@@ -27,7 +27,7 @@ def np_to_list(d):
     return d_fixed
 
 
-class tempStructTask:
+class colorStructTask:
     """ class defining a psychological experiment
     """
     
@@ -216,11 +216,12 @@ class tempStructTask:
         """
         trialClock = core.Clock()
         self.trialnum += 1
-        self.stims[trial['stim']].draw()
+        stim_i = trial['stim']
+        self.win.setColor(trial['context'])
+        self.stims[stim_i].draw()
         self.win.flip()
         trialClock.reset()
         event.clearEvents()
-        FBtext = [('Lose\n\n -1',u'red'), ('Win\n\n +1!',u'lime')]
         trial['actualOnsetTime']=core.getTime() - self.startTime
         trial['stimulusCleared']=0
         trial['response']=[]
@@ -251,22 +252,16 @@ class tempStructTask:
                         #If training, present FB
                         if self.mode != "noFB":
                             trial['actualFBOnsetTime'] = trialClock.getTime()-trial['stimulusCleared']
-                            if key == trial['correct_action']:
-                                self.pointtracker += 1
-                                if trial['PosFB_correct'] == 1:                       
-                                    FB = 1
-                                else: 
-                                    FB = 0
-                            else:
-                                if trial['PosFB_incorrect'] == 1:                           
-                                    FB = 1
-                                else: 
-                                    FB = 0
+                            choice = self.action_keys.index(key)
+                            FB = trial['state_content']['ts'][stim_i,choice]
                             if self.bot:
                                 self.bot.learn(FB)
                                 print(self.bot.Q.Qstates)
                             trial['FB'] = FB
-                            self.presentTextToWindow(FBtext[FB][0], FBtext[FB][1])
+                            if FB == 1:
+                                self.presentTextToWindow('+1 point')
+                            else:
+                                self.presentTextToWindow('+' + FB + ' points')
                             core.wait(self.FBDuration)
                             self.clearWindow()     
         #If subject did not respond within the stimulus window clear the stim

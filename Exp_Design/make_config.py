@@ -6,22 +6,30 @@ Created on Thu Nov 20 16:13:45 2014
 """
 
 import numpy as np
+from scipy.stats import norm
 import random as r
 import yaml
 import datetime
 
-def makeConfigList(taskname = 'Temp_Struct', iden = '000', probs1 = (.8, .2),
-                    probs2 = (.8, .2), num_blocks = 50, block_len = 16, 
+def makeConfigList(taskname = 'Color_Struct', iden = '000', 
+                   recursive_p = .9, 
+                   exp_len = 200,
                     action_keys = None, loc = '../Config_Files/'):
     
+    trans_probs = np.matrix([[recursive_p, 1-recursive_p], [1-recursive_p, recursive_p]])
     timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     iden = str(iden)
     if not action_keys:
         action_keys = ['h', 'j', 'k', 'l']
         r.shuffle(action_keys)
     stim_ids = [0,1]
-    tasksets = {'ts1': {'probs': probs1, 'actions': [action_keys[i] for i in (0,1)]}, 
-                          'ts2': {'probs': probs2, 'actions': [action_keys[i] for i in (2,3)]}}
+    #each taskset is define as a nxm matrix where n = # of stims and
+    #m = # of actions. In theory, 'n' could be further decomposed into features
+    states = {0: {'ts': np.matrix([[1,0,0,0],[0,1,0,0]]), 'c_dis': norm(-.5,.5)}, 
+                1: {'ts': np.matrix([[1,0,2,0],[0,1,0,2]]), 'c_dis': norm(.5,.5)}}
+
+    
+                
     initial_params = {
       'clearAfterResponse': 1,
       'quit_key': 'q',
@@ -34,8 +42,9 @@ def makeConfigList(taskname = 'Temp_Struct', iden = '000', probs1 = (.8, .2),
       'action_keys': action_keys,
       'tasksets': tasksets,
       'stim_ids': stim_ids,
-      'block_len': block_len
+      'exp_len': exp_len
     }
+    
     
     def makeTrialList():
         """
@@ -48,62 +57,37 @@ def makeConfigList(taskname = 'Temp_Struct', iden = '000', probs1 = (.8, .2),
         r.shuffle(keys)
         trial_count = 1
         curr_onset = 1 #initial onset
-       
-       
-       #ensure that the valid trial probabilities for each taskset are close to
-       #the desired probabilities
-       
-        diff = np.array([1,1])   
-        ts1_probs = np.array(tasksets['ts1']['probs'])
-        while (diff > [.025,.025]).any():
-                ts1_valid = [np.random.binomial(1, ts1_probs[0],block_len*num_blocks/2),np.random.binomial(1, ts1_probs[1],block_len*num_blocks/2)]
-                ts1_valid_probs = np.array([np.mean(array) for array in ts1_valid])
-                diff = np.array(abs(ts1_probs - ts1_valid_probs))
+        curr_state = r.choice(states.keys())
         
-        diff = np.array([1,1])    
-        ts2_probs = np.array(tasksets['ts2']['probs'])
-        while (diff > [.025,.025]).any():
-                ts2_valid = [np.random.binomial(1, ts2_probs[0],block_len*num_blocks/2),np.random.binomial(1, ts2_probs[1],block_len*num_blocks/2)]
-                ts2_valid_probs = np.array([np.mean(array) for array in ts2_valid])
-                diff = np.array(abs(ts2_probs - ts2_valid_probs))
-
-        valid_trials = [ts1_valid, ts2_valid]
-            
-            
-        #create blocks with a random order of stims (keeping the freqs equal)
-        for block in range(num_blocks):
-            #Define stim order, ensuring that no stim appears more than 3 times 
-            #in a row and the overall proportion of stim1 is close to 50%
-            mean_stim = 0
-            local_var = []
-            while (abs(mean_stim - .5) >= .1) or (0 in local_var):
-                stims = r.sample(stim_ids*int(block_len*.8),block_len)
-                mean_stim = np.mean(stims)
-                local_var = [np.var(stims[i:i+4]) for i in range(block_len-4)]
-            #Alternate tasksets
-            curr_ts = tasksets[keys[block%2]]
-            
+        #Define stim order, ensuring that no stim appears more than 3 times 
+        #in a row and the overall proportion of stim1 is close to 50%
+        mean_stim = 0
+        local_var = []
+        stims = r.sample(stim_ids*int(exp_len*.5),exp_len)
+                
         
-            PosFB_c = valid_trials[block%2][0][0:12]
-            PosFB_i = valid_trials[block%2][1][0:12]
-            valid_trials[block%2][0] = valid_trials[block%2][0][12:]
-            valid_trials[block%2][1] = valid_trials[block%2][1][12:]
-
+        
+        for trial in range(exp_len):
+            context_sample = max(-1, min(1, states[curr_state]['c_dis'].rvs()))
+            context_sample *= np.array([1,1,1])
             
-
-            for trial in range(block_len):
-                trialList += [{
-                    'trial_count': trial_count,
-                    'TS': curr_ts,
-                    'stim': stims[trial],
-                    'correct_action': curr_ts['actions'][stims[trial]],
-                    'onset': curr_onset,
-                    'FBonset': .5,
-                    'PosFB_correct': bool(PosFB_c[trial]),
-                    'PosFB_incorrect': bool(PosFB_i[trial])
-                }]
-                trial_count += 1
-                curr_onset += 2.5+r.random()*.5
+            trialList += [{
+                'trial_count': trial_count,
+                'state': curr_state,
+                'state_content': states[curr_state],
+                'context': context_sample,
+                'stim': stims[trial],
+                'onset': curr_onset,
+                'FBonset': .5,
+            }]
+            if r.random() < trans_probs[curr_state,curr_state]:
+                curr_state = 1-curr_state
+            
+            trial_count += 1
+            curr_onset += 2.5+r.random()*.5
+        
+       
+        
                 
         return trialList
 

@@ -1,5 +1,5 @@
 """
-runtempStructTask
+runcolorStructTask
 """
 
 from psychopy import visual, core, event, logging, data, misc
@@ -7,18 +7,18 @@ import os, socket, random
 import json
 import webbrowser
 
-from temp_struct_task import tempStructTask
+from color_struct_task import colorStructTask
 from make_config import makeConfigList
 import test_bot
 
 #set-up some variables
 
 verbose=True
-fullscr=True  # change to True for full screen display
+fullscr=False  # change to True for full screen display
 subdata=[]
-practice_on = True
+practice_on = False
 task_on = True
-test_on = True
+test_on = False
 
 # set things up for practice, training and tests
 try:
@@ -33,19 +33,17 @@ f = open('IDs.txt', 'a')
 f.write(subject_code + '\n')
 f.close()
 
-block_len = 12
 train_length = 60 #train_length in minutes
-avg_trial_length = 2.75
+avg_trial_length = 2.75 #in seconds
 #Find the minimum even number of blocks to last at least 60 minutes
-num_blocks = int(round(train_length*60/(block_len*avg_trial_length)/2)*2)
+exp_len = train_length*60/avg_trial_legnth
 probs = (.9,.1)
-config_file = makeConfigList(iden = subject_code, num_blocks = num_blocks,
-                             block_len = block_len, probs1 = probs, probs2 = probs)
+config_file = makeConfigList(iden = subject_code, exp_len = exo_len, recursive_p = .9)
 bot = test_bot.test_bot(config_file)
 
-practice_file = '../Config_Files/Temp_Struct_Practice_config.yaml'
-practice=tempStructTask(practice_file,subject_code, fullscreen = fullscr, bot = None, mode = 'Practice')
-task=tempStructTask(config_file,subject_code, fullscreen = fullscr, bot = None)
+#practice_file = '../Config_Files/color_Struct_Practice_config.yaml'
+#practice=colorStructTask(practice_file,subject_code, fullscreen = fullscr, bot = None, mode = 'Practice')
+task=colorStructTask(config_file,subject_code, fullscreen = fullscr, bot = None)
 task.writeToLog(task.toJSON())
 
 #************************************
@@ -177,10 +175,10 @@ if task_on:
 if test_on:
     
     test_num_blocks = 4
-    test_config = makeConfigList(taskname = 'Temp_Struct_noFBTest', iden = subject_code, 
+    test_config = makeConfigList(taskname = 'color_Struct_noFBTest', iden = subject_code, 
                                  num_blocks = test_num_blocks, block_len = block_len, probs1 = probs,
                                   probs2 = probs, action_keys = task.getActions())
-    test=tempStructTask(test_config,subject_code,bot = None, mode = 'noFB', fullscreen = fullscr)
+    test=colorStructTask(test_config,subject_code,bot = None, mode = 'noFB', fullscreen = fullscr)
     test.writeToLog(test.toJSON())
     
     # prepare to start
