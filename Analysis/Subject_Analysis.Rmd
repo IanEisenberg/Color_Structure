@@ -1,0 +1,33 @@
+---
+title: "Subject_Analysis"
+output: html_document
+---
+
+Load up the data
+
+```{r}
+  dataFiles <- Sys.glob("../Data/*.csv")
+  dfa = read.csv(dataFiles[2])
+  dfa$FB = factor(dfa$FB)
+  dfa$curr_ts = factor(dfa$curr_ts)
+  dfa$stim = factor(dfa$stim)
+```
+
+```{r helper functions}
+  lagpad <- function(x, k) {
+    if(k > 0) {
+      c(rep(NA, k), x)[1 : length(x)] 
+    } else {
+      c(x, rep(NA, abs(k)))[abs(k)+1 : length(x)-k-1]
+    }}
+```
+
+```{r}
+  rs1 = lm(rt ~ switch, dfa)
+  dfa$lag_FB = factor(lagpad(dfa$FB,1),labels = c('0','1'))
+  rs2 = lm(rt~lag_FB,dfa)
+  rs3 = lm(rt~lag_FB + switch,dfa)
+  
+  rs4 = glm(switch ~ lag_FB, data = dfa, family = binomial)
+```
+
