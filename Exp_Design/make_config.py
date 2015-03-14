@@ -25,8 +25,8 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
     stim_ids = [0,1]
     #each taskset is define as a nxm matrix where n = # of stims and
     #m = # of actions. In theory, 'n' could be further decomposed into features
-    states = {0: {'ts': np.matrix([[1,0,0,0],[0,1,0,0]]), 'c_dis': norm(-.5,.5)}, 
-                1: {'ts': np.matrix([[1,0,2,0],[0,1,0,2]]), 'c_dis': norm(.5,.5)}}
+    states = {0: {'ts': [[1,0,0,0],[0,1,0,0]], 'c_mean': -.5, 'c_sd': .5}, 
+                1: {'ts': [[1,0,2,0],[0,1,0,2]], 'c_mean': .5, 'c_sd': .5}}
 
     
                 
@@ -40,7 +40,7 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
       'id': iden,
       'trigger_key': '5',
       'action_keys': action_keys,
-      'tasksets': tasksets,
+      'states': states,
       'stim_ids': stim_ids,
       'exp_len': exp_len
     }
@@ -53,28 +53,24 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
         correct action for stim 1 and stim 2.
         """
         trialList = []    
-        keys = tasksets.keys()
-        r.shuffle(keys)
         trial_count = 1
         curr_onset = 1 #initial onset
         curr_state = r.choice(states.keys())
-        
-        #Define stim order, ensuring that no stim appears more than 3 times 
-        #in a row and the overall proportion of stim1 is close to 50%
-        mean_stim = 0
-        local_var = []
         stims = r.sample(stim_ids*int(exp_len*.5),exp_len)
                 
         
         
         for trial in range(exp_len):
-            context_sample = max(-1, min(1, states[curr_state]['c_dis'].rvs()))
-            context_sample *= np.array([1,1,1])
+            state = states[curr_state]
+            dis = norm(state['c_mean'],state['c_sd'])
+            context_sample = [max(-1, min(1, dis.rvs()))] * 3
+
             
             trialList += [{
                 'trial_count': trial_count,
                 'state': curr_state,
-                'state_content': states[curr_state],
+                'ts': state['ts'],
+                'c_dis': {'mean': dis.mean(), 'sd': dis.std()},
                 'context': context_sample,
                 'stim': stims[trial],
                 'onset': curr_onset,
@@ -92,10 +88,15 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
         return trialList
 
     
-    yaml_input = makeTrialList()
-    yaml_input.insert(0,initial_params)    
-    filename = taskname + '_' + iden + '_config_' + timestamp + '.yaml'
-    f=open(loc + filename,'w')
-    yaml.dump_all(yaml_input,f,default_flow_style = False, explicit_start = True)
+    np_input = makeTrialList()
+    np_input.insert(0,initial_params)
+    filename = taskname + '_' + iden + '_config_' + timestamp + '.npy'
+    np.save(loc + filename, np_input)
+    
+#    yaml_input = makeTrialList()
+#    yaml_input.insert(0,initial_params)    
+#    filename = taskname + '_' + iden + '_config_' + timestamp + '.yaml'
+#    f=open(loc + filename,'w')
+#    yaml.dump_all(yaml_input,f,default_flow_style = False, explicit_start = True)
     return loc+filename
     

@@ -54,7 +54,7 @@ class colorStructTask:
         #Choose 'practice', 'FB', 'noFB'
         self.mode = mode
         try:
-            self.loadStimulusFileYAML(config_file)
+            self.loadStimulusFileNP(config_file)
         except:
             print 'cannot load config file'
             sys.exit()
@@ -62,13 +62,13 @@ class colorStructTask:
         self.logfilename='%s_%s_%s.log'%(self.subject_code,self.taskname,self.timestamp)
         self.datafilename='%s_%s_%s'%(self.subject_code,self.taskname,self.timestamp)
 
-    def loadStimulusFileYAML(self,filename):
-        """ load a stimulus file in YAML format
+    def loadStimulusFileNP(self,filename):
+        """ load a stimulus file in np format
         """
         if not os.path.exists(filename):
             raise BaseException('Stimulus file not found')
-        yaml_iterator=yaml.load_all(file(filename,'r'))
-        for trial in yaml_iterator:
+        config_file = np.load(filename)
+        for trial in config_file:
             if trial.has_key('taskname'):
                 self.taskinfo=trial
                 for k in self.taskinfo.iterkeys():
@@ -108,7 +108,7 @@ class colorStructTask:
         """
         self.win = visual.Window(self.window_dims, allowGUI=False, fullscr=self.fullscreen, 
                                  monitor='testMonitor', units='deg')                        
-        self.win.setColor('black')
+        self.win.setColor([-1,-1,-1],'rgb')
         self.win.flip()
         self.win.flip()
         
@@ -134,12 +134,12 @@ class colorStructTask:
             self.stims = stims
         else:
             if self.mode == 'FB':
-                self.stims = [visual.ImageStim(self.win, image = '../Stimuli/93.tiff', units = 'cm', size = (7, 7)),
-                            visual.ImageStim(self.win, image = '../Stimuli/22.tiff', units = 'cm', size = (7, 7))]
+                self.stims = [visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'cm', size = (7, 7)),
+                            visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'cm', size = (7, 7))]
                 r.shuffle(self.stims)
             elif self.mode == 'Practice':
-                self.stims = [visual.ImageStim(self.win, image = '../Stimuli/12.tiff', units = 'cm', size = (7, 7)),
-                            visual.ImageStim(self.win, image = '../Stimuli/17.tiff', units = 'cm', size = (7, 7))]
+                self.stims = [visual.ImageStim(self.win, image = '../Stimuli/12.png', units = 'cm', size = (7, 7)),
+                            visual.ImageStim(self.win, image = '../Stimuli/17.png', units = 'cm', size = (7, 7))]
             
 
         
@@ -217,9 +217,12 @@ class colorStructTask:
         trialClock = core.Clock()
         self.trialnum += 1
         stim_i = trial['stim']
-        self.win.setColor(trial['context'])
+#        visual.Rect(self.win,width = 2, height = 2, fillColorSpace = 'rgb', fillColor = trial['context'], units = 'norm').draw()
+        self.win.setColor(trial['context'],'rgb')
+        self.win.flip()
         self.stims[stim_i].draw()
         self.win.flip()
+
         trialClock.reset()
         event.clearEvents()
         trial['actualOnsetTime']=core.getTime() - self.startTime
@@ -253,7 +256,7 @@ class colorStructTask:
                         if self.mode != "noFB":
                             trial['actualFBOnsetTime'] = trialClock.getTime()-trial['stimulusCleared']
                             choice = self.action_keys.index(key)
-                            FB = trial['state_content']['ts'][stim_i,choice]
+                            FB = trial['ts'][stim_i][choice]
                             if self.bot:
                                 self.bot.learn(FB)
                                 print(self.bot.Q.Qstates)
@@ -261,7 +264,7 @@ class colorStructTask:
                             if FB == 1:
                                 self.presentTextToWindow('+1 point')
                             else:
-                                self.presentTextToWindow('+' + FB + ' points')
+                                self.presentTextToWindow('+' + str(FB ) + ' points')
                             core.wait(self.FBDuration)
                             self.clearWindow()     
         #If subject did not respond within the stimulus window clear the stim

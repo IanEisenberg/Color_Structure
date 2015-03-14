@@ -36,10 +36,9 @@ f.close()
 train_length = 60 #train_length in minutes
 avg_trial_length = 2.75 #in seconds
 #Find the minimum even number of blocks to last at least 60 minutes
-exp_len = train_length*60/avg_trial_legnth
-probs = (.9,.1)
-config_file = makeConfigList(iden = subject_code, exp_len = exo_len, recursive_p = .9)
-bot = test_bot.test_bot(config_file)
+exp_len = int(round(train_length*60/avg_trial_length/2)*2)
+config_file = makeConfigList(iden = subject_code, exp_len = exp_len, recursive_p = .9)
+#bot = test_bot.test_bot(config_file)
 
 #practice_file = '../Config_Files/color_Struct_Practice_config.yaml'
 #practice=colorStructTask(practice_file,subject_code, fullscreen = fullscr, bot = None, mode = 'Practice')
@@ -127,7 +126,7 @@ if task_on:
                             
                             Please wait for the experimenter.
                             """)
-    resp,task.startTime=task.waitForKeypress(practice.trigger_key)
+    resp,task.startTime=task.waitForKeypress(task.trigger_key)
     task.checkRespForQuitKey(resp)
     event.clearEvents()
     
