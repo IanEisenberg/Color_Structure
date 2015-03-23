@@ -25,17 +25,23 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
     stim_ids = [0,1]
     #each taskset is define as a nxm matrix where n = # of stims and
     #m = # of actions. In theory, 'n' could be further decomposed into features
-    states = {0: {'ts': [[1,0,0,0],[0,1,0,0]], 'c_mean': -.5, 'c_sd': .5}, 
-                1: {'ts': [[1,0,2,0],[0,1,0,2]], 'c_mean': .5, 'c_sd': .5}}
+    states = {0: {'ts': [[1,0,0,0],[0,1,0,0]], 'c_mean': -.3, 'c_sd': .37}, 
+                1: {'ts': [[1,0,2,0],[0,1,0,2]], 'c_mean': .3, 'c_sd': .37}}
 
-    
+    #useful if I wanted to parametrically alter overlap
+#    def minf1f2(x, mu1, mu2, sd1, sd2):
+#        f1 = norm(mu1, sd1).pdf(x)
+#        f2 = norm(mu2, sd2).pdf(x)
+#        return min(f1, f2)
+#    overlap = scipy.integrate.quad(minf1f2,-np.Inf,np.Inf,args = (-.4, .4, .5, .5))
+
                 
     initial_params = {
       'clearAfterResponse': 1,
       'quit_key': 'q',
       'responseWindow': 1.0,
       'stimulusDuration': 1.0,  
-      'FBDuration': 1.0,
+      'FBDuration': .5,
       'taskname': taskname,
       'id': iden,
       'trigger_key': '5',
@@ -76,7 +82,7 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
                 'onset': curr_onset,
                 'FBonset': .5,
             }]
-            if r.random() < trans_probs[curr_state,curr_state]:
+            if r.random() > trans_probs[curr_state,curr_state]:
                 curr_state = 1-curr_state
             
             trial_count += 1

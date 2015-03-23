@@ -222,7 +222,11 @@ class colorStructTask:
         self.win.flip()
         self.stims[stim_i].draw()
         self.win.flip()
-
+        # set trial text color based on background color
+        if np.mean(trial['context']) < .2:
+            text_color = 'white'
+        else:
+            text_color = 'black'
         trialClock.reset()
         event.clearEvents()
         trial['actualOnsetTime']=core.getTime() - self.startTime
@@ -262,9 +266,9 @@ class colorStructTask:
                                 print(self.bot.Q.Qstates)
                             trial['FB'] = FB
                             if FB == 1:
-                                self.presentTextToWindow('+1 point')
+                                self.presentTextToWindow('+1 point', color = text_color)
                             else:
-                                self.presentTextToWindow('+' + str(FB ) + ' points')
+                                self.presentTextToWindow('+' + str(FB ) + ' points', color = text_color)
                             core.wait(self.FBDuration)
                             self.clearWindow()     
         #If subject did not respond within the stimulus window clear the stim

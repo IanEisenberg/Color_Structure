@@ -40,8 +40,8 @@ exp_len = int(round(train_length*60/avg_trial_length/2)*2)
 config_file = makeConfigList(iden = subject_code, exp_len = exp_len, recursive_p = .9)
 #bot = test_bot.test_bot(config_file)
 
-#practice_file = '../Config_Files/color_Struct_Practice_config.yaml'
-#practice=colorStructTask(practice_file,subject_code, fullscreen = fullscr, bot = None, mode = 'Practice')
+practice_file = '../Config_Files/Color_Struct_Practice_config.npy'
+practice=colorStructTask(practice_file,subject_code, fullscreen = fullscr, bot = None, mode = 'Practice')
 task=colorStructTask(config_file,subject_code, fullscreen = fullscr, bot = None)
 task.writeToLog(task.toJSON())
 
@@ -157,7 +157,8 @@ if task_on:
         trial=task.presentTrial(trial)
         task.writeToLog(json.dumps(trial))
         task.alldata.append(trial)
-    
+        print('state = ' + str(trial['state'])+ ', value: ' + str(np.mean(trial['context']))) 
+        
     
     task.writeToLog(json.dumps({'trigger_times':task.trigger_times}))
     task.writeData()
