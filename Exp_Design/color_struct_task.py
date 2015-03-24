@@ -9,6 +9,7 @@ import numpy as np
 import datetime
 import json
 import random as r
+import subprocess
 
 try:
     from save_data_to_db import *
@@ -44,6 +45,7 @@ class colorStructTask:
         self.startTime=[]
         self.alldata=[]
         self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        self.gitHash = subprocess.check_output(['git','rev-parse','--short','HEAD'])[:-1]
         self.trigger_times=[]
         self.config_file=config_file
         self.trialnum = 0
