@@ -13,6 +13,8 @@ import datetime
 
 def makeConfigList(taskname = 'Color_Struct', iden = '000', 
                    recursive_p = .9, 
+                   ts1 = [[1,0,0,0],[0,1,0,0]],
+                   ts1 = [[0,0,0,0],[0,0,0,1]],
                    exp_len = 200,
                     action_keys = None, loc = '../Config_Files/'):
     
@@ -25,8 +27,8 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
     stim_ids = [0,1]
     #each taskset is define as a nxm matrix where n = # of stims and
     #m = # of actions. In theory, 'n' could be further decomposed into features
-    states = {0: {'ts': [[1,0,0,0],[0,1,0,0]], 'c_mean': -.3, 'c_sd': .37}, 
-                1: {'ts': [[1,0,2,0],[0,1,0,2]], 'c_mean': .3, 'c_sd': .37}}
+    states = {0: {'ts': ts1, 'c_mean': -.3, 'c_sd': .37}, 
+                1: {'ts': ts2, 'c_mean': .3, 'c_sd': .37}}
 
     #useful if I wanted to parametrically alter overlap
 #    def minf1f2(x, mu1, mu2, sd1, sd2):

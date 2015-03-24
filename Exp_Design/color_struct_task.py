@@ -134,8 +134,8 @@ class colorStructTask:
             self.stims = stims
         else:
             if self.mode == 'FB':
-                self.stims = [visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'cm', size = (7, 7)),
-                            visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'cm', size = (7, 7))]
+                self.stims = [visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'cm', size = (7, 7), mask = 'circle'),
+                            visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'cm', size = (7, 7), mask = 'circle')]
                 r.shuffle(self.stims)
             elif self.mode == 'Practice':
                 self.stims = [visual.ImageStim(self.win, image = '../Stimuli/12.png', units = 'cm', size = (7, 7)),
