@@ -14,7 +14,7 @@ import datetime
 def makeConfigList(taskname = 'Color_Struct', iden = '000', 
                    recursive_p = .9, 
                    ts1 = [[1,0,0,0],[0,1,0,0]],
-                   ts1 = [[0,0,0,0],[0,0,0,1]],
+                   ts2 = [[0,0,0,0],[0,0,0,1]],
                    exp_len = 200,
                     action_keys = None, loc = '../Config_Files/'):
     
