@@ -6,7 +6,7 @@ from psychopy import visual, core, event, logging, data, misc
 import os, socket, random
 import json
 import webbrowser
-
+import numpy as np
 from color_struct_task import colorStructTask
 from make_config import makeConfigList
 import test_bot
@@ -33,15 +33,24 @@ f = open('IDs.txt', 'a')
 f.write(subject_code + '\n')
 f.close()
 
-train_length = 60 #train_length in minutes
-avg_trial_length = 2.75 #in seconds
-#Find the minimum even number of blocks to last at least 60 minutes
-exp_len = int(round(train_length*60/avg_trial_length/2)*2)
-config_file = makeConfigList(iden = subject_code, exp_len = exp_len, recursive_p = .9)
+train_length = 5 #train_length in minutes
+test_length = 5 #test_length in minutes
+avg_test_trial_len = 2.25 #in seconds
+avg_task_trial_len = avg_test_trial_len + 1 #factor in FB
+#Find the minimum even number of blocks to last at least train_length minutes
+task_len = int(round(train_length*60/avg_task_trial_len/2)*2)
+test_len = int(round(test_length*60/avg_test_trial_len/2)*2)
 
-practice_file = '../Config_Files/Color_Struct_Practice_config.npy'
-practice=colorStructTask(practice_file,subject_code, fullscreen = fullscr, bot = None, mode = 'Practice')
-task=colorStructTask(config_file,subject_code, fullscreen = fullscr, bot = None)
+
+#set up config files
+practice_config_file = '../Config_Files/Color_Struct_Practice_config.npy'
+task_config_file = makeConfigList(iden = subject_code, task_len = exp_len, recursive_p = .9)
+test_config_file = makeConfigList(iden = subject_code, test_len = exp_len, recursive_p = .9,
+                                  FBDuration = 0, FBonset = 0)
+
+
+practice=colorStructTask(practice_config_file,subject_code, fullscreen = fullscr, bot = None, mode = 'Practice')
+task=colorStructTask(task_config_file,subject_code, fullscreen = fullscr, bot = None)
 task.writeToLog(task.toJSON())
 
 #************************************

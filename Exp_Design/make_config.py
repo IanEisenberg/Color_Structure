@@ -14,8 +14,12 @@ import datetime
 def makeConfigList(taskname = 'Color_Struct', iden = '000', 
                    recursive_p = .9, 
                    ts1 = [[1,0,0,0],[0,1,0,0]],
-                   ts2 = [[0,0,0,0],[0,0,0,1]],
+                   ts2 = [[0,0,1,0],[0,0,0,1]],
                    exp_len = 200,
+                   stimulusDuration = 1.5,
+                   FBDuration = .5,
+                   FBonset = .5,
+                   intertrial = .5,
                     action_keys = None, loc = '../Config_Files/'):
     
     trans_probs = np.matrix([[recursive_p, 1-recursive_p], [1-recursive_p, recursive_p]])
@@ -42,8 +46,7 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
       'clearAfterResponse': 1,
       'quit_key': 'q',
       'responseWindow': 1.0,
-      'stimulusDuration': 1.0,  
-      'FBDuration': .5,
+      'stimulusDuration': stimulusDuration,  
       'taskname': taskname,
       'id': iden,
       'trigger_key': '5',
@@ -82,13 +85,14 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
                 'context': context_sample,
                 'stim': stims[trial],
                 'onset': curr_onset,
-                'FBonset': .5,
+                'FBDuration': FBDuration,
+                'FBonset': FBonset,
             }]
             if r.random() > trans_probs[curr_state,curr_state]:
                 curr_state = 1-curr_state
             
             trial_count += 1
-            curr_onset += 2.5+r.random()*.5
+            curr_onset += stimulusDuration+FBDuration+FBonset+intertrial+r.random()*.5
         
        
         

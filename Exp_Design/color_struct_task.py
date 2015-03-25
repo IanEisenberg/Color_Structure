@@ -33,7 +33,7 @@ class colorStructTask:
     """
     
     def __init__(self,config_file,subject_code,verbose=True, 
-                 fullscreen = False, bot = None, mode = 'FB'):
+                 fullscreen = False, bot = None, mode = 'task'):
             
         self.subject_code=subject_code
         self.win=[]
@@ -135,7 +135,7 @@ class colorStructTask:
         if stims:
             self.stims = stims
         else:
-            if self.mode == 'FB':
+            if self.mode == 'task':
                 self.stims = [visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'cm', size = (7, 7), mask = 'circle'),
                             visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'cm', size = (7, 7), mask = 'circle')]
                 r.shuffle(self.stims)
@@ -259,7 +259,7 @@ class colorStructTask:
                         trial['stimulusCleared']=trialClock.getTime()
                         core.wait(trial['FBonset'])    
                         #If training, present FB
-                        if self.mode != "noFB":
+                        if trial['FBDuration'] != 0:
                             trial['actualFBOnsetTime'] = trialClock.getTime()-trial['stimulusCleared']
                             choice = self.action_keys.index(key)
                             FB = trial['ts'][stim_i][choice]
