@@ -239,7 +239,12 @@ class colorStructTask:
         while trialClock.getTime() < (self.stimulusDuration):
             key_response=event.getKeys(None,True)
             if self.bot:
-                choice = self.bot.choose(trial['stim'])
+                print('*****************\n')
+                print('state: ' + str(trial['state']))
+                print("priors: " + str(self.bot.TS_prior))
+                choice = self.bot.choose(trial['stim'], trial['context'])
+                print("posteriors: " + str(self.bot.posterior))
+                print("choice: " + str(choice[0]))
                 core.wait(choice[1])
                 key_response = [(choice[0], core.getAbsTime())]
             if len(key_response)==0:
@@ -255,23 +260,21 @@ class colorStructTask:
                     trial['rt'].append(trialClock.getTime())
                     if self.clearAfterResponse and trial['stimulusCleared']==0:
                         self.clearWindow()
-                        #trial['stimulusCleared']=core.getTime()-onsetTime
                         trial['stimulusCleared']=trialClock.getTime()
-                        core.wait(trial['FBonset'])    
-                        #If training, present FB
+                        choice = self.action_keys.index(key)
+                        #record points for bonus
+                        FB = trial['ts'][stim_i][choice]
+                        trial['FB'] = FB
+                        self.pointtracker += FB
+                        #If training, present FB to window
                         if trial['FBDuration'] != 0:
+                            core.wait(trial['FBonset'])  
                             trial['actualFBOnsetTime'] = trialClock.getTime()-trial['stimulusCleared']
-                            choice = self.action_keys.index(key)
-                            FB = trial['ts'][stim_i][choice]
-                            if self.bot:
-                                self.bot.learn(FB)
-                                print(self.bot.Q.Qstates)
-                            trial['FB'] = FB
                             if FB == 1:
                                 self.presentTextToWindow('+1 point', color = text_color)
                             else:
-                                self.presentTextToWindow('+' + str(FB ) + ' points', color = text_color)
-                            core.wait(self.FBDuration)
+                                self.presentTextToWindow('+' + str(FB) + ' points', color = text_color)
+                            core.wait(trial['FBDuration'])
                             self.clearWindow()     
         #If subject did not respond within the stimulus window clear the stim
         #and admonish the subject
