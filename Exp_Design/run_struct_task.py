@@ -271,7 +271,7 @@ if test_on:
     
 
 #************************************
-# Send text about task performance
+# Send text about test performance
 #************************************   
     username = "thedummyspeaks@gmail.com"
     password = "r*kO84gSzzD4"
