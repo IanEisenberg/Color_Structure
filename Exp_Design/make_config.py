@@ -178,7 +178,7 @@ def makePracticeConfigList(taskname = 'Color_Struct_Practice',
         for trial in range(exp_len):
             state = states[curr_state]
             dis = norm(state['c_mean'],state['c_sd'])
-            context_sample = [max(-1, min(1, dis.rvs()))] * 3
+            context_sample = [max(-1, min(1, dis.rvs()))]
 
             
             trialList += [{

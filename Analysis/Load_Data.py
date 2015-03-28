@@ -25,42 +25,43 @@ def load_data(datafile, name, mode = 'train'):
     taskinfo = loaded_yaml['taskinfo']
     
     #Reflects mapping of action keys to tasksets and stimuli
-    tmp = taskinfo['action_keys']
-    stim_map = [(tmp[0], tmp[2]), (tmp[1], tmp[3])]
+    stim_map = [(0,2),(1,3)]
+    ts_map = [(0,1),(2,3)]
     
     #Load data into a dataframe
     df = pd.DataFrame(data)
     
     # Responses and RT's are stored as lists, though we only care about the first one.
-    # When converting to list, replace empty RT's wi
     rts = np.array([x[0]  for x in df.rt.values])
     responses = [x[0] for x in df.response.values]
     df.rt[:] = rts
     df.response[:] = responses
-    
     #Remove missed trials:
     df = df[df.response != 'NA']
     df = df.set_index(df.trial_count)
-    df = df.drop('trial_count',1)
+    #change response from strings to corresponding numbers.
+    df.response = [taskinfo['action_keys'].index(key_press) for key_press in df.response]
+
     #Create a separate analysis dataframe
     if mode == 'train':
-        dfa = df.drop(['FBonset', 'actualFBOnsetTime', 'actualOnsetTime', 'onset', 
-                               'stimulusCleared', 'PosFB_correct', 'PosFB_incorrect'],1)
+        dfa = df.drop(['FBonset', 'FBDuration', 'actualFBOnsetTime', 'actualOnsetTime', 'onset', 
+                               'stimulusCleared'],1)
     elif mode == 'test':
         dfa = df.drop(['FBonset', 'FB', 'actualOnsetTime', 'onset', 
-                               'stimulusCleared', 'PosFB_correct', 'PosFB_incorrect'],1)
+                               'stimulusCleared'],1)
     
-    #Create new variables: correct response, taskset consistent, stim consistent
-    dfa['correct'] = dfa['correct_action'] == dfa['response']
+    #Create new variables: taskset consistent, stim consistent
+
     # Taskset consistency means that the action was one of the two dictated by 
     # the current taskset, even if it isn't correct for the specific stimulus.
     # Stimulus consistency means that the action would be correct for the stimulus
     # in one of the two tasksets.
-    dfa['con_ts'] = [dfa.response[i] in dfa.TS[i]['actions'] for i in dfa.index]
+    dfa['con_ts'] = [any([stim[dfa.response[i]]==1 for stim in dfa.ts[i]]) for i in dfa.index]
     dfa['con_stim'] = [dfa.response[i] in stim_map[dfa.stim[i]] for i in dfa.index]
     # Presuming tasksets are learned, define a 'currently operating TS' variable
-    # 0 indicates the first presented TS is operating, 1 the second
-    dfa['curr_ts'] = [int(dfa.response[i] in dfa.TS[dfa.index[0]]['actions']) for i in dfa.index]
+    #curr_ts is defined by the response, which corresponds to one of the two ts's defined
+    #in ts_map
+    dfa['curr_ts'] = [int(dfa.response[i] in ts_map[1]) for i in dfa.index]
     dfa['switch'] = [dfa.curr_ts.shift(1)[i] != dfa.curr_ts[i] for i in dfa.index]
     dfa.switch[1] = False   
     

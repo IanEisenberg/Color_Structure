@@ -220,7 +220,7 @@ class colorStructTask:
         self.trialnum += 1
         stim_i = trial['stim']
 #        visual.Rect(self.win,width = 2, height = 2, fillColorSpace = 'rgb', fillColor = trial['context'], units = 'norm').draw()
-        self.win.setColor(trial['context'],'rgb')
+        self.win.setColor(trial['context']*3,'rgb')
         self.win.flip()
         self.stims[stim_i].draw()
         self.win.flip()
