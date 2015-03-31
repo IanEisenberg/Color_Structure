@@ -8,13 +8,13 @@ import smtplib
 import json
 import webbrowser
 import numpy as np
-from color_struct_task import colorStructTask
-from make_config import makeConfigList, makePracticeConfigList
+from color_struct_task_2dims import colorStructTask
+from make_config_2dims import makeConfigList, makePracticeConfigList
 from test_bot import test_bot
 #set-up some variables
 
 verbose=True
-fullscr=True  # change to True for full screen display
+fullscr=False  # change to True for full screen display
 subdata=[]
 practice_on = False
 task_on = True
@@ -53,7 +53,7 @@ except SystemExit:
     practice=colorStructTask(practice_config_file,subject_code, fullscreen = fullscr, bot = None, mode = 'Practice')
 
 task=colorStructTask(task_config_file,subject_code, fullscreen = fullscr, 
-                     bot = test_bot(task_config_file, mode = "other"))
+                     bot = None) #test_bot(task_config_file, mode = "other"))
 task.writeToLog(task.toJSON())
 
 
@@ -79,7 +79,7 @@ if practice_on:
         one at a time, and you will need to learn how to respond to them
         
         There will only be two shapes, and your responses
-        will consist of one of four buttons: ('h', 'j', 'k', 'l')
+        will consist of one of two buttons, 'j' and 'k'.
         
         You need to learn the best key(s) to press for each shape.
         """,

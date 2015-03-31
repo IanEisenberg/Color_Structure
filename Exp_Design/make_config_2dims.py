@@ -13,8 +13,10 @@ import datetime
 
 def makeConfigList(taskname = 'Color_Struct', iden = '000', 
                    recursive_p = .9, 
-                   ts1 = [[1,0,0,0],[0,1,0,0]],
-                   ts2 = [[0,0,1,0],[0,0,0,1]],
+                   #tasksets relate to stimulus dimensions
+                   #specify action (1 or 0) to take in response to each stim
+                   ts1 = 0, #relates to first stimulus dimension
+                   ts2 = 1, #relates to second stimulus dimension
                    exp_len = 200,
                    stimulusDuration = 1.5,
                    FBDuration = .5,
@@ -26,9 +28,13 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
     timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     iden = str(iden)
     if not action_keys:
-        action_keys = ['h', 'j', 'k', 'l']
+        action_keys = ['j', 'k']
         r.shuffle(action_keys)
-    stim_ids = [0,1]
+    
+    #first dimension relates to shape, second to orientation. The values both
+    #indicate a feature and a response. The task-sets orient to the first or 
+    #second dimension
+    stim_ids = [(0,0),(0,1),(1,0),(1,1)]
     #each taskset is define as a nxm matrix where n = # of stims and
     #m = # of actions. In theory, 'n' could be further decomposed into features
     states = {0: {'ts': ts1, 'c_mean': -.3, 'c_sd': .37}, 
@@ -69,13 +75,15 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
         curr_onset = 1 #initial onset
         curr_state = r.choice(states.keys())
         stims = r.sample(stim_ids*int(exp_len*.5),exp_len)
-                
+        #define bins. Will set context to center point of each bin
+        bin_boundaries = np.linspace(-1,1,11)
         
         
         for trial in range(exp_len):
             state = states[curr_state]
             dis = norm(state['c_mean'],state['c_sd'])
-            context_sample = [max(-1, min(1, dis.rvs()))]
+            binned = -1.1 + np.digitize([dis.rvs()],bin_boundaries)*.2
+            context_sample = [max(-1, min(1, binned[0]))]
 
             
             trialList += [{
@@ -88,6 +96,9 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
                 'onset': curr_onset,
                 'FBDuration': FBDuration,
                 'FBonset': FBonset,
+                #option to change based on state and stim
+                'reward': 1,
+                'punishment': 0
             }]
             if r.random() > trans_probs[curr_state,curr_state]:
                 curr_state = 1-curr_state
