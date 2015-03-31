@@ -35,7 +35,7 @@ axes = {'titleweight' : 'bold'
         }
 plt.rc('font', **font)
 plt.rc('axes', **axes)
-plt.rc('figure', figsize = (8,8))
+plt.rc('figure', figsize = (5,5))
 
 #*********************************************
 # Set up helper functions
@@ -115,6 +115,15 @@ plt.plot([i[1] for i in tmp.posterior_ignore])
 plt.plot([i[1] for i in tmp.posterior_single])
 plt.plot([i[1] for i in tmp.posterior_optimal])
 
+dfa['smoothed_ignore']=pd.stats.moments.ewma(pd.Series([i[1] for i in tmp.posterior_ignore]), span = 3)
+dfa['smoothed_single']=pd.stats.moments.ewma(pd.Series([i[1] for i in tmp.posterior_single]), span = 3)
+dfa['smoothed_optimal']=pd.stats.moments.ewma(pd.Series([i[1] for i in tmp.posterior_optimal]), span = 3)
+
+plt.hold(True)
+plt.plot(tmp.state, 'ro')
+plt.plot(dfa['smoothed_ignore'])
+plt.plot(dfa['smoothed_single'])
+plt.plot(dfa['smoothed_optimal'])
 
 
 
