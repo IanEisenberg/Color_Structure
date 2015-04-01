@@ -240,10 +240,11 @@ class colorStructTask:
         trialClock = core.Clock()
         self.trialnum += 1
         stim_i = trial['stim']
-        self.win.setColor([trial['context']]*3,'rgb')
-        self.win.flip()
-        self.stims[stim_i].draw()
-        self.win.flip()
+        if self.botMode != 'short':
+            self.win.setColor([trial['context']]*3,'rgb')
+            self.win.flip()
+            self.stims[stim_i].draw()
+            self.win.flip()
         # set trial text color based on background color
         if np.mean(trial['context']) < .2:
             self.text_color = 'white'
@@ -272,6 +273,7 @@ class colorStructTask:
                     trial['stimulusCleared']=trialClock.getTime()
                     trial['actualFBOnsetTime'] = trialClock.getTime()
                     trial['rt'].append(bot_action[1])
+                    self.pointtracker += FB
                     break
                 else:
                     key_response = [(bot_action[0], bot_action[1])]

@@ -33,8 +33,8 @@ f = open('IDs.txt', 'a')
 f.write(subject_code + '\n')
 f.close()
 
-train_mins = 5 #train_length in minutes
-test_mins = 5 #test_length in minutes
+train_mins = 20 #train_length in minutes
+test_mins = 20 #test_length in minutes
 avg_test_trial_len = 2.25 #in seconds
 avg_task_trial_len = avg_test_trial_len + 1 #factor in FB
 #Find the minimum even number of blocks to last at least train_length minutes
@@ -317,7 +317,7 @@ if test_on:
 # Determine payment
 #************************************
 points,trials = test.getPoints()
-performance = float(points/trials)
+performance = float(points)/trials
 pay_bonus = round(performance*5*2)/2.0
 print('Participant ' + subject_code + ' won ' + str(round(performance,2)) + ' points. Bonus: $' + str(pay_bonus))
 webbrowser.open_new('https://stanforduniversity.qualtrics.com/SE/?SID=SV_aV1hwNrNXgX5NYN')

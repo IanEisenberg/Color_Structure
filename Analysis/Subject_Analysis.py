@@ -15,11 +15,11 @@ from Load_Data import load_data
 from ggplot import *
 import glob
 
-train_files = glob.glob('../Data/*Struct_20*')
-test_files = glob.glob('../Data/*Struct_noFB*')
+train_files = glob.glob('../Data/*Struct_20*yaml')
+test_files = glob.glob('../Data/*Struct_noFB*yaml')
 
-data_file = train_files[0]
-name = data_file[8:]
+data_file = train_files[3]
+name = data_file[8:-5]
 taskinfo, df, dfa = load_data(data_file, name)
 
 #*********************************************
@@ -35,7 +35,7 @@ axes = {'titleweight' : 'bold'
         }
 plt.rc('font', **font)
 plt.rc('axes', **axes)
-plt.rc('figure', figsize = (5,5))
+plt.rc('figure', figsize = (8,8))
 
 #*********************************************
 # Set up helper functions

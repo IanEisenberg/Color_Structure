@@ -1,3 +1,8 @@
 testbot1
 testbot2
 testbot3
+testbot4
+testbot5
+testbot6
+testbot7
+testbot8
