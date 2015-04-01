@@ -18,8 +18,8 @@ import glob
 train_files = glob.glob('../Data/*Struct_20*')
 test_files = glob.glob('../Data/*Struct_noFB*')
 
-name = train_files[0]
-data_file = '../Data/' + name
+data_file = train_files[0]
+name = data_file[8:]
 taskinfo, df, dfa = load_data(data_file, name)
 
 #*********************************************
@@ -40,12 +40,6 @@ plt.rc('figure', figsize = (5,5))
 #*********************************************
 # Set up helper functions
 #*********************************************
-def window_function(func, array, window):
-    slices = len(array)/window
-    windowed_scores = [float(func(array[i*window:(i+1)*window])) for i in range(slices)]
-    if slices*window < len(array):
-        windowed_scores.append(float(func(array[(slices)*window:])))
-    return np.array(windowed_scores)
 
 def bar(x, y, title):
     plot = plt.bar(x,y)
@@ -78,6 +72,7 @@ plt.ylabel('RT in ms')
 #*********************************************
 # Optimal task-set inference 
 #*********************************************
+recursive_p = taskinfo['recursive_p']
 state_dis = [norm(state['c_mean'], state['c_sd']) for state in taskinfo['states'].values()]
 transitions = np.array([[recursive_p, 1-recursive_p], [1-recursive_p,recursive_p]])
 
@@ -88,9 +83,9 @@ prior_optimal = [.5,.5]
 posterior_ignore, posterior_single, posterior_optimal = [],[],[]
 
 for context in dfa.context:
-    posterior_ignore.append(calc_posterior(context[0], prior_ignore,state_dis))
-    posterior_single.append(calc_posterior(context[0], prior_single,state_dis))
-    posterior_optimal.append(calc_posterior(context[0], prior_optimal,state_dis))
+    posterior_ignore.append(calc_posterior(context, prior_ignore,state_dis))
+    posterior_single.append(calc_posterior(context, prior_single,state_dis))
+    posterior_optimal.append(calc_posterior(context, prior_optimal,state_dis))
     
     prior_single = transitions[np.argmax(posterior_single[-1]),:]
     prior_optimal = np.dot(transitions,posterior_optimal[-1])
@@ -101,14 +96,14 @@ dfa['posterior_optimal'] = posterior_optimal
        
 plt.hold(True)
 plt.plot([i*2-1 for i in dfa.state], 'ro')
-plt.plot([i[0] for i in dfa.context])
+plt.plot(dfa.context)
 
 dfa_sorted = dfa.sort('state')
 plt.hold(True)
 plt.plot([i*2-1 for i in dfa_sorted.state], 'ro')
-plt.plot([i[0] for i in dfa_sorted.context])
+plt.plot(dfa_sorted.context)
 
-tmp = dfa[0:len(dfa)/2]
+tmp = dfa[0:len(dfa)]
 plt.hold(True)
 plt.plot(tmp.state, 'ro')
 plt.plot([i[1] for i in tmp.posterior_ignore])

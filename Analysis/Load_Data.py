@@ -8,7 +8,6 @@ Created on Tue Dec  9 14:22:54 2014
 import yaml
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 def load_data(datafile, name, mode = 'train'):
     """
@@ -24,9 +23,6 @@ def load_data(datafile, name, mode = 'train'):
     data = loaded_yaml['taskdata']
     taskinfo = loaded_yaml['taskinfo']
     
-    #Reflects mapping of action keys to tasksets and stimuli
-    stim_map = [(0,2),(1,3)]
-    ts_map = [(0,1),(2,3)]
     
     #Load data into a dataframe
     df = pd.DataFrame(data)
@@ -37,33 +33,22 @@ def load_data(datafile, name, mode = 'train'):
     df.rt[:] = rts
     df.response[:] = responses
     #Remove missed trials:
-    df = df[df.response != 'NA']
+    df = df[df.response != 999]
     df = df.set_index(df.trial_count)
-    #change response from strings to corresponding numbers.
-    df.response = [taskinfo['action_keys'].index(key_press) for key_press in df.response]
 
     #Create a separate analysis dataframe
     if mode == 'train':
         dfa = df.drop(['FBonset', 'FBDuration', 'actualFBOnsetTime', 'actualOnsetTime', 'onset', 
-                               'stimulusCleared'],1)
+                        'reward', 'punishment','stimulusCleared'],1)
     elif mode == 'test':
         dfa = df.drop(['FBonset', 'FB', 'actualOnsetTime', 'onset', 
-                               'stimulusCleared'],1)
-    
-    #Create new variables: taskset consistent, stim consistent
-
-    # Taskset consistency means that the action was one of the two dictated by 
-    # the current taskset, even if it isn't correct for the specific stimulus.
-    # Stimulus consistency means that the action would be correct for the stimulus
-    # in one of the two tasksets.
-    dfa['con_ts'] = [any([stim[dfa.response[i]]==1 for stim in dfa.ts[i]]) for i in dfa.index]
-    dfa['con_stim'] = [dfa.response[i] in stim_map[dfa.stim[i]] for i in dfa.index]
-    # Presuming tasksets are learned, define a 'currently operating TS' variable
-    #curr_ts is defined by the response, which corresponds to one of the two ts's defined
-    #in ts_map
-    dfa['curr_ts'] = [int(dfa.response[i] in ts_map[1]) for i in dfa.index]
-    dfa['switch'] = [dfa.curr_ts.shift(1)[i] != dfa.curr_ts[i] for i in dfa.index]
+                       'reward', 'punishment','stimulusCleared'],1)
+                  
+    dfa['rep_resp'] = [dfa.response.shift(1)[i] == dfa.response[i] for i in dfa.index]
+    dfa['switch'] = [dfa.ts.shift(1)[i] != dfa.ts[i] for i in dfa.index]
     dfa.switch[1] = False   
+    dfa['con_shape'] = [dfa.response[i] == dfa.stim[i][0] for i in dfa.index]
+    dfa['con_orient'] = [dfa.response[i] == dfa.stim[i][1] for i in dfa.index]
     
     #save data to CSV
     dfa.to_csv('../Data/' + name + '_cleaned.csv')

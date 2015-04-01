@@ -33,7 +33,7 @@ class colorStructTask:
     """
     
     def __init__(self,config_file,subject_code,verbose=True, 
-                 fullscreen = False, bot = None, mode = 'task'):
+                 fullscreen = False, mode = 'task'):
             
         self.subject_code=subject_code
         self.win=[]
@@ -52,7 +52,9 @@ class colorStructTask:
         self.track_response = []
         self.fullscreen = fullscreen
         self.pointtracker = 0
-        self.bot = bot
+        self.text_color = [1]*3
+        self.bot = None
+        self.botMode = None
         #Choose 'practice', 'FB', 'noFB'
         self.mode = mode
         try:
@@ -114,20 +116,20 @@ class colorStructTask:
         self.win.flip()
         self.win.flip()
         
-    def presentTextToWindow(self,text, color = u'white'):
+    def presentTextToWindow(self,text):
         """ present a text message to the screen
         return:  time of completion
         """
         
         if not self.textStim:
             self.textStim=visual.TextStim(self.win, text=text,font='BiauKai',
-                                height=1,color=color, colorSpace=u'rgb',
+                                height=1,color=self.text_color, colorSpace=u'rgb',
                                 opacity=1,depth=0.0,
                                 alignHoriz='center',wrapWidth=50)
             self.textStim.setAutoDraw(True) #automatically draw every frame
         else:
             self.textStim.setText(text)
-            self.textStim.setColor(color)
+            self.textStim.setColor(self.text_color)
         self.win.flip()
         return core.getTime()
 
@@ -200,6 +202,16 @@ class colorStructTask:
     def shutDownEarly(self):
         self.closeWindow()
         sys.exit()
+        
+    def setBot(self, bot, mode = "full"):
+        """ sets up a bot to run the experiment
+            mode = 'full' displays the experiment like normal.
+            mode = 'short' doesn't display any images and just create data
+        """
+        self.bot = bot
+        self.botMode = mode
+
+        
     
     def getPastAcc(self, time_win):
         """Returns the ratio of hits/trials in a predefined window
@@ -228,15 +240,15 @@ class colorStructTask:
         trialClock = core.Clock()
         self.trialnum += 1
         stim_i = trial['stim']
-        self.win.setColor(trial['context']*3,'rgb')
+        self.win.setColor([trial['context']]*3,'rgb')
         self.win.flip()
         self.stims[stim_i].draw()
         self.win.flip()
         # set trial text color based on background color
         if np.mean(trial['context']) < .2:
-            text_color = 'white'
+            self.text_color = 'white'
         else:
-            text_color = 'black'
+            self.text_color = 'black'
         trialClock.reset()
         event.clearEvents()
         trial['actualOnsetTime']=core.getTime() - self.startTime
@@ -247,14 +259,23 @@ class colorStructTask:
         while trialClock.getTime() < (self.stimulusDuration):
             key_response=event.getKeys(None,True)
             if self.bot:
-                print('*****************\n')
-                print('state: ' + str(trial['state']))
-                print("priors: " + str(self.bot.TS_prior))
-                choice = self.bot.choose(trial['stim'], trial['context'])
-                print("posteriors: " + str(self.bot.posterior))
-                print("choice: " + str(choice[0]))
-                core.wait(choice[1])
-                key_response = [(choice[0], core.getAbsTime())]
+                bot_action = self.bot.choose(trial['stim'], trial['context'])
+                choice = self.action_keys.index(bot_action[0])
+                trial['response'].append(choice)
+                if choice == stim_i[trial['ts']]:
+                    FB = trial['reward']
+                else:
+                    FB = trial['punishment']
+                if trial['FBDuration'] != 0:
+                    trial['FB'] = FB
+                if self.botMode == 'short':
+                    trial['stimulusCleared']=trialClock.getTime()
+                    trial['actualFBOnsetTime'] = trialClock.getTime()
+                    trial['rt'].append(bot_action[1])
+                    break
+                else:
+                    key_response = [(bot_action[0], bot_action[1])]
+                    core.wait(bot_action[1])
             if len(key_response)==0:
                 continue
             for key,response_time in key_response:
@@ -274,17 +295,17 @@ class colorStructTask:
                             FB = trial['reward']
                         else:
                             FB = trial['punishment']
-                        
                         #record points for bonus
                         self.pointtracker += FB
                         #If training, present FB to window
                         if trial['FBDuration'] != 0:
+                            trial['FB'] = FB
                             core.wait(trial['FBonset'])  
                             trial['actualFBOnsetTime'] = trialClock.getTime()-trial['stimulusCleared']
                             if FB == 1:
-                                self.presentTextToWindow('+1 point', color = text_color)
+                                self.presentTextToWindow('+1 point')
                             else:
-                                self.presentTextToWindow('+' + str(FB) + ' points', color = text_color)
+                                self.presentTextToWindow('+' + str(FB) + ' points')
                             core.wait(trial['FBDuration'])
                             self.clearWindow()     
         #If subject did not respond within the stimulus window clear the stim
@@ -292,7 +313,7 @@ class colorStructTask:
         if trial['stimulusCleared']==0:
             self.clearWindow()
             trial['stimulusCleared']=trialClock.getTime()
-            trial['response'].append('NA')
+            trial['response'].append(999)
             trial['rt'].append(999)
             core.wait(.5)
             self.presentTextToWindow('Please Respond Faster')

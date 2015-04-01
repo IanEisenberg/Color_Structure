@@ -10,7 +10,7 @@ import webbrowser
 import numpy as np
 from color_struct_task_2dims import colorStructTask
 from make_config_2dims import makeConfigList, makePracticeConfigList
-from test_bot import test_bot
+from test_bot_2dims import test_bot
 #set-up some variables
 
 verbose=True
@@ -33,8 +33,8 @@ f = open('IDs.txt', 'a')
 f.write(subject_code + '\n')
 f.close()
 
-train_mins = 20 #train_length in minutes
-test_mins = 20 #test_length in minutes
+train_mins = 5 #train_length in minutes
+test_mins = 5 #test_length in minutes
 avg_test_trial_len = 2.25 #in seconds
 avg_task_trial_len = avg_test_trial_len + 1 #factor in FB
 #Find the minimum even number of blocks to last at least train_length minutes
@@ -47,13 +47,13 @@ practice_config_file = '../Config_Files/Color_Struct_Practice_config.npy'
 task_config_file = makeConfigList(iden = subject_code, exp_len = task_len, recursive_p = .9)
 
 try:
-    practice=colorStructTask(practice_config_file,subject_code, fullscreen = fullscr, bot = None, mode = 'Practice')
+    practice=colorStructTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'Practice')
 except SystemExit:
     practice_config_file = makePracticeConfigList()
-    practice=colorStructTask(practice_config_file,subject_code, fullscreen = fullscr, bot = None, mode = 'Practice')
+    practice=colorStructTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'Practice')
 
-task=colorStructTask(task_config_file,subject_code, fullscreen = fullscr, 
-                     bot = None) #test_bot(task_config_file, mode = "other"))
+task=colorStructTask(task_config_file,subject_code, fullscreen = fullscr)
+task.setBot(bot = test_bot(task_config_file, mode = "other"), mode = "short")
 task.writeToLog(task.toJSON())
 
 
@@ -142,41 +142,47 @@ if task_on:
     # prepare to start
     task.setupWindow()
     task.defineStims()
-    task.presentTextToWindow(
-        """
-        We will now start the experiment.
+    if not task.bot:
+        task.presentTextToWindow(
+            """
+            We will now start the experiment.
+            
+            There will be one break half way through. 
+            
+            Please wait for the experimenter.
+            """)
+        resp,task.startTime=task.waitForKeypress(task.trigger_key)
+        task.checkRespForQuitKey(resp)
+        event.clearEvents()
+    else:
+        task.startTime = core.getTime()
         
-        There will be one break half way through. 
-        
-        Please wait for the experimenter.
-        """)
-    resp,task.startTime=task.waitForKeypress(task.trigger_key)
-    task.checkRespForQuitKey(resp)
-    event.clearEvents()
-    
     
     pause_trial = task.stimulusInfo[len(task.stimulusInfo)/2]
     pause_time = 0
     for trial in task.stimulusInfo:
-        if trial == pause_trial:
-            time1 = core.getTime()
-            task.presentTextToWindow("Take a break! Press '5' when you're ready to continue.")
-            task.waitForKeypress(task.trigger_key)
-            task.clearWindow()
-            pause_time = core.getTime() - time1
-            
-        # wait for onset time
-        while core.getTime() < trial['onset'] + task.startTime + pause_time:
-                key_response=event.getKeys(None,True)
-                if len(key_response)==0:
-                    continue
-                for key,response_time in key_response:
-                    if task.quit_key==key:
-                        task.shutDownEarly()
-                    elif task.trigger_key==key:
-                        task.trigger_times.append(response_time-task.startTime)
-                        task.waitForKeypress()
+        if not task.bot:
+            if trial == pause_trial:
+                time1 = core.getTime()
+                task.presentTextToWindow("Take a break! Press '5' when you're ready to continue.")
+                task.waitForKeypress(task.trigger_key)
+                task.clearWindow()
+                pause_time = core.getTime() - time1
+        
+        #if botMode = short, don't wait for onset times
+        if task.botMode != 'short':
+            # wait for onset time
+            while core.getTime() < trial['onset'] + task.startTime + pause_time:
+                    key_response=event.getKeys(None,True)
+                    if len(key_response)==0:
                         continue
+                    for key,response_time in key_response:
+                        if task.quit_key==key:
+                            task.shutDownEarly()
+                        elif task.trigger_key==key:
+                            task.trigger_times.append(response_time-task.startTime)
+                            task.waitForKeypress()
+                            continue
     
         trial=task.presentTrial(trial)
         task.writeToLog(json.dumps(trial))
@@ -221,41 +227,57 @@ if test_on:
     
     test_config_file = makeConfigList(taskname = 'Color_Struct_noFB', iden = subject_code, exp_len = test_len, 
                                       recursive_p = .9, FBDuration = 0, FBonset = 0, action_keys = task.getActions())
-    test=colorStructTask(test_config_file,subject_code, fullscreen = fullscr, 
-                         bot = test_bot(task_config_file, mode = "other"))
+    test=colorStructTask(test_config_file,subject_code, fullscreen = fullscr)
+    test.setBot(bot = test_bot(test_config_file, mode = "other"), mode = "short")
+
     test.writeToLog(test.toJSON())
     
     # prepare to start
     test.setupWindow()
     test.defineStims()
-    test.presentTextToWindow(
-        """
-        In this next part the feedback will be invisible. You
-        are still earning points, though, and these points are
-        used to determine your bonus.
+    if not test.bot:
+        test.presentTextToWindow(
+            """
+            In this next part the feedback will be invisible. You
+            are still earning points, though, and these points are
+            used to determine your bonus.
+            
+            Do your best to respond to the shapes as you learned to
+            in the last section.
+            
+            Please wait for the experimenter.
+            """)
+                            
+        resp,test.startTime=test.waitForKeypress(test.trigger_key)
+        test.checkRespForQuitKey(resp)
+        event.clearEvents()
+    else:
+        test.startTime = core.getTime()
         
-        Do your best to respond to the shapes as you learned to
-        in the last section.
-        
-        Please wait for the experimenter.
-        """)
-                        
-    resp,test.startTime=test.waitForKeypress(test.trigger_key)
-    test.checkRespForQuitKey(resp)
-    event.clearEvents()
-    
+    pause_trial = test.stimulusInfo[len(test.stimulusInfo)/2]
+    pause_time = 0
     for trial in test.stimulusInfo:
-        # wait for onset time
-        while core.getTime() < trial['onset'] + test.startTime:
-                key_response=event.getKeys(None,True)
-                if len(key_response)==0:
-                    continue
-                for key,response_time in key_response:
-                    if test.quit_key==key:
-                        test.shutDownEarly()
-                    elif test.trigger_key==key:
-                        test.trigger_times.append(response_time-test.startTime)
+        if not test.bot:
+            if trial == pause_trial:
+                time1 = core.getTime()
+                test.presentTextToWindow("Take a break! Press '5' when you're ready to continue.")
+                test.waitForKeypress(test.trigger_key)
+                test.clearWindow()
+                pause_time = core.getTime() - time1
+            
+        #if botMode = short, don't wait for onset times
+        if task.botMode != 'short':
+            # wait for onset time
+            while core.getTime() < trial['onset'] + test.startTime:
+                    key_response=event.getKeys(None,True)
+                    if len(key_response)==0:
                         continue
+                    for key,response_time in key_response:
+                        if test.quit_key==key:
+                            test.shutDownEarly()
+                        elif test.trigger_key==key:
+                            test.trigger_times.append(response_time-test.startTime)
+                            continue
     
         trial=test.presentTrial(trial)
         test.writeToLog(json.dumps(trial))

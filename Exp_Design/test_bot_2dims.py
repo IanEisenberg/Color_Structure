@@ -28,7 +28,7 @@ class test_bot:
         """
         self.updateLikelihood(context)
         curr_state = self.taskinfo['states'][np.argmax(self.posterior)]
-        choice = self.action_keys[np.argmax(curr_state['ts'][stim])]
+        choice = self.action_keys[stim[np.argmax(curr_state['ts'])]]
         return (choice,.5)
 
         
