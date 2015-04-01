@@ -22,23 +22,27 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
                    FBDuration = .5,
                    FBonset = .5,
                    intertrial = .5,
-                   action_keys = None, loc = '../Config_Files/'):
+                   action_keys = None, 
+                   ts_order = None,
+                   loc = '../Config_Files/'):
     
     trans_probs = np.matrix([[recursive_p, 1-recursive_p], [1-recursive_p, recursive_p]])
     timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     iden = str(iden)
     if not action_keys:
-        action_keys = ['j', 'k']
+        action_keys = ['d','f','j', 'k']
         r.shuffle(action_keys)
     
     #first dimension relates to shape, second to orientation. The values both
     #indicate a feature and a response. The task-sets orient to the first or 
     #second dimension
-    stim_ids = [(0,0),(0,1),(1,0),(1,1)]
-    #each taskset is define as a nxm matrix where n = # of stims and
-    #m = # of actions. In theory, 'n' could be further decomposed into features
-    states = {0: {'ts': ts1, 'c_mean': -.3, 'c_sd': .37}, 
-                1: {'ts': ts2, 'c_mean': .3, 'c_sd': .37}}
+    stim_ids = [(0,2),(0,3),(1,2),(1,3)]
+    
+    if not ts_order:
+        ts_order = [ts1,ts2]
+        r.shuffle(ts_order)
+    states = {0: {'ts': ts_order[0], 'c_mean': -.3, 'c_sd': .37}, 
+                1: {'ts': ts_order[1], 'c_mean': .3, 'c_sd': .37}}
 
     #useful if I wanted to parametrically alter overlap
 #    def minf1f2(x, mu1, mu2, sd1, sd2):
@@ -73,14 +77,23 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
         trialList = []    
         trial_count = 1
         curr_onset = 1 #initial onset
-        curr_state = r.choice(states.keys())
-        stims = r.sample(stim_ids*int(exp_len*.5),exp_len)
+        stims = r.sample(stim_ids*int(exp_len * .25),exp_len)
+              
+        trial_states = [1] #start off the function
+        while abs(np.mean(trial_states)-.5) > .1:
+            curr_state = r.choice(states.keys())
+            trial_states = []
+            for trial in range(exp_len):
+                trial_states.append(curr_state)
+                if r.random() > trans_probs[curr_state,curr_state]:
+                    curr_state = 1-curr_state
+            
         #define bins. Will set context to center point of each bin
         bin_boundaries = np.linspace(-1,1,11)
         
         
         for trial in range(exp_len):
-            state = states[curr_state]
+            state = states[trial_states[trial]]
             dis = norm(state['c_mean'],state['c_sd'])
             binned = -1.1 + np.digitize([dis.rvs()],bin_boundaries)*.2
             context_sample = max(-1, min(1, binned[0]))
@@ -88,7 +101,7 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
             
             trialList += [{
                 'trial_count': trial_count,
-                'state': curr_state,
+                'state': trial_states[trial],
                 'ts': state['ts'],
                 'c_dis': {'mean': dis.mean(), 'sd': dis.std()},
                 'context': context_sample,
@@ -100,8 +113,7 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
                 'reward': 1,
                 'punishment': 0
             }]
-            if r.random() > trans_probs[curr_state,curr_state]:
-                curr_state = 1-curr_state
+
             
             trial_count += 1
             curr_onset += stimulusDuration+FBDuration+FBonset+intertrial+r.random()*.5
@@ -142,16 +154,18 @@ def makePracticeConfigList(taskname = 'Color_Struct_Practice',
                    loc = '../Config_Files/'):
     
     trans_probs = np.matrix([[recursive_p, 1-recursive_p], [1-recursive_p, recursive_p]])
-    action_keys = ['j', 'k']
+    action_keys = ['d','f','j', 'k']
     
     #first dimension relates to shape, second to orientation. The values both
     #indicate a feature and a response. The task-sets orient to the first or 
     #second dimension
-    stim_ids = [(0,0),(0,1),(1,0),(1,1)]
+    stim_ids = [(0,2),(0,3),(1,2),(1,3)]
     #each taskset is define as a nxm matrix where n = # of stims and
     #m = # of actions. In theory, 'n' could be further decomposed into features
-    states = {0: {'ts': ts1, 'c_mean': -.3, 'c_sd': .37}, 
-                1: {'ts': ts2, 'c_mean': .3, 'c_sd': .37}}
+    ts_order = [ts1,ts2]
+    r.shuffle(ts_order)
+    states = {0: {'ts': ts_order[0], 'c_mean': -.3, 'c_sd': .37}, 
+                1: {'ts': ts_order[1], 'c_mean': .3, 'c_sd': .37}}
 
                 
     initial_params = {
@@ -179,7 +193,7 @@ def makePracticeConfigList(taskname = 'Color_Struct_Practice',
         trial_count = 1
         curr_onset = 1 #initial onset
         curr_state = r.choice(states.keys())
-        stims = r.sample(stim_ids*int(exp_len*.5),exp_len)
+        stims = r.sample(stim_ids*int(exp_len*.25),exp_len)
         #define bins. Will set context to center point of each bin
         bin_boundaries = np.linspace(-1,1,11)
         

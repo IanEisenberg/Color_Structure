@@ -2,23 +2,22 @@
 runcolorStructTask
 """
 
-from psychopy import visual, core, event, logging, data, misc
-import os, socket, random
+from psychopy import core, event
 import smtplib
 import json
 import webbrowser
-import numpy as np
 from color_struct_task_2dims import colorStructTask
 from make_config_2dims import makeConfigList, makePracticeConfigList
 from test_bot_2dims import test_bot
 #set-up some variables
 
 verbose=True
-fullscr=False  # change to True for full screen display
+fullscr= False
 subdata=[]
 practice_on = False
 task_on = True
 test_on = True
+bot_on = True
 
 # set things up for practice, training and tests
 try:
@@ -38,8 +37,8 @@ test_mins = 20 #test_length in minutes
 avg_test_trial_len = 2.25 #in seconds
 avg_task_trial_len = avg_test_trial_len + 1 #factor in FB
 #Find the minimum even number of blocks to last at least train_length minutes
-task_len = int(round(train_mins*60/avg_task_trial_len/2)*2)
-test_len = int(round(test_mins*60/avg_test_trial_len/2)*2)
+task_len = int(round(train_mins*60/avg_task_trial_len/4)*4)
+test_len = int(round(test_mins*60/avg_test_trial_len/4)*4)
 
 
 #set up config files
@@ -53,7 +52,8 @@ except SystemExit:
     practice=colorStructTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'Practice')
 
 task=colorStructTask(task_config_file,subject_code, fullscreen = fullscr)
-task.setBot(bot = test_bot(task_config_file, mode = "other"), mode = "short")
+if bot_on == True:
+    task.setBot(bot = test_bot(task_config_file, mode = "ignore_base"), mode = "short")
 task.writeToLog(task.toJSON())
 
 
@@ -68,20 +68,20 @@ if practice_on:
     task_intro_text = [
         'Welcome\n\nPress 5 to move through instructions',
         """
-        This experiment starts with atraining phase followed by a testing phase.
+        This experiment starts with a training phase followed by a testing phase.
         
         Your performance on the test phase determines your bonus payment
-        (up to $5). It is important to learn as much as possible
-        during the training phase so you can do well on the test phase.
+        (up to $5). To perform well on the test phase you'll need to stay
+        motivated and learn as much as possible in the training phase.
         """,
         """
         In the training phase, shapes will appear on the screen
-        one at a time, and you will need to learn how to respond to them
+        one at a time, and you will need to learn how to respond to them.
         
-        There will only be two shapes, and your responses
-        will consist of one of two buttons, 'j' and 'k'.
+        Your responses will consist of one of two buttons: 'd', 'f', 'j' and 'k'.
+        Use your index and middle fingers on both hands to respond.
         
-        You need to learn the best key(s) to press for each shape.
+       The goal is to learn the best key(s) to press for each shape.
         """,
         """
         The background color will also be changing on each trial,
@@ -98,7 +98,7 @@ if practice_on:
         you will get points indicating how well you did.
         
         After the training phase, there will be a test phase 
-        with no feedback. You will still be earning points, however,
+        with no feedback. You will still be earning points however,
         you just won't be able to see them anymore.
         
         It is therefore very important that you use the points 
@@ -142,7 +142,7 @@ if task_on:
     # prepare to start
     task.setupWindow()
     task.defineStims()
-    if not task.bot:
+    if bot_on == False:
         task.presentTextToWindow(
             """
             We will now start the experiment.
@@ -192,8 +192,9 @@ if task_on:
     
     task.writeToLog(json.dumps({'trigger_times':task.trigger_times}))
     task.writeData()
-    task.presentTextToWindow('Thank you. Please wait for the experimenter.')
-    task.waitForKeypress(task.quit_key)
+    if bot_on == False:
+        task.presentTextToWindow('Thank you. Please wait for the experimenter.')
+        task.waitForKeypress(task.quit_key)
 
 
     # clean up
@@ -201,23 +202,24 @@ if task_on:
 
 #************************************
 # Send text about task performance
-#************************************   
-    username = "thedummyspeaks@gmail.com"
-    password = "r*kO84gSzzD4"
-    
-    atttext = "9148155478@txt.att.net"
-    message = "Training done. Points " + str(task.getPoints())
-    
-    msg = """From: %s
-    To: %s
-    Subject: text-message
-    %s""" % (username, atttext, message)
-    
-    server = smtplib.SMTP('smtp.gmail.com',587)
-    server.starttls()
-    server.login(username,password)
-    server.sendmail(username, atttext, msg)
-    server.quit()
+#************************************
+    if bot_on == False:   
+        username = "thedummyspeaks@gmail.com"
+        password = "r*kO84gSzzD4"
+        
+        atttext = "9148155478@txt.att.net"
+        message = "Training done. Points " + str(task.getPoints())
+        
+        msg = """From: %s
+        To: %s
+        Subject: text-message
+        %s""" % (username, atttext, message)
+        
+        server = smtplib.SMTP('smtp.gmail.com',587)
+        server.starttls()
+        server.login(username,password)
+        server.sendmail(username, atttext, msg)
+        server.quit()
     
 #************************************
 # Start test
@@ -226,16 +228,18 @@ if task_on:
 if test_on:
     
     test_config_file = makeConfigList(taskname = 'Color_Struct_noFB', iden = subject_code, exp_len = test_len, 
-                                      recursive_p = .9, FBDuration = 0, FBonset = 0, action_keys = task.getActions())
+                                      recursive_p = .9, FBDuration = 0, FBonset = 0, action_keys = task.getActions(),
+                                      ts_order = task.getTSorder())
     test=colorStructTask(test_config_file,subject_code, fullscreen = fullscr)
-    test.setBot(bot = test_bot(test_config_file, mode = "other"), mode = "short")
+    if bot_on == True:
+        test.setBot(bot = test_bot(test_config_file, mode = "ignore_base"), mode = "short")
 
     test.writeToLog(test.toJSON())
     
     # prepare to start
     test.setupWindow()
     test.defineStims()
-    if not test.bot:
+    if bot_on == False:
         test.presentTextToWindow(
             """
             In this next part the feedback will be invisible. You
@@ -266,7 +270,7 @@ if test_on:
                 pause_time = core.getTime() - time1
             
         #if botMode = short, don't wait for onset times
-        if task.botMode != 'short':
+        if test.botMode != 'short':
             # wait for onset time
             while core.getTime() < trial['onset'] + test.startTime:
                     key_response=event.getKeys(None,True)
@@ -285,8 +289,9 @@ if test_on:
     
     test.writeToLog(json.dumps({'trigger_times':task.trigger_times}))
     test.writeData()
-    test.presentTextToWindow('Thank you. Please wait for the experimenter.')
-    test.waitForKeypress(task.quit_key)
+    if bot_on == False:
+        test.presentTextToWindow('Thank you. Please wait for the experimenter.')
+        test.waitForKeypress(task.quit_key)
     
     # clean up
     test.closeWindow()
@@ -295,22 +300,23 @@ if test_on:
 #************************************
 # Send text about test performance
 #************************************   
-    username = "thedummyspeaks@gmail.com"
-    password = "r*kO84gSzzD4"
-    
-    atttext = "9148155478@txt.att.net"
-    message = "Test done. Points " + str(test.getPoints())
-    
-    msg = """From: %s
-    To: %s
-    Subject: text-message
-    %s""" % (username, atttext, message)
-    
-    server = smtplib.SMTP('smtp.gmail.com',587)
-    server.starttls()
-    server.login(username,password)
-    server.sendmail(username, atttext, msg)
-    server.quit()
+    if bot_on == False:
+        username = "thedummyspeaks@gmail.com"
+        password = "r*kO84gSzzD4"
+        
+        atttext = "9148155478@txt.att.net"
+        message = "Test done. Points " + str(test.getPoints())
+        
+        msg = """From: %s
+        To: %s
+        Subject: text-message
+        %s""" % (username, atttext, message)
+        
+        server = smtplib.SMTP('smtp.gmail.com',587)
+        server.starttls()
+        server.login(username,password)
+        server.sendmail(username, atttext, msg)
+        server.quit()
     
     
 #************************************
@@ -319,8 +325,9 @@ if test_on:
 points,trials = test.getPoints()
 performance = float(points)/trials
 pay_bonus = round(performance*5*2)/2.0
-print('Participant ' + subject_code + ' won ' + str(round(performance,2)) + ' points. Bonus: $' + str(pay_bonus))
-webbrowser.open_new('https://stanforduniversity.qualtrics.com/SE/?SID=SV_aV1hwNrNXgX5NYN')
+print('Participant ' + subject_code + ' won ' + str(points) + ' points out of ' + str(trials) + ' trials. Bonus: $' + str(pay_bonus))
+if bot_on == False:
+    webbrowser.open_new('https://stanforduniversity.qualtrics.com/SE/?SID=SV_aV1hwNrNXgX5NYN')
 
 
 

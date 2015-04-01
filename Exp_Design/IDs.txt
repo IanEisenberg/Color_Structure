@@ -1,8 +1,5 @@
-testbot1
-testbot2
-testbot3
-testbot4
-testbot5
-testbot6
-testbot7
-testbot8
+testbot_5mins
+testbot_10mins
+testbpt_20mins
+testbot_ignore_10mins
+testbot_ignore_20mins

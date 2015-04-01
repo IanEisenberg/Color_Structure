@@ -2,7 +2,7 @@
 generic task using psychopy
 """
 
-from psychopy import visual, core, event, logging, data, misc
+from psychopy import visual, core, event
 import sys,os
 import yaml
 import numpy as np
@@ -60,7 +60,7 @@ class colorStructTask:
         try:
             self.loadStimulusFileNP(config_file)
         except:
-            print 'cannot load config file'
+            print mode + ': cannot load config file'
             sys.exit()
                                                         
         self.logfilename='%s_%s_%s.log'%(self.subject_code,self.taskname,self.timestamp)
@@ -134,20 +134,21 @@ class colorStructTask:
         return core.getTime()
 
     def defineStims(self, stims = None):
+        
         if stims:
             self.stims = stims
         else:
             if self.mode == 'task':
-                self.stims = {(0,0): visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'cm', size = (3, 7), mask = 'circle', ori = 30),
-                              (0,1): visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'cm', size = (3, 7), mask = 'circle', ori = -30),
-                              (1,0): visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'cm', size = (3, 7), mask = 'circle', ori = 30),
-                              (1,1): visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'cm', size = (3, 7), mask = 'circle', ori = -30)}
+                self.stims = {self.stim_ids[0]: visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'cm', size = (3, 7), mask = 'circle', ori = 30),
+                              self.stim_ids[1]: visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'cm', size = (3, 7), mask = 'circle', ori = -30),
+                              self.stim_ids[2]: visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'cm', size = (3, 7), mask = 'circle', ori = 30),
+                              self.stim_ids[3]: visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'cm', size = (3, 7), mask = 'circle', ori = -30)}
 
             elif self.mode == 'Practice':
-                self.stims = {(0,0): visual.Rect(self.win,1,.5,ori = 0),
-                              (0,1): visual.Rect(self.win,1,.5,ori = -90),
-                              (1,0): visual.Circle(self.win,radius = (.5,1),edges = 32,ori = 0),
-                              (1,1): visual.Circle(self.win,radius = (.5,1), edges = 32,ori = -90)}
+                self.stims = {self.stim_ids[0]: visual.Rect(self.win,2,6,ori = 0),
+                              self.stim_ids[1]: visual.Rect(self.win,2,6,ori = -90),
+                              self.stim_ids[2]: visual.Circle(self.win,radius = (1,3),edges = 32,ori = 0),
+                              self.stim_ids[3]: visual.Circle(self.win,radius = (1,3), edges = 32,ori = -90)}
                 for stim in self.stims.values():
                     stim.setFillColor('red')
                     stim.setLineColor('red')
@@ -225,6 +226,10 @@ class colorStructTask:
         
     def getActions(self):
         return self.action_keys
+        
+    def getTSorder(self):
+        return [self.taskinfo['states'][0]['ts'],
+                self.taskinfo['states'][1]['ts']]
         
     def getPoints(self):
         return (self.pointtracker,self.trialnum)

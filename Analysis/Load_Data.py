@@ -49,6 +49,7 @@ def load_data(datafile, name, mode = 'train'):
     dfa.switch[1] = False   
     dfa['con_shape'] = [dfa.response[i] == dfa.stim[i][0] for i in dfa.index]
     dfa['con_orient'] = [dfa.response[i] == dfa.stim[i][1] for i in dfa.index]
+    dfa['correct'] = [dfa.response[i] == dfa.stim[i][dfa.ts[i]] for i in dfa.index]
     
     #save data to CSV
     dfa.to_csv('../Data/' + name + '_cleaned.csv')

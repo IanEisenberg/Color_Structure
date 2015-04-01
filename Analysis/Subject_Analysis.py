@@ -18,7 +18,7 @@ import glob
 train_files = glob.glob('../Data/*Struct_20*yaml')
 test_files = glob.glob('../Data/*Struct_noFB*yaml')
 
-data_file = train_files[3]
+data_file = train_files[2]
 name = data_file[8:-5]
 taskinfo, df, dfa = load_data(data_file, name)
 
@@ -40,7 +40,24 @@ plt.rc('figure', figsize = (8,8))
 #*********************************************
 # Set up helper functions
 #*********************************************
-
+def track_runs(iterable):
+    """
+    Return the item with the most consecutive repetitions in `iterable`.
+    If there are multiple such items, return the first one.
+    If `iterable` is empty, return `None`.
+    """
+    track_repeats=[]
+    current_element = None
+    current_repeats = 0
+    for element in iterable:
+        if current_element == element:
+            current_repeats += 1
+        else:
+            track_repeats.append((current_repeats,current_element))
+            current_element = element
+            current_repeats = 1
+    return track_repeats
+    
 def bar(x, y, title):
     plot = plt.bar(x,y)
     plt.title(str(title))
@@ -93,35 +110,36 @@ for context in dfa.context:
 dfa['posterior_ignore'] = posterior_ignore
 dfa['posterior_single'] = posterior_single
 dfa['posterior_optimal'] = posterior_optimal
-       
+   
+#plot context values and show the current state    
 plt.hold(True)
-plt.plot([i*2-1 for i in dfa.state], 'ro')
+plt.plot([i*2-1 for i in dfa.ts], 'ro')
 plt.plot(dfa.context)
 
-dfa_sorted = dfa.sort('state')
+#sort the context values by state
+dfa_sorted = dfa.sort('ts')
 plt.hold(True)
-plt.plot([i*2-1 for i in dfa_sorted.state], 'ro')
+plt.plot([i*2-1 for i in dfa_sorted.ts], 'ro')
 plt.plot(dfa_sorted.context)
 
-tmp = dfa[0:len(dfa)]
-plt.hold(True)
-plt.plot(tmp.state, 'ro')
-plt.plot([i[1] for i in tmp.posterior_ignore])
-plt.plot([i[1] for i in tmp.posterior_single])
-plt.plot([i[1] for i in tmp.posterior_optimal])
+#smooth the posterior estimates using an exponentially-weighted moving average
+dfa['smoothed_ignore']=pd.stats.moments.ewma(pd.Series([i[1] for i in dfa.posterior_ignore]), span = 5)
+dfa['smoothed_single']=pd.stats.moments.ewma(pd.Series([i[1] for i in dfa.posterior_single]), span = 5)
+dfa['smoothed_optimal']=pd.stats.moments.ewma(pd.Series([i[1] for i in dfa.posterior_optimal]), span = 5)
 
-dfa['smoothed_ignore']=pd.stats.moments.ewma(pd.Series([i[1] for i in tmp.posterior_ignore]), span = 3)
-dfa['smoothed_single']=pd.stats.moments.ewma(pd.Series([i[1] for i in tmp.posterior_single]), span = 3)
-dfa['smoothed_optimal']=pd.stats.moments.ewma(pd.Series([i[1] for i in tmp.posterior_optimal]), span = 3)
-
+#plot the optimal posterior estimate against a base-rate ignoring model
 plt.hold(True)
-plt.plot(tmp.state, 'ro')
+plt.plot(tmp.ts, 'ro')
 plt.plot(dfa['smoothed_ignore'])
-plt.plot(dfa['smoothed_single'])
 plt.plot(dfa['smoothed_optimal'])
 
-
-
+#plot the posterior estimate on top of the actual context (smoothed by the same value)
+dfa['smoothed_context']=pd.stats.moments.ewma(pd.Series(dfa.context), span = 5)
+plt.hold(True)
+plt.plot([i*2-1 for i in dfa.ts], 'ro')
+plt.plot(dfa['context'])
+plt.plot(dfa['smoothed_ignore'])
+plt.plot(dfa['smoothed_optimal'])
 
 
 

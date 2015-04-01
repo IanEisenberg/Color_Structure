@@ -1,0 +1,3070 @@
+configfile: ../Config_Files/Color_Struct_testbot_5mins_config_2015-04-01_11-32-38.npy
+subcode: testbot_5mins
+taskdata:
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0011000633239746094
+  actualOnsetTime: 0.00040221214294433594
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!python/str "433333\u04FF"
+  onset: 1
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: &id001 !!python/tuple [1, 3]
+  stimulusCleared: 0.0010988712310791016
+  trial_count: 1
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009639263153076172
+  actualOnsetTime: 0.0017120838165283203
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!python/str "433333\u04FF"
+  onset: 4.263467424415313
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: &id003 !!python/tuple [1, 2]
+  stimulusCleared: 0.0009629726409912109
+  trial_count: 2
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009448528289794922
+  actualOnsetTime: 0.002907991409301758
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    NDMzMzMz0z8=
+  onset: 7.66512542829941
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: &id002 !!python/tuple [0, 2]
+  stimulusCleared: 0.0009438991546630859
+  trial_count: 3
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009479522705078125
+  actualOnsetTime: 0.004080057144165039
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZub8=
+  onset: 11.009232031657907
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0009469985961914062
+  trial_count: 4
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009601116180419922
+  actualOnsetTime: 0.005233049392700195
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!python/str "433333\u04FF"
+  onset: 14.296657357275944
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0009582042694091797
+  trial_count: 5
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009419918060302734
+  actualOnsetTime: 0.0063860416412353516
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!python/str "433333\u04FF"
+  onset: 17.36392804495851
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0009400844573974609
+  trial_count: 6
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009319782257080078
+  actualOnsetTime: 0.0075550079345703125
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4L8=
+  onset: 20.841053740156052
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0009310245513916016
+  trial_count: 7
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0011441707611083984
+  actualOnsetTime: 0.008864164352416992
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!python/str "433333\u04FF"
+  onset: 24.078841716979742
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0011429786682128906
+  trial_count: 8
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009708404541015625
+  actualOnsetTime: 0.010122060775756836
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4L8=
+  onset: 27.396829295850814
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0009698867797851562
+  trial_count: 9
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009410381317138672
+  actualOnsetTime: 0.011303186416625977
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 30.44675494602924
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0009388923645019531
+  trial_count: 10
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0016999244689941406
+  actualOnsetTime: 0.01310420036315918
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4L8=
+  onset: 33.47747411514687
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0016989707946777344
+  trial_count: 11
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0010020732879638672
+  actualOnsetTime: 0.014492988586425781
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!python/str "433333\u04FF"
+  onset: 36.87581174998733
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: &id004 !!python/tuple [0, 3]
+  stimulusCleared: 0.001001119613647461
+  trial_count: 12
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009629726409912109
+  actualOnsetTime: 0.015679121017456055
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!python/str "433333\u04FF"
+  onset: 40.15971520013922
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0009620189666748047
+  trial_count: 13
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009429454803466797
+  actualOnsetTime: 0.01685309410095215
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    Z2ZmZmZm5r8=
+  onset: 43.44419524055188
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0009419918060302734
+  trial_count: 14
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009729862213134766
+  actualOnsetTime: 0.018041133880615234
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    Z2ZmZmZm5r8=
+  onset: 46.761672728379985
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0009720325469970703
+  trial_count: 15
+  ts: 0
+- FB: 0
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.00098419189453125
+  actualOnsetTime: 0.019215106964111328
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!python/str "433333\u04FF"
+  onset: 49.9203750893352
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.000982046127319336
+  trial_count: 16
+  ts: 1
+- FB: 0
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0011680126190185547
+  actualOnsetTime: 0.020586013793945312
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 53.30706762722568
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0011661052703857422
+  trial_count: 17
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009679794311523438
+  actualOnsetTime: 0.021845102310180664
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 56.57026285711232
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0009670257568359375
+  trial_count: 18
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009629726409912109
+  actualOnsetTime: 0.023045063018798828
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4L8=
+  onset: 59.96953954937975
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0009620189666748047
+  trial_count: 19
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0020351409912109375
+  actualOnsetTime: 0.024932146072387695
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!python/str "433333\u04FF"
+  onset: 63.1519398202879
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0020339488983154297
+  trial_count: 20
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0010819435119628906
+  actualOnsetTime: 0.026571035385131836
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    ZmZmZmZm5j8=
+  onset: 66.4350490995491
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0010809898376464844
+  trial_count: 21
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.001112222671508789
+  actualOnsetTime: 0.027907133102416992
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    NDMzMzMz0z8=
+  onset: 69.76305625824328
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0011110305786132812
+  trial_count: 22
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0010368824005126953
+  actualOnsetTime: 0.02918720245361328
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!python/str "433333\u04FF"
+  onset: 72.86197077666365
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.001035928726196289
+  trial_count: 23
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0010769367218017578
+  actualOnsetTime: 0.030537128448486328
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    ZmZmZmZm5j8=
+  onset: 75.97158094306639
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0010759830474853516
+  trial_count: 24
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.000993967056274414
+  actualOnsetTime: 0.03178906440734863
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    zszMzMzM7L8=
+  onset: 79.12546842687033
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0009920597076416016
+  trial_count: 25
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009379386901855469
+  actualOnsetTime: 0.0329890251159668
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 82.19348008745153
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0009369850158691406
+  trial_count: 26
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009448528289794922
+  actualOnsetTime: 0.034148216247558594
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    Z2ZmZmZm5r8=
+  onset: 85.58473923333715
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0009438991546630859
+  trial_count: 27
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009529590606689453
+  actualOnsetTime: 0.03530311584472656
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 88.65640536901736
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0009520053863525391
+  trial_count: 28
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0016741752624511719
+  actualOnsetTime: 0.03709006309509277
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4L8=
+  onset: 92.00510050992202
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0016732215881347656
+  trial_count: 29
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0010349750518798828
+  actualOnsetTime: 0.03841900825500488
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 95.15398763337085
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0010340213775634766
+  trial_count: 30
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0010759830474853516
+  actualOnsetTime: 0.0397951602935791
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    NDMzMzMz0z8=
+  onset: 98.5300765286057
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0010750293731689453
+  trial_count: 31
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009851455688476562
+  actualOnsetTime: 0.041045188903808594
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4D8=
+  onset: 101.82949525756707
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0009851455688476562
+  trial_count: 32
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009768009185791016
+  actualOnsetTime: 0.042231082916259766
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    ZmZmZmZm5j8=
+  onset: 105.0506995100264
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0009758472442626953
+  trial_count: 33
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009570121765136719
+  actualOnsetTime: 0.04342818260192871
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    NDMzMzMz0z8=
+  onset: 108.49756593998923
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0009560585021972656
+  trial_count: 34
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009579658508300781
+  actualOnsetTime: 0.04460620880126953
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    NDMzMzMz0z8=
+  onset: 111.59502335331622
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0009570121765136719
+  trial_count: 35
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0011241436004638672
+  actualOnsetTime: 0.04590010643005371
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4D8=
+  onset: 114.62102629062588
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0011229515075683594
+  trial_count: 36
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0010249614715576172
+  actualOnsetTime: 0.047170162200927734
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZub8=
+  onset: 118.04705217269779
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.001024007797241211
+  trial_count: 37
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0017490386962890625
+  actualOnsetTime: 0.04908299446105957
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZub8=
+  onset: 121.13512989005416
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0017478466033935547
+  trial_count: 38
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0012309551239013672
+  actualOnsetTime: 0.05041813850402832
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZub8=
+  onset: 124.18968551540358
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.001230001449584961
+  trial_count: 39
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0015828609466552734
+  actualOnsetTime: 0.0523831844329834
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    ZmZmZmZm5j8=
+  onset: 127.65234397281895
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0015819072723388672
+  trial_count: 40
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009090900421142578
+  actualOnsetTime: 0.05387711524963379
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 131.13542062385105
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.00090789794921875
+  trial_count: 41
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0008368492126464844
+  actualOnsetTime: 0.05488014221191406
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 134.3205941921183
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0008358955383300781
+  trial_count: 42
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0008270740509033203
+  actualOnsetTime: 0.05584907531738281
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4D8=
+  onset: 137.4260932813059
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0008270740509033203
+  trial_count: 43
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0008318424224853516
+  actualOnsetTime: 0.056829214096069336
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4L8=
+  onset: 140.54396177527303
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0008308887481689453
+  trial_count: 44
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0008730888366699219
+  actualOnsetTime: 0.057839155197143555
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4L8=
+  onset: 143.7506467545292
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0008721351623535156
+  trial_count: 45
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.000823974609375
+  actualOnsetTime: 0.05882620811462402
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4L8=
+  onset: 146.78543009476078
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0008230209350585938
+  trial_count: 46
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0008718967437744141
+  actualOnsetTime: 0.05979013442993164
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!python/str "433333\u04FF"
+  onset: 150.25202854519605
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0008718967437744141
+  trial_count: 47
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.003529787063598633
+  actualOnsetTime: 0.061480045318603516
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    Z2ZmZmZm5r8=
+  onset: 153.50263722982487
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0035278797149658203
+  trial_count: 48
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.001967906951904297
+  actualOnsetTime: 0.06507205963134766
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4L8=
+  onset: 156.7589093452925
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0019659996032714844
+  trial_count: 49
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0010221004486083984
+  actualOnsetTime: 0.06722617149353027
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!python/str "433333\u04FF"
+  onset: 160.14533085374762
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0010211467742919922
+  trial_count: 50
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0010259151458740234
+  actualOnsetTime: 0.06850719451904297
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 163.54388931185096
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0010249614715576172
+  trial_count: 51
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009970664978027344
+  actualOnsetTime: 0.0697171688079834
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    Z2ZmZmZm5r8=
+  onset: 167.0259147289229
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0009961128234863281
+  trial_count: 52
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009560585021972656
+  actualOnsetTime: 0.0709531307220459
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZub8=
+  onset: 170.3548876502609
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0009551048278808594
+  trial_count: 53
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009450912475585938
+  actualOnsetTime: 0.07212615013122559
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZub8=
+  onset: 173.85198369269625
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0009450912475585938
+  trial_count: 54
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009529590606689453
+  actualOnsetTime: 0.07326912879943848
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 177.19557219254625
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0009520053863525391
+  trial_count: 55
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009288787841796875
+  actualOnsetTime: 0.07442617416381836
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    zMzMzMzM7D8=
+  onset: 180.40187010148867
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0009279251098632812
+  trial_count: 56
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0016160011291503906
+  actualOnsetTime: 0.07591700553894043
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    NDMzMzMz0z8=
+  onset: 183.6815721084159
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0016140937805175781
+  trial_count: 57
+  ts: 1
+- FB: 0
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0011751651763916016
+  actualOnsetTime: 0.07764220237731934
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZub8=
+  onset: 186.9087734473602
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0011742115020751953
+  trial_count: 58
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.001058816909790039
+  actualOnsetTime: 0.08153104782104492
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    Z2ZmZmZm5r8=
+  onset: 190.0615670978737
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0010578632354736328
+  trial_count: 59
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0010581016540527344
+  actualOnsetTime: 0.08287620544433594
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZub8=
+  onset: 193.15816813101333
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0010559558868408203
+  trial_count: 60
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0014660358428955078
+  actualOnsetTime: 0.08407306671142578
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!python/str "433333\u04FF"
+  onset: 196.27108859526362
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0014650821685791016
+  trial_count: 61
+  ts: 0
+- FB: 0
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.003031015396118164
+  actualOnsetTime: 0.08611512184143066
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4D8=
+  onset: 199.65537843015366
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.003030061721801758
+  trial_count: 62
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.002187013626098633
+  actualOnsetTime: 0.08965706825256348
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4L8=
+  onset: 202.832657866123
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0021851062774658203
+  trial_count: 63
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.001302957534790039
+  actualOnsetTime: 0.0919342041015625
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    zszMzMzM7L8=
+  onset: 206.29124392359077
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0013020038604736328
+  trial_count: 64
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0011980533599853516
+  actualOnsetTime: 0.09339404106140137
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 209.29341741923707
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0011968612670898438
+  trial_count: 65
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0010950565338134766
+  actualOnsetTime: 0.0948951244354248
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4L8=
+  onset: 212.35193991354927
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0010938644409179688
+  trial_count: 66
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0010149478912353516
+  actualOnsetTime: 0.0961611270904541
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: -1
+  onset: 215.55782492425342
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.001013040542602539
+  trial_count: 67
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.000988006591796875
+  actualOnsetTime: 0.09738707542419434
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4L8=
+  onset: 218.72003604287255
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0009870529174804688
+  trial_count: 68
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.026571989059448242
+  actualOnsetTime: 0.12052512168884277
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    zMzMzMzM7D8=
+  onset: 222.1604462546489
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.026571035385131836
+  trial_count: 69
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0010221004486083984
+  actualOnsetTime: 0.1254901885986328
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    ZmZmZmZm5j8=
+  onset: 225.36891490170166
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0010209083557128906
+  trial_count: 70
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009198188781738281
+  actualOnsetTime: 0.12665510177612305
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 228.79638630108118
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0009188652038574219
+  trial_count: 71
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.003953218460083008
+  actualOnsetTime: 0.12774419784545898
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 232.24353751235705
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0039520263671875
+  trial_count: 72
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0014410018920898438
+  actualOnsetTime: 0.13240718841552734
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    ZmZmZmZm5j8=
+  onset: 235.5989310267931
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.001439809799194336
+  trial_count: 73
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009608268737792969
+  actualOnsetTime: 0.13366913795471191
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 238.79614223393602
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0009598731994628906
+  trial_count: 74
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009889602661132812
+  actualOnsetTime: 0.1348731517791748
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    zMzMzMzM7D8=
+  onset: 242.21989528026532
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.000988006591796875
+  trial_count: 75
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0017240047454833984
+  actualOnsetTime: 0.13672208786010742
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    ZmZmZmZm5j8=
+  onset: 245.4645528381787
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.001722097396850586
+  trial_count: 76
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009999275207519531
+  actualOnsetTime: 0.13806509971618652
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 248.59183076415783
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0009989738464355469
+  trial_count: 77
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009958744049072266
+  actualOnsetTime: 0.13929200172424316
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    NDMzMzMz0z8=
+  onset: 251.9613405095786
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0009949207305908203
+  trial_count: 78
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009589195251464844
+  actualOnsetTime: 0.14049410820007324
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4D8=
+  onset: 255.37471284492298
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0009579658508300781
+  trial_count: 79
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009648799896240234
+  actualOnsetTime: 0.14166712760925293
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    ZmZmZmZm5j8=
+  onset: 258.7626740617972
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0009639263153076172
+  trial_count: 80
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009729862213134766
+  actualOnsetTime: 0.14287400245666504
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZub8=
+  onset: 262.09337388111294
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0009720325469970703
+  trial_count: 81
+  ts: 1
+- FB: 0
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0013091564178466797
+  actualOnsetTime: 0.144362211227417
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!python/str "433333\u04FF"
+  onset: 265.5884055341603
+  punishment: 0
+  response: [1]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0013082027435302734
+  trial_count: 82
+  ts: 1
+- FB: 0
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0009319782257080078
+  actualOnsetTime: 0.1456141471862793
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!python/str "433333\u04FF"
+  onset: 268.7704127506253
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0009319782257080078
+  trial_count: 83
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.00102996826171875
+  actualOnsetTime: 0.15120506286621094
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: 1
+  onset: 272.23955107791124
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0010290145874023438
+  trial_count: 84
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0008828639984130859
+  actualOnsetTime: 0.15237998962402344
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZub8=
+  onset: 275.46534666757213
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id001
+  stimulusCleared: 0.0008819103240966797
+  trial_count: 85
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0008900165557861328
+  actualOnsetTime: 0.15355610847473145
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 278.6618016410014
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id002
+  stimulusCleared: 0.0008890628814697266
+  trial_count: 86
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0008690357208251953
+  actualOnsetTime: 0.15459418296813965
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: 1
+  onset: 281.93085591544
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0008680820465087891
+  trial_count: 87
+  ts: 1
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0008559226989746094
+  actualOnsetTime: 0.15557503700256348
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      MzMzMzMz0z8=
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZuT8=
+  onset: 285.19701447791493
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0008549690246582031
+  trial_count: 88
+  ts: 1
+- FB: 0
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0008668899536132812
+  actualOnsetTime: 0.15661406517028809
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZub8=
+  onset: 288.20549130845586
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.000865936279296875
+  trial_count: 89
+  ts: 0
+- FB: 0
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0008580684661865234
+  actualOnsetTime: 0.15762114524841309
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    oJmZmZmZub8=
+  onset: 291.6196145592096
+  punishment: 0
+  response: [2]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id003
+  stimulusCleared: 0.0008571147918701172
+  trial_count: 90
+  ts: 0
+- FB: 0
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0008530616760253906
+  actualOnsetTime: 0.15862321853637695
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    NDMzMzMz0z8=
+  onset: 294.6612462789555
+  punishment: 0
+  response: [3]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0008521080017089844
+  trial_count: 91
+  ts: 0
+- FB: 1
+  FBDuration: 0.5
+  FBonset: 0.5
+  actualFBOnsetTime: 0.0012710094451904297
+  actualOnsetTime: 0.15996909141540527
+  c_dis:
+    mean: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!python/str "333333\u04FF"
+    sd: !!python/object/apply:numpy.core.multiarray.scalar
+    - !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      rkfhehSu1z8=
+  context: !!python/object/apply:numpy.core.multiarray.scalar
+  - !!python/object/apply:numpy.dtype
+    args: [f8, 0, 1]
+    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+  - !!binary |
+    AAAAAAAA4L8=
+  onset: 298.0851250824923
+  punishment: 0
+  response: [0]
+  reward: 1
+  rt: [0.5]
+  state: 0
+  stim: *id004
+  stimulusCleared: 0.0012700557708740234
+  trial_count: 92
+  ts: 0
+taskinfo:
+  action_keys: [f, d, j, k]
+  clearAfterResponse: 1
+  exp_len: 92
+  id: testbot_5mins
+  quit_key: q
+  recursive_p: 0.9
+  responseWindow: 1.0
+  states:
+    0: {c_mean: -0.3, c_sd: 0.37, ts: 0}
+    1: {c_mean: 0.3, c_sd: 0.37, ts: 1}
+  stim_ids:
+  - *id002
+  - *id004
+  - *id003
+  - *id001
+  stimulusDuration: 1.5
+  taskname: Color_Struct
+  trigger_key: '5'
+timestamp: 2015-04-01_11-32-38
