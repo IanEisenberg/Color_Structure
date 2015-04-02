@@ -233,7 +233,7 @@ class colorStructTask:
         ratio = self.win.size[1]/float(self.win.size[0])
         tmp_stim = visual.Rect(self.win,height*ratio*10, height,units = 'norm',fillColor = 'yellow')
         for context in self.context_means:
-            tmp_stim.setPos((0, context*.8))
+            tmp_stim.setPos((0, context*.9))
             tmp_stim.draw()
         self.win.flip()
 
