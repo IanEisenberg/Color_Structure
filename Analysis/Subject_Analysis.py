@@ -35,7 +35,7 @@ axes = {'titleweight' : 'bold'
         }
 plt.rc('font', **font)
 plt.rc('axes', **axes)
-plt.rc('figure', figsize = (8,8))
+plt.rc('figure', figsize = (12,12))
 
 #*********************************************
 # Set up helper functions
@@ -49,13 +49,15 @@ def track_runs(iterable):
     track_repeats=[]
     current_element = None
     current_repeats = 0
+    element_i = 0
     for element in iterable:
         if current_element == element:
             current_repeats += 1
         else:
-            track_repeats.append((current_repeats,current_element))
+            track_repeats.append((current_repeats,current_element, element_i-current_repeats))
             current_element = element
             current_repeats = 1
+        element_i += 1
     return track_repeats
     
 def bar(x, y, title):
@@ -75,8 +77,9 @@ def calc_posterior(data,prior,likelihood_dist):
 #*********************************************
 # Preliminary Analysis
 #*********************************************
-
-state_dis = [norm(state['c_mean'], state['c_sd']) for state in taskinfo['states'].values()]
+recursive_p = taskinfo['recursive_p']
+states = taskinfo['states']
+state_dis = [norm(states[0]['c_mean'], states[0]['c_sd']), norm(states[1]['c_mean'], states[1]['c_sd']) ]
 
 
 #Basic things - look at distribution of RT, etc.
@@ -89,7 +92,6 @@ plt.ylabel('RT in ms')
 #*********************************************
 # Optimal task-set inference 
 #*********************************************
-recursive_p = taskinfo['recursive_p']
 state_dis = [norm(state['c_mean'], state['c_sd']) for state in taskinfo['states'].values()]
 transitions = np.array([[recursive_p, 1-recursive_p], [1-recursive_p,recursive_p]])
 
@@ -111,6 +113,19 @@ dfa['posterior_ignore'] = posterior_ignore
 dfa['posterior_single'] = posterior_single
 dfa['posterior_optimal'] = posterior_optimal
    
+   
+ #smooth the posterior estimates using an exponentially-weighted moving average
+span_val = 3
+dfa['smoothed_ignore']=pd.stats.moments.ewma(pd.Series([i[1] for i in dfa.posterior_ignore]), span = span_val)
+dfa['smoothed_single']=pd.stats.moments.ewma(pd.Series([i[1] for i in dfa.posterior_single]), span = span_val)
+dfa['smoothed_optimal']=pd.stats.moments.ewma(pd.Series([i[1] for i in dfa.posterior_optimal]), span = span_val)
+#smooth context by same value 
+dfa['smoothed_context']=pd.stats.moments.ewma(pd.Series(dfa.context), span = span_val)
+
+
+#*********************************************
+# Plotting
+#*********************************************
 #plot context values and show the current state    
 plt.hold(True)
 plt.plot([i*2-1 for i in dfa.ts], 'ro')
@@ -122,24 +137,25 @@ plt.hold(True)
 plt.plot([i*2-1 for i in dfa_sorted.ts], 'ro')
 plt.plot(dfa_sorted.context)
 
-#smooth the posterior estimates using an exponentially-weighted moving average
-dfa['smoothed_ignore']=pd.stats.moments.ewma(pd.Series([i[1] for i in dfa.posterior_ignore]), span = 5)
-dfa['smoothed_single']=pd.stats.moments.ewma(pd.Series([i[1] for i in dfa.posterior_single]), span = 5)
-dfa['smoothed_optimal']=pd.stats.moments.ewma(pd.Series([i[1] for i in dfa.posterior_optimal]), span = 5)
-
 #plot the optimal posterior estimate against a base-rate ignoring model
 plt.hold(True)
 plt.plot(tmp.ts, 'ro')
 plt.plot(dfa['smoothed_ignore'])
 plt.plot(dfa['smoothed_optimal'])
 
-#plot the posterior estimate on top of the actual context (smoothed by the same value)
-dfa['smoothed_context']=pd.stats.moments.ewma(pd.Series(dfa.context), span = 5)
+#plot the posterior estimate on top of the actual context
+plt.hold(True)
+plt.plot([i*2-1 for i in dfa.ts], 'ro')
+plt.plot(dfa['smoothed_context'])
+plt.plot(dfa['smoothed_ignore'], linewidth = 3)
+plt.plot(dfa['smoothed_optimal'], linewidth = 3)
+
+#unsmoothed
 plt.hold(True)
 plt.plot([i*2-1 for i in dfa.ts], 'ro')
 plt.plot(dfa['context'])
-plt.plot(dfa['smoothed_ignore'])
-plt.plot(dfa['smoothed_optimal'])
+plt.plot([i[0] for i in dfa['posterior_ignore']], linewidth = 3)
+plt.plot([i[0] for i in dfa['posterior_optimal']], linewidth = 3)
 
 
 

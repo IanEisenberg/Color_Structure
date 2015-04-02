@@ -64,7 +64,8 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
       'states': states,
       'recursive_p': recursive_p,
       'stim_ids': stim_ids,
-      'exp_len': exp_len
+      'exp_len': exp_len,
+      'context_means': list(-1.1+np.array(range(1,11))*.2)
     }
     
     
@@ -83,10 +84,14 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
         while abs(np.mean(trial_states)-.5) > .1:
             curr_state = r.choice(states.keys())
             trial_states = []
+            state_reps = 0
             for trial in range(exp_len):
                 trial_states.append(curr_state)
-                if r.random() > trans_probs[curr_state,curr_state]:
+                if r.random() > trans_probs[curr_state,curr_state] or state_reps > 25:
                     curr_state = 1-curr_state
+                    state_reps = 0
+                else:
+                    state_reps += 1
             
         #define bins. Will set context to center point of each bin
         bin_boundaries = np.linspace(-1,1,11)
@@ -129,11 +134,6 @@ def makeConfigList(taskname = 'Color_Struct', iden = '000',
     filename = taskname + '_' + iden + '_config_' + timestamp + '.npy'
     np.save(loc + filename, np_input)
     
-#    yaml_input = makeTrialList()
-#    yaml_input.insert(0,initial_params)    
-#    filename = taskname + '_' + iden + '_config_' + timestamp + '.yaml'
-#    f=open(loc + filename,'w')
-#    yaml.dump_all(yaml_input,f,default_flow_style = False, explicit_start = True)
     return loc+filename
     
     
@@ -179,7 +179,8 @@ def makePracticeConfigList(taskname = 'Color_Struct_Practice',
       'states': states,
       'recursive_p': recursive_p,
       'stim_ids': stim_ids,
-      'exp_len': exp_len
+      'exp_len': exp_len,
+      'context_means': list(-1.1+np.array(range(1,11))*.2)
     }
     
     
@@ -238,9 +239,4 @@ def makePracticeConfigList(taskname = 'Color_Struct_Practice',
     filename = taskname + '_config.npy'
     np.save(loc + filename, np_input)
     
-#    yaml_input = makeTrialList()
-#    yaml_input.insert(0,initial_params)    
-#    filename = taskname + '_' + iden + '_config_' + timestamp + '.yaml'
-#    f=open(loc + filename,'w')
-#    yaml.dump_all(yaml_input,f,default_flow_style = False, explicit_start = True)
     return loc+filename

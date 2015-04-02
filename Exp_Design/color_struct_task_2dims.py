@@ -138,25 +138,21 @@ class colorStructTask:
         if stims:
             self.stims = stims
         else:
-            if self.mode == 'task':
-                self.stims = {self.stim_ids[0]: visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'cm', size = (3, 7), mask = 'circle', ori = 30),
-                              self.stim_ids[1]: visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'cm', size = (3, 7), mask = 'circle', ori = -30),
-                              self.stim_ids[2]: visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'cm', size = (3, 7), mask = 'circle', ori = 30),
-                              self.stim_ids[3]: visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'cm', size = (3, 7), mask = 'circle', ori = -30)}
+            height = .25
+            ratio = self.win.size[1]/float(self.win.size[0])
+            if self.mode == 'practice':
+                self.stims = {self.stim_ids[0]: visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = 30),
+                              self.stim_ids[1]: visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = -30),
+                              self.stim_ids[2]: visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = 30),
+                              self.stim_ids[3]: visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = -30)}
 
-            elif self.mode == 'Practice':
-                self.stims = {self.stim_ids[0]: visual.Rect(self.win,2,6,ori = 0),
-                              self.stim_ids[1]: visual.Rect(self.win,2,6,ori = -90),
-                              self.stim_ids[2]: visual.Circle(self.win,radius = (1,3),edges = 32,ori = 0),
-                              self.stim_ids[3]: visual.Circle(self.win,radius = (1,3), edges = 32,ori = -90)}
-                for stim in self.stims.values():
-                    stim.setFillColor('red')
-                    stim.setLineColor('red')
-            
-                
-            
-
+            elif self.mode == 'task':
+                self.stims = {self.stim_ids[0]: visual.Rect(self.win,height*ratio, height,units = 'norm', fillColor = 'red'),
+                              self.stim_ids[1]: visual.Rect(self.win,height*ratio, height,units = 'norm',fillColor = 'blue'),
+                              self.stim_ids[2]: visual.Circle(self.win,units = 'norm',radius = (height*ratio/2, height/2),edges = 32,fillColor = 'red'),
+                              self.stim_ids[3]: visual.Circle(self.win,units = 'norm',radius = (height*ratio/2, height/2), edges = 32,fillColor = 'blue')}
         
+            
     def clearWindow(self):
         """ clear the main window
         """
@@ -211,8 +207,6 @@ class colorStructTask:
         """
         self.bot = bot
         self.botMode = mode
-
-        
     
     def getPastAcc(self, time_win):
         """Returns the ratio of hits/trials in a predefined window
@@ -234,6 +228,16 @@ class colorStructTask:
     def getPoints(self):
         return (self.pointtracker,self.trialnum)
         
+    def presentContexts(self):
+        height = .05
+        ratio = self.win.size[1]/float(self.win.size[0])
+        tmp_stim = visual.Rect(self.win,height*ratio*10, height,units = 'norm',fillColor = 'yellow')
+        for context in self.context_means:
+            tmp_stim.setPos((0, context*.8))
+            tmp_stim.draw()
+        self.win.flip()
+
+        
     def presentTrial(self,trial):
         """
         This function presents a stimuli, waits for a response, tracks the
@@ -246,15 +250,9 @@ class colorStructTask:
         self.trialnum += 1
         stim_i = trial['stim']
         if self.botMode != 'short':
-            self.win.setColor([trial['context']]*3,'rgb')
-            self.win.flip()
+            self.stims[stim_i].setPos((0, trial['context']*.8))
             self.stims[stim_i].draw()
             self.win.flip()
-        # set trial text color based on background color
-        if np.mean(trial['context']) < .2:
-            self.text_color = 'white'
-        else:
-            self.text_color = 'black'
         trialClock.reset()
         event.clearEvents()
         trial['actualOnsetTime']=core.getTime() - self.startTime

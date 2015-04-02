@@ -12,12 +12,13 @@ from test_bot_2dims import test_bot
 #set-up some variables
 
 verbose=True
-fullscr= False
+fullscr= True
 subdata=[]
-practice_on = False
+practice_on = True
 task_on = True
 test_on = True
-bot_on = True
+bot_on = False
+bot_mode = "ignore_base" #other for optimal
 
 # set things up for practice, training and tests
 try:
@@ -32,8 +33,8 @@ f = open('IDs.txt', 'a')
 f.write(subject_code + '\n')
 f.close()
 
-train_mins = 20 #train_length in minutes
-test_mins = 20 #test_length in minutes
+train_mins = 10 #train_length in minutes
+test_mins = 10 #test_length in minutes
 avg_test_trial_len = 2.25 #in seconds
 avg_task_trial_len = avg_test_trial_len + 1 #factor in FB
 #Find the minimum even number of blocks to last at least train_length minutes
@@ -46,14 +47,14 @@ practice_config_file = '../Config_Files/Color_Struct_Practice_config.npy'
 task_config_file = makeConfigList(iden = subject_code, exp_len = task_len, recursive_p = .9)
 
 try:
-    practice=colorStructTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'Practice')
+    practice=colorStructTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'practice')
 except SystemExit:
     practice_config_file = makePracticeConfigList()
-    practice=colorStructTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'Practice')
+    practice=colorStructTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'practice')
 
 task=colorStructTask(task_config_file,subject_code, fullscreen = fullscr)
 if bot_on == True:
-    task.setBot(bot = test_bot(task_config_file, mode = "ignore_base"), mode = "short")
+    task.setBot(bot = test_bot(task_config_file, mode = bot_mode), mode = "short")
 task.writeToLog(task.toJSON())
 
 
@@ -68,7 +69,8 @@ if practice_on:
     task_intro_text = [
         'Welcome\n\nPress 5 to move through instructions',
         """
-        This experiment starts with a training phase followed by a testing phase.
+        This experiment starts with a training phase followed by a testing phase,
+        each lasting about 25 minutes.
         
         Your performance on the test phase determines your bonus payment
         (up to $5). To perform well on the test phase you'll need to stay
@@ -78,34 +80,36 @@ if practice_on:
         In the training phase, shapes will appear on the screen
         one at a time, and you will need to learn how to respond to them.
         
-        Your responses will consist of one of two buttons: 'd', 'f', 'j' and 'k'.
+        Your responses will consist of one of four buttons: 'd', 'f', 'j' and 'k'.
         Use your index and middle fingers on both hands to respond.
         
-       The goal is to learn the best key(s) to press for each shape.
+        The goal is to learn the best key(s) to press for each shape.
         """,
         """
-        The background color will also be changing on each trial,
-        ranging from black to white.
+        The shape's vertical position will also be changing on each trial.
         
         Critically, the best key to press in response to each shape 
-        depends on the background color. 
+        depends on the shape's position. 
         
-        You must respond while the shape is on the screen.
-        Please respond as quickly and accurately as possible.
+        The different positions where the shapes will be presented 
+        are shown on the next screen.
         """,
         """
         After you press a key, the shape will disappear and 
         you will get points indicating how well you did.
         
         After the training phase, there will be a test phase 
-        with no feedback. You will still be earning points however,
-        you just won't be able to see them anymore.
+        with no feedback. You will still be earning points, and these
+        test phase points will be used to determine your bonus pay.
         
         It is therefore very important that you use the points 
         in the training phase to learn how to best respond to each shape 
-        depending on the background color.
+        depending on the vertical position.
         """,
         """
+        You must respond while the shape is on the screen.
+        Please respond as quickly and accurately as possible.
+        
         The task is hard! Stay motivated and try to learn
         all you can.
         
@@ -119,6 +123,12 @@ if practice_on:
         resp,practice.startTime=practice.waitForKeypress(practice.trigger_key)
         practice.checkRespForQuitKey(resp)
         event.clearEvents()
+        if 'position' in line:
+            practice.presentContexts()
+            resp,practice.startTime=practice.waitForKeypress(practice.trigger_key)
+            practice.checkRespForQuitKey(resp)
+
+    
     
     for trial in practice.stimulusInfo:
         # wait for onset time
@@ -232,7 +242,7 @@ if test_on:
                                       ts_order = task.getTSorder())
     test=colorStructTask(test_config_file,subject_code, fullscreen = fullscr)
     if bot_on == True:
-        test.setBot(bot = test_bot(test_config_file, mode = "ignore_base"), mode = "short")
+        test.setBot(bot = test_bot(test_config_file, mode = bot_mode), mode = "short")
 
     test.writeToLog(test.toJSON())
     
