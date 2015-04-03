@@ -18,9 +18,9 @@ import glob
 train_files = glob.glob('../Data/*Struct_20*yaml')
 test_files = glob.glob('../Data/*Struct_noFB*yaml')
 
-data_file = train_files[2]
+data_file = test_files[0]
 name = data_file[8:-5]
-taskinfo, df, dfa = load_data(data_file, name)
+taskinfo, df, dfa = load_data(data_file, name, mode = 'test')
 
 #*********************************************
 # Set up plotting defaults
@@ -92,7 +92,11 @@ plt.ylabel('RT in ms')
 #*********************************************
 # Optimal task-set inference 
 #*********************************************
-state_dis = [norm(state['c_mean'], state['c_sd']) for state in taskinfo['states'].values()]
+ts_order = [states[0]['ts'],states[1]['ts']]
+ts_dis = [norm(states[ts_order[0]]['c_mean'], states[ts_order[0]]['c_sd']),
+          norm(states[ts_order[1]]['c_mean'], states[ts_order[1]]['c_sd'])]
+
+
 transitions = np.array([[recursive_p, 1-recursive_p], [1-recursive_p,recursive_p]])
 
 prior_ignore = [.5,.5] #base rate fallacy
@@ -109,18 +113,21 @@ for context in dfa.context:
     prior_single = transitions[np.argmax(posterior_single[-1]),:]
     prior_optimal = np.dot(transitions,posterior_optimal[-1])
 
-dfa['posterior_ignore'] = posterior_ignore
-dfa['posterior_single'] = posterior_single
-dfa['posterior_optimal'] = posterior_optimal
+#The posterior likelihood of ts 0
+dfa['ts0_posterior_ignore'] = [val[0] for val in posterior_ignore]
+dfa['ts0_posterior_single'] = [val[0] for val in posterior_single]
+dfa['ts0_posterior_optimal'] = [val[0] for val in posterior_optimal]
    
    
  #smooth the posterior estimates using an exponentially-weighted moving average
 span_val = 3
-dfa['smoothed_ignore']=pd.stats.moments.ewma(pd.Series([i[1] for i in dfa.posterior_ignore]), span = span_val)
-dfa['smoothed_single']=pd.stats.moments.ewma(pd.Series([i[1] for i in dfa.posterior_single]), span = span_val)
-dfa['smoothed_optimal']=pd.stats.moments.ewma(pd.Series([i[1] for i in dfa.posterior_optimal]), span = span_val)
+dfa['smoothed_ts0_ignore']=pd.stats.moments.ewma(dfa.ts0_posterior_ignore, span = span_val)
+dfa['smoothed_ts0_single']=pd.stats.moments.ewma(dfa.ts0_posterior_single, span = span_val)
+dfa['smoothed_ts0_optimal']=pd.stats.moments.ewma(dfa.ts0_posterior_optimal, span = span_val)
 #smooth context by same value 
 dfa['smoothed_context']=pd.stats.moments.ewma(pd.Series(dfa.context), span = span_val)
+
+dfa.to_csv('../Data/' + name + '_modeled.csv')
 
 
 #*********************************************
@@ -139,7 +146,7 @@ plt.plot(dfa_sorted.context)
 
 #plot the optimal posterior estimate against a base-rate ignoring model
 plt.hold(True)
-plt.plot(tmp.ts, 'ro')
+plt.plot(dfa.ts, 'ro')
 plt.plot(dfa['smoothed_ignore'])
 plt.plot(dfa['smoothed_optimal'])
 

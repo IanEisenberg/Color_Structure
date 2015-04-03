@@ -33,8 +33,12 @@ def load_data(datafile, name, mode = 'train'):
     df.rt[:] = rts
     df.response[:] = responses
     #Remove missed trials:
-    df = df[df.response != 999]
+    df = df[df.rt != 999]
     df = df.set_index(df.trial_count)
+    #change responses to numerical values if need be:
+    if type(df['response'].loc[1]) == str:
+        df['response'] = [taskinfo['action_keys'].index(response) for response in df.response]
+    
 
     #Create a separate analysis dataframe
     if mode == 'train':
@@ -49,6 +53,7 @@ def load_data(datafile, name, mode = 'train'):
     dfa.switch[1] = False   
     dfa['con_shape'] = [dfa.response[i] == dfa.stim[i][0] for i in dfa.index]
     dfa['con_orient'] = [dfa.response[i] == dfa.stim[i][1] for i in dfa.index]
+    dfa['subj_switch'] = [dfa.con_shape.shift(1)[i] != dfa.con_shape[i] for i in dfa.index]
     dfa['correct'] = [dfa.response[i] == dfa.stim[i][dfa.ts[i]] for i in dfa.index]
     
     #save data to CSV

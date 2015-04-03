@@ -138,7 +138,7 @@ class colorStructTask:
         if stims:
             self.stims = stims
         else:
-            height = .25
+            height = .2
             ratio = self.win.size[1]/float(self.win.size[0])
             if self.mode == 'practice':
                 self.stims = {self.stim_ids[0]: visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = 30),
@@ -260,6 +260,8 @@ class colorStructTask:
         trial['response']=[]
         trial['rt']=[]
         trial['FB'] = []
+        if trial['trial_count'] < 10:
+            self.win.getMovieFrame()
         while trialClock.getTime() < (self.stimulusDuration):
             key_response=event.getKeys(None,True)
             if self.bot:

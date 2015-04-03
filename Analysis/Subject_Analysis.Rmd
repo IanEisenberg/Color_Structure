@@ -6,7 +6,7 @@ output: html_document
 Load up the data
 
 ```{r}
-  dataFiles <- Sys.glob("../Data/*.csv")
+  dataFiles <- Sys.glob("../Data/*modeled.csv")
   dfa = read.csv(dataFiles[2])
   dfa$FB = factor(dfa$FB)
   dfa$curr_ts = factor(dfa$curr_ts)

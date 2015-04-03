@@ -9,12 +9,13 @@ import webbrowser
 from color_struct_task_2dims import colorStructTask
 from make_config_2dims import makeConfigList, makePracticeConfigList
 from test_bot_2dims import test_bot
+import random as r
 #set-up some variables
 
 verbose=True
 fullscr= True
 subdata=[]
-practice_on = True
+practice_on = False
 task_on = True
 test_on = True
 bot_on = False
@@ -33,18 +34,20 @@ f = open('IDs.txt', 'a')
 f.write(subject_code + '\n')
 f.close()
 
-train_mins = 10 #train_length in minutes
-test_mins = 10 #test_length in minutes
+#set up some task variables
+train_mins = 15 #train_length in minutes
+test_mins = 15 #test_length in minutes
 avg_test_trial_len = 2.25 #in seconds
 avg_task_trial_len = avg_test_trial_len + 1 #factor in FB
 #Find the minimum even number of blocks to last at least train_length minutes
 task_len = int(round(train_mins*60/avg_task_trial_len/4)*4)
 test_len = int(round(test_mins*60/avg_test_trial_len/4)*4)
+recursive_p = r.choice([.8, .9])
 
 
 #set up config files
 practice_config_file = '../Config_Files/Color_Struct_Practice_config.npy'
-task_config_file = makeConfigList(iden = subject_code, exp_len = task_len, recursive_p = .9)
+task_config_file = makeConfigList(iden = subject_code, exp_len = task_len, recursive_p = recursive_p)
 
 try:
     practice=colorStructTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'practice')
@@ -123,7 +126,7 @@ if practice_on:
         resp,practice.startTime=practice.waitForKeypress(practice.trigger_key)
         practice.checkRespForQuitKey(resp)
         event.clearEvents()
-        if 'position' in line:
+        if 'shown on the next screen' in line:
             practice.presentContexts()
             resp,practice.startTime=practice.waitForKeypress(practice.trigger_key)
             practice.checkRespForQuitKey(resp)
@@ -199,7 +202,7 @@ if task_on:
         task.alldata.append(trial)
         #print('state = ' + str(trial['state'])+ ', value: ' + str(np.mean(trial['context']))) 
         
-    
+    task.win.saveMovieFrames('../Plots/Example_Trials.png')
     task.writeToLog(json.dumps({'trigger_times':task.trigger_times}))
     task.writeData()
     if bot_on == False:
@@ -238,7 +241,7 @@ if task_on:
 if test_on:
     
     test_config_file = makeConfigList(taskname = 'Color_Struct_noFB', iden = subject_code, exp_len = test_len, 
-                                      recursive_p = .9, FBDuration = 0, FBonset = 0, action_keys = task.getActions(),
+                                      recursive_p = recursive_p, FBDuration = 0, FBonset = 0, action_keys = task.getActions(),
                                       ts_order = task.getTSorder())
     test=colorStructTask(test_config_file,subject_code, fullscreen = fullscr)
     if bot_on == True:
