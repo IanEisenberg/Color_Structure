@@ -61,7 +61,7 @@ def track_runs(iterable):
     return track_repeats
     
 def bar(x, y, title):
-    plot = plt.bar(x,y)
+    plot = plt.bar(x,y,width = .5)
     plt.title(str(title))
     return plot
 
@@ -80,6 +80,7 @@ def calc_posterior(data,prior,likelihood_dist):
 recursive_p = taskinfo['recursive_p']
 states = taskinfo['states']
 state_dis = [norm(states[0]['c_mean'], states[0]['c_sd']), norm(states[1]['c_mean'], states[1]['c_sd']) ]
+transitions = np.array([[recursive_p, 1-recursive_p], [1-recursive_p,recursive_p]])
 
 
 #Basic things - look at distribution of RT, etc.
@@ -97,7 +98,6 @@ ts_dis = [norm(states[ts_order[0]]['c_mean'], states[ts_order[0]]['c_sd']),
           norm(states[ts_order[1]]['c_mean'], states[ts_order[1]]['c_sd'])]
 
 
-transitions = np.array([[recursive_p, 1-recursive_p], [1-recursive_p,recursive_p]])
 
 prior_ignore = [.5,.5] #base rate fallacy
 prior_single = [.5,.5] #changes to reflect state transitions assuming state = argmax(posterior)
@@ -133,36 +133,52 @@ dfa.to_csv('../Data/' + name + '_modeled.csv')
 #*********************************************
 # Plotting
 #*********************************************
+
+plotting_dict = {'optimal': ['ts0_posterior_optimal', 'b','optimal'],
+                'single': ['ts0_posterior_single', 'c','one TS'],
+                 'ignore': ['ts0_posterior_ignore', 'r','ignore']}
+sub = dfa[150:190]
 #plot context values and show the current state    
 plt.hold(True)
-plt.plot([i*2-1 for i in dfa.ts], 'ro')
-plt.plot(dfa.context)
+plt.plot([i*2-1 for i in sub.ts], 'ro')
+plt.plot(sub.context, 'k', lw = 2)
+plt.ylabel('Vertical Height')
+plt.xlabel('trial')
+plt.savefig('context_over_trials.png', dpi = 300)
 
 #sort the context values by state
-dfa_sorted = dfa.sort('ts')
+sub_sorted = sub.sort('ts')
+fig = plt.figure()
 plt.hold(True)
-plt.plot([i*2-1 for i in dfa_sorted.ts], 'ro')
-plt.plot(dfa_sorted.context)
+plt.plot([i*2-1 for i in sub_sorted.ts], 'ro')
+plt.plot(sub_sorted.context,'k', lw = 2)
+plt.ylabel('Vertical Height')
+plt.xlabel('sorted trials')
+plt.savefig('sorted_context.png', dpi = 300)
+
 
 #plot the optimal posterior estimate against a base-rate ignoring model
 plt.hold(True)
-plt.plot(dfa.ts, 'ro')
-plt.plot(dfa['smoothed_ignore'])
-plt.plot(dfa['smoothed_optimal'])
+models = []
+displacement = 0
+for arg in plotting_dict.values():
+    if arg[2] not in ['single']:
+        plt.plot(sub.trial_count,sub[arg[0]]*2,arg[1], label = arg[2], lw = 2)
+        plt.plot(sub.trial_count, [int(val>.5)+3+displacement for val in sub[arg[0]]],arg[1]+'o')
+        displacement+=.1
+        models.append(arg[0])
+plt.plot(sub.trial_count,sub.ts-2, 'ro', label = 'Curr TS')
+plt.plot(sub.trial_count, sub.context/2-1.5,'k', lw = 2, label = 'position context')
+plt.xlabel('trial number')
+plt.yticks([-2, -1.5, -1, 0, 1, 2, 3.1, 4.1], [ -1, 0 , 1,0, .5,  1, 'TS2 Choice', 'TS1 Choice'])
+plt.xlim([min(sub.index)-.5,max(sub.index)])
+plt.ylim(-2.5,5)
+plt.ylabel('Posterior probability of TS1')
+#subdivide graph
+plt.axhline(2.5, color = 'k', ls = 'dashed', lw = 2)
+plt.axhline(-.5, color = 'k', ls = 'dashed', lw = 2)
+pylab.legend(bbox_to_anchor=(1.3, 1.05))
 
-#plot the posterior estimate on top of the actual context
-plt.hold(True)
-plt.plot([i*2-1 for i in dfa.ts], 'ro')
-plt.plot(dfa['smoothed_context'])
-plt.plot(dfa['smoothed_ignore'], linewidth = 3)
-plt.plot(dfa['smoothed_optimal'], linewidth = 3)
-
-#unsmoothed
-plt.hold(True)
-plt.plot([i*2-1 for i in dfa.ts], 'ro')
-plt.plot(dfa['context'])
-plt.plot([i[0] for i in dfa['posterior_ignore']], linewidth = 3)
-plt.plot([i[0] for i in dfa['posterior_optimal']], linewidth = 3)
 
 
 
