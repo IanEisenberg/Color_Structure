@@ -335,7 +335,7 @@ if test_on:
 # Determine payment
 #************************************
 points,trials = test.getPoints()
-performance = float(points)/trials
+performance = (float(points)/trials-.25)/.75
 pay_bonus = round(performance*5*2)/2.0
 print('Participant ' + subject_code + ' won ' + str(points) + ' points out of ' + str(trials) + ' trials. Bonus: $' + str(pay_bonus))
 if bot_on == False:

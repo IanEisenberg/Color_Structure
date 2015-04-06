@@ -1,4 +1,4 @@
- #!/bin/bash
+#!/bin/bash
  
- git clean -f -d
- python Exp_Design/run_struct_task.py
+git clean -f -d
+python Exp_Design/run_struct_task.py

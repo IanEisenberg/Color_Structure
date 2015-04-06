@@ -16,13 +16,6 @@ from Load_Data import load_data
 from ggplot import *
 import glob
 
-train_files = glob.glob('../Data/*Struct_20*yaml')
-test_files = glob.glob('../Data/*Struct_noFB*yaml')
-
-data_file = test_files[0]
-name = data_file[8:-5]
-taskinfo, df, dfa = load_data(data_file, name, mode = 'test')
-
 #*********************************************
 # Set up plotting defaults
 #*********************************************
@@ -77,6 +70,20 @@ def calc_posterior(data,prior,likelihood_dist):
     posterior = numer/dinom
     return posterior
     
+    
+#*********************************************
+# Load Data
+#*********************************************
+    
+train_files = glob.glob('../Data/*Struct_20*yaml')
+test_files = glob.glob('../Data/*Struct_noFB*yaml')
+
+data_file = test_files[1]
+name = data_file[8:-5]
+subj = re.match(r'(\w*)_Color*', name).group(1)
+taskinfo, df, dfa = load_data(data_file, name, mode = 'test')
+
+
 
 #*********************************************
 # Preliminary Analysis
@@ -110,9 +117,9 @@ prior_optimal = [.5,.5]
 posterior_ignore, posterior_single, posterior_optimal = [],[],[]
 
 for context in dfa.context:
-    posterior_ignore.append(calc_posterior(context, prior_ignore,state_dis))
-    posterior_single.append(calc_posterior(context, prior_single,state_dis))
-    posterior_optimal.append(calc_posterior(context, prior_optimal,state_dis))
+    posterior_ignore.append(calc_posterior(context, prior_ignore,ts_dis))
+    posterior_single.append(calc_posterior(context, prior_single,ts_dis))
+    posterior_optimal.append(calc_posterior(context, prior_optimal,ts_dis))
     
     prior_single = transitions[np.argmax(posterior_single[-1]),:]
     prior_optimal = np.dot(transitions,posterior_optimal[-1])
@@ -187,8 +194,10 @@ for arg in plotting_dict.values():
         plt.plot(sub.trial_count, [int(val>.5)+3+displacement for val in sub[arg[0]]],arg[1]+'o')
         displacement+=.15
         models.append(arg[0])
-plt.plot(sub.trial_count, sub.ts+2.85, 'yo', label = 'subject choice')
-plt.plot(sub.trial_count,sub.ts-2, 'go', label = 'operating TS')
+#plot subject choices (con_shape = conforming to TS1)
+plt.plot(sub.trial_count, sub.con_shape+2.85, 'yo', label = 'subject choice')
+#plot current TS, flipping bit to plot correctly
+plt.plot(sub.trial_count,(1-sub.ts)-2, 'go', label = 'operating TS')
 plt.plot(sub.trial_count, sub.context/2-1.5,'k', lw = 2, label = 'stimulus height')
 plt.xlabel('trial number')
 plt.yticks([-2, -1.5, -1, 0, 1, 2, 3.1, 4.1], [ -1, 0 , 1,'0%', '50%',  '100%', 'TS2 Choice', 'TS1 Choice'])
@@ -202,7 +211,7 @@ plt.axhline(1, color = 'y', ls = 'dashed', lw = 2)
 plt.axhline(-1.5, color = 'y', ls = 'dashed', lw = 2)
 pylab.legend(loc='upper center', bbox_to_anchor=(0.5, 1.08),
           ncol=3, fancybox=True, shadow=True)
-plt.savefig('../Plots/single_subject_plot.png', dpi = 300)
+plt.savefig('../Plots/' + subj + '_summary_plot.png', dpi = 300)
 
 
 
