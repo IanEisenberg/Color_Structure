@@ -11,6 +11,7 @@ import numpy as np
 from scipy.stats import norm
 import pandas as pd
 import matplotlib.pyplot as plt
+import pylab
 from Load_Data import load_data
 from ggplot import *
 import glob
@@ -28,14 +29,14 @@ taskinfo, df, dfa = load_data(data_file, name, mode = 'test')
 
 font = {'family' : 'normal',
         'weight' : 'normal',
-        'size'   : 18,
+        'size'   : 20,
         }
         
 axes = {'titleweight' : 'bold'
         }
 plt.rc('font', **font)
 plt.rc('axes', **axes)
-plt.rc('figure', figsize = (12,12))
+plt.rc('figure', figsize = (16,12))
 
 #*********************************************
 # Set up helper functions
@@ -69,7 +70,10 @@ def calc_posterior(data,prior,likelihood_dist):
     n = len(prior)
     likelihood = [dis.pdf(data) for dis in likelihood_dist]
     numer = np.array([likelihood[i] * prior[i] for i in range(n)])
-    dinom = np.sum(numer)
+    try:
+        dinom = [np.sum(zip(*numer)[i]) for i in range(len(numer[0]))]
+    except TypeError:
+        dinom = np.sum(numer)
     posterior = numer/dinom
     return posterior
     
@@ -135,9 +139,9 @@ dfa.to_csv('../Data/' + name + '_modeled.csv')
 #*********************************************
 
 plotting_dict = {'optimal': ['ts0_posterior_optimal', 'b','optimal'],
-                'single': ['ts0_posterior_single', 'c','one TS'],
-                 'ignore': ['ts0_posterior_ignore', 'r','ignore']}
-sub = dfa[150:190]
+                'single': ['ts0_posterior_single', 'c','TS(t-1)'],
+                 'ignore': ['ts0_posterior_ignore', 'r','base rate neglect']}
+sub = dfa[150:250]
 #plot context values and show the current state    
 plt.hold(True)
 plt.plot([i*2-1 for i in sub.ts], 'ro')
@@ -156,8 +160,24 @@ plt.ylabel('Vertical Height')
 plt.xlabel('sorted trials')
 plt.savefig('sorted_context.png', dpi = 300)
 
+#Plot how optimal inference changes based on context value and priors
+x = np.linspace(-1,1,100)
+y_biasUp = calc_posterior(x,[.9,.1],state_dis)
+y_even = calc_posterior(x,[.5,.5],state_dis)
+y_biasDown = calc_posterior(x,[.1,.9],state_dis)
+plt.hold(True)
+plt.plot(x,y_biasUp[0],lw = 3, label = "prior P(TS) = .9")
+plt.plot(x,y_even[0], lw = 3, label = "prior P(TS) = .5")
+plt.plot(x,y_biasDown[0], lw = 3, label = "prior P(TS) = .1")
+plt.axhline(.5,color = 'y', ls = 'dashed', lw = 2)
+plt.xlabel('Stimulus Vertical Position')
+plt.ylabel('Posterior P(TS1)')
+pylab.legend(loc='upper right')
+plt.savefig('../Plots/effect_of_prior.png', dpi = 300)
 
-#plot the optimal posterior estimate against a base-rate ignoring model
+
+#plot the posterior estimates for different models, the TS they currently select
+#and the vertical position of the stimulus
 plt.hold(True)
 models = []
 displacement = 0
@@ -165,19 +185,24 @@ for arg in plotting_dict.values():
     if arg[2] not in ['single']:
         plt.plot(sub.trial_count,sub[arg[0]]*2,arg[1], label = arg[2], lw = 2)
         plt.plot(sub.trial_count, [int(val>.5)+3+displacement for val in sub[arg[0]]],arg[1]+'o')
-        displacement+=.1
+        displacement+=.15
         models.append(arg[0])
-plt.plot(sub.trial_count,sub.ts-2, 'ro', label = 'Curr TS')
-plt.plot(sub.trial_count, sub.context/2-1.5,'k', lw = 2, label = 'position context')
+plt.plot(sub.trial_count, sub.ts+2.85, 'yo', label = 'subject choice')
+plt.plot(sub.trial_count,sub.ts-2, 'go', label = 'operating TS')
+plt.plot(sub.trial_count, sub.context/2-1.5,'k', lw = 2, label = 'stimulus height')
 plt.xlabel('trial number')
-plt.yticks([-2, -1.5, -1, 0, 1, 2, 3.1, 4.1], [ -1, 0 , 1,0, .5,  1, 'TS2 Choice', 'TS1 Choice'])
+plt.yticks([-2, -1.5, -1, 0, 1, 2, 3.1, 4.1], [ -1, 0 , 1,'0%', '50%',  '100%', 'TS2 Choice', 'TS1 Choice'])
 plt.xlim([min(sub.index)-.5,max(sub.index)])
 plt.ylim(-2.5,5)
 plt.ylabel('Posterior probability of TS1')
 #subdivide graph
-plt.axhline(2.5, color = 'k', ls = 'dashed', lw = 2)
-plt.axhline(-.5, color = 'k', ls = 'dashed', lw = 2)
-pylab.legend(bbox_to_anchor=(1.3, 1.05))
+plt.axhline(2.5, color = 'k', ls = 'dashed', lw = 3)
+plt.axhline(-.5, color = 'k', ls = 'dashed', lw = 3)
+plt.axhline(1, color = 'y', ls = 'dashed', lw = 2)
+plt.axhline(-1.5, color = 'y', ls = 'dashed', lw = 2)
+pylab.legend(loc='upper center', bbox_to_anchor=(0.5, 1.08),
+          ncol=3, fancybox=True, shadow=True)
+plt.savefig('../Plots/single_subject_plot.png', dpi = 300)
 
 
 
