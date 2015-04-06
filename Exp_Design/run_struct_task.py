@@ -35,14 +35,14 @@ f.write(subject_code + '\n')
 f.close()
 
 #set up some task variables
-train_mins = 25 #train_length in minutes
-test_mins = 25 #test_length in minutes
+train_mins = 1 #train_length in minutes
+test_mins = 1 #test_length in minutes
 avg_test_trial_len = 2.25 #in seconds
 avg_task_trial_len = avg_test_trial_len + 1 #factor in FB
 #Find the minimum even number of blocks to last at least train_length minutes
 task_len = int(round(train_mins*60/avg_task_trial_len/4)*4)
 test_len = int(round(test_mins*60/avg_test_trial_len/4)*4)
-recursive_p = r.choice([.8, .9])
+recursive_p = .9
 
 
 #set up config files
@@ -202,7 +202,6 @@ if task_on:
         task.alldata.append(trial)
         #print('state = ' + str(trial['state'])+ ', value: ' + str(np.mean(trial['context']))) 
         
-    task.win.saveMovieFrames('../Plots/Example_Trials.png')
     task.writeToLog(json.dumps({'trigger_times':task.trigger_times}))
     task.writeData()
     if bot_on == False:
@@ -285,7 +284,7 @@ if test_on:
         #if botMode = short, don't wait for onset times
         if test.botMode != 'short':
             # wait for onset time
-            while core.getTime() < trial['onset'] + test.startTime:
+            while core.getTime() < trial['onset'] + test.startTime + pause_time:
                     key_response=event.getKeys(None,True)
                     if len(key_response)==0:
                         continue
