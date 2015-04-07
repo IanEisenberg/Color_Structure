@@ -169,17 +169,17 @@ plt.savefig('sorted_context.png', dpi = 300)
 
 #Plot how optimal inference changes based on context value and priors
 x = np.linspace(-1,1,100)
-y_biasUp = calc_posterior(x,[.9,.1],state_dis)
-y_even = calc_posterior(x,[.5,.5],state_dis)
-y_biasDown = calc_posterior(x,[.1,.9],state_dis)
+y_biasUp = calc_posterior(x,[.9,.1],ts_dis)
+y_even = calc_posterior(x,[.5,.5],ts_dis)
+y_biasDown = calc_posterior(x,[.1,.9],ts_dis)
 plt.hold(True)
-plt.plot(x,y_biasUp[0],lw = 3, label = "prior P(TS) = .9")
-plt.plot(x,y_even[0], lw = 3, label = "prior P(TS) = .5")
-plt.plot(x,y_biasDown[0], lw = 3, label = "prior P(TS) = .1")
+plt.plot(x,y_biasUp[0],lw = 3, label = "prior P(TS1) = .9")
+plt.plot(x,y_even[0], lw = 3, label = "prior P(TS1) = .5")
+plt.plot(x,y_biasDown[0], lw = 3, label = "prior P(TS1) = .1")
 plt.axhline(.5,color = 'y', ls = 'dashed', lw = 2)
 plt.xlabel('Stimulus Vertical Position')
 plt.ylabel('Posterior P(TS1)')
-pylab.legend(loc='upper right')
+pylab.legend(loc='upper left')
 plt.savefig('../Plots/effect_of_prior.png', dpi = 300)
 
 
@@ -188,35 +188,54 @@ plt.savefig('../Plots/effect_of_prior.png', dpi = 300)
 plt.hold(True)
 models = []
 displacement = 0
+#plot model certainty and task-set choices
 for arg in plotting_dict.values():
-    if arg[2] not in ['single']:
+    if arg[2] not in ['']:
         plt.plot(sub.trial_count,sub[arg[0]]*2,arg[1], label = arg[2], lw = 2)
         plt.plot(sub.trial_count, [int(val>.5)+3+displacement for val in sub[arg[0]]],arg[1]+'o')
         displacement+=.15
         models.append(arg[0])
+plt.axhline(1, color = 'y', ls = 'dashed', lw = 2)
+plt.axhline(2.5, color = 'k', ls = 'dashed', lw = 3)
+
 #plot subject choices (con_shape = conforming to TS1)
-plt.plot(sub.trial_count, sub.con_shape+2.85, 'yo', label = 'subject choice')
 #plot current TS, flipping bit to plot correctly
 plt.plot(sub.trial_count,(1-sub.ts)-2, 'go', label = 'operating TS')
 plt.plot(sub.trial_count, sub.context/2-1.5,'k', lw = 2, label = 'stimulus height')
-plt.xlabel('trial number')
+plt.plot(sub.trial_count, sub.con_shape+2.85, 'yo', label = 'subject choice')
 plt.yticks([-2, -1.5, -1, 0, 1, 2, 3.1, 4.1], [ -1, 0 , 1,'0%', '50%',  '100%', 'TS2 Choice', 'TS1 Choice'])
+
 plt.xlim([min(sub.index)-.5,max(sub.index)])
 plt.ylim(-2.5,5)
-plt.ylabel('Posterior probability of TS1')
 #subdivide graph
-plt.axhline(2.5, color = 'k', ls = 'dashed', lw = 3)
 plt.axhline(-.5, color = 'k', ls = 'dashed', lw = 3)
-plt.axhline(1, color = 'y', ls = 'dashed', lw = 2)
 plt.axhline(-1.5, color = 'y', ls = 'dashed', lw = 2)
+#axes labels
+plt.xlabel('trial number')
+plt.ylabel('Predicted P(TS1)')
+ax = plt.gca()
+ax.yaxis.set_label_coords(-.1, .45)
 pylab.legend(loc='upper center', bbox_to_anchor=(0.5, 1.08),
           ncol=3, fancybox=True, shadow=True)
-plt.savefig('../Plots/' + subj + '_summary_plot.png', dpi = 300)
+
+plt.savefig('../Plots/' +  subj + '_summary_plot.png', dpi = 300, bbox_inches='tight')
 
 
 
 
 
+y = np.linspace(-1,1,100)
+x1 = -ts_dis[0].pdf(y)
+#x2 = -ts_dis[1].pdf(y)
+f = plt.figure(figsize = (6,12))
+ax = f.add_subplot(111)
+plt.plot(x1,y, lw = 3)
+plt.plot(x2,y, lw = 3)
+ax.yaxis.tick_right()
+ax.xaxis.set_visible(False)
+ax.yaxis.set_visible(False)
+ax.set_axis_bgcolor((.9,.9,.9))
+plt.savefig('../Plots/position_distributions.png', dpi = 300, transparent = True)
 
 
 

@@ -92,7 +92,7 @@ if practice_on:
         The shape's vertical position will also be changing on each trial.
         
         Critically, the best key to press in response to each shape 
-        depends on the shape's position. 
+        depends on the shape's vertical position. 
         
         The different positions where the shapes will be presented 
         are shown on the next screen.
