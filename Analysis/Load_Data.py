@@ -36,7 +36,7 @@ def load_data(datafile, name, mode = 'train'):
     df = df[df.rt != 999]
     df = df.set_index(df.trial_count)
     #change responses to numerical values if need be:
-    if type(df['response'].loc[1]) == str:
+    if type(df['response'].loc[df.index[0]]) == str:
         df['response'] = [taskinfo['action_keys'].index(response) for response in df.response]
     
 

@@ -5,6 +5,11 @@ output: html_document
 
 Load up the data
 
+```{r set up libraries}
+library(ggplot2)
+library(plyr)
+```
+
 ```{r}
   dataFiles <- Sys.glob("../Data/*modeled.csv")
   dfa = read.csv(dataFiles[2])
@@ -18,16 +23,36 @@ Load up the data
     if(k > 0) {
       c(rep(NA, k), x)[1 : length(x)] 
     } else {
-      c(x, rep(NA, abs(k)))[abs(k)+1 : length(x)-k-1]
+      c(x, rep(NA, abs(k)))[abs(k)+1 : length(x)]
     }}
+  
+  lag_mat = lagpad(dfa$context, 1)
+  lags = seq(2,10)
+  for (i in lags) {
+    lag_mat = cbind(lag_mat, lagpad(dfa$context,i))
+  }
+  dfa=cbind(dfa,lag_mat)
+  dfa = rename(dfa, c("lag_mat" = "lag_1"))
+  names(dfa) <- gsub("V", "lag_", names(dfa))
 ```
 
+```{r }
+  sub = dfa[11:length(dfa),]
+  m1 = glm(ts0_posterior_single<.5 ~ context + lag_1, family = "binomial", data = sub)
+  m2 = glm(ts0_posterior_single<.5 ~ context + lag_1 + lag_2, family = "binomial", data = sub)
+
+  m2 = lm(ts0_posterior_single ~ context + lag_1 + lag_2 + lag_3 + lag_4 + lag_5 + lag_6 +
+      lag_7 + lag_8 + lag_9 + lag_10, data = dfa)
+  summary(m2)
+```
+
+
 ```{r}
-  rs1 = lm(rt ~ switch, dfa)
-  dfa$lag_FB = factor(lagpad(dfa$FB,1),labels = c('0','1'))
-  rs2 = lm(rt~lag_FB,dfa)
-  rs3 = lm(rt~lag_FB + switch,dfa)
-  
-  rs4 = glm(switch ~ lag_FB, data = dfa, family = binomial)
+  rs1 = glm(con_shape ~ ts0_posterior_ignore, data = dfa, family = binomial)
+  rs2 = glm(con_shape ~ ts0_posterior_single, data = dfa, family = binomial)
+  rs3 = glm(con_shape ~ ts0_posterior_optimal, data = dfa, family = binomial)
+  summary(rs1)
+  summary(rs2)
+  summary(rs3)
 ```
 

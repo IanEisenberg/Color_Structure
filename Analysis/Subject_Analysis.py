@@ -15,6 +15,7 @@ import pylab
 from Load_Data import load_data
 from ggplot import *
 import glob
+import re
 
 #*********************************************
 # Set up plotting defaults
@@ -78,7 +79,7 @@ def calc_posterior(data,prior,likelihood_dist):
 train_files = glob.glob('../Data/*Struct_20*yaml')
 test_files = glob.glob('../Data/*Struct_noFB*yaml')
 
-data_file = test_files[1]
+data_file = test_files[3]
 name = data_file[8:-5]
 subj = re.match(r'(\w*)_Color*', name).group(1)
 taskinfo, df, dfa = load_data(data_file, name, mode = 'test')
@@ -142,13 +143,22 @@ dfa.to_csv('../Data/' + name + '_modeled.csv')
 
 
 #*********************************************
+# Optimal task-set inference 
+#*********************************************
+
+sub = dfa.query('(ts == %d and context > 0) or (ts == %d and context < 0)' % (states[0]['ts'], states[1]['ts']) )
+sub = dfa.query('context > .35 or context < -.35' )
+
+#*********************************************
 # Plotting
 #*********************************************
 
 plotting_dict = {'optimal': ['ts0_posterior_optimal', 'b','optimal'],
                 'single': ['ts0_posterior_single', 'c','TS(t-1)'],
                  'ignore': ['ts0_posterior_ignore', 'r','base rate neglect']}
-sub = dfa[150:250]
+#get trials where context conflicts with normal ts
+#sub = dfa.query('(ts == 0 and context > 0) or (ts == 1 and context < 0)')
+sub = dfa
 #plot context values and show the current state    
 plt.hold(True)
 plt.plot([i*2-1 for i in sub.ts], 'ro')
@@ -190,21 +200,19 @@ models = []
 displacement = 0
 #plot model certainty and task-set choices
 for arg in plotting_dict.values():
-    if arg[2] not in ['']:
+    if arg[2] not in ['TS(t-1)']:
         plt.plot(sub.trial_count,sub[arg[0]]*2,arg[1], label = arg[2], lw = 2)
         plt.plot(sub.trial_count, [int(val>.5)+3+displacement for val in sub[arg[0]]],arg[1]+'o')
         displacement+=.15
         models.append(arg[0])
 plt.axhline(1, color = 'y', ls = 'dashed', lw = 2)
 plt.axhline(2.5, color = 'k', ls = 'dashed', lw = 3)
-
 #plot subject choices (con_shape = conforming to TS1)
 #plot current TS, flipping bit to plot correctly
 plt.plot(sub.trial_count,(1-sub.ts)-2, 'go', label = 'operating TS')
 plt.plot(sub.trial_count, sub.context/2-1.5,'k', lw = 2, label = 'stimulus height')
 plt.plot(sub.trial_count, sub.con_shape+2.85, 'yo', label = 'subject choice')
 plt.yticks([-2, -1.5, -1, 0, 1, 2, 3.1, 4.1], [ -1, 0 , 1,'0%', '50%',  '100%', 'TS2 Choice', 'TS1 Choice'])
-
 plt.xlim([min(sub.index)-.5,max(sub.index)])
 plt.ylim(-2.5,5)
 #subdivide graph
@@ -221,21 +229,6 @@ pylab.legend(loc='upper center', bbox_to_anchor=(0.5, 1.08),
 plt.savefig('../Plots/' +  subj + '_summary_plot.png', dpi = 300, bbox_inches='tight')
 
 
-
-
-
-y = np.linspace(-1,1,100)
-x1 = -ts_dis[0].pdf(y)
-#x2 = -ts_dis[1].pdf(y)
-f = plt.figure(figsize = (6,12))
-ax = f.add_subplot(111)
-plt.plot(x1,y, lw = 3)
-plt.plot(x2,y, lw = 3)
-ax.yaxis.tick_right()
-ax.xaxis.set_visible(False)
-ax.yaxis.set_visible(False)
-ax.set_axis_bgcolor((.9,.9,.9))
-plt.savefig('../Plots/position_distributions.png', dpi = 300, transparent = True)
 
 
 
