@@ -97,7 +97,7 @@ class colorStructTask:
         f.write('\n')
         f.close()
          
-    def writeData(self, loc = '../Data/'):
+    def writeData(self, loc = '../RawData/'):
         data = {}
         data['taskinfo']=self.taskinfo
         data['configfile']=self.config_file

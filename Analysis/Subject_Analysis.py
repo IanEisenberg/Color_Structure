@@ -6,14 +6,12 @@ Created on Fri Jan 23 11:12:43 2015
 """
 
 
-import yaml
 import numpy as np
 from scipy.stats import norm
 import pandas as pd
 import matplotlib.pyplot as plt
 import pylab
 from Load_Data import load_data
-from ggplot import *
 import glob
 import re
 
@@ -31,6 +29,9 @@ axes = {'titleweight' : 'bold'
 plt.rc('font', **font)
 plt.rc('axes', **axes)
 plt.rc('figure', figsize = (16,12))
+
+save = False
+plot = False
 
 #*********************************************
 # Set up helper functions
@@ -76,8 +77,8 @@ def calc_posterior(data,prior,likelihood_dist):
 # Load Data
 #*********************************************
     
-train_files = glob.glob('../Data/*Struct_20*yaml')
-test_files = glob.glob('../Data/*Struct_noFB*yaml')
+train_files = glob.glob('../RawData/*Struct_20*yaml')
+test_files = glob.glob('../RawData/*Struct_noFB*yaml')
 
 data_file = test_files[3]
 name = data_file[8:-5]
@@ -87,19 +88,23 @@ taskinfo, df, dfa = load_data(data_file, name, mode = 'test')
 
 
 #*********************************************
-# Preliminary Analysis
+# Preliminary Setup
 #*********************************************
 recursive_p = taskinfo['recursive_p']
 states = taskinfo['states']
 state_dis = [norm(states[0]['c_mean'], states[0]['c_sd']), norm(states[1]['c_mean'], states[1]['c_sd']) ]
-transitions = np.array([[recursive_p, 1-recursive_p], [1-recursive_p,recursive_p]])
+trans_probs = np.array([[recursive_p, 1-recursive_p], [1-recursive_p,recursive_p]])
+
+#*********************************************
+# Switch costs 
+#*********************************************
+#RT difference when switching to either action of a new task-set
+TS_switch_cost = np.mean(dfa.query('subj_switch == True')['rt']) - np.mean(dfa.query('subj_switch == False')['rt'])
+#RT difference when switching to the other action within a task-set
+switch_resp_cost = np.mean(dfa.query('rep_resp == False and subj_switch != True')['rt']) - np.mean(dfa.query('rep_resp == True')['rt'])
 
 
-#Basic things - look at distribution of RT, etc.
-plt.plot(dfa.rt*1000,'ro')
-plt.title('RT over experiment', size = 24)
-plt.xlabel('trial')
-plt.ylabel('RT in ms')
+
 
 
 #*********************************************
@@ -122,111 +127,118 @@ for context in dfa.context:
     posterior_single.append(calc_posterior(context, prior_single,ts_dis))
     posterior_optimal.append(calc_posterior(context, prior_optimal,ts_dis))
     
-    prior_single = transitions[np.argmax(posterior_single[-1]),:]
-    prior_optimal = np.dot(transitions,posterior_optimal[-1])
+    prior_single = trans_probs[np.argmax(posterior_single[-1]),:]
+    prior_optimal = np.dot(trans_probs,posterior_optimal[-1])
 
 #The posterior likelihood of ts 0
 dfa['ts0_posterior_ignore'] = [val[0] for val in posterior_ignore]
 dfa['ts0_posterior_single'] = [val[0] for val in posterior_single]
 dfa['ts0_posterior_optimal'] = [val[0] for val in posterior_optimal]
-   
-   
- #smooth the posterior estimates using an exponentially-weighted moving average
-span_val = 3
-dfa['smoothed_ts0_ignore']=pd.stats.moments.ewma(dfa.ts0_posterior_ignore, span = span_val)
-dfa['smoothed_ts0_single']=pd.stats.moments.ewma(dfa.ts0_posterior_single, span = span_val)
-dfa['smoothed_ts0_optimal']=pd.stats.moments.ewma(dfa.ts0_posterior_optimal, span = span_val)
-#smooth context by same value 
-dfa['smoothed_context']=pd.stats.moments.ewma(pd.Series(dfa.context), span = span_val)
 
-dfa.to_csv('../Data/' + name + '_modeled.csv')
+if save == True:
+    dfa.to_csv('../Data/' + name + '_modeled.csv')
 
 
 #*********************************************
-# Optimal task-set inference 
+# Gross discriminability between models for restricted contexts
 #*********************************************
 
 sub = dfa.query('(ts == %d and context > 0) or (ts == %d and context < 0)' % (states[0]['ts'], states[1]['ts']) )
-sub = dfa.query('context > .35 or context < -.35' )
+sub[['ts0_posterior_ignore', 'ts0_posterior_single', 'ts0_posterior_optimal']].corr()
+
+sub = dfa.query('context < .35 and context > -.35' )
+sub[['ts0_posterior_ignore', 'ts0_posterior_single', 'ts0_posterior_optimal']].corr()
 
 #*********************************************
 # Plotting
 #*********************************************
 
-plotting_dict = {'optimal': ['ts0_posterior_optimal', 'b','optimal'],
-                'single': ['ts0_posterior_single', 'c','TS(t-1)'],
-                 'ignore': ['ts0_posterior_ignore', 'r','base rate neglect']}
-#get trials where context conflicts with normal ts
-#sub = dfa.query('(ts == 0 and context > 0) or (ts == 1 and context < 0)')
-sub = dfa
-#plot context values and show the current state    
-plt.hold(True)
-plt.plot([i*2-1 for i in sub.ts], 'ro')
-plt.plot(sub.context, 'k', lw = 2)
-plt.ylabel('Vertical Height')
-plt.xlabel('trial')
-plt.savefig('context_over_trials.png', dpi = 300)
-
-#sort the context values by state
-sub_sorted = sub.sort('ts')
-fig = plt.figure()
-plt.hold(True)
-plt.plot([i*2-1 for i in sub_sorted.ts], 'ro')
-plt.plot(sub_sorted.context,'k', lw = 2)
-plt.ylabel('Vertical Height')
-plt.xlabel('sorted trials')
-plt.savefig('sorted_context.png', dpi = 300)
-
-#Plot how optimal inference changes based on context value and priors
-x = np.linspace(-1,1,100)
-y_biasUp = calc_posterior(x,[.9,.1],ts_dis)
-y_even = calc_posterior(x,[.5,.5],ts_dis)
-y_biasDown = calc_posterior(x,[.1,.9],ts_dis)
-plt.hold(True)
-plt.plot(x,y_biasUp[0],lw = 3, label = "prior P(TS1) = .9")
-plt.plot(x,y_even[0], lw = 3, label = "prior P(TS1) = .5")
-plt.plot(x,y_biasDown[0], lw = 3, label = "prior P(TS1) = .1")
-plt.axhline(.5,color = 'y', ls = 'dashed', lw = 2)
-plt.xlabel('Stimulus Vertical Position')
-plt.ylabel('Posterior P(TS1)')
-pylab.legend(loc='upper left')
-plt.savefig('../Plots/effect_of_prior.png', dpi = 300)
-
-
-#plot the posterior estimates for different models, the TS they currently select
-#and the vertical position of the stimulus
-plt.hold(True)
-models = []
-displacement = 0
-#plot model certainty and task-set choices
-for arg in plotting_dict.values():
-    if arg[2] not in ['TS(t-1)']:
-        plt.plot(sub.trial_count,sub[arg[0]]*2,arg[1], label = arg[2], lw = 2)
-        plt.plot(sub.trial_count, [int(val>.5)+3+displacement for val in sub[arg[0]]],arg[1]+'o')
-        displacement+=.15
-        models.append(arg[0])
-plt.axhline(1, color = 'y', ls = 'dashed', lw = 2)
-plt.axhline(2.5, color = 'k', ls = 'dashed', lw = 3)
-#plot subject choices (con_shape = conforming to TS1)
-#plot current TS, flipping bit to plot correctly
-plt.plot(sub.trial_count,(1-sub.ts)-2, 'go', label = 'operating TS')
-plt.plot(sub.trial_count, sub.context/2-1.5,'k', lw = 2, label = 'stimulus height')
-plt.plot(sub.trial_count, sub.con_shape+2.85, 'yo', label = 'subject choice')
-plt.yticks([-2, -1.5, -1, 0, 1, 2, 3.1, 4.1], [ -1, 0 , 1,'0%', '50%',  '100%', 'TS2 Choice', 'TS1 Choice'])
-plt.xlim([min(sub.index)-.5,max(sub.index)])
-plt.ylim(-2.5,5)
-#subdivide graph
-plt.axhline(-.5, color = 'k', ls = 'dashed', lw = 3)
-plt.axhline(-1.5, color = 'y', ls = 'dashed', lw = 2)
-#axes labels
-plt.xlabel('trial number')
-plt.ylabel('Predicted P(TS1)')
-ax = plt.gca()
-ax.yaxis.set_label_coords(-.1, .45)
-pylab.legend(loc='upper center', bbox_to_anchor=(0.5, 1.08),
-          ncol=3, fancybox=True, shadow=True)
-
-plt.savefig('../Plots/' +  subj + '_summary_plot.png', dpi = 300, bbox_inches='tight')
+if plot == True:
+    plotting_dict = {'optimal': ['ts0_posterior_optimal', 'b','optimal'],
+                    'single': ['ts0_posterior_single', 'c','TS(t-1)'],
+                     'ignore': ['ts0_posterior_ignore', 'r','base rate neglect']}
+                     
+    #Basic things - look at distribution of RT, etc.
+    plt.plot(dfa.rt*1000,'ro')
+    plt.title('RT over experiment', size = 24)
+    plt.xlabel('trial')
+    plt.ylabel('RT in ms')
+    
+    
+    #get trials where context conflicts with normal ts
+    #sub = dfa.query('(ts == 0 and context > 0) or (ts == 1 and context < 0)')
+    sub = dfa
+    #plot context values and show the current state    
+    plt.hold(True)
+    plt.plot([i*2-1 for i in sub.ts], 'ro')
+    plt.plot(sub.context, 'k', lw = 2)
+    plt.ylabel('Vertical Height')
+    plt.xlabel('trial')
+    if save == True:
+        plt.savefig('context_over_trials.png', dpi = 300)
+    
+    #sort the context values by state
+    sub_sorted = sub.sort('ts')
+    fig = plt.figure()
+    plt.hold(True)
+    plt.plot([i*2-1 for i in sub_sorted.ts], 'ro')
+    plt.plot(sub_sorted.context,'k', lw = 2)
+    plt.ylabel('Vertical Height')
+    plt.xlabel('sorted trials')
+    if save == True:
+        plt.savefig('sorted_context.png', dpi = 300)
+    
+    #Plot how optimal inference changes based on context value and priors
+    x = np.linspace(-1,1,100)
+    y_biasUp = calc_posterior(x,[.9,.1],ts_dis)
+    y_even = calc_posterior(x,[.5,.5],ts_dis)
+    y_biasDown = calc_posterior(x,[.1,.9],ts_dis)
+    plt.hold(True)
+    plt.plot(x,y_biasUp[0],lw = 3, label = "prior P(TS1) = .9")
+    plt.plot(x,y_even[0], lw = 3, label = "prior P(TS1) = .5")
+    plt.plot(x,y_biasDown[0], lw = 3, label = "prior P(TS1) = .1")
+    plt.axhline(.5,color = 'y', ls = 'dashed', lw = 2)
+    plt.xlabel('Stimulus Vertical Position')
+    plt.ylabel('Posterior P(TS1)')
+    pylab.legend(loc='upper left')
+    if save == True:
+        plt.savefig('../Plots/effect_of_prior.png', dpi = 300)
+    
+    
+    #plot the posterior estimates for different models, the TS they currently select
+    #and the vertical position of the stimulus
+    plt.hold(True)
+    models = []
+    displacement = 0
+    #plot model certainty and task-set choices
+    for arg in plotting_dict.values():
+        if arg[2] not in ['TS(t-1)']:
+            plt.plot(sub.trial_count,sub[arg[0]]*2,arg[1], label = arg[2], lw = 2)
+            plt.plot(sub.trial_count, [int(val>.5)+3+displacement for val in sub[arg[0]]],arg[1]+'o')
+            displacement+=.15
+            models.append(arg[0])
+    plt.axhline(1, color = 'y', ls = 'dashed', lw = 2)
+    plt.axhline(2.5, color = 'k', ls = 'dashed', lw = 3)
+    #plot subject choices (con_shape = conforming to TS1)
+    #plot current TS, flipping bit to plot correctly
+    plt.plot(sub.trial_count,(1-sub.ts)-2, 'go', label = 'operating TS')
+    plt.plot(sub.trial_count, sub.context/2-1.5,'k', lw = 2, label = 'stimulus height')
+    plt.plot(sub.trial_count, sub.con_shape+2.85, 'yo', label = 'subject choice')
+    plt.yticks([-2, -1.5, -1, 0, 1, 2, 3.1, 4.1], [ -1, 0 , 1,'0%', '50%',  '100%', 'TS2 Choice', 'TS1 Choice'])
+    plt.xlim([min(sub.index)-.5,max(sub.index)])
+    plt.ylim(-2.5,5)
+    #subdivide graph
+    plt.axhline(-.5, color = 'k', ls = 'dashed', lw = 3)
+    plt.axhline(-1.5, color = 'y', ls = 'dashed', lw = 2)
+    #axes labels
+    plt.xlabel('trial number')
+    plt.ylabel('Predicted P(TS1)')
+    ax = plt.gca()
+    ax.yaxis.set_label_coords(-.1, .45)
+    pylab.legend(loc='upper center', bbox_to_anchor=(0.5, 1.08),
+              ncol=3, fancybox=True, shadow=True)
+    if save == True:
+        plt.savefig('../Plots/' +  subj + '_summary_plot.png', dpi = 300, bbox_inches='tight')
 
 
 

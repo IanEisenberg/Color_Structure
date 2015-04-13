@@ -56,8 +56,6 @@ def load_data(datafile, name, mode = 'train'):
     dfa['subj_switch'] = [dfa.con_shape.shift(1)[i] != dfa.con_shape[i] for i in dfa.index]
     dfa['correct'] = [dfa.response[i] == dfa.stim[i][dfa.ts[i]] for i in dfa.index]
     
-    #save data to CSV
-    dfa.to_csv('../Data/' + name + '_cleaned.csv')
     
     return (taskinfo, df,dfa)
 
