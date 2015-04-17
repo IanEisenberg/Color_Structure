@@ -85,9 +85,14 @@ class PredModel:
     def set_mode(self, mode):
         self.mode = mode
         
-    def choose(self, mode = None):
+    def choose(self, mode = None, random_prob = .1):
         if mode == "noisy":
-            return np.random.choice(range(len(self.spoterior)), self.posterior)
+            return np.random.choice(range(len(self.posterior)), p=self.posterior)
+        elif mode == "random_noisy":
+            if r.random() > random_prob:
+                return np.random.choice(range(len(self.posterior)), p=self.posterior)
+            else:
+                return r.choice([0,1])
         else:
             return np.argmax(self.posterior)
             
