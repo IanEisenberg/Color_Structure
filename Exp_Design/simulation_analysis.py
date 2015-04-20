@@ -85,10 +85,10 @@ models = [ \
     PredModel(ts_dis, init_prior, mode = "optimal")]
 
 prediction_df = pd.DataFrame(columns = ['subject','n_prediction','rn_prediction'])
-random_noisy_df = pd.DataFrame(columns = ['ignore','single','optimal'])
-noisy_df = pd.DataFrame(columns = ['ignore','single','optimal'])
+random_noisy_df = pd.DataFrame(columns = ['ignore','single','optimal','subj'])
+noisy_df = pd.DataFrame(columns = ['ignore','single','optimal','subj'])
 
-for subj in range(10):
+for subj in range(100):
     data_gen = DataGenerator(ts_dis,.9)
     trials = [data_gen.gen_data() for _ in range(exp_len)]
     
