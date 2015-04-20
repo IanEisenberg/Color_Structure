@@ -1,14 +1,14 @@
 """
-runcolorStructTask
+runprobContextTask
 """
 
 from psychopy import core, event
 import smtplib
 import json
 import webbrowser
-from color_struct_task_2dims import colorStructTask
-from make_config_2dims import makeConfigList, makePracticeConfigList
-from test_bot_2dims import test_bot
+from prob_context_task import probContextTask
+from make_config import makeConfigList, makePracticeConfigList
+from test_bot import test_bot
 import random as r
 #set-up some variables
 
@@ -46,16 +46,16 @@ recursive_p = .9
 
 
 #set up config files
-practice_config_file = '../Config_Files/Color_Struct_Practice_config.npy'
+practice_config_file = '../Config_Files/Prob_Context_Practice_config.npy'
 task_config_file = makeConfigList(iden = subject_code, exp_len = task_len, recursive_p = recursive_p)
 
 try:
-    practice=colorStructTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'practice')
+    practice=probContextTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'practice')
 except SystemExit:
     practice_config_file = makePracticeConfigList()
-    practice=colorStructTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'practice')
+    practice=probContextTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'practice')
 
-task=colorStructTask(task_config_file,subject_code, fullscreen = fullscr)
+task=probContextTask(task_config_file,subject_code, fullscreen = fullscr)
 if bot_on == True:
     task.setBot(bot = test_bot(task_config_file, mode = bot_mode), mode = "short")
 task.writeToLog(task.toJSON())
@@ -242,7 +242,7 @@ if test_on:
     test_config_file = makeConfigList(taskname = 'Color_Struct_noFB', iden = subject_code, exp_len = test_len, 
                                       recursive_p = recursive_p, FBDuration = 0, FBonset = 0, action_keys = task.getActions(),
                                       ts_order = task.getTSorder())
-    test=colorStructTask(test_config_file,subject_code, fullscreen = fullscr)
+    test=probContextTask(test_config_file,subject_code, fullscreen = fullscr)
     if bot_on == True:
         test.setBot(bot = test_bot(test_config_file, mode = bot_mode), mode = "short")
 

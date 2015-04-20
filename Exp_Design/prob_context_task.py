@@ -28,7 +28,7 @@ def np_to_list(d):
     return d_fixed
 
 
-class colorStructTask:
+class probContextTask:
     """ class defining a psychological experiment
     """
     

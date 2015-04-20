@@ -28,7 +28,7 @@ class test_bot:
         """
         self.updateLikelihood(context)
         curr_state = self.taskinfo['states'][np.argmax(self.posterior)]
-        choice = self.action_keys[np.argmax(curr_state['ts'][stim])]
+        choice = self.action_keys[stim[curr_state['ts']]]
         return (choice,.5)
 
         
@@ -39,6 +39,8 @@ class test_bot:
         if self.mode == "one-shot":
             self.TS_prior[np.argmax(self.posterior)] = self.recursive_p
             self.TS_prior[1-np.argmax(self.posterior)] = 1-self.recursive_p
+        elif self.mode == "ignore_base":
+            self.TS_prior = [.5, .5]
         else:
             self.TS_prior = [sum(self.posterior*[self.recursive_p,1-self.recursive_p]), 
                              sum(self.posterior*[1-self.recursive_p,self.recursive_p])]
