@@ -8,28 +8,11 @@ import yaml
 import numpy as np
 import datetime
 import json
-import random as r
 import subprocess
-
-try:
-    from save_data_to_db import *
-except:
-    pass
-
-def np_to_list(d):
-    d_fixed={}
-    for k in d.iterkeys():
-        if isinstance(d[k],np.ndarray) and d[k].ndim==1:
-            d_fixed[k]=[x for x in d[k]]
-            print 'converting %s from np array to list'%k
-        else:
-            #print 'copying %s'%k
-            d_fixed[k]=d[k]
-    return d_fixed
 
 
 class probContextTask:
-    """ class defining a psychological experiment
+    """ class defining a probabilistic context task
     """
     
     def __init__(self,config_file,subject_code,verbose=True, 
@@ -45,17 +28,19 @@ class probContextTask:
         self.startTime=[]
         self.alldata=[]
         self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        #looks up the hash of the most recent git push. Stored in log file
         self.gitHash = subprocess.check_output(['git','rev-parse','--short','HEAD'])[:-1]
         self.trigger_times=[]
         self.config_file=config_file
         self.trialnum = 0
         self.track_response = []
         self.fullscreen = fullscreen
-        self.pointtracker = 0
         self.text_color = [1]*3
+        self.pointtracker = 0
+        #intializes a bot variable that can be set by setBot
         self.bot = None
         self.botMode = None
-        #Choose 'practice', 'FB', 'noFB'
+        #Choose 'practice', 'task': determines stimulus set to use
         self.mode = mode
         try:
             self.loadStimulusFileNP(config_file)
@@ -67,7 +52,7 @@ class probContextTask:
         self.datafilename='%s_%s_%s'%(self.subject_code,self.taskname,self.timestamp)
 
     def loadStimulusFileNP(self,filename):
-        """ load a stimulus file in np format
+        """ load a stimulus file in numpy format
         """
         if not os.path.exists(filename):
             raise BaseException('Stimulus file not found')
@@ -134,7 +119,10 @@ class probContextTask:
         return core.getTime()
 
     def defineStims(self, stims = None):
-        
+        """Defines two sets of stims for practice and the task.
+            Ratio variable is used due to the normalized units to make 
+            'square' squares
+        """
         if stims:
             self.stims = stims
         else:
@@ -229,6 +217,8 @@ class probContextTask:
         return (self.pointtracker,self.trialnum)
         
     def presentContexts(self):
+        """ Used during instructions to present possible stimulus positions
+        """
         height = .05
         ratio = self.win.size[1]/float(self.win.size[0])
         tmp_stim = visual.Rect(self.win,height*ratio*10, height,units = 'norm',fillColor = 'yellow')

@@ -9,7 +9,6 @@ import webbrowser
 from prob_context_task import probContextTask
 from make_config import makeConfigList, makePracticeConfigList
 from test_bot import test_bot
-import random as r
 #set-up some variables
 
 verbose=True
@@ -338,6 +337,8 @@ points,trials = test.getPoints()
 performance = (float(points)/trials-.25)/.75
 pay_bonus = round(performance*5*2)/2.0
 print('Participant ' + subject_code + ' won ' + str(points) + ' points out of ' + str(trials) + ' trials. Bonus: $' + str(pay_bonus))
+
+#open post-task questionnaire
 if bot_on == False:
     webbrowser.open_new('https://stanforduniversity.qualtrics.com/SE/?SID=SV_9KzEWE7l4xuORIF')
 

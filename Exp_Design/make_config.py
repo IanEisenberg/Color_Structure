@@ -8,13 +8,11 @@ Created on Thu Nov 20 16:13:45 2014
 import numpy as np
 from scipy.stats import norm
 import random as r
-import yaml
 import datetime
 
 def makeConfigList(taskname = 'Prob_Context', iden = '000', 
                    recursive_p = .9, 
                    #tasksets relate to stimulus dimensions
-                   #specify action (1 or 0) to take in response to each stim
                    ts1 = 0, #relates to first stimulus dimension
                    ts2 = 1, #relates to second stimulus dimension
                    exp_len = 200,
@@ -26,6 +24,7 @@ def makeConfigList(taskname = 'Prob_Context', iden = '000',
                    ts_order = None,
                    loc = '../Config_Files/'):
     
+    #transition probabilities from one TS to another
     trans_probs = np.matrix([[recursive_p, 1-recursive_p], [1-recursive_p, recursive_p]])
     timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     iden = str(iden)
@@ -81,6 +80,9 @@ def makeConfigList(taskname = 'Prob_Context', iden = '000',
         stims = r.sample(stim_ids*int(exp_len * .25),exp_len)
               
         trial_states = [1] #start off the function
+        #creates the task-set trial list. Task-sets alternate based on recusive_p
+        #with a maximum repetition of 25 trials. This function also makes sure
+        #that each task-set composes at least 40% of trials
         while abs(np.mean(trial_states)-.5) > .1:
             curr_state = r.choice(states.keys())
             trial_states = []
