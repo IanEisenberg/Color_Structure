@@ -12,6 +12,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import pylab
 from Load_Data import load_data
+from helper_classes import PredModel
 import glob
 import re
 
@@ -77,12 +78,13 @@ def calc_posterior(data,prior,likelihood_dist):
 # Load Data
 #*********************************************
     
-train_files = glob.glob('../RawData/*Struct_20*yaml')
-test_files = glob.glob('../RawData/*Struct_noFB*yaml')
+train_files = glob.glob('../RawData/*Context_20*yaml')
+test_files = glob.glob('../RawData/*Context_noFB*yaml')
 
-data_file = test_files[3]
-name = data_file[8:-5]
-subj = re.match(r'(\w*)_Color*', name).group(1)
+
+data_file = test_files[0]
+name = data_file[11:-5]
+subj = re.match(r'(\w*)_Prob*', name).group(1)
 taskinfo, df, dfa = load_data(data_file, name, mode = 'test')
 
 
@@ -113,6 +115,41 @@ switch_resp_cost = np.mean(dfa.query('rep_resp == False and subj_switch != True'
 ts_order = [states[0]['ts'],states[1]['ts']]
 ts_dis = [norm(states[ts_order[0]]['c_mean'], states[ts_order[0]]['c_sd']),
           norm(states[ts_order[1]]['c_mean'], states[ts_order[1]]['c_sd'])]
+
+init_prior = [.5,.5]
+model_choice = ['ignore','single','optimal']
+models = [ \
+    PredModel(ts_dis, init_prior, mode = "ignore"),\
+    PredModel(ts_dis, init_prior, mode = "single"),\
+    PredModel(ts_dis, init_prior, mode = "optimal")]
+    
+model_posteriors = pd.DataFrame(columns = ['ignore','single','optimal'])
+model_choices = pd.DataFrame(columns = ['ignore','single','optimal'])
+model_likelihoods = pd.DataFrame(columns = ['ignore','single','optimal','rand','ts0','ts1'])
+for i,trial in dfa.iterrows():
+    c = trial.context
+    trial_choice = int(trial.con_orient)
+    
+    model_posterior= []
+    model_choice=[]
+    trial_model_likelihoods = []
+    for i,model in enumerate(models):
+        conf = model.calc_posterior(c)
+        model_posterior += [conf[0]]
+        model_choice += [model.choose()]
+        trial_model_likelihoods += [conf[trial_choice]]
+    #add on 'straw model' predictions.
+    trial_model_likelihoods += [.5,[.9,.1][trial_choice], [.1,.9][trial_choice]] 
+   
+   #record trial estimates
+    model_likelihoods.loc[trial.trial_count] = trial_model_likelihoods
+    model_posteriors.loc[trial.trial_count] = model_posterior
+    model_choices.loc[trial.trial_count] = model_choice
+
+tmp = np.product(model_likelihoods,axis = 0)
+model_posterior = np.round(tmp/sum(tmp),2)
+print(model_likelihoods.columns[np.argmax(model_posterior)])
+
 
 
 

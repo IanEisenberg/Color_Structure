@@ -56,7 +56,7 @@ except SystemExit:
 
 task=probContextTask(task_config_file,subject_code, fullscreen = fullscr)
 if bot_on == True:
-    task.setBot(bot = test_bot(task_config_file, mode = bot_mode), mode = "short")
+    task.setBot(bot = test_bot(task_config_file, mode = bot_mode), mode = "full")
 task.writeToLog(task.toJSON())
 
 
@@ -243,7 +243,7 @@ if test_on:
                                       ts_order = task.getTSorder())
     test=probContextTask(test_config_file,subject_code, fullscreen = fullscr)
     if bot_on == True:
-        test.setBot(bot = test_bot(test_config_file, mode = bot_mode), mode = "short")
+        test.setBot(bot = test_bot(test_config_file, mode = bot_mode), mode = "full")
 
     test.writeToLog(test.toJSON())
     

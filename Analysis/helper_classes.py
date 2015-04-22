@@ -15,55 +15,28 @@ class PredModel:
     and the relevant to calculate posterior hypothesis estimates.
     """
     def __init__(self, likelihood_dist, prior, recursive_prob = .9,
-                 data_noise = 0, mean_noise = 0, std_noise = 0, rp_noise = 0,
-                 mode = "optimal"):
+                 data_noise = 0, mode = "optimal"):
         self.prior = prior
         self.likelihood_dist = likelihood_dist
         self.recursive_prob = recursive_prob
-        self.dn = data_noise
-        self.mn = mean_noise
-        self.sn = std_noise
-        self.rpn = rp_noise
         self.mode = mode
         self.posterior = prior
         
-    def calc_posterior(self, data, noise_val = None, noise = 'gaussian'):
+    def calc_posterior(self, data, noise = None):
         """
         Calculate the posterior probability of different distribution hypotheses
-        given the data. You can specify a few different kinds of noise:
-        data_noise = noisy perceptual encoding
-        mean_noise = noisy distribution of mean estimates
-        std_noise = noisy distribution of std estimates
-        The value specified will be a scaling parameter. It should always
-        be less than one. You can also speciy
-        the noise distribution (default = uniform, alternative = gaussian)
+        given the data. You can set a noise value which will set add gaussian
+        noise to the observation. The value specified will be a scaling parameter. 
+        It should always be less than one. 
         """
         ld = self.likelihood_dist
         rp = self.recursive_prob
         prior = self.prior
         mode = self.mode
-        if not noise_val:
-            dn = self.dn
-            mn = self.mn
-            sn = self.sn
-            rpn = self.rpn
-        else:
-            dn,mn,sn, rpn = np.array([noise_val]*4)*[bool(val) for val in [self.dn,self.mn,self.sn,self.rpn]]
-        #noise specification
-        #dn changes the perceived data
-        #mn and sn change the estimate of the generating distributions, and
-        #therefore create noisy likelihood estimates
-        if noise.lower() == 'uniform':
-            data = min(max(data + dn*r.random()*2-1,-1),1)
-            ld = [norm(min(max(dis.mean()+r.random()*mn,-1),1), (dis.std()+r.random()*sn))
-                                for dis in ld]
-            rp = min(max(rp+r.random()*rpn,0),1)
-        elif noise.lower() == 'gaussian':
-            data= min(max(data + dn*norm().rvs(),-1),1)
-            ld = [norm(min(max(dis.mean()+norm().rvs()*mn,-1),1), abs(dis.std()+norm().rvs()*sn)) 
-                                for dis in ld]
-            rp = min(max(rp+norm.rvs()*rpn,0),1)
-                                    
+
+        if noise:
+            data= min(max(data + noise*norm().rvs(),-1),1)
+                                   
         trans_probs = np.array([[rp, 1-rp], [1-rp, rp]])    
                      
         n = len(prior)
@@ -86,11 +59,16 @@ class PredModel:
         self.mode = mode
         
     def choose(self, mode = None, random_prob = .1):
-        if mode == "noisy":
+        if mode == "prob_match":
             return np.random.choice(range(len(self.posterior)), p=self.posterior)
-        elif mode == "random_noisy":
+        elif mode == "noisy_prob_match":
             if r.random() > random_prob:
                 return np.random.choice(range(len(self.posterior)), p=self.posterior)
+            else:
+                return r.choice([0,1])
+        elif mode == "noisy":
+            if r.random() > random_prob:
+                return np.argmax(self.posterior)
             else:
                 return r.choice([0,1])
         else:
