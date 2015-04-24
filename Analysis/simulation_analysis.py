@@ -15,6 +15,7 @@ import pylab
 from ggplot import * 
 from helper_classes import PredModel,DataGenerator
 from datetime import datetime
+from collections import OrderedDict as odict
 
 #***********************
 #Analysis
@@ -23,76 +24,86 @@ from datetime import datetime
 #Make random subject with some noise values following one of the models and try
 #to predict
 startTime = datetime.now()
-ts_dis = [norm(.3,.37),norm(-.3,.37)]    
 init_prior = [.5, .5]
 exp_len = 500
 model_choice = ['ignore','single','optimal']
-subj_choices = ['norm','noisy','prob_match','noisy_prob_match']
-model_distribution_df = pd.DataFrame(columns = ['ignore','single','optimal','rand','ts0','ts1','subj'])
-prediction_df = pd.DataFrame(columns = ['subject','choices','noisy_choices','prob_match','noisy_prob_match'])
-choices_df = pd.DataFrame(columns = ['ignore','single','optimal','subj','choice_mode'])
+subj_choices = ['norm','noisy','prob_match','noisy_prob_match','softmax']
 
-for subj in range(25):
-    print(subj)
 
+#Set up dataframes to record choices
+posterior_keys = ['subj_i','subj_mode','choice_mode','ts','context','subj','ignore','single','optimal']
+choices_keys = ['subj_i','subj_mode','choice_mode','ts','context','subj','ignore','single','optimal']
+perform_keys = ['subj_i','subj_mode','choice_mode','ts','context','subj','ignore','single','optimal']
+likelihoods_keys = ['subj_i','subj_mode','choice_mode','ts','context','ignore','single','optimal','rand','ts0','ts1']
+group_posteriors, group_choices, group_performs,group_likelihoods = [],[],[],[]
+
+u = .3
+std = .4
+ts_dis = [norm(-u,std),norm(u,std)]    
+for subj_i in range(20):
+    print(subj_i)
+    
+    
     #Setup new models and set an even prior
     models = [ \
-    PredModel(ts_dis, init_prior, mode = "ignore"),\
-    PredModel(ts_dis, init_prior, mode = "single"),\
-    PredModel(ts_dis, init_prior, mode = "optimal")]
+        PredModel(ts_dis, init_prior, mode = "ignore"),\
+        PredModel(ts_dis, init_prior, mode = "single"),\
+        PredModel(ts_dis, init_prior, mode = "optimal")]
     model_prior = [1.0/len(models)]*6
     
     #Generate data, choose a random subject 'mode' and make the subject
     data_gen = DataGenerator(ts_dis,.9)
     trials = [data_gen.gen_data() for _ in range(exp_len)]
-    mode = r.choice(model_choice)
-    choice_mode = r.choice(subj_choices)
+    mode = 'optimal' #r.choice(model_choice)
+    choice_mode = 'prob_match'
     subj_model = PredModel(ts_dis, init_prior, mode = mode)  
-                
-    #Set up dataframes to record choices
-    posteriors = pd.DataFrame(columns = ['subj','ignore','single','optimal'])
-    choices = pd.DataFrame(columns = ['subj','ignore','single','optimal'])
     
-    #first three are the inference models of interest. Second three are 'straw models'
-    #which choose randomly, always ts0, or always ts1, respectively
-    model_likelihoods = pd.DataFrame(columns = ['ignore','single','optimal','rand','ts0','ts1'])
     
     for trial in trials:
         trial_num = trial['trial_count']
         c = round(trial['context'],1)
-        trial_posterior = [subj_model.calc_posterior(c)[0]]
-        trial_choice = [subj_model.choose(mode = choice_mode, random_prob = .2)]
+        ts = trial['ts']
+        trial_posterior = [subj_i,mode,choice_mode,ts,c,subj_model.calc_posterior(c)[0]]
+        trial_choice = [subj_i,mode,choice_mode,ts,c,subj_model.choose(mode = choice_mode, random_prob = .2)]
 
         model_posteriors= []
         model_choices=[]
-        trial_model_likelihoods = []
+        trial_model_likelihoods = [subj_i,mode,choice_mode,ts,c]
+        trial_perform = [subj_i,mode,choice_mode,ts,c]
         for i,model in enumerate(models):
             conf = model.calc_posterior(c)
             model_posteriors += [conf[0]]
             model_choices += [model.choose()]
-            trial_model_likelihoods += [conf[trial_choice[0]]]
+            trial_model_likelihoods += [np.log(conf[trial_choice[5]])]
         #add on 'straw model' predictions.
-        trial_model_likelihoods += [.5,float(trial_choice[0] == 0), float(trial_choice[0] == 1)] 
-        model_likelihoods.loc[trial_num] = trial_model_likelihoods
-        
+        trial_model_likelihoods += list(np.log([.5,[.9,.1][trial_choice[5]], [.1,.9][trial_choice[5]]]))
         #record
         trial_posterior += model_posteriors            
         trial_choice += model_choices
-        posteriors.loc[trial_num] = trial_posterior
-        choices.loc[trial_num] = trial_choice
-    
-    choices_corr = choices.corr().iloc[1:4,0]
-    tmp = np.product(model_likelihoods,axis = 0)
-    model_posterior = np.round(tmp/sum(tmp),2)
-    model_distribution_df.loc[len(prediction_df)] = np.append(model_posterior,[mode,choice_mode])
-    prediction_df.loc[len(prediction_df)] = [
-                    mode, 
-                    np.argmax(choices_corr),
-                    np.argmax(noisy_choices_corr),
-                    np.argmax(prob_match_corr),
-                    np.argmax(noisy_prob_match_corr)]
-    choices_df.loc[len(prediction_df)]  = choices_corr.append(pd.Series(mode,index=['subj']))
+        trial_perform += list(np.equal(ts,trial_choice[5:])*1)
+        trial_posterior
+        group_posteriors.append(odict(zip(perform_keys,trial_posterior)))
+        group_performs.append(odict(zip(perform_keys,trial_perform)))
+        group_choices.append(odict(zip(perform_keys,trial_choice)))
+        group_likelihoods.append(odict(zip(perform_keys,trial_model_likelihoods)))
 
+group_posteriors = pd.DataFrame(group_posteriors, columns = posterior_keys)       
+group_performs = pd.DataFrame(group_performs, columns = perform_keys)       
+group_choices = pd.DataFrame(group_choices, columns = choices_keys)       
+group_likelihoods = pd.DataFrame(group_likelihoods, columns = likelihoods_keys)       
+
+        
+print(datetime.now()-startTime)
+      
+        
+        group_posteriors = pd.concat([group_posteriors, posteriors], axis = 0)
+        group_choices = pd.concat([group_choices, choices], axis = 0)
+        group_performance = pd.concat([group_performance, performance], axis = 0)
+        group_likelihoods = pd.concat([group_likelihoods, model_likelihoods], axis = 0)
+
+group_posteriors=group_posteriors.convert_objects(convert_numeric = True)
+group_choices=group_choices.convert_objects(convert_numeric = True)
+group_performance=group_performance.convert_objects(convert_numeric = True)
+group_likelihoods=group_likelihoods.convert_objects(convert_numeric = True)
          
 print(datetime.now()-startTime)
-          

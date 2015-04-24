@@ -58,7 +58,7 @@ class PredModel:
     def set_mode(self, mode):
         self.mode = mode
         
-    def choose(self, mode = None, random_prob = .1):
+    def choose(self, mode = None, random_prob = .1, temp = 1):
         if mode == "prob_match":
             return np.random.choice(range(len(self.posterior)), p=self.posterior)
         elif mode == "noisy_prob_match":
@@ -71,6 +71,9 @@ class PredModel:
                 return np.argmax(self.posterior)
             else:
                 return r.choice([0,1])
+        elif mode == "softmax":
+            probs = np.exp(self.posterior/temp)/sum(np.exp(self.posterior/temp))
+            return np.random.choice(range(len(probs)), p = probs)
         else:
             return np.argmax(self.posterior)
             

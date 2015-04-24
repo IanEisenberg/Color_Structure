@@ -64,7 +64,7 @@ def makeConfigList(taskname = 'Prob_Context', iden = '000',
       'recursive_p': recursive_p,
       'stim_ids': stim_ids,
       'exp_len': exp_len,
-      'context_means': list(-1.1+np.array(range(1,11))*.2)
+      'context_means': [round(i,2) for i in list(-1.1+np.array(range(1,11))*.2)]
     }
     
     
@@ -103,14 +103,14 @@ def makeConfigList(taskname = 'Prob_Context', iden = '000',
             state = states[trial_states[trial]]
             dis = norm(state['c_mean'],state['c_sd'])
             binned = -1.1 + np.digitize([dis.rvs()],bin_boundaries)*.2
-            context_sample = max(-1, min(1, binned[0]))
+            context_sample = round(max(-1, min(1, binned[0])),2)
 
             
             trialList += [{
                 'trial_count': trial_count,
                 'state': trial_states[trial],
                 'ts': state['ts'],
-                'c_dis': {'mean': dis.mean(), 'sd': dis.std()},
+                'c_dis': {'mean': dis.mean().item(), 'sd': dis.std().item()},
                 'context': context_sample,
                 'stim': stims[trial],
                 'onset': curr_onset,
@@ -182,7 +182,7 @@ def makePracticeConfigList(taskname = 'Prob_Context_Practice',
       'recursive_p': recursive_p,
       'stim_ids': stim_ids,
       'exp_len': exp_len,
-      'context_means': list(-1.1+np.array(range(1,11))*.2)
+      'context_means': [round(i,2) for i in list(-1.1+np.array(range(1,11))*.2)]
     }
     
     
@@ -207,7 +207,7 @@ def makePracticeConfigList(taskname = 'Prob_Context_Practice',
             state = states[curr_state]
             dis = norm(state['c_mean'],state['c_sd'])
             binned = -1.1 + np.digitize([dis.rvs()],bin_boundaries)*.2
-            context_sample = max(-1, min(1, binned[0]))
+            context_sample = round(max(-1, min(1, binned[0])),2)
 
             
             trialList += [{
