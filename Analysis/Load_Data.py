@@ -45,7 +45,7 @@ def load_data(datafile, name, mode = 'train'):
         dfa = df.drop(['FBonset', 'FBDuration', 'actualFBOnsetTime', 'actualOnsetTime', 'onset', 
                         'reward', 'punishment','stimulusCleared'],1)
     elif mode == 'test':
-        dfa = df.drop(['FBonset', 'FB', 'actualOnsetTime', 'onset', 
+        dfa = df.drop(['FBonset', 'FB', 'FBDuration', 'actualOnsetTime', 'onset', 
                        'reward', 'punishment','stimulusCleared'],1)
                   
     dfa['rep_resp'] = [dfa.response.shift(1)[i] == dfa.response[i] for i in dfa.index]
@@ -54,9 +54,9 @@ def load_data(datafile, name, mode = 'train'):
     dfa['con_shape'] = [int(dfa.response[i] == dfa.stim[i][0]) for i in dfa.index]
     dfa['con_orient'] = [int(dfa.response[i] == dfa.stim[i][1]) for i in dfa.index]
     dfa['subj_ts'] = [int(response in [2,3]) for response in dfa.response]
-    dfa['subj_switch'] = [dfa.subj_ts.shift(1)[i] != dfa.subj_ts[i] for i in dfa.index]
+    dfa['subj_switch'] = [int(dfa.subj_ts.shift(1)[i] != dfa.subj_ts[i]) for i in dfa.index]
     dfa['correct'] = [dfa.response[i] == dfa.stim[i][dfa.ts[i]] for i in dfa.index]
-    
+    dfa = dfa.convert_objects(convert_numeric = True)
     
     return (taskinfo, df,dfa)
 

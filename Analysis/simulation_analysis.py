@@ -96,10 +96,7 @@ group_likelihoods = pd.DataFrame(group_likelihoods, columns = likelihoods_keys)
 print(datetime.now()-startTime)
       
         
-        group_posteriors = pd.concat([group_posteriors, posteriors], axis = 0)
-        group_choices = pd.concat([group_choices, choices], axis = 0)
-        group_performance = pd.concat([group_performance, performance], axis = 0)
-        group_likelihoods = pd.concat([group_likelihoods, model_likelihoods], axis = 0)
+
 
 group_posteriors=group_posteriors.convert_objects(convert_numeric = True)
 group_choices=group_choices.convert_objects(convert_numeric = True)

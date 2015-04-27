@@ -76,7 +76,7 @@ def makeConfigList(taskname = 'Prob_Context', iden = '000',
         """
         trialList = []    
         trial_count = 1
-        curr_onset = 1 #initial onset
+        curr_onset = 2 #initial onset
         stims = r.sample(stim_ids*int(exp_len * .25),exp_len)
               
         trial_states = [1] #start off the function
@@ -194,7 +194,7 @@ def makePracticeConfigList(taskname = 'Prob_Context_Practice',
         """
         trialList = []    
         trial_count = 1
-        curr_onset = 1 #initial onset
+        curr_onset = 2 #initial onset
         curr_state = r.choice(states.keys())
         stims = r.sample(stim_ids*int(exp_len*.25),exp_len)
         #define bins. Will set context to center point of each bin

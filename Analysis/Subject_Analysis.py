@@ -44,12 +44,28 @@ plot = False
 train_files = glob.glob('../RawData/*Context_20*yaml')
 test_files = glob.glob('../RawData/*Context_noFB*yaml')
 
+subj_i = 1
+train_file = train_files[subj_i]
+test_file = test_files[subj_i]
 
-data_file = train_files[2]
-name = data_file[11:-5]
-subj = re.match(r'(\w*)_Prob*', name).group(1)
-taskinfo, df, dfa = load_data(data_file, name, mode = 'train')
+test_name = test_file[11:-5]
+train_name = train_file[11:-5]
+subj_name = re.match(r'(\w*)_Prob*', name).group(1)
 
+try:
+    train_dict = pickle.load(open('../Data/' + train_name + '.p','rb'))
+except FileNotFoundError:
+    taskinfo, df, dfa = load_data(train_file, train_name, mode = 'train')
+    train_dict = {'taskinfo': taskinfo, 'dfa': dfa}
+    pickle.dump(train_dict, open('../Data/' + train_name + '.p','wb'))
+    
+try:
+    test_dict = pickle.load(open('../Data/' + test_name + '.p','rb'))
+    taskinfo, dfa = [test_dict.get(k) for k in ['taskinfo','dfa']]
+except FileNotFoundError:
+    taskinfo, df, dfa = load_data(test_file, test_name, mode = 'test')
+    test_dict = {'taskinfo': taskinfo, 'dfa': dfa}
+    pickle.dump(test_dict, open('../Data/' + test_name + '.p','wb'))
 
 
 #*********************************************
@@ -59,7 +75,8 @@ recursive_p = taskinfo['recursive_p']
 states = taskinfo['states']
 state_dis = [norm(states[0]['c_mean'], states[0]['c_sd']), norm(states[1]['c_mean'], states[1]['c_sd']) ]
 trans_probs = np.array([[recursive_p, 1-recursive_p], [1-recursive_p,recursive_p]])
-
+train_dfa = train_dict['dfa']
+train_recursive_p = 1-train_dfa.switch.mean()
 #*********************************************
 # Switch costs 
 #*********************************************
@@ -67,7 +84,7 @@ trans_probs = np.array([[recursive_p, 1-recursive_p], [1-recursive_p,recursive_p
 TS_switch_cost = np.mean(dfa.query('subj_switch == True')['rt']) - np.mean(dfa.query('subj_switch == False')['rt'])
 #RT difference when switching to the other action within a task-set
 switch_resp_cost = np.mean(dfa.query('rep_resp == False and subj_switch != True')['rt']) - np.mean(dfa.query('rep_resp == True')['rt'])
-
+TS_minus_resp_switch_cost = TS_switch_cost - switch_resp_cost
 
 
 #*********************************************
@@ -80,9 +97,9 @@ ts_dis = [norm(states[ts_order[0]]['c_mean'], states[ts_order[0]]['c_sd']),
 init_prior = [.5,.5]
 model_choice = ['ignore','single','optimal']
 models = [ \
-    PredModel(ts_dis, init_prior, mode = "ignore"),\
-    PredModel(ts_dis, init_prior, mode = "single"),\
-    PredModel(ts_dis, init_prior, mode = "optimal")]
+    PredModel(ts_dis, init_prior, mode = "ignore", recursive_prob = train_recursive_p),\
+    PredModel(ts_dis, init_prior, mode = "single", recursive_prob = train_recursive_p),\
+    PredModel(ts_dis, init_prior, mode = "optimal", recursive_prob = train_recursive_p)]
     
 model_posteriors = pd.DataFrame(columns = ['ignore','single','optimal'], dtype = 'float64')
 model_choices = pd.DataFrame(columns = ['ignore','single','optimal'], dtype = 'float64')
@@ -120,9 +137,6 @@ dfa['abs_context'] = abs(dfa.context)
 dfa.groupby('abs_context').mean()
 dfa_modeled = pd.concat([dfa,model_posteriors],axis = 1)
 
-
-if save == True:
-    dfa.to_csv('../Data/' + name + '_modeled.csv')
 
 
 #*********************************************
@@ -180,7 +194,7 @@ if plot == True:
     sub = dfa_modeled[50:200]
     plot_run(sub,plotting_dict, exclude = ['single'])
     if save == True:
-        plt.savefig('../Plots/' +  subj + '_summary_plot.png', dpi = 300, bbox_inches='tight')
+        plt.savefig('../Plots/' +  subj_name + '_summary_plot.png', dpi = 300, bbox_inches='tight')
 
 
 
