@@ -59,6 +59,17 @@ if bot_on == True:
     task.setBot(bot = test_bot(task_config_file, mode = bot_mode), mode = "full")
 task.writeToLog(task.toJSON())
 
+#************************************
+# Set up text reminders
+#************************************
+
+if bot_on == False:   
+    username = "thedummyspeaks@gmail.com"
+    password = "r*kO84gSzzD4"
+    atttext = "9148155478@txt.att.net"
+    server = smtplib.SMTP('smtp.gmail.com',587)
+    server.starttls()
+    server.login(username,password)
 
 #************************************
 # Start Practice
@@ -214,31 +225,24 @@ if task_on:
 #************************************
 # Send text about task performance
 #************************************
-    if bot_on == False:   
-        username = "thedummyspeaks@gmail.com"
-        password = "r*kO84gSzzD4"
-        
-        atttext = "9148155478@txt.att.net"
-        message = "Training done. Points " + str(task.getPoints())
+    if bot_on == False:
+        message = "Training done. Points: " + str(task.getPoints()[0]) + \
+            " out of " + str(task.getPoints()[1]) 
         
         msg = """From: %s
         To: %s
         Subject: text-message
-        %s""" % (username, atttext, message)
         
-        server = smtplib.SMTP('smtp.gmail.com',587)
-        server.starttls()
-        server.login(username,password)
+        %s""" % (username, atttext, message)
         server.sendmail(username, atttext, msg)
-        server.quit()
-    
+
 #************************************
 # Start test
 #************************************
 
 if test_on:
     
-    test_config_file = makeConfigList(taskname = 'Color_Struct_noFB', iden = subject_code, exp_len = test_len, 
+    test_config_file = makeConfigList(taskname = 'Prob_Context_noFB', iden = subject_code, exp_len = test_len, 
                                       recursive_p = recursive_p, FBDuration = 0, FBonset = 0, action_keys = task.getActions(),
                                       ts_order = task.getTSorder())
     test=probContextTask(test_config_file,subject_code, fullscreen = fullscr)
@@ -312,20 +316,11 @@ if test_on:
 # Send text about test performance
 #************************************   
     if bot_on == False:
-        username = "thedummyspeaks@gmail.com"
-        password = "r*kO84gSzzD4"
-        
-        atttext = "9148155478@txt.att.net"
-        message = "Test done. Points " + str(test.getPoints())
-        
         msg = """From: %s
         To: %s
         Subject: text-message
         %s""" % (username, atttext, message)
         
-        server = smtplib.SMTP('smtp.gmail.com',587)
-        server.starttls()
-        server.login(username,password)
         server.sendmail(username, atttext, msg)
         server.quit()
     
@@ -335,7 +330,7 @@ if test_on:
 #************************************
 points,trials = test.getPoints()
 performance = (float(points)/trials-.25)/.75
-pay_bonus = round(performance*5*2)/2.0
+pay_bonus = round(performance*5)
 print('Participant ' + subject_code + ' won ' + str(points) + ' points out of ' + str(trials) + ' trials. Bonus: $' + str(pay_bonus))
 
 #open post-task questionnaire
