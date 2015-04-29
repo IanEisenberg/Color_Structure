@@ -83,7 +83,7 @@ class BiasPredModel:
     and the relevant to calculate posterior hypothesis estimates.
     """
     def __init__(self, likelihood_dist, prior, recursive_prob = .9,
-                 data_noise = 0, bias = 1):
+                 data_noise = 0, bias = 1, temp = 1):
         self.prior = np.array(prior)
         self.likelihood_dist = likelihood_dist
         self.recursive_prob = recursive_prob
@@ -124,7 +124,8 @@ class BiasPredModel:
     def set_bias(self, bias):
         self.bias = bias
         
-    def choose(self, mode = None, random_prob = .1, temp = 1):
+    def choose(self, mode = 'softmax', random_prob = .1):
+        temp = self.temp
         if mode == "prob_match":
             return np.random.choice(range(len(self.posterior)), p=self.posterior)
         elif mode == "noisy_prob_match":

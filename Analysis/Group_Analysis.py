@@ -83,7 +83,13 @@ for train_file, test_file in zip(train_files,test_files):
     # Generic Experimental Settings
     #*********************************************
     behav_sum['train_len'] = len(train_dfa)
-    behav_sum['test_len'] = len(test_dfa)
+    behav_sum['test_len'] = len(dfa)
+    
+    #*********************************************
+    # Performance
+    #*********************************************    
+    behav_sum['train_ts1_acc'], behav_sum['train_ts2_acc'] = list(train_dfa.groupby('ts').correct.mean())
+    behav_sum['test_ts1_acc'], behav_sum['test_ts2_acc'] = list(dfa.groupby('ts').correct.mean())
     
     #*********************************************
     # Switch costs 
@@ -173,8 +179,8 @@ for train_file, test_file in zip(train_files,test_files):
     behav_sum['ts_acc'] = ts_acc/optimal_ts_acc
 
     
-    def fitfunc(dfa, b):
-        model = BiasPredModel(ts_dis, init_prior, bias = b, recursive_prob = train_recursive_p)
+    def fitfunc(dfa, b, temp):
+        model = BiasPredModel(ts_dis, init_prior, bias = b, temp = temp, recursive_prob = train_recursive_p)
         bias_model_likelihoods = []
         for i,trial in dfa.iterrows():
             c = trial.context
@@ -182,11 +188,15 @@ for train_file, test_file in zip(train_files,test_files):
             conf = model.calc_posterior(c)
             bias_model_likelihoods.append(conf[trial_choice])
         return bias_model_likelihoods
-        
+     
     def errfunc(dfa,b):
         return (fitfunc(dfa,b) - np.ones(len(dfa)))
     
-    behav_sum['estimated_bias'] = scipy.optimize.curve_fit(fitfunc,dfa,np.ones(len(dfa)), p0 = .2)[0][0]
+    bias, temp = scipy.optimize.curve_fit(fitfunc,dfa,np.ones(len(dfa)), p0 = [.2,1])[0][0]
+    behav_sum['estimated_bias'] = bias
+    
+    squared_error = np.sum(np.square(errfunc(dfa,bias)))
+    behav_sum['bias_model_error'] = squared_error
     
     #*********************************************
     # Add to group dictionary
