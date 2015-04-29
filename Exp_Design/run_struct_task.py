@@ -9,13 +9,16 @@ import webbrowser
 from prob_context_task import probContextTask
 from make_config import makeConfigList, makePracticeConfigList
 from test_bot import test_bot
+import glob
+from Load_Data import load_data
+
 #set-up some variables
 
 verbose=True
 fullscr= True
 subdata=[]
-practice_on = True
-task_on = True
+practice_on = False
+task_on = False
 test_on = True
 bot_on = False
 bot_mode = "ignore_base" #other for optimal
@@ -82,11 +85,11 @@ if practice_on:
     task_intro_text = [
         'Welcome\n\nPress 5 to move through instructions',
         """
-        This experiment starts with a training phase followed by a testing phase,
-        each lasting about 25 minutes.
+        This experiment starts with a training phase followed by a testing phase.
+        Training will last about 45 minutes and testing will last 30 minutes.
         
-        Your performance on the test phase determines your bonus payment
-        (up to $5). To perform well on the test phase you'll need to stay
+        Your performance on the training AND test phase determines your bonus payment. 
+        To perform well on the test phase you'll need to stay
         motivated and learn as much as possible in the training phase.
         """,
         """
@@ -102,7 +105,7 @@ if practice_on:
         The shape's vertical position will also be changing on each trial.
         
         Critically, the best key to press in response to each shape 
-        depends on the shape's vertical position. 
+        partially depends on the shape's vertical position. 
         
         The different positions where the shapes will be presented 
         are shown on the next screen.
@@ -113,7 +116,7 @@ if practice_on:
         
         After the training phase, there will be a test phase 
         with no feedback. You will still be earning points, and these
-        test phase points will be used to determine your bonus pay.
+        test phase points will also be used to determine your bonus pay.
         
         It is therefore very important that you use the points 
         in the training phase to learn how to best respond to each shape 
@@ -241,10 +244,16 @@ if task_on:
 #************************************
 
 if test_on:
+    train_file = glob.glob('../RawData/' + subject_code + '*Context_20*yaml')[0]
+    train_name = train_file[11:-5]
+    taskinfo, df, dfa = load_data(train_file, train_name, mode = 'train')
+    states = taskinfo['states']
+    ts_order = [states[0]['ts'],states[1]['ts']]
+
     
     test_config_file = makeConfigList(taskname = 'Prob_Context_noFB', iden = subject_code, exp_len = test_len, 
-                                      recursive_p = recursive_p, FBDuration = 0, FBonset = 0, action_keys = task.getActions(),
-                                      ts_order = task.getTSorder())
+                                      recursive_p = recursive_p, FBDuration = 0, FBonset = 0, action_keys = taskinfo['action_keys'],
+                                      ts_order = ts_order)
     test=probContextTask(test_config_file,subject_code, fullscreen = fullscr)
     if bot_on == True:
         test.setBot(bot = test_bot(test_config_file, mode = bot_mode), mode = "full")
