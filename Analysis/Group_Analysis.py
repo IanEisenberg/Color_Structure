@@ -7,10 +7,11 @@ Created on Mon Apr 27 11:16:08 2015
 
 import numpy as np
 from scipy.stats import norm
+import scipy
 import pandas as pd
 import matplotlib.pyplot as plt
 from Load_Data import load_data
-from helper_classes import PredModel, BalancedPredModel
+from helper_classes import PredModel, BiasPredModel
 import statsmodels.api as sm
 import pickle
 import glob
@@ -47,8 +48,8 @@ test_files = glob.glob('../RawData/*Context_noFB*yaml')
 count = 0
 for train_file, test_file in zip(train_files,test_files):
     count += 1
-    if count != 1:
-        continue
+    if count != 999:
+        pass #continue
     
     test_name = test_file[11:-5]
     train_name = train_file[11:-5]
@@ -77,6 +78,12 @@ for train_file, test_file in zip(train_files,test_files):
     dfa['abs_context'] = abs(dfa.context)    
     train_dfa = train_dict['dfa']
     behav_sum = odict()
+    
+    #*********************************************
+    # Generic Experimental Settings
+    #*********************************************
+    behav_sum['train_len'] = len(train_dfa)
+    behav_sum['test_len'] = len(test_dfa)
     
     #*********************************************
     # Switch costs 
@@ -165,6 +172,21 @@ for train_file, test_file in zip(train_files,test_files):
     optimal_ts_acc = np.mean(np.equal(model_choices.optimal,dfa.ts))
     behav_sum['ts_acc'] = ts_acc/optimal_ts_acc
 
+    
+    def fitfunc(dfa, b):
+        model = BiasPredModel(ts_dis, init_prior, bias = b, recursive_prob = train_recursive_p)
+        bias_model_likelihoods = []
+        for i,trial in dfa.iterrows():
+            c = trial.context
+            trial_choice = trial.subj_ts
+            conf = model.calc_posterior(c)
+            bias_model_likelihoods.append(conf[trial_choice])
+        return bias_model_likelihoods
+        
+    def errfunc(dfa,b):
+        return (fitfunc(dfa,b) - np.ones(len(dfa)))
+    
+    behav_sum['estimated_bias'] = scipy.optimize.curve_fit(fitfunc,dfa,np.ones(len(dfa)), p0 = .2)[0][0]
     
     #*********************************************
     # Add to group dictionary
