@@ -51,8 +51,8 @@ def load_data(datafile, name, mode = 'train'):
     dfa['rep_resp'] = [dfa.response.shift(1)[i] == dfa.response[i] for i in dfa.index]
     dfa['switch'] = [dfa.ts.shift(1)[i] != dfa.ts[i] for i in dfa.index]
     dfa['switch'].iloc[0]=False
-    dfa['con_shape'] = [int(dfa.response[i] == dfa.stim[i][0]) for i in dfa.index]
-    dfa['con_orient'] = [int(dfa.response[i] == dfa.stim[i][1]) for i in dfa.index]
+    dfa['con_1dim'] = [int(dfa.response[i] == dfa.stim[i][0]) for i in dfa.index]
+    dfa['con_2dim'] = [int(dfa.response[i] == dfa.stim[i][1]) for i in dfa.index]
     dfa['subj_ts'] = [int(response in [2,3]) for response in dfa.response]
     dfa['subj_switch'] = [int(dfa.subj_ts.shift(1)[i] != dfa.subj_ts[i]) for i in dfa.index]
     dfa['correct'] = [dfa.response[i] == dfa.stim[i][dfa.ts[i]] for i in dfa.index]

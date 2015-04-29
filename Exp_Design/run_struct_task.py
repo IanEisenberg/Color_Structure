@@ -17,8 +17,8 @@ from Load_Data import load_data
 verbose=True
 fullscr= True
 subdata=[]
-practice_on = False
-task_on = False
+practice_on = True
+task_on = True
 test_on = True
 bot_on = False
 bot_mode = "ignore_base" #other for optimal
@@ -62,17 +62,7 @@ if bot_on == True:
     task.setBot(bot = test_bot(task_config_file, mode = bot_mode), mode = "full")
 task.writeToLog(task.toJSON())
 
-#************************************
-# Set up text reminders
-#************************************
 
-if bot_on == False:   
-    username = "thedummyspeaks@gmail.com"
-    password = "r*kO84gSzzD4"
-    atttext = "9148155478@txt.att.net"
-    server = smtplib.SMTP('smtp.gmail.com',587)
-    server.starttls()
-    server.login(username,password)
 
 #************************************
 # Start Practice
@@ -228,9 +218,15 @@ if task_on:
 #************************************
 # Send text about task performance
 #************************************
-    if bot_on == False:
-        message = "Training done. Points: " + str(task.getPoints()[0]) + \
-            " out of " + str(task.getPoints()[1]) 
+
+    if bot_on == False:   
+        username = "thedummyspeaks@gmail.com"
+        password = "r*kO84gSzzD4"
+        atttext = "9148155478@txt.att.net"
+        server = smtplib.SMTP('smtp.gmail.com',587)
+        server.starttls()
+        server.login(username,password)
+        message = "Training done."
         
         msg = """From: %s
         To: %s
@@ -238,22 +234,29 @@ if task_on:
         
         %s""" % (username, atttext, message)
         server.sendmail(username, atttext, msg)
+        server.quit()
 
 #************************************
 # Start test
 #************************************
 
 if test_on:
-    train_file = glob.glob('../RawData/' + subject_code + '*Context_20*yaml')[0]
-    train_name = train_file[11:-5]
-    taskinfo, df, dfa = load_data(train_file, train_name, mode = 'train')
-    states = taskinfo['states']
-    ts_order = [states[0]['ts'],states[1]['ts']]
-
-    
+    #if experiment crashed for some reason between train and test set task_on
+    #to false and the experiment will load up the parameters from the training
+    if task_on == False:
+        train_file = glob.glob('../RawData/' + subject_code + '*Context_20*yaml')[0]
+        train_name = train_file[11:-5]
+        taskinfo, df, dfa = load_data(train_file, train_name, mode = 'train')
+        action_keys = taskinfo['action_keys']
+        states = taskinfo['states']
+        ts_order = [states[0]['ts'],states[1]['ts']] 
+    else:
+        action_keys = task.getActions()
+        ts_order = task.getTSorder()
     test_config_file = makeConfigList(taskname = 'Prob_Context_noFB', iden = subject_code, exp_len = test_len, 
-                                      recursive_p = recursive_p, FBDuration = 0, FBonset = 0, action_keys = taskinfo['action_keys'],
+                                      recursive_p = recursive_p, FBDuration = 0, FBonset = 0, action_keys = action_keys,
                                       ts_order = ts_order)
+                                      
     test=probContextTask(test_config_file,subject_code, fullscreen = fullscr)
     if bot_on == True:
         test.setBot(bot = test_bot(test_config_file, mode = bot_mode), mode = "full")
@@ -322,17 +325,25 @@ if test_on:
     
 
 #************************************
-# Send text about test performance
-#************************************   
-    if bot_on == False:
+# Send text about task performance
+#************************************
+
+    if bot_on == False:   
+        username = "thedummyspeaks@gmail.com"
+        password = "r*kO84gSzzD4"
+        atttext = "9148155478@txt.att.net"
+        server = smtplib.SMTP('smtp.gmail.com',587)
+        server.starttls()
+        server.login(username,password)
+        message = "Testing done."
+        
         msg = """From: %s
         To: %s
         Subject: text-message
-        %s""" % (username, atttext, message)
         
+        %s""" % (username, atttext, message)
         server.sendmail(username, atttext, msg)
         server.quit()
-    
     
 #************************************
 # Determine payment
