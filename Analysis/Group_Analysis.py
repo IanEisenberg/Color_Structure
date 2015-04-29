@@ -9,15 +9,14 @@ import numpy as np
 from scipy.stats import norm
 import pandas as pd
 import matplotlib.pyplot as plt
-import pylab
 from Load_Data import load_data
-from helper_classes import PredModel
-from helper_functions import *
-from ggplot import *
+from helper_classes import PredModel, BalancedPredModel
 import statsmodels.api as sm
 import pickle
 import glob
 import re
+from collections import OrderedDict as odict
+
 
 #*********************************************
 # Set up plotting defaults
@@ -48,8 +47,8 @@ test_files = glob.glob('../RawData/*Context_noFB*yaml')
 count = 0
 for train_file, test_file in zip(train_files,test_files):
     count += 1
-    if count != 999:
-        pass #continue
+    if count != 1:
+        continue
     
     test_name = test_file[11:-5]
     train_name = train_file[11:-5]
@@ -77,7 +76,7 @@ for train_file, test_file in zip(train_files,test_files):
     trans_probs = np.array([[recursive_p, 1-recursive_p], [1-recursive_p,recursive_p]])
     dfa['abs_context'] = abs(dfa.context)    
     train_dfa = train_dict['dfa']
-    behav_sum = {}
+    behav_sum = odict()
     
     #*********************************************
     # Switch costs 
@@ -93,13 +92,13 @@ for train_file, test_file in zip(train_files,test_files):
     # linear fit of RT based on absolute context
     #*********************************************
     
-    result = sm.GLM(dfa.rt,dfa.context).fit()
+    result = sm.GLM(dfa.rt,dfa.abs_context).fit()
     behav_sum['context->rt'] = result.params[0]
     
     #*********************************************
     # Switch training accuracy
     #*********************************************
-    behav_sum['switch_acc'] = train_dfa[int(len(train_dfa)/2):].groupby('subj_switch').correct.mean()[1]
+    behav_sum['train_switch_acc'] = train_dfa[int(len(train_dfa)/2):].groupby('subj_switch').correct.mean()[1]
 
     
     #*********************************************
@@ -107,7 +106,7 @@ for train_file, test_file in zip(train_files,test_files):
     #*********************************************
     subj_recursive_p = (1-dfa.subj_switch.mean())
     train_recursive_p = (1-train_dfa.switch.mean())
-    behav_sum['subj_recursive_p'] = subj_recursive_p/train_recursive_p
+    behav_sum['subj_recursive_p'] = subj_recursive_p
     behav_sum['train_statistics'] = {'recursive_p':train_recursive_p}
     
     #*********************************************
@@ -175,5 +174,6 @@ for train_file, test_file in zip(train_files,test_files):
     
     
 group_df = pd.DataFrame(group_behavior).transpose()   
+group_df = group_df[list(behav_sum.keys())]
     
     

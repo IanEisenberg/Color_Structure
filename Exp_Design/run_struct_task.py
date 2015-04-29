@@ -14,7 +14,7 @@ from test_bot import test_bot
 verbose=True
 fullscr= True
 subdata=[]
-practice_on = True
+practice_on = False
 task_on = True
 test_on = True
 bot_on = False

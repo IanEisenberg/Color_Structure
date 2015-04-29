@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pylab
 from ggplot import * 
-from helper_classes import PredModel,DataGenerator
+from helper_classes import PredModel,DataGenerator, BiasPredModel
 from datetime import datetime
 from collections import OrderedDict as odict
 
@@ -24,7 +24,7 @@ from collections import OrderedDict as odict
 #Make random subject with some noise values following one of the models and try
 #to predict
 std_track ={}
-for std in [.37,.45,.5]:
+for std in [.37]:
     startTime = datetime.now()
     init_prior = [.5, .5]
     exp_len = 600
@@ -41,7 +41,7 @@ for std in [.37,.45,.5]:
     
     u = .3
     ts_dis = [norm(-u,std),norm(u,std)]    
-    for subj_i in range(100):
+    for subj_i in range(1):
         print(subj_i)
         
         
@@ -49,7 +49,8 @@ for std in [.37,.45,.5]:
         models = [ \
             PredModel(ts_dis, init_prior, mode = "ignore"),\
             PredModel(ts_dis, init_prior, mode = "single"),\
-            PredModel(ts_dis, init_prior, mode = "optimal")]
+            PredModel(ts_dis, init_prior, mode = "optimal"), \
+            BalancedPredModel(ts_dis,init_prior, balance = 1)]
         model_prior = [1.0/len(models)]*6
         
         #Generate data, choose a random subject 'mode' and make the subject

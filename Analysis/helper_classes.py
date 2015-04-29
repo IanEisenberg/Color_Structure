@@ -77,6 +77,72 @@ class PredModel:
         else:
             return np.argmax(self.posterior)
             
+class BiasPredModel:
+    """
+    Prediction model that takes in data, and uses a prior over hypotheses
+    and the relevant to calculate posterior hypothesis estimates.
+    """
+    def __init__(self, likelihood_dist, prior, recursive_prob = .9,
+                 data_noise = 0, bias = 1):
+        self.prior = np.array(prior)
+        self.likelihood_dist = likelihood_dist
+        self.recursive_prob = recursive_prob
+        self.bias = bias
+        self.posterior = prior
+        
+    def calc_posterior(self, data, noise = None):
+        """
+        Calculate the posterior probability of different distribution hypotheses
+        given the data. You can set a noise value which will set add gaussian
+        noise to the observation. The value specified will be a scaling parameter. 
+        It should always be less than one. 
+        """
+        ld = self.likelihood_dist
+        rp = self.recursive_prob
+        bias = self.bias
+        prior = self.prior
+
+        if noise:
+            data= min(max(data + noise*norm().rvs(),-1),1)
+                                   
+        trans_probs = np.array([[rp, 1-rp], [1-rp, rp]])    
+                     
+        n = len(prior)
+        likelihood = [dis.pdf(data) for dis in ld]
+        numer = np.array([likelihood[i] * prior[i] for i in range(n)])
+        try:
+            dinom = [np.sum(zip(*numer)[i]) for i in range(len(numer[0]))]
+        except TypeError:
+            dinom = np.sum(numer)
+        posterior = numer/dinom
+        
+        optimal_prior = np.dot(trans_probs,posterior)
+        self.prior = (optimal_prior*(1-bias) + np.array([.5,.5])*bias)
+        self.posterior = posterior
+        return posterior
+        
+    def set_bias(self, bias):
+        self.bias = bias
+        
+    def choose(self, mode = None, random_prob = .1, temp = 1):
+        if mode == "prob_match":
+            return np.random.choice(range(len(self.posterior)), p=self.posterior)
+        elif mode == "noisy_prob_match":
+            if r.random() > random_prob:
+                return np.random.choice(range(len(self.posterior)), p=self.posterior)
+            else:
+                return r.choice([0,1])
+        elif mode == "noisy":
+            if r.random() > random_prob:
+                return np.argmax(self.posterior)
+            else:
+                return r.choice([0,1])
+        elif mode == "softmax":
+            probs = np.exp(self.posterior/temp)/sum(np.exp(self.posterior/temp))
+            return np.random.choice(range(len(probs)), p = probs)
+        else:
+            return np.argmax(self.posterior)
+
             
 class DataGenerator:
     """

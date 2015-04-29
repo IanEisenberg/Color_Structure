@@ -12,9 +12,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import pylab
 from Load_Data import load_data
-from helper_classes import PredModel
+from helper_classes import PredModel, BiasPredModel
 from helper_functions import *
 from ggplot import *
+import pickle
 import glob
 import re
 
@@ -44,13 +45,13 @@ plot = False
 train_files = glob.glob('../RawData/*Context_20*yaml')
 test_files = glob.glob('../RawData/*Context_noFB*yaml')
 
-subj_i = 1
+subj_i = 0
 train_file = train_files[subj_i]
 test_file = test_files[subj_i]
 
 test_name = test_file[11:-5]
 train_name = train_file[11:-5]
-subj_name = re.match(r'(\w*)_Prob*', name).group(1)
+subj_name = re.match(r'(\w*)_Prob*', test_name).group(1)
 
 try:
     train_dict = pickle.load(open('../Data/' + train_name + '.p','rb'))
@@ -129,6 +130,24 @@ for i,trial in dfa.iterrows():
     model_choices.loc[i] = model_choice
     model_prob_matches.loc[i] = model_prob_match
     
+
+print(np.argmax(model_likelihoods.sum()))
+
+
+def fitfunc(dfa, b):
+    model = BiasPredModel(ts_dis, init_prior, bias = b, recursive_prob = train_recursive_p)
+    bias_model_likelihoods = []
+    for i,trial in dfa.iterrows():
+        c = trial.context
+        trial_choice = trial.subj_ts
+        conf = model.calc_posterior(c)
+        bias_model_likelihoods.append(conf[trial_choice])
+    return bias_model_likelihoods
+    
+def errfunc(dfa,b):
+    return (fitfunc(dfa,b) - np.ones(len(dfa)))
+
+tmp = scipy.optimize.curve_fit(fitfunc,dfa,np.ones(len(dfa)), p0 = .2)   
 
 print(np.argmax(model_likelihoods.sum()))
 
