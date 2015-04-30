@@ -49,12 +49,11 @@ def load_data(datafile, name, mode = 'train'):
                        'reward', 'punishment','stimulusCleared'],1)
                   
     dfa['rep_resp'] = [dfa.response.shift(1)[i] == dfa.response[i] for i in dfa.index]
-    dfa['switch'] = [dfa.ts.shift(1)[i] != dfa.ts[i] for i in dfa.index]
-    dfa['switch'].iloc[0]=False
+    dfa['switch'] = abs(dfa.ts.diff())
     dfa['con_1dim'] = [int(dfa.response[i] == dfa.stim[i][0]) for i in dfa.index]
     dfa['con_2dim'] = [int(dfa.response[i] == dfa.stim[i][1]) for i in dfa.index]
     dfa['subj_ts'] = [int(response in [2,3]) for response in dfa.response]
-    dfa['subj_switch'] = [int(dfa.subj_ts.shift(1)[i] != dfa.subj_ts[i]) for i in dfa.index]
+    dfa['subj_switch'] = abs(dfa.subj_ts.diff())
     dfa['correct'] = [dfa.response[i] == dfa.stim[i][dfa.ts[i]] for i in dfa.index]
     dfa = dfa.convert_objects(convert_numeric = True)
     

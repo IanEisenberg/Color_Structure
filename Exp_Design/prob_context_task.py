@@ -221,13 +221,35 @@ class probContextTask:
         """
         height = .05
         ratio = self.win.size[1]/float(self.win.size[0])
-        tmp_stim = visual.Rect(self.win,height*ratio*10, height,units = 'norm',fillColor = 'yellow')
+        tmp_stim = visual.Rect(self.win,height*ratio*5, height,units = 'norm',fillColor = 'yellow')
         for context in self.context_means:
             tmp_stim.setPos((0, context*.9))
             tmp_stim.draw()
         self.win.flip()
-
         
+    def presentStims(self, mode = 'practice'):
+        """ Used during instructions to present possible stims
+        """
+        height = .2
+        ratio = self.win.size[1]/float(self.win.size[0])
+        pos = [-.6, -.2, .2, .6]
+        if mode == 'practice':
+                stims = [visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = 30),
+                         visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = -30),
+                         visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = 30),
+                         visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = -30)]
+
+        elif mode == 'task':
+            stims = [visual.Rect(self.win,height*ratio, height,units = 'norm', fillColor = 'red'),
+                     visual.Rect(self.win,height*ratio, height,units = 'norm',fillColor = 'blue'),
+                     visual.Circle(self.win,units = 'norm',radius = (height*ratio/2, height/2),edges = 32,fillColor = 'red'),
+                     visual.Circle(self.win,units = 'norm',radius = (height*ratio/2, height/2), edges = 32,fillColor = 'blue')]
+        
+        for i,stim in enumerate(stims):
+            stim.setPos((pos[i],0))
+            stim.draw()
+        self.win.flip()
+
     def presentTrial(self,trial):
         """
         This function presents a stimuli, waits for a response, tracks the

@@ -12,6 +12,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import pylab
 from Load_Data import load_data
+import statsmodels.api as sm
+from collections import OrderedDict as odict
 from helper_classes import PredModel, BiasPredModel
 from helper_functions import *
 from ggplot import *
@@ -45,7 +47,7 @@ plot = False
 train_files = glob.glob('../RawData/*Context_20*yaml')
 test_files = glob.glob('../RawData/*Context_noFB*yaml')
 
-subj_i = 0
+subj_i = 5
 train_file = train_files[subj_i]
 test_file = test_files[subj_i]
 
@@ -76,8 +78,28 @@ recursive_p = taskinfo['recursive_p']
 states = taskinfo['states']
 state_dis = [norm(states[0]['c_mean'], states[0]['c_sd']), norm(states[1]['c_mean'], states[1]['c_sd']) ]
 trans_probs = np.array([[recursive_p, 1-recursive_p], [1-recursive_p,recursive_p]])
+dfa['abs_context'] = abs(dfa.context)    
 train_dfa = train_dict['dfa']
-train_recursive_p = 1-train_dfa.switch.mean()
+train_dfa['abs_context'] = abs(train_dfa.context)
+behav_sum = odict()
+
+
+#*********************************************
+# Generic Experimental Settings
+#*********************************************
+behav_sum['train_len'] = len(train_dfa)
+behav_sum['test_len'] = len(dfa)
+
+#*********************************************
+# Performance
+#*********************************************    
+behav_sum['train_ts1_acc'], behav_sum['train_ts2_acc'] = list(train_dfa.groupby('ts').correct.mean())
+behav_sum['test_ts1_acc'], behav_sum['test_ts2_acc'] = list(dfa.groupby('ts').correct.mean())
+
+sub = train_dfa
+logit = sm.Logit(sub['correct'], sub[['trial_count','rt','abs_context']])
+result = logit.fit()
+print(result.summary())
 #*********************************************
 # Switch costs 
 #*********************************************
@@ -86,14 +108,46 @@ TS_switch_cost = np.mean(dfa.query('subj_switch == True')['rt']) - np.mean(dfa.q
 #RT difference when switching to the other action within a task-set
 switch_resp_cost = np.mean(dfa.query('rep_resp == False and subj_switch != True')['rt']) - np.mean(dfa.query('rep_resp == True')['rt'])
 TS_minus_resp_switch_cost = TS_switch_cost - switch_resp_cost
+behav_sum['Switch_cost'] = TS_minus_resp_switch_cost
+
+#*********************************************
+# linear fit of RT based on absolute context
+#*********************************************
+
+result = sm.GLM(dfa.rt,dfa.abs_context).fit()
+behav_sum['context->rt'] = result.params[0]
+
+#*********************************************
+# Switch training accuracy
+#*********************************************
+behav_sum['train_switch_acc'] = train_dfa[int(len(train_dfa)/2):].groupby('subj_switch').correct.mean()[1]
 
 
+#*********************************************
+# estimate of subjective transition probabilities
+#*********************************************
+subj_recursive_p = (1-dfa.subj_switch.mean())
+train_recursive_p = (1-train_dfa.switch.mean())
+behav_sum['subj_recursive_p'] = subj_recursive_p
+behav_sum['train_statistics'] = {'recursive_p':train_recursive_p}
+    
+#*********************************************
+# Test Accuracy as proportion of optimal model
+#*********************************************
+
+#When subjects performed consistently with a particular TS, what was the mean context value?
+experienced_ts_means = list(train_dfa.groupby('subj_ts').agg(np.mean).context)
+#Same for standard deviation
+experienced_ts_std = list(train_dfa.groupby('subj_ts').agg(np.std).context)
+behav_sum['train_statistics']['ts_mean_ts'] = list(zip(experienced_ts_means,experienced_ts_std))  
+
+    
 #*********************************************
 # Optimal task-set inference 
 #*********************************************
 ts_order = [states[0]['ts'],states[1]['ts']]
-ts_dis = [norm(states[ts_order[0]]['c_mean'], states[ts_order[0]]['c_sd']),
-          norm(states[ts_order[1]]['c_mean'], states[ts_order[1]]['c_sd'])]
+ts_dis = [state_dis[i] for i in ts_order]
+
 
 init_prior = [.5,.5]
 model_choice = ['ignore','single','optimal']
@@ -133,7 +187,7 @@ for i,trial in dfa.iterrows():
 
 print(np.argmax(model_likelihoods.sum()))
 
-
+ts_dis = [norm(mean,std) for mean,std in zip(experienced_ts_means,experienced_ts_std)]
 def fitfunc(dfa, b):
     model = BiasPredModel(ts_dis, init_prior, bias = b, recursive_prob = train_recursive_p)
     bias_model_likelihoods = []
@@ -147,7 +201,7 @@ def fitfunc(dfa, b):
 def errfunc(dfa,b):
     return (fitfunc(dfa,b) - np.ones(len(dfa)))
 
-tmp = scipy.optimize.curve_fit(fitfunc,dfa,np.ones(len(dfa)), p0 = .2)   
+bias = scipy.optimize.curve_fit(fitfunc,dfa,np.ones(len(dfa)), p0 = .2)[0][0]
 
 print(np.argmax(model_likelihoods.sum()))
 

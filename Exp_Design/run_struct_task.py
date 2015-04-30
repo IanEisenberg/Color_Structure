@@ -90,6 +90,8 @@ if practice_on:
         Use your index and middle fingers on both hands to respond.
         
         The goal is to learn the best key(s) to press for each shape.
+        
+        Press '5' to see the four shapes used in practice.
         """,
         """
         The shape's vertical position will also be changing on each trial.
@@ -98,11 +100,12 @@ if practice_on:
         partially depends on the shape's vertical position. 
         
         The different positions where the shapes will be presented 
-        are shown on the next screen.
+        are shown on the next screen. On each trial the shape will
+        be presented at only one of these positions.
         """,
         """
         After you press a key, the shape will disappear and 
-        you will get points indicating how well you did.
+        you will get a point if you responded correctly.
         
         After the training phase, there will be a test phase 
         with no feedback. You will still be earning points, and these
@@ -110,7 +113,7 @@ if practice_on:
         
         It is therefore very important that you use the points 
         in the training phase to learn how to best respond to each shape 
-        depending on the vertical position.
+        and how your response depends on the shape's vertical position.
         """,
         """
         You must respond while the shape is on the screen.
@@ -124,11 +127,16 @@ if practice_on:
         """
     ]
     
+    
     for line in task_intro_text:
         practice.presentTextToWindow(line)
         resp,practice.startTime=practice.waitForKeypress(practice.trigger_key)
         practice.checkRespForQuitKey(resp)
         event.clearEvents()
+        if 'used in practice' in line:
+            practice.presentStims(mode = 'practice')
+            resp,practice.startTime=practice.waitForKeypress(practice.trigger_key)
+            practice.checkRespForQuitKey(resp)
         if 'shown on the next screen' in line:
             practice.presentContexts()
             resp,practice.startTime=practice.waitForKeypress(practice.trigger_key)
@@ -147,6 +155,19 @@ if practice_on:
                         practice.shutDownEarly()
         trial=practice.presentTrial(trial)
     
+    practice.presentTextToWindow(
+    """
+    That's enough practice. Before we start the experiment
+    press 5 to see the shapes you will have to respond to
+    during the training and test phases.
+    """)
+    resp,task.startTime=practice.waitForKeypress(practice.trigger_key)
+    task.checkRespForQuitKey(resp)
+    practice.presentStims(mode = 'task')
+    resp,practice.startTime=practice.waitForKeypress(practice.trigger_key)
+    practice.checkRespForQuitKey(resp)
+    
+    
     # clean up
     practice.closeWindow()
 
@@ -163,7 +184,8 @@ if task_on:
             """
             We will now start the experiment.
             
-            There will be one break half way through. 
+            There will be one break half way through. As soon
+            as you press '5' the experiment will start so get ready!
             
             Please wait for the experimenter.
             """)
