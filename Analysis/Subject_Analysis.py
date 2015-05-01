@@ -48,7 +48,7 @@ plot = False
 train_files = glob.glob('../RawData/*Context_20*yaml')
 test_files = glob.glob('../RawData/*Context_noFB*yaml')
 
-subj_i = 5
+subj_i = 4
 train_file = train_files[subj_i]
 test_file = test_files[subj_i]
 
@@ -58,6 +58,8 @@ subj_name = re.match(r'(\w*)_Prob*', test_name).group(1)
 
 try:
     train_dict = pickle.load(open('../Data/' + train_name + '.p','rb'))
+    taskinfo, train_dfa = [train_dict.get(k) for k in ['taskinfo','dfa']]
+
 except FileNotFoundError:
     train_taskinfo, train_dfa = load_data(train_file, train_name, mode = 'train')
     pickle.dump(train_dict, open('../Data/' + train_name + '.p','wb'))

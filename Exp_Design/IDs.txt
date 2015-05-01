@@ -5,7 +5,3 @@ Pilot010
 Pilot012
 Pilot015
 Pilot014
-tmp
-tmp
-tmp
-tmp
