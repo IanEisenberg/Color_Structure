@@ -113,3 +113,37 @@ for std in [.37]:
 sd = .5
 std_track[sd]['group_performs'].groupby('context').mean()
 
+
+#******************************************
+#Test acc difference between optimal and ignore models
+#******************************************
+
+sim_acc = []
+for sim in range(20):
+    a = DataGenerator(ts_dis,.9)
+    trials = [a.gen_data() for _ in range(700)]
+    
+    optimal_observer = BiasPredModel(ts_dis, [.5,.5], bias = 0, recursive_prob = recursive_p)
+    ignore_observer = BiasPredModel(ts_dis, [.5,.5], bias = 1, recursive_prob = recursive_p)
+    
+    observer_choices = []
+    ignore_choices = []
+    tss = []
+    for i,trial in enumerate(trials):
+        tss.append(trial['ts'])
+        c = trial['context']
+        conf = optimal_observer.calc_posterior(c)
+        obs_choice = np.argmax(conf)
+        observer_choices.append(obs_choice)
+        
+        ignore_conf = ignore_observer.calc_posterior(c)
+        ignore_choice = np.argmax(ignore_conf)
+        ignore_choices.append(ignore_choice)
+        
+    np.sum(np.equal(tss,observer_choices))/len(tss)
+    np.sum(np.equal(tss,ignore_choices))/len(tss)
+    sim_acc.append((np.sum(np.equal(tss,observer_choices))/len(tss),
+                    np.sum(np.equal(tss,ignore_choices))/len(tss)))
+                    
+optimal,ignore = [[z[i] for z in sim_acc] for i in (0,1)]
+scipy.stats.ttest_ind(optimal,ignore,equal_var = False)

@@ -57,5 +57,5 @@ def load_data(datafile, name, mode = 'train'):
     dfa['correct'] = [dfa.response[i] == dfa.stim[i][dfa.ts[i]] for i in dfa.index]
     dfa = dfa.convert_objects(convert_numeric = True)
     
-    return (taskinfo, df,dfa)
+    return (taskinfo, dfa)
 

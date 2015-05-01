@@ -129,10 +129,10 @@ class probContextTask:
             height = .2
             ratio = self.win.size[1]/float(self.win.size[0])
             if self.mode == 'practice':
-                self.stims = {self.stim_ids[0]: visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = 30),
-                              self.stim_ids[1]: visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = -30),
-                              self.stim_ids[2]: visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = 30),
-                              self.stim_ids[3]: visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = -30)}
+                self.stims = {self.stim_ids[0]: visual.Polygon(self.win,units = 'norm',radius = (height*ratio/2, height/2),edges = 3,fillColor = 'green'),
+                              self.stim_ids[1]: visual.Polygon(self.win, units = 'norm',radius = (height*ratio/2, height/2),edges = 3,fillColor = 'yellow'),
+                              self.stim_ids[2]: visual.Polygon(self.win, units = 'norm',radius = (height*ratio/2, height/2),edges = 5,fillColor = 'green'),
+                              self.stim_ids[3]: visual.Polygon(self.win, units = 'norm',radius = (height*ratio/2, height/2),edges = 5,fillColor = 'yellow')}
 
             elif self.mode == 'task':
                 self.stims = {self.stim_ids[0]: visual.Rect(self.win,height*ratio, height,units = 'norm', fillColor = 'red'),
@@ -234,10 +234,10 @@ class probContextTask:
         ratio = self.win.size[1]/float(self.win.size[0])
         pos = [-.6, -.2, .2, .6]
         if mode == 'practice':
-                stims = [visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = 30),
-                         visual.ImageStim(self.win, image = '../Stimuli/93.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = -30),
-                         visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = 30),
-                         visual.ImageStim(self.win, image = '../Stimuli/22.png', units = 'norm', size = (height*ratio, height), mask = 'circle', ori = -30)]
+                stims = [visual.Polygon(self.win,units = 'norm',radius = (height*ratio/2, height/2),edges = 3,fillColor = 'green'),
+                         visual.Polygon(self.win,units = 'norm',radius = (height*ratio/2, height/2),edges = 3,fillColor = 'yellow'),
+                         visual.Polygon(self.win, units = 'norm',radius = (height*ratio/2, height/2),edges = 5,fillColor = 'green'),
+                         visual.Polygon(self.win, units = 'norm',radius = (height*ratio/2, height/2),edges = 5,fillColor = 'yellow')]
 
         elif mode == 'task':
             stims = [visual.Rect(self.win,height*ratio, height,units = 'norm', fillColor = 'red'),
