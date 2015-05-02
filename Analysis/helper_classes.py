@@ -83,12 +83,13 @@ class BiasPredModel:
     and the relevant to calculate posterior hypothesis estimates.
     """
     def __init__(self, likelihood_dist, prior, recursive_prob = .9,
-                 data_noise = 0, bias = 1, temp = 1):
+                 data_noise = 0, bias = 0, temp = 1):
         self.prior = np.array(prior)
         self.likelihood_dist = likelihood_dist
         self.recursive_prob = recursive_prob
         self.bias = bias
         self.posterior = prior
+        self.temp = temp
         
     def calc_posterior(self, data, noise = None):
         """
@@ -108,7 +109,7 @@ class BiasPredModel:
         trans_probs = np.array([[rp, 1-rp], [1-rp, rp]])    
                      
         n = len(prior)
-        likelihood = [dis.pdf(data) for dis in ld]
+        likelihood = np.array([dis.pdf(data) for dis in ld])
         numer = np.array([likelihood[i] * prior[i] for i in range(n)])
         try:
             dinom = [np.sum(zip(*numer)[i]) for i in range(len(numer[0]))]
@@ -117,7 +118,8 @@ class BiasPredModel:
         posterior = numer/dinom
         
         optimal_prior = np.dot(trans_probs,posterior)
-        self.prior = (optimal_prior*(1-bias) + np.array([.5,.5])*bias)
+        mixture_prior = (optimal_prior*(1-bias) + np.array([.5,.5])*bias) #weighted by bias
+        self.prior = mixture_prior/np.sum(mixture_prior) #renormalize
         self.posterior = posterior
         return posterior
         

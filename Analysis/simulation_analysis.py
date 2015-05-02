@@ -49,8 +49,7 @@ for std in [.37]:
         models = [ \
             PredModel(ts_dis, init_prior, mode = "ignore"),\
             PredModel(ts_dis, init_prior, mode = "single"),\
-            PredModel(ts_dis, init_prior, mode = "optimal"), \
-            BalancedPredModel(ts_dis,init_prior, balance = 1)]
+            PredModel(ts_dis, init_prior, mode = "optimal")]
         model_prior = [1.0/len(models)]*6
         
         #Generate data, choose a random subject 'mode' and make the subject
@@ -58,7 +57,7 @@ for std in [.37]:
         trials = [data_gen.gen_data() for _ in range(exp_len)]
         mode = 'optimal' #r.choice(model_choice)
         choice_mode = 'prob_match'
-        subj_model = PredModel(ts_dis, init_prior, mode = mode)  
+        subj_model = BiasPredModel(ts_dis, init_prior,  bias = .4)  
         
         
         for trial in trials:

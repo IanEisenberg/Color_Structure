@@ -17,10 +17,10 @@ from Load_Data import load_data
 verbose=True
 fullscr= True
 subdata=[]
-practice_on = True
+practice_on = False
 task_on = True
 test_on = True
-fullInfo = True
+fullInfo = False
 bot_on = False
 bot_mode = "ignore_base" #other for optimal
 
@@ -38,8 +38,8 @@ f.write(subject_code + '\n')
 f.close()
 
 #set up some task variables
-train_mins = 1 #train_length in minutes
-test_mins = 1 #test_length in minutes
+train_mins = 45 #train_length in minutes
+test_mins = 30 #test_length in minutes
 avg_test_trial_len = 2.25 #in seconds
 avg_task_trial_len = avg_test_trial_len + 1 #factor in FB
 #Find the minimum even number of blocks to last at least train_length minutes

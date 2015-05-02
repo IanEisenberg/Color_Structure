@@ -8,7 +8,7 @@ Created on Fri Jan 23 11:12:43 2015
 
 import numpy as np
 from scipy.stats import norm
-import scipy
+import lmfit
 import pandas as pd
 import matplotlib.pyplot as plt
 import pylab
@@ -62,6 +62,7 @@ try:
 
 except FileNotFoundError:
     train_taskinfo, train_dfa = load_data(train_file, train_name, mode = 'train')
+    train_dict = {'taskinfo': train_taskinfo, 'dfa': train_dfa}
     pickle.dump(train_dict, open('../Data/' + train_name + '.p','wb'))
     
 try:
@@ -69,7 +70,7 @@ try:
     taskinfo, test_dfa = [test_dict.get(k) for k in ['taskinfo','dfa']]
 except FileNotFoundError:
     taskinfo, test_dfa = load_data(test_file, test_name, mode = 'test')
-    test_dict = {'taskinfo': taskinfo, 'dfa': dfa}
+    test_dict = {'taskinfo': taskinfo, 'dfa': test_dfa}
     pickle.dump(test_dict, open('../Data/' + test_name + '.p','wb'))
 
 
@@ -81,6 +82,14 @@ states = taskinfo['states']
 state_dis = [norm(states[0]['c_mean'], states[0]['c_sd']), norm(states[1]['c_mean'], states[1]['c_sd']) ]
 ts_order = [states[0]['ts'],states[1]['ts']]
 ts_dis = [state_dis[i] for i in ts_order]
+
+#What was the mean contextual value for each taskset during this train run?
+train_ts_means = list(train_dfa.groupby('ts').agg(np.mean).context)
+#Same for standard deviation
+train_ts_std = list(train_dfa.groupby('ts').agg(np.std).context)
+train_ts_dis = [norm(m,s) for m,s in zip(train_ts_means,train_ts_std)]
+#And do the same for recursive_p
+train_recursive_p = 1- train_dfa.switch.mean()
 
 test_dfa['abs_context'] = abs(test_dfa.context)    
 train_dfa['abs_context'] = abs(train_dfa.context)
@@ -96,7 +105,8 @@ behav_sum = odict()
 #given that it chooses the correct task-set, and perfectly learns from feedback.
 #This means that it sets the prior probability for each ts to the transition probabilities
 #of the correct task-set on each trial (which a subject 'could' do due to the
-#deterministic feedback)
+#deterministic feedback). Basically, after receiving FB, the ideal observer
+#knows exactly what task it is in and should act accordingly.
 
 for dfa in [train_dfa]:
     observer_prior = [.5,.5]
@@ -114,7 +124,7 @@ for dfa in [train_dfa]:
     dfa['conform_observer'] = np.equal(train_dfa.subj_ts, observer_choices)
 
 #Optimal observer for test        
-optimal_observer = BiasPredModel(ts_dis, [.5,.5], bias = 0, recursive_prob = recursive_p)
+optimal_observer = BiasPredModel(train_ts_dis, [.5,.5], bias = 0, recursive_prob = train_recursive_p)
 observer_choices = []
 for i,trial in test_dfa.iterrows():
     c = trial.context
@@ -128,23 +138,31 @@ test_dfa['conform_observer'] = np.equal(test_dfa.subj_ts, observer_choices)
 #*********************************************
 # Generic Experimental Settings
 #*********************************************
+
 behav_sum['train_len'] = len(train_dfa)
 behav_sum['test_len'] = len(test_dfa)
 
 #*********************************************
 # Performance
 #*********************************************    
-#accuracy is defined in relation to the observer
 
+#accuracy is defined in relation to the ideal observer
 behav_sum['train_ts1_acc'], behav_sum['train_ts2_acc'] = list(train_dfa.groupby('ts').conform_observer.mean())
 behav_sum['test_ts1_acc'], behav_sum['test_ts2_acc'] = list(test_dfa.groupby('ts').conform_observer.mean())
 
-logit = sm.Logit(sub['correct'], sub[['trial_count']])
-result = logit.fit()
-print(result.summary())
+#Very course estimate of learning: is there a change in performance over trials?
+#Threshold p < .01, and if so, what direction?
+learn_direct = []
+for sub in [train_dfa, test_dfa]:
+    logit = sm.Logit(sub['conform_observer'], sm.add_constant(sub[['trial_count']]))
+    result = logit.fit()
+    learn_direct.append(int(result.pvalues[1]<.01) * np.sign(result.params[1]))
+behav_sum['learning?'] = learn_direct
+
 #*********************************************
 # Switch costs 
 #*********************************************
+
 #RT difference when switching to either action of a new task-set
 TS_switch_cost = np.mean(test_dfa.query('subj_switch == True')['rt']) - np.mean(test_dfa.query('subj_switch == False')['rt'])
 #RT difference when switching to the other action within a task-set
@@ -156,47 +174,26 @@ behav_sum['Switch_cost'] = TS_minus_resp_switch_cost
 # linear fit of RT based on absolute context
 #*********************************************
 
-result = sm.GLM(test_dfa.rt,test_dfa.abs_context).fit()
-behav_sum['context->rt'] = result.params[0]
+result = sm.GLS(test_dfa.rt,sm.add_constant(test_dfa.abs_context)).fit()
+behav_sum['context->rt'] = result.params[1] * int(result.pvalues[1]<.05)
+
 
 #*********************************************
 # Switch training accuracy
 #*********************************************
-behav_sum['train_switch_acc'] = train_dfa[int(len(train_dfa)/2):].groupby('subj_switch').correct.mean()[1]
 
+behav_sum['train_switch_acc'] = train_dfa.groupby('subj_switch').conform_observer.mean()[1]
 
-#*********************************************
-# estimate of subjective transition probabilities
-#*********************************************
-subj_recursive_p = (1-test_dfa.subj_switch.mean())
-train_recursive_p = (1-train_dfa.switch.mean())
-behav_sum['subj_recursive_p'] = subj_recursive_p
-behav_sum['train_statistics'] = {'recursive_p':train_recursive_p}
-    
-#*********************************************
-# Test Accuracy as proportion of optimal model
-#*********************************************
-
-#When subjects performed consistently with a particular TS, what was the mean context value?
-experienced_ts_means = list(train_dfa.groupby('subj_ts').agg(np.mean).context)
-#Same for standard deviation
-experienced_ts_std = list(train_dfa.groupby('subj_ts').agg(np.std).context)
-behav_sum['train_statistics']['ts_mean_ts'] = list(zip(experienced_ts_means,experienced_ts_std))  
-
-    
 #*********************************************
 # Optimal task-set inference 
 #*********************************************
-ts_order = [states[0]['ts'],states[1]['ts']]
-ts_dis = [state_dis[i] for i in ts_order]
-
 
 init_prior = [.5,.5]
 model_choice = ['ignore','single','optimal']
 models = [ \
-    PredModel(ts_dis, init_prior, mode = "ignore", recursive_prob = train_recursive_p),\
-    PredModel(ts_dis, init_prior, mode = "single", recursive_prob = train_recursive_p),\
-    PredModel(ts_dis, init_prior, mode = "optimal", recursive_prob = train_recursive_p)]
+    PredModel(train_ts_dis, init_prior, mode = "ignore", recursive_prob = train_recursive_p),\
+    PredModel(train_ts_dis, init_prior, mode = "single", recursive_prob = train_recursive_p),\
+    PredModel(train_ts_dis, init_prior, mode = "optimal", recursive_prob = train_recursive_p)]
     
 model_posteriors = pd.DataFrame(columns = ['ignore','single','optimal'], dtype = 'float64')
 model_choices = pd.DataFrame(columns = ['ignore','single','optimal'], dtype = 'float64')
@@ -226,12 +223,10 @@ for i,trial in test_dfa.iterrows():
     model_choices.loc[i] = model_choice
     model_prob_matches.loc[i] = model_prob_match
     
+behav_sum['best_model'] = np.argmax(model_likelihoods.sum())
 
-print(np.argmax(model_likelihoods.sum()))
-
-ts_dis = [norm(mean,std) for mean,std in zip(experienced_ts_means,experienced_ts_std)]
 def fitfunc(dfa, b):
-    model = BiasPredModel(ts_dis, init_prior, bias = b, recursive_prob = train_recursive_p)
+    model = BiasPredModel(train_ts_dis, init_prior, bias = b, recursive_prob = train_recursive_p)
     bias_model_likelihoods = []
     for i,trial in dfa.iterrows():
         c = trial.context
@@ -243,14 +238,13 @@ def fitfunc(dfa, b):
 def errfunc(dfa,b):
     return (fitfunc(dfa,b) - np.ones(len(dfa)))
 
-bias = scipy.optimize.curve_fit(fitfunc,test_dfa,np.ones(len(test_dfa)), p0 = .2)[0][0]
+model = lmfit.Model(fitfunc, independent_vars = ['dfa'])    
+bias = model.fit(np.ones(len(test_dfa)), dfa = test_dfa, b = .4).values 
+behav_sum['estimated_bias'] = bias
 
-print(np.argmax(model_likelihoods.sum()))
 
 
-dfa['abs_context'] = abs(test_dfa.context)
-test_dfa.groupby('abs_context').mean()
-test_dfa_modeled = pd.concat([test_dfa,model_posteriors],axis = 1)
+
 
 
 
