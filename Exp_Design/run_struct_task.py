@@ -20,6 +20,8 @@ subdata=[]
 practice_on = True
 task_on = True
 test_on = True
+#fullInfo refers to instructions and practice where subjects are explicitely
+#told that they either have to pay attention to color OR shape.
 fullInfo = True
 bot_on = False
 bot_mode = "ignore_base" #other for optimal
@@ -38,8 +40,8 @@ f.write(subject_code + '\n')
 f.close()
 
 #set up some task variables
-train_mins = 1 #train_length in minutes
-test_mins = 1 #test_length in minutes
+train_mins = 45 #train_length in minutes
+test_mins = 30 #test_length in minutes
 avg_test_trial_len = 2.25 #in seconds
 avg_task_trial_len = avg_test_trial_len + 1 #factor in FB
 #Find the minimum even number of blocks to last at least train_length minutes
@@ -108,12 +110,10 @@ if practice_on:
             """
             The shape's vertical position will also be changing on each trial.
             
-            Critically, the best key to press in response to each shape 
-            also depends on the shape's vertical position. 
+            The best key to press in response to each shape 
+            partially depends on the shape's vertical position. 
             
-            The different positions where the shapes will be presented 
-            are shown on the next screen. On each trial the shape will
-            be presented at only one of these positions.
+            After you press '5' you'll see two example trials.
             """,
             """
             After you press a key, the shape will disappear and 
@@ -143,7 +143,7 @@ if practice_on:
             'Welcome\n\nPress 5 to move through instructions',
             """
             This experiment starts with a training phase followed by a testing phase.
-            Training will last about 45 minutes and testing will last 30 minutes.
+            Training will last 45 minutes and testing will last 30 minutes.
             
             Your performance on the training AND test phase determines your bonus payment. 
             To perform well on the test phase you'll need to stay
@@ -171,12 +171,10 @@ if practice_on:
             """
             The shape's vertical position will also be changing on each trial.
             
-            Critically, the vertical position of the shape partially
+            The vertical position of the shape partially
             determines whether you should respond based on color or identity.
             
-            The different positions where the shapes will be presented 
-            are shown on the next screen. On each trial the shape will
-            be presented at only one of these positions.
+            After you press '5' you'll see two example trials.
             """,
             """
             After you press a key, the shape will disappear and 
@@ -186,7 +184,7 @@ if practice_on:
             with no feedback. You will still be earning points, and these
             test phase points will also be used to determine your bonus pay.
             
-            It is therefore very important that you use the points 
+            It is therefore important that you use the points 
             in the training phase to learn when to respond based on 
             the color or identity of the shapes and how your response
             depends on the shape's vertical position.
@@ -212,10 +210,11 @@ if practice_on:
             practice.presentStims(mode = 'practice')
             resp,practice.startTime=practice.waitForKeypress(practice.trigger_key)
             practice.checkRespForQuitKey(resp)
-        if 'shown on the next screen' in line:
-            practice.presentContexts()
-            resp,practice.startTime=practice.waitForKeypress(practice.trigger_key)
-            practice.checkRespForQuitKey(resp)
+        if "two example trials" in line:
+            core.wait(1)
+            practice.presentTrial(practice.stimulusInfo[0])
+            core.wait(1)
+            practice.presentTrial(practice.stimulusInfo[1])
 
     
     

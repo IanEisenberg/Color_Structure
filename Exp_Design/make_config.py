@@ -245,15 +245,16 @@ def makePracticeConfigList(taskname = 'Prob_Context_Practice',
     
     
     
-#same function as above but with preset trial length and seed intended to create
-#a representitive practice run 
+#same function as above but with the intent of illustrating the two
+#tasksets. The first half of practice uses the first taskset, while the second
+#uses the second.
 def makeFullInfoPracticeConfigList(taskname = 'Prob_Context_FullInfo_Practice', 
                    recursive_p = .9, 
                    #tasksets relate to stimulus dimensions
                    #specify action (1 or 0) to take in response to each stim
                    ts1 = 0, #relates to first stimulus dimension
                    ts2 = 1, #relates to second stimulus dimension
-                   exp_len = 20,
+                   exp_len = 32,
                    stimulusDuration = 1.5,
                    FBDuration = .5,
                    FBonset = .5,
@@ -269,7 +270,6 @@ def makeFullInfoPracticeConfigList(taskname = 'Prob_Context_FullInfo_Practice',
     #each taskset is define as a nxm matrix where n = # of stims and
     #m = # of actions. In theory, 'n' could be further decomposed into features
     ts_order = [ts1,ts2]
-    r.shuffle(ts_order)
     states = {0: {'ts': ts_order[0], 'c_mean': -.3, 'c_sd': .37}, 
                 1: {'ts': ts_order[1], 'c_mean': .3, 'c_sd': .37}}
 
@@ -299,7 +299,7 @@ def makeFullInfoPracticeConfigList(taskname = 'Prob_Context_FullInfo_Practice',
         trialList = []    
         trial_count = 1
         curr_onset = 2 #initial onset
-        curr_state = [0]*10 + [1]*10
+        curr_state = [0]*int(exp_len/2) + [1]*int(exp_len/2)
         stims = r.sample(stim_ids*int(exp_len*.25),exp_len)
         states = {0: {'ts': ts_order[0], 'c_mean': -.3, 'c_sd': .37}, 
                 1: {'ts': ts_order[1], 'c_mean': .3, 'c_sd': .37}}
