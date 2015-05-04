@@ -337,7 +337,7 @@ def makeFullInfoPracticeConfigList(taskname = 'Prob_Context_FullInfo_Practice',
                 
         return trialList
 
-    r.seed(13373)
+    r.seed(1337)
     np_input = makeTrialList()
     np_input.insert(0,initial_params)
     filename = taskname + '_config.npy'
