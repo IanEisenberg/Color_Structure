@@ -17,12 +17,16 @@ from Load_Data import load_data
 verbose=True
 fullscr= True
 subdata=[]
-practice_on = True
+practice_on = False
 task_on = True
 test_on = True
+<<<<<<< HEAD
 #fullInfo refers to instructions and practice where subjects are explicitely
 #told that they either have to pay attention to color OR shape.
 fullInfo = True
+=======
+fullInfo = False
+>>>>>>> 4f337eb60caa2c06a98d207f12f786dca918494c
 bot_on = False
 bot_mode = "ignore_base" #other for optimal
 
