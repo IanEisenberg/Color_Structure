@@ -7,16 +7,16 @@ Created on Mon Apr 27 11:16:08 2015
 
 import numpy as np
 from scipy.stats import norm
-import scipy
 import pandas as pd
 import matplotlib.pyplot as plt
 from Load_Data import load_data
-from helper_classes import PredModel, BiasPredModel
+from helper_classes import PredModel, BiasPredModel, EstimatePredModel
 from helper_functions import *
 import statsmodels.api as sm
 import pickle
 import glob
 import re
+import lmfit
 from collections import OrderedDict as odict
 
 
@@ -43,9 +43,15 @@ plot = False
 # Load Data
 #*********************************************
 group_behavior = {}
-train_files = glob.glob('../RawData/*Context_20*yaml')
-test_files = glob.glob('../RawData/*Context_noFB*yaml')
+fullInfo = False
 
+if fullInfo:
+   train_files = glob.glob('../RawData/*FullInfo_20*yaml')
+   test_files = glob.glob('../RawData/*FullInfo_noFB*yaml') 
+else:
+    train_files = glob.glob('../RawData/*Context_20*yaml')
+    test_files = glob.glob('../RawData/*Context_noFB*yaml')
+    
 count = 0
 for train_file, test_file in zip(train_files,test_files):
     count += 1
@@ -55,7 +61,7 @@ for train_file, test_file in zip(train_files,test_files):
     test_name = test_file[11:-5]
     train_name = train_file[11:-5]
     subj_name = re.match(r'(\w*)_Prob*', test_name).group(1)
-    
+    print(subj_name)
     try:
         train_dict = pickle.load(open('../Data/' + train_name + '.p','rb'))
         taskinfo, train_dfa = [train_dict.get(k) for k in ['taskinfo','dfa']]
@@ -73,6 +79,8 @@ for train_file, test_file in zip(train_files,test_files):
         test_dict = {'taskinfo': taskinfo, 'dfa': test_dfa}
         pickle.dump(test_dict, open('../Data/' + test_name + '.p','wb'))
         
+
+    
     #*********************************************
     # Preliminary Setup
     #*********************************************
@@ -123,7 +131,7 @@ for train_file, test_file in zip(train_files,test_files):
         dfa['conform_observer'] = np.equal(train_dfa.subj_ts, observer_choices)
     
     #Optimal observer for test        
-    optimal_observer = BiasPredModel(train_ts_dis, [.5,.5], bias = 0, recursive_prob = train_recursive_p)
+    optimal_observer = BiasPredModel(train_ts_dis, [.5,.5], recursive_prob = train_recursive_p)
     observer_choices = []
     for i,trial in test_dfa.iterrows():
         c = trial.context
@@ -184,21 +192,84 @@ for train_file, test_file in zip(train_files,test_files):
     behav_sum['train_switch_acc'] = train_dfa.groupby('subj_switch').conform_observer.mean()[1]
     
     #*********************************************
+    # Contributors to task-set choice
+    #*********************************************
+    sub = sm.add_constant(test_dfa[['context','subj_ts','rt']])
+    sub['last_ts'] = sub.subj_ts.shift(1)
+    predictors = sub.drop(['subj_ts'],axis = 1)
+    logit = sm.Logit(sub['subj_ts'],predictors, missing = 'drop')
+    result = logit.fit()
+    print(result.summary())
+    
+    #*********************************************
     # Optimal task-set inference 
     #*********************************************
-    
     init_prior = [.5,.5]
+
+    def bias_fitfunc(dfa, rp, tsb):
+        model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
+        model_likelihoods = []
+        for i,trial in dfa.iterrows():
+            c = trial.context
+            trial_choice = trial.subj_ts
+            conf = model.calc_posterior(c)
+            model_likelihoods.append(conf[trial_choice])
+        return model_likelihoods
+        
+    def bias_errfunc(dfa,rp,tsb):
+        return (bias_fitfunc(dfa,rp,tsb) - np.ones(len(dfa)))
+    
+    model = lmfit.Model(bias_fitfunc, independent_vars = ['dfa'])    
+    params = lmfit.Parameters()
+    params.add('tsb', value = 0)
+    params.add('rp', value = train_recursive_p)
+    
+    modelfit = model.fit(np.ones(len(test_dfa)), params, dfa = test_dfa)
+    tsb, brp = [modelfit.values.get(k) for k in ['tsb', 'rp']]
+    behav_sum['bias_fit_params'] = modelfit.values
+    behav_sum['bias_fit_error'] = np.sum(np.square(bias_errfunc(test_dfa,brp,ts_bias)))
+    
+    
+    
+    def estimate_fitfunc(dfa, m,s,rp):
+        model = EstimatePredModel(init_prior, mean = m, std = s, recursive_prob = rp)
+        model_likelihoods = []
+        for i,trial in dfa.iterrows():
+            c = trial.context
+            trial_choice = trial.subj_ts
+            conf = model.calc_posterior(c)
+            model_likelihoods.append(conf[trial_choice])
+        return model_likelihoods
+        
+    def estimate_errfunc(dfa,m,s,rp):
+        return (estimate_fitfunc(dfa,m,s,rp) - np.ones(len(dfa)))
+    
+    model = lmfit.Model(estimate_fitfunc, independent_vars = ['dfa'])    
+    params = lmfit.Parameters()
+    params.add('m', value = train_ts_dis[0].mean(), min = -1, max = 1)
+    params.add('s', value = train_ts_dis[0].std())
+    params.add('rp', value = train_recursive_p)
+    
+    modelfit = model.fit(np.ones(len(test_dfa)), params, dfa = test_dfa)
+    m, s, erp = [modelfit.values.get(k) for k in ['m','s','rp']]
+    behav_sum['estimate_fit_params'] = modelfit.values
+    behav_sum['estimate_fit_error'] = np.sum(np.square(estimate_errfunc(test_dfa,m,s,erp)))
+    
+    
+    
+    
     model_choice = ['ignore','single','optimal']
     models = [ \
         PredModel(train_ts_dis, init_prior, mode = "ignore", recursive_prob = train_recursive_p),\
         PredModel(train_ts_dis, init_prior, mode = "single", recursive_prob = train_recursive_p),\
-        PredModel(train_ts_dis, init_prior, mode = "optimal", recursive_prob = train_recursive_p)]
+        PredModel(train_ts_dis, init_prior, mode = "optimal", recursive_prob = train_recursive_p),\
+        BiasPredModel(train_ts_dis,init_prior,recursive_prob = brp, ts_bias = tsb),\
+        EstimatePredModel(init_prior, mean = m, std = s, recursive_prob = erp, temp = 0)]
         
-    model_posteriors = pd.DataFrame(columns = ['ignore','single','optimal'], dtype = 'float64')
-    model_choices = pd.DataFrame(columns = ['ignore','single','optimal'], dtype = 'float64')
-    model_prob_matches = pd.DataFrame(columns = ['ignore','single','optimal'], dtype = 'float64')
-    model_likelihoods = pd.DataFrame(columns = ['ignore','single','optimal','rand','ts0','ts1'], dtype = 'float64')
-    
+    model_posteriors = pd.DataFrame(columns = ['ignore','single','optimal','bias','estimate'], dtype = 'float64')
+    model_choices = pd.DataFrame(columns = ['ignore','single','optimal','bias','estimate'], dtype = 'float64')
+    model_likelihoods = pd.DataFrame(columns = ['ignore','single','optimal','bias','estimate','rand','ts0','ts1'], dtype = 'float64')
+
     for i,trial in test_dfa.iterrows():
         c = trial.context
         trial_choice = trial.subj_ts
@@ -211,7 +282,6 @@ for train_file, test_file in zip(train_files,test_files):
             conf = model.calc_posterior(c)
             model_posterior += [conf[0]]
             model_choice += [model.choose()]
-            model_prob_match += [model.choose('softmax')]
             trial_model_likelihoods += [conf[trial_choice]]
         #add on 'straw model' predictions.
         trial_model_likelihoods += [.5,[.9,.1][trial_choice], [.1,.9][trial_choice]] 
@@ -220,30 +290,10 @@ for train_file, test_file in zip(train_files,test_files):
         model_likelihoods.loc[i] = np.log(trial_model_likelihoods)
         model_posteriors.loc[i] = model_posterior
         model_choices.loc[i] = model_choice
-        model_prob_matches.loc[i] = model_prob_match
         
     behav_sum['best_model'] = np.argmax(model_likelihoods.sum())
-    
-    def fitfunc(dfa, b):
-        model = BiasPredModel(train_ts_dis, init_prior, bias = b, recursive_prob = train_recursive_p)
-        bias_model_likelihoods = []
-        for i,trial in dfa.iterrows():
-            c = trial.context
-            trial_choice = trial.subj_ts
-            conf = model.calc_posterior(c)
-            bias_model_likelihoods.append(conf[trial_choice])
-        return bias_model_likelihoods
-        
-    def errfunc(dfa,b):
-        return (fitfunc(dfa,b) - np.ones(len(dfa)))
-    
-    model = lmfit.Model(fitfunc, independent_vars = ['dfa'])    
-    bias = model.fit(np.ones(len(test_dfa)), dfa = test_dfa, b = 5).values 
-    behav_sum['estimated_bias'] = bias
 
 
-
-    
     #*********************************************
     # Add to group dictionary
     #*********************************************
@@ -254,4 +304,4 @@ for train_file, test_file in zip(train_files,test_files):
 group_df = pd.DataFrame(group_behavior).transpose()   
 group_df = group_df[list(behav_sum.keys())]
     
-    
+        
