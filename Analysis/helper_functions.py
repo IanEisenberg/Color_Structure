@@ -34,8 +34,13 @@ def bar(x, y, title):
     plt.title(str(title))
     return plot
 
-def softmax(probs, temp):
-    return np.exp(probs/temp)/sum(np.exp(probs/temp))
+def moving_average(a, n=3) :
+    ret = np.cumsum(a, dtype=float)
+    ret[n:] = ret[n:] - ret[:-n]
+    return ret[n - 1:] / n
+    
+def softmax(probs, inv_temp):
+    return np.exp(probs*inv_temp)/sum(np.exp(probs*inv_temp))
     
 def calc_posterior(data,prior,likelihood_dist):
     n = len(prior)
@@ -81,3 +86,5 @@ def plot_run(sub,plotting_dict, exclude = []):
     ax.yaxis.set_label_coords(-.1, .45)
     pylab.legend(loc='upper center', bbox_to_anchor=(0.5, 1.08),
               ncol=3, fancybox=True, shadow=True)
+              
+              

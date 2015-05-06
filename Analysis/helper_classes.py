@@ -8,6 +8,7 @@ Created on Tue Apr 14 18:09:29 2015
 import random as r
 import numpy as np
 from scipy.stats import norm
+from helper_functions import softmax 
 
 class PredModel:
     """
@@ -15,15 +16,14 @@ class PredModel:
     and the relevant to calculate posterior hypothesis estimates.
     """
     def __init__(self, likelihood_dist, prior, recursive_prob = .9,
-                 data_noise = 0, mode = "optimal", temp = .01):
+                 data_noise = 0, mode = "optimal"):
         self.prior = prior
         self.likelihood_dist = likelihood_dist
         self.recursive_prob = recursive_prob
         self.mode = mode
         self.posterior = prior
-        self.temp = temp
         
-    def calc_posterior(self, data, noise = None):
+    def calc_posterior(self, data, noise = 0):
         """
         Calculate the posterior probability of different distribution hypotheses
         given the data. You can set a noise value which will set add gaussian
@@ -59,22 +59,14 @@ class PredModel:
     def set_mode(self, mode):
         self.mode = mode
         
-    def choose(self, mode = None, random_prob = .1):
-        temp = self.temp
-        if mode == "prob_match":
-            return np.random.choice(range(len(self.posterior)), p=self.posterior)
-        elif mode == "noisy_prob_match":
-            if r.random() > random_prob:
-                return np.random.choice(range(len(self.posterior)), p=self.posterior)
+    def choose(self, mode = 'softmax', eps = .1, inv_temp = 1):
+        if mode == "e-greedy":
+            if r.random() < eps:
+                return r.randint(0,2)
             else:
-                return r.choice([0,1])
-        elif mode == "noisy":
-            if r.random() > random_prob:
                 return np.argmax(self.posterior)
-            else:
-                return r.choice([0,1])
         elif mode == "softmax":
-            probs = np.exp(self.posterior/temp)/sum(np.exp(self.posterior/temp))
+            probs = softmax(self.posterior, inv_temp)
             return np.random.choice(range(len(probs)), p = probs)
         else:
             return np.argmax(self.posterior)
@@ -85,15 +77,14 @@ class BiasPredModel:
     and the relevant to calculate posterior hypothesis estimates.
     """
     def __init__(self, likelihood_dist, prior, recursive_prob = .9,
-                 data_noise = 0, ts_bias = 0, temp = .01):
+                 data_noise = 0, ts_bias = 0):
         self.prior = np.array(prior)
         self.likelihood_dist = likelihood_dist
         self.recursive_prob = recursive_prob
         self.ts_bias = ts_bias
         self.posterior = prior
-        self.temp = temp
         
-    def calc_posterior(self, data, noise = None):
+    def calc_posterior(self, data, noise = 0):
         """
         Calculate the posterior probability of different distribution hypotheses
         given the data. You can set a noise value which will set add gaussian
@@ -104,7 +95,7 @@ class BiasPredModel:
         rp = self.recursive_prob
         prior = self.prior
         ts_bias = self.ts_bias
-        prior += np.array([0,ts_bias])
+        prior[1]*=ts_bias
         prior = prior/sum(prior)
 
         if noise:
@@ -125,22 +116,14 @@ class BiasPredModel:
         self.posterior = posterior
         return posterior
        
-    def choose(self, mode = 'softmax', random_prob = .1):
-        temp = self.temp
-        if mode == "prob_match":
-            return np.random.choice(range(len(self.posterior)), p=self.posterior)
-        elif mode == "noisy_prob_match":
-            if r.random() > random_prob:
-                return np.random.choice(range(len(self.posterior)), p=self.posterior)
+    def choose(self, mode = 'softmax', eps = .1, inv_temp = 1):
+        if mode == "e-greedy":
+            if r.random() < eps:
+                return r.randint(0,2)
             else:
-                return r.choice([0,1])
-        elif mode == "noisy":
-            if r.random() > random_prob:
                 return np.argmax(self.posterior)
-            else:
-                return r.choice([0,1])
         elif mode == "softmax":
-            probs = np.exp(self.posterior/temp)/sum(np.exp(self.posterior/temp))
+            probs = softmax(self.posterior, inv_temp)
             return np.random.choice(range(len(probs)), p = probs)
         else:
             return np.argmax(self.posterior)
@@ -150,15 +133,13 @@ class EstimatePredModel:
     Prediction model that takes in data, and uses a prior over hypotheses
     and the relevant to calculate posterior hypothesis estimates.
     """
-    def __init__(self, prior, mean = 0, std = .37, recursive_prob = .9,
-                 temp = .01):
+    def __init__(self, prior, mean = 0, std = .37, recursive_prob = .9):
         self.prior = np.array(prior)
         self.likelihood_dist = [norm(mean, std),norm(-mean,std)]
         self.recursive_prob = recursive_prob
         self.posterior = prior
-        self.temp = temp
         
-    def calc_posterior(self, data, noise = None):
+    def calc_posterior(self, data, noise = 0):
         """
         Calculate the posterior probability of different distribution hypotheses
         given the data. You can set a noise value which will set add gaussian
@@ -187,22 +168,14 @@ class EstimatePredModel:
         self.posterior = posterior
         return posterior
        
-    def choose(self, mode = 'softmax', random_prob = .1):
-        temp = self.temp
-        if mode == "prob_match":
-            return np.random.choice(range(len(self.posterior)), p=self.posterior)
-        elif mode == "noisy_prob_match":
-            if r.random() > random_prob:
-                return np.random.choice(range(len(self.posterior)), p=self.posterior)
+    def choose(self, mode = 'softmax', eps = .1, inv_temp = 1):
+        if mode == "e-greedy":
+            if r.random() < eps:
+                return r.randint(0,2)
             else:
-                return r.choice([0,1])
-        elif mode == "noisy":
-            if r.random() > random_prob:
                 return np.argmax(self.posterior)
-            else:
-                return r.choice([0,1])
         elif mode == "softmax":
-            probs = np.exp(self.posterior/temp)/sum(np.exp(self.posterior/temp))
+            probs = softmax(self.posterior, inv_temp)
             return np.random.choice(range(len(probs)), p = probs)
         else:
             return np.argmax(self.posterior)

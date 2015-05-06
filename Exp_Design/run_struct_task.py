@@ -157,6 +157,8 @@ if practice_on:
             Use your index and middle fingers on both hands to respond.
             
             The goal is to learn the best key(s) to press for each shape.
+            After you press a key, the shape will disappear and 
+            you will get a point if you responded correctly.
             
             Press '5' to see the four shapes that will be used in practice.
             """,
@@ -167,19 +169,27 @@ if practice_on:
             Your responses should depend on these features. At certain points
             in the experiment you should respond based on color, and at other times
             you should respond based on identity, but not both at the same time.
+            
+            We will now practice responding to the shapes. For these trials,
+            just pay attention to the identity of the shape when making your response.
+            
+            Please wait for the experimenter.
             """,
             """
-            The shape's vertical position will also be changing on each trial.
+            In those trials, one key worked for the pentagon, and one worked for the triangle.
+            
+            We'll now practice responding to the color of the shape.
+            
+            Please wait for the experimenter.
+            """,
+            """
+            As you may have noticed, the shape's vertical position on the screen
+            changes on each trial.
             
             The vertical position of the shape partially
             determines whether you should respond based on color or identity.
-            
-            After you press '5' you'll see two example trials.
             """,
             """
-            After you press a key, the shape will disappear and 
-            you will get a point if you responded correctly.
-            
             After the training phase, there will be a test phase 
             with no feedback. You will still be earning points, and these
             test phase points will also be used to determine your bonus pay.
@@ -210,13 +220,34 @@ if practice_on:
             practice.presentStims(mode = 'practice')
             resp,practice.startTime=practice.waitForKeypress(practice.trigger_key)
             practice.checkRespForQuitKey(resp)
-        if "two example trials" in line:
+        if "pay attention to the identity of the shape" in line:
+            startTime = core.getTime()
+            for trial in practice.stimulusInfo[0:12]:
+                # wait for onset time
+                while core.getTime() < trial['onset'] + startTime:
+                        key_response=event.getKeys(None,True)
+                        if len(key_response)==0:
+                            continue
+                        for key,response_time in key_response:
+                            if practice.quit_key==key:
+                                practice.shutDownEarly()
+                trial=practice.presentTrial(trial)
+            elapsed_time = core.getTime() - startTime
             core.wait(1)
-            practice.presentTrial(practice.stimulusInfo[0])
+        if "responding to the color of the shape" in line:
+            startTime = core.getTime()
+            for trial in practice.stimulusInfo[12:24]: #Onset time FIx!
+                # wait for onset time
+                while core.getTime() < trial['onset'] + startTime - elapsed_time:
+                        key_response=event.getKeys(None,True)
+                        if len(key_response)==0:
+                            continue
+                        for key,response_time in key_response:
+                            if practice.quit_key==key:
+                                practice.shutDownEarly()
+                trial=practice.presentTrial(trial)
+            elapsed_time = core.getTime() - startTime + elapsed_time
             core.wait(1)
-            practice.presentTrial(practice.stimulusInfo[1])
-
-    
     
     for trial in practice.stimulusInfo:
         # wait for onset time

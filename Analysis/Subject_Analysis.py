@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import pylab
 from Load_Data import load_data
 import statsmodels.api as sm
+import statsmodels.formula.api as smf
 from collections import OrderedDict as odict
 from helper_classes import PredModel, BiasPredModel
 from helper_functions import *
@@ -53,7 +54,7 @@ else:
     train_files = glob.glob('../RawData/*Context_20*yaml')
     test_files = glob.glob('../RawData/*Context_noFB*yaml')
 
-subj_i = 0
+subj_i = 1
 train_file = train_files[subj_i]
 test_file = test_files[subj_i]
 
@@ -95,9 +96,11 @@ train_ts_std = list(train_dfa.groupby('ts').agg(np.std).context)
 train_ts_dis = [norm(m,s) for m,s in zip(train_ts_means,train_ts_std)]
 #And do the same for recursive_p
 train_recursive_p = 1- train_dfa.switch.mean()
-
+#decompose contexts
 test_dfa['abs_context'] = abs(test_dfa.context)    
 train_dfa['abs_context'] = abs(train_dfa.context)
+train_dfa['context_sign'] = np.sign(train_dfa.context)
+test_dfa['context_sign'] = np.sign(test_dfa.context)
 
 behav_sum = odict()
 
@@ -129,7 +132,7 @@ for dfa in [train_dfa]:
     dfa['conform_observer'] = np.equal(train_dfa.subj_ts, observer_choices)
 
 #Optimal observer for test        
-optimal_observer = BiasPredModel(train_ts_dis, [.5,.5], bias = 0, recursive_prob = train_recursive_p)
+optimal_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = 0, recursive_prob = train_recursive_p)
 observer_choices = []
 for i,trial in test_dfa.iterrows():
     c = trial.context
@@ -192,18 +195,19 @@ behav_sum['train_switch_acc'] = train_dfa.groupby('subj_switch').conform_observe
 #*********************************************
 # Contributors to task-set choice
 #*********************************************
-sub = sm.add_constant(test_dfa[['context','subj_ts','rt']])
+sub = sm.add_constant(test_dfa[['context_sign','abs_context','context','subj_ts','rt']])
 sub['last_ts'] = sub.subj_ts.shift(1)
 predictors = sub.drop(['subj_ts'],axis = 1)
-logit = sm.Logit(sub['subj_ts'],predictors, missing = 'drop')
-result = logit.fit()
+result = smf.logit(formula = 'subj_ts ~ context + last_ts', data = sub, missing = 'drop').fit()
 print(result.summary())
 
 #*********************************************
 # Model fitting
 #*********************************************
-init_prior = [.5,.5]
 
+#*************************************
+#Model Functions
+#*************************************
 
 def bias_fitfunc(dfa, rp, tsb):
     model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
@@ -218,18 +222,16 @@ def bias_fitfunc(dfa, rp, tsb):
 def bias_errfunc(dfa,rp,tsb):
     return (bias_fitfunc(dfa,rp,tsb) - np.ones(len(dfa)))
 
-model = lmfit.Model(bias_fitfunc, independent_vars = ['dfa'])    
-params = lmfit.Parameters()
-params.add('tsb', value = 0)
-params.add('rp', value = train_recursive_p)
-
-modelfit = model.fit(np.ones(len(test_dfa)), params, dfa = test_dfa)
-tsb, brp = [modelfit.values.get(k) for k in ['tsb', 'rp']]
-behav_sum['bias_fit_params'] = modelfit.values
-behav_sum['bias_fit_error'] = np.sum(np.square(bias_errfunc(test_dfa,brp,ts_bias)))
-
-
-
+def bias_fit_temp(t, dfa, tsb, rp,):
+    model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
+    model_choices = []
+    for i,trial in dfa.iterrows():
+        c = trial.context
+        model.calc_posterior(c)
+        model_choices.append(model.choose(mode = 'softmax', inv_temp = t))
+    dfa['model_choices'] = model_choices
+    return np.sum(np.square(dfa.groupby('context').model_choices.mean()-test_dfa.groupby('context').subj_ts.mean()))
+    
 def estimate_fitfunc(dfa, m,s,rp):
     model = EstimatePredModel(init_prior, mean = m, std = s, recursive_prob = rp)
     model_likelihoods = []
@@ -238,48 +240,69 @@ def estimate_fitfunc(dfa, m,s,rp):
         trial_choice = trial.subj_ts
         conf = model.calc_posterior(c)
         model_likelihoods.append(conf[trial_choice])
-    return model_likelihoods
-    
-def estimate_errfunc(dfa,m,s,rp):
-    return (estimate_fitfunc(dfa,m,s,rp) - np.ones(len(dfa)))
+    return model_likelihoods    
 
+def estimate_errfunc(dfa,m,s,rp):
+    return (estimate_fitfunc(dfa,m,s,rp) - np.ones(len(dfa)))    
+    
+def estimate_fit_temp(dfa, m,s,rp, t):
+    model = EstimatePredModel(init_prior,mean = m, std = s, recursive_prob = rp)
+    model_choices = []
+    for i,trial in dfa.iterrows():
+        c = trial.context
+        model.calc_posterior(c)
+        model_choices.append(model.choose(mode = 'softmax', inv_temp = t))
+    dfa['model_choices'] = model_choices
+    return dfa.groupby('context').model_choices.mean()
+   
+    
+init_prior = [.5,.5]
+
+#Fit bias model
+model = lmfit.Model(bias_fitfunc, independent_vars = ['dfa'])    
+params = lmfit.Parameters()
+params.add('tsb', value = 1, min = 0)
+params.add('rp', value = train_recursive_p)
+modelfit = model.fit(np.ones(len(test_dfa)), params, dfa = test_dfa)
+tsb, brp = [modelfit.values.get(k) for k in ['tsb', 'rp']]
+behav_sum['bias_fit_params'] = modelfit.values
+behav_sum['bias_fit_error'] = np.sum(np.square(bias_errfunc(test_dfa,brp,tsb)))
+#Fit softmax temp
+model = lmfit.Model(bias_fit_temp, independent_vars = ['dfa','tsb','rp'])    
+params = lmfit.Parameters()
+params.add('t', value = 10)
+modelfit = model.fit(test_dfa.groupby('context').subj_ts.mean(), params, dfa = test_dfa, tsb = tsb, rp = brp)
+btemp = modelfit.values['t'] 
+    
+    
+    
+#Fit Estimate model
 model = lmfit.Model(estimate_fitfunc, independent_vars = ['dfa'])    
 params = lmfit.Parameters()
 params.add('m', value = train_ts_dis[0].mean(), min = -1, max = 1)
 params.add('s', value = train_ts_dis[0].std())
 params.add('rp', value = train_recursive_p)
-
 modelfit = model.fit(np.ones(len(test_dfa)), params, dfa = test_dfa)
 m, s, erp = [modelfit.values.get(k) for k in ['m','s','rp']]
 behav_sum['estimate_fit_params'] = modelfit.values
 behav_sum['estimate_fit_error'] = np.sum(np.square(estimate_errfunc(test_dfa,m,s,erp)))
-
-def estimate_fit_temp(dfa, t):
-    model = EstimatePredModel(init_prior,mean = m, std = s, recursive_prob = rp, temp = t)
-    model_choices = []
-    for i,trial in dfa.iterrows():
-        c = trial.context
-        model.calc_posterior(c)
-        model_choices.append(model.choose())
-    return model_choices
-    
-model = lmfit.Model(estimate_fit_temp, independent_vars = ['dfa'])    
+#Fit softmax temp
+model = lmfit.Model(estimate_fit_temp, independent_vars = ['dfa','m','s','rp'])    
 params = lmfit.Parameters()
-params.add('t', min = .01)
-modelfit = model.fit(test_dfa.subj_ts, params, dfa = test_dfa)
-temp = modelfit.values['t']
+params.add('t', value = 5)
+modelfit = model.fit(test_dfa.groupby('context').subj_ts.mean(), params, dfa = test_dfa, m=m, s=s, rp=erp)
+etemp = modelfit.values['t']
 
+behav_sum['softmax_temps'] = {'bias_temp':btemp, 'estimate_temp':etemp}
 
 models = [ \
     PredModel(train_ts_dis, init_prior, mode = "ignore", recursive_prob = train_recursive_p),\
     PredModel(train_ts_dis, init_prior, mode = "single", recursive_prob = train_recursive_p),\
-    PredModel(train_ts_dis, init_prior, mode = "optimal", recursive_prob = train_recursive_p),\
-    BiasPredModel(train_ts_dis,init_prior,recursive_prob = brp, ts_bias = ts_bias),\
-    EstimatePredModel(init_prior, mean = m, std = s, recursive_prob = erp, temp = temp)]
+    PredModel(train_ts_dis, init_prior, mode = "optimal", recursive_prob = train_recursive_p)]
     
-model_posteriors = pd.DataFrame(columns = ['ignore','single','optimal','bias','estimate'], dtype = 'float64')
-model_choices = pd.DataFrame(columns = ['ignore','single','optimal','bias','estimate'], dtype = 'float64')
-model_likelihoods = pd.DataFrame(columns = ['ignore','single','optimal','bias','estimate','rand','ts0','ts1'], dtype = 'float64')
+model_posteriors = pd.DataFrame(columns = ['ignore','single','optimal'], dtype = 'float64')
+model_choices = pd.DataFrame(columns = ['ignore','single','optimal'], dtype = 'float64')
+model_likelihoods = pd.DataFrame(columns = ['ignore','single','optimal','rand','ts0','ts1'], dtype = 'float64')
 
 for i,trial in test_dfa.iterrows():
     c = trial.context
@@ -351,7 +374,7 @@ if plot == True:
     pylab.legend(loc='upper right',prop={'size':20})
             
     ggplot(dfa, aes(x='context',y='rt', color = 'subj_ts')) + geom_point(alpha=.4) + stat_summary(size = 6)
-    ggplot(dfa, aes(x='context',y='correct', color = 'subj_ts')) + stat_summary()
+    ggplot(dfa, aes(x='context',y='conform_observer', color = 'subj_ts')) + stat_summary()
     
 
     #Plot run

@@ -299,7 +299,7 @@ def makeFullInfoPracticeConfigList(taskname = 'Prob_Context_FullInfo_Practice',
         trialList = []    
         trial_count = 1
         curr_onset = 2 #initial onset
-        curr_state = [0]*int(exp_len/2) + [1]*int(exp_len/2)
+        state_list = [0]*12 + [1]*12 + list(np.random.randint(0,2,exp_len))
         stims = r.sample(stim_ids*int(exp_len*.25),exp_len)
         states = {0: {'ts': ts_order[0], 'c_mean': -.3, 'c_sd': .37}, 
                 1: {'ts': ts_order[1], 'c_mean': .3, 'c_sd': .37}}
@@ -309,14 +309,14 @@ def makeFullInfoPracticeConfigList(taskname = 'Prob_Context_FullInfo_Practice',
         
         
         for trial in range(exp_len):
-            state = states[curr_state[trial]]
+            state = states[state_list[trial]]
             dis = norm(state['c_mean'],state['c_sd'])
             binned = -1.1 + np.digitize([dis.rvs()],bin_boundaries)*.2
             context_sample = round(max(-1, min(1, binned[0])),2)
             
             trialList += [{
                 'trial_count': trial_count,
-                'state': curr_state,
+                'state': state_list[trial],
                 'ts': state['ts'],
                 'c_dis': {'mean': dis.mean(), 'sd': dis.std()},
                 'context': context_sample,
