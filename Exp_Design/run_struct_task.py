@@ -262,7 +262,13 @@ if practice_on:
     
     practice.presentTextToWindow(
     """
-    That's enough practice. Before we start the experiment
+    That's enough practice. In the actual experiment, there will
+    be new shapes that you have to learn about. You still have to
+    learn when to respond based on the identity or color of the shape,
+    but the correct responses may be different from what you learned
+    during practice. 
+    
+    Before we start the experiment
     press 5 to see the shapes you will have to respond to
     during the training and test phases.
     """)
@@ -286,7 +292,12 @@ if task_on:
     if bot_on == False:
         task.presentTextToWindow(
             """
-            We will now start the experiment.
+            We will now start the training phase of the experiment.
+            
+            Remember, following this training phase will be a test phase with no
+            feedback (you won't see points). Use this training to learn when
+            you have to respond to the identity or color of the shape without
+            needing to use the points.
             
             There will be one break half way through. As soon
             as you press '5' the experiment will start so get ready!

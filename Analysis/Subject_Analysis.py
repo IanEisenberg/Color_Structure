@@ -54,7 +54,7 @@ else:
     train_files = glob.glob('../RawData/*Context_20*yaml')
     test_files = glob.glob('../RawData/*Context_noFB*yaml')
 
-subj_i = 1
+subj_i = 3
 train_file = train_files[subj_i]
 test_file = test_files[subj_i]
 
@@ -88,6 +88,7 @@ states = taskinfo['states']
 state_dis = [norm(states[0]['c_mean'], states[0]['c_sd']), norm(states[1]['c_mean'], states[1]['c_sd']) ]
 ts_order = [states[0]['ts'],states[1]['ts']]
 ts_dis = [state_dis[i] for i in ts_order]
+ts2_side = np.sign(ts_dis[1].mean())
 
 #What was the mean contextual value for each taskset during this train run?
 train_ts_means = list(train_dfa.groupby('ts').agg(np.mean).context)
@@ -106,7 +107,7 @@ behav_sum = odict()
 
 
 #*********************************************
-# Set up perfect observer
+# Set up pobservers
 #*********************************************
 
 #This observer know the exact statistics of the task, always chooses correctly
@@ -127,21 +128,38 @@ for dfa in [train_dfa]:
         observer_choices.append(obs_choice)
         observer_prior = np.round([.9*(1-ts)+.1*ts,.9*ts+.1*(1-ts)],2)
         
-    dfa['observer_choices'] = observer_choices
-    dfa['observer_switch'] = abs(dfa.observer_choices.diff())
-    dfa['conform_observer'] = np.equal(train_dfa.subj_ts, observer_choices)
+    dfa['opt_observer_choices'] = observer_choices
+    dfa['opt_observer_switch'] = abs(dfa.opt_observer_choices.diff())
+    dfa['conform_opt_observer'] = np.equal(train_dfa.subj_ts, observer_choices)
 
 #Optimal observer for test        
-optimal_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = 0, recursive_prob = train_recursive_p)
+no_fb_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = 1, recursive_prob = train_recursive_p)
+observer_choices = []
+for i,trial in train_dfa.iterrows():
+    c = trial.context
+    conf = no_fb_observer.calc_posterior(c)
+    obs_choice = np.argmax(conf)
+    observer_choices.append(obs_choice)
+train_dfa['no_fb_observer_choices'] = observer_choices
+train_dfa['no_fb_observer_switch'] = abs(train_dfa.no_fb_observer_choices.diff())
+train_dfa['conform_no_fb_observer'] = np.equal(train_dfa.subj_ts, observer_choices)
+
+
+#Optimal observer for test        
+optimal_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = 1, recursive_prob = train_recursive_p)
 observer_choices = []
 for i,trial in test_dfa.iterrows():
     c = trial.context
     conf = optimal_observer.calc_posterior(c)
     obs_choice = np.argmax(conf)
     observer_choices.append(obs_choice)
-test_dfa['observer_choices'] = observer_choices
-test_dfa['observer_switch'] = abs(test_dfa.observer_choices.diff())
-test_dfa['conform_observer'] = np.equal(test_dfa.subj_ts, observer_choices)
+test_dfa['opt_observer_choices'] = observer_choices
+test_dfa['opt_observer_switch'] = abs(test_dfa.opt_observer_choices.diff())
+test_dfa['conform_opt_observer'] = np.equal(test_dfa.subj_ts, observer_choices)
+
+test_dfa['midline_observer_choices'] = (test_dfa.context_sign == ts2_side).astype('int')
+test_dfa['midline_observer_switch'] = abs(test_dfa.midline_observer_choices.diff())
+test_dfa['conform_midline_observer'] = np.equal(test_dfa.subj_ts, test_dfa.midline_observer_choices)
 
 #*********************************************
 # Generic Experimental Settings
@@ -155,14 +173,14 @@ behav_sum['test_len'] = len(test_dfa)
 #*********************************************    
 
 #accuracy is defined in relation to the ideal observer
-behav_sum['train_ts1_acc'], behav_sum['train_ts2_acc'] = list(train_dfa.groupby('ts').conform_observer.mean())
-behav_sum['test_ts1_acc'], behav_sum['test_ts2_acc'] = list(test_dfa.groupby('ts').conform_observer.mean())
+behav_sum['train_ts1_acc'], behav_sum['train_ts2_acc'] = list(train_dfa.groupby('ts').conform_opt_observer.mean())
+behav_sum['test_ts1_acc'], behav_sum['test_ts2_acc'] = list(test_dfa.groupby('ts').conform_opt_observer.mean())
 
 #Very course estimate of learning: is there a change in performance over trials?
 #Threshold p < .01, and if so, what direction?
 learn_direct = []
 for sub in [train_dfa, test_dfa]:
-    logit = sm.Logit(sub['conform_observer'], sm.add_constant(sub[['trial_count']]))
+    logit = sm.Logit(sub['conform_opt_observer'], sm.add_constant(sub[['trial_count']]))
     result = logit.fit()
     learn_direct.append(int(result.pvalues[1]<.01) * np.sign(result.params[1]))
 behav_sum['learning?'] = learn_direct
@@ -179,10 +197,22 @@ TS_minus_resp_switch_cost = TS_switch_cost - switch_resp_cost
 behav_sum['Switch_cost'] = TS_minus_resp_switch_cost
 
 #*********************************************
+# Switch Analysis
+#*********************************************
+switch_contexts = odict()
+switch_contexts['subject'] = test_dfa.query('subj_switch == True').groupby(['subj_ts','context']).trial_count.count().unstack(level = 0)
+switch_contexts['opt_observer'] = test_dfa.query('opt_observer_switch == True').groupby(['opt_observer_choices','context']).trial_count.count().unstack(level = 0)
+switch_contexts['midline_observer'] = test_dfa.query('midline_observer_switch == True').groupby(['midline_observer_choices','context']).trial_count.count().unstack(level = 0)
+
+
+
+
+
+#*********************************************
 # linear fit of RT based on absolute context
 #*********************************************
 
-result = sm.GLS(test_dfa.rt,sm.add_constant(test_dfa.abs_context)).fit()
+result = sm.GLS(np.log(test_dfa.rt),sm.add_constant(test_dfa.abs_context)).fit()
 behav_sum['context->rt'] = result.params[1] * int(result.pvalues[1]<.05)
 
 
@@ -190,7 +220,7 @@ behav_sum['context->rt'] = result.params[1] * int(result.pvalues[1]<.05)
 # Switch training accuracy
 #*********************************************
 
-behav_sum['train_switch_acc'] = train_dfa.groupby('subj_switch').conform_observer.mean()[1]
+behav_sum['train_switch_acc'] = train_dfa.groupby('subj_switch').conform_opt_observer.mean()[1]
 
 #*********************************************
 # Contributors to task-set choice
@@ -336,6 +366,43 @@ behav_sum['best_model'] = np.argmax(model_likelihoods.sum())
 
 if plot == True:
     
+    #Plot conformity to a number of measures (models, experimental ts, midline)
+    plt.subplot(3,1,1)
+    plt.hold(True)
+    plt.plot(pd.ewma(np.equal(train_dfa.context_sign==ts2_side,train_dfa.subj_ts), span = 50), lw = 3, label = 'midline rule')
+    plt.plot(pd.ewma(train_dfa.conform_opt_observer,span = 50), lw = 3, label = 'optimal')  
+    plt.plot(pd.ewma(train_dfa.correct,span = 50), lw = 3, label = 'experiment TS')  
+    plt.plot(pd.ewma(train_dfa.conform_no_fb_observer,span = 50), lw = 3, label = 'optimal no FB') 
+    plt.axhline(.5, color = 'k', lw = 3, ls = '--')
+    plt.xlabel('Trial')
+    plt.ylabel('EWMA (span = 50) conformity')
+    pylab.legend(loc='bottom right',prop={'size':20})
+    
+    plt.subplot(3,1,2)
+    plt.hold(True)
+    plt.plot(pd.ewma(test_dfa.conform_midline_observer, span = 50), lw = 3, label = 'midline rule')
+    plt.plot(pd.ewma(test_dfa.conform_opt_observer,span = 50), lw = 3, label = 'optimal')  
+    plt.plot(pd.ewma(test_dfa.correct,span = 50), lw = 3, label = 'experiment TS')  
+    plt.axhline(.5, color = 'k', lw = 3, ls = '--')
+    pylab.legend(loc='bottom right',prop={'size':20})
+    
+    #plot distribution of switches, by task-set
+    plt.hold(True)
+    sub = switch_contexts['subject']
+    plt.plot(sub[0], lw = 3, color = 'm', label = 'switch to ts 1')
+    plt.plot(sub[1], lw = 3, color = 'c', label = 'switch to ts 2')
+    sub = switch_contexts['opt_observer']
+    plt.plot(sub[0], lw = 3, color = 'm', ls = '--', label = 'optimal observer')
+    plt.plot(sub[1], lw = 3, color = 'c', ls = '--')
+    sub = switch_contexts['midline_observer']
+    plt.plot(sub[0], lw = 3, color = 'm', ls = ':', label = 'midline rule')
+    plt.plot(sub[1], lw = 3, color = 'c', ls = ':')
+    plt.xticks(list(range(12)),np.round(list(sub.index),2))
+    plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
+    pylab.legend(loc='upper right',prop={'size':20})
+    
+    
+    
     #look at RT
     plt.subplot(4,1,1)
     plt.plot(dfa.rt*1000,'ro')
@@ -356,7 +423,7 @@ if plot == True:
     plt.subplot(4,1,3)
     plt.hold(True)
     dfa.query('subj_switch == 0 and rep_resp == 0')['rt'].plot(kind='density', color = 'm', lw = 5, label = 'repeat response')
-    dfa.query('subj_switch == 0 and rep_resp == 1')['rt'].plot(kind='density', color = 'c', lw = 5, label = 'chance response (within task-set)')
+    dfa.query('subj_switch == 0 and rep_resp == 1')['rt'].plot(kind='density', color = 'c', lw = 5, label = 'change response (within task-set)')
     dfa.query('subj_switch == 0 and rep_resp == 0')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
     dfa.query('subj_switch == 0 and rep_resp == 1')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
     plt.xlabel('RT')
@@ -374,7 +441,7 @@ if plot == True:
     pylab.legend(loc='upper right',prop={'size':20})
             
     ggplot(dfa, aes(x='context',y='rt', color = 'subj_ts')) + geom_point(alpha=.4) + stat_summary(size = 6)
-    ggplot(dfa, aes(x='context',y='conform_observer', color = 'subj_ts')) + stat_summary()
+    ggplot(dfa, aes(x='context',y='conform_opt_observer', color = 'subj_ts')) + stat_summary()
     
 
     #Plot run

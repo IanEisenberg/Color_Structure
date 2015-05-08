@@ -77,7 +77,7 @@ class BiasPredModel:
     and the relevant to calculate posterior hypothesis estimates.
     """
     def __init__(self, likelihood_dist, prior, recursive_prob = .9,
-                 data_noise = 0, ts_bias = 0):
+                 data_noise = 0, ts_bias = 1):
         self.prior = np.array(prior)
         self.likelihood_dist = likelihood_dist
         self.recursive_prob = recursive_prob
