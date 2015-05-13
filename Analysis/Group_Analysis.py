@@ -34,7 +34,6 @@ axes = {'titleweight' : 'bold'
         }
 plt.rc('font', **font)
 plt.rc('axes', **axes)
-plt.rc('figure', figsize = (12,8))
 
 save = False
 plot = False
@@ -231,8 +230,10 @@ gtest_df.query('opt_observer_switch == True').groupby('context').mean().opt_obse
 gtest_df = gtest_df.query('id != "Pilot021"')
 ids = np.unique(gtest_df.id)
 contexts = np.unique(gtest_df.context)
+figdims = (16,12)
 if plot == True:
     #Plot task-set count by context value
+    plt.figure(figsize = figdims)
     plt.hold(True) 
     plt.plot(gtest_df.groupby('context').subj_ts.mean(), lw = 3, color = 'c', label = 'Subject')
     plt.plot(gtest_df.groupby('context').opt_observer_choices.mean(), lw = 3, color = 'c', ls = '--', label = 'optimal observer')
@@ -247,6 +248,8 @@ if plot == True:
         plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'k', alpha = .1)
     
     #plot distribution of switches, by task-set
+    plt.figure(figsize = figdims)
+    plt.subplot(2,1,1)
     plt.hold(True) 
     sub = switch_counts['subject']
     plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to ts 1')
@@ -289,6 +292,7 @@ if plot == True:
     
         
     #As above, using normalized measure
+    plt.subplot(2,1,2)
     plt.hold(True) 
     sub = norm_switch_counts['subject']
     plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to ts 1')
@@ -329,12 +333,13 @@ if plot == True:
     #    plt.plot(sub[1], lw = 3, color = 'c', ls = '--', alpha = .15)
 
     #RT for switch vs stay for different trial-by-trial context diff
-    gtest_df.groupby(['subj_switch','context_diff']).mean().rt.unstack(level = 0).plot(kind='bar', color = ['c','m'])     
+    gtest_df.groupby(['subj_switch','context_diff']).mean().rt.unstack(level = 0).plot(kind='bar', color = ['c','m'], figsize = figdims)     
             
     #Plot rt against optimal model certainty
     ggplot(gtest_df, aes('opt_certainty', 'rt', color = 'id')) + geom_point() + geom_smooth(method = 'lm')
        
     #look at RT
+    plt.figure(figsize = figdims)
     plt.subplot(4,1,1)
     gtest_df.rt.hist(bins = 25)
     plt.ylabel('Count across subject')

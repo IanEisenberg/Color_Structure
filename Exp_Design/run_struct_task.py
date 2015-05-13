@@ -18,7 +18,7 @@ verbose=True
 fullscr= True
 subdata=[]
 practice_on = True
-task_on = True
+train_on = True
 test_on = True
 #fullInfo refers to instructions and practice where subjects are explicitely
 #told that they either have to pay attention to color OR shape.
@@ -43,31 +43,31 @@ f.close()
 train_mins = 45 #train_length in minutes
 test_mins = 30 #test_length in minutes
 avg_test_trial_len = 2.25 #in seconds
-avg_task_trial_len = avg_test_trial_len + 1 #factor in FB
+avg_train_trial_len = avg_test_trial_len + 1 #factor in FB
 #Find the minimum even number of blocks to last at least train_length minutes
-task_len = int(round(train_mins*60/avg_task_trial_len/4)*4)
+train_len = int(round(train_mins*60/avg_train_trial_len/4)*4)
 test_len = int(round(test_mins*60/avg_test_trial_len/4)*4)
 recursive_p = .9
 if fullInfo:
-    taskname = 'Prob_Context_FullInfo'
+    trainname = 'Prob_Context_FullInfo'
 else:
-    taskname = 'Prob_Context'
+    trainname = 'Prob_Context'
 
 
 #set up config files
 practice_config_file = '../Config_Files/Prob_Context_Practice_config.npy'
-task_config_file = makeConfigList(taskname = taskname, iden = subject_code, exp_len = task_len, recursive_p = recursive_p)
+train_config_file = makeConfigList(taskname = trainname, iden = subject_code, exp_len = train_len, recursive_p = recursive_p)
 
 if fullInfo == False:
-    practice_config_file = makePracticeConfigList(taskname = taskname + '_Practice')
+    practice_config_file = makePracticeConfigList(taskname = trainname + '_Practice')
 else:
-    practice_config_file = makeFullInfoPracticeConfigList(taskname = taskname + '_Practice')
+    practice_config_file = makeFullInfoPracticeConfigList(taskname = trainname + '_Practice')
 practice=probContextTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'practice')
 
-task=probContextTask(task_config_file,subject_code, fullscreen = fullscr)
+train=probContextTask(train_config_file,subject_code, fullscreen = fullscr)
 if bot_on == True:
-    task.setBot(bot = test_bot(task_config_file, mode = bot_mode), mode = "full")
-task.writeToLog(task.toJSON())
+    train.setBot(bot = test_bot(train_config_file, mode = bot_mode), mode = "full")
+train.writeToLog(train.toJSON())
 
 
 
@@ -272,8 +272,8 @@ if practice_on:
     press 5 to see the shapes you will have to respond to
     during the training and test phases.
     """)
-    resp,task.startTime=practice.waitForKeypress(practice.trigger_key)
-    task.checkRespForQuitKey(resp)
+    resp,practice.startTime=practice.waitForKeypress(practice.trigger_key)
+    practice.checkRespForQuitKey(resp)
     practice.presentStims(mode = 'task')
     resp,practice.startTime=practice.waitForKeypress(practice.trigger_key)
     practice.checkRespForQuitKey(resp)
@@ -285,12 +285,12 @@ if practice_on:
 # Start training
 #************************************
 
-if task_on:
+if train_on:
     # prepare to start
-    task.setupWindow()
-    task.defineStims()
+    train.setupWindow()
+    train.defineStims()
     if bot_on == False:
-        task.presentTextToWindow(
+        train.presentTextToWindow(
             """
             We will now start the training phase of the experiment.
             
@@ -304,56 +304,56 @@ if task_on:
             
             Please wait for the experimenter.
             """)
-        resp,task.startTime=task.waitForKeypress(task.trigger_key)
-        task.checkRespForQuitKey(resp)
+        resp,train.startTime=train.waitForKeypress(train.trigger_key)
+        train.checkRespForQuitKey(resp)
         event.clearEvents()
     else:
-        task.startTime = core.getTime()
+        train.startTime = core.getTime()
         
     
-    pause_trial = task.stimulusInfo[len(task.stimulusInfo)/2]
+    pause_trial = train.stimulusInfo[len(train.stimulusInfo)/2]
     pause_time = 0
-    for trial in task.stimulusInfo:
-        if not task.bot:
+    for trial in train.stimulusInfo:
+        if not train.bot:
             if trial == pause_trial:
                 time1 = core.getTime()
-                task.presentTextToWindow("Take a break! Press '5' when you're ready to continue.")
-                task.waitForKeypress(task.trigger_key)
-                task.clearWindow()
+                train.presentTextToWindow("Take a break! Press '5' when you're ready to continue.")
+                train.waitForKeypress(train.trigger_key)
+                train.clearWindow()
                 pause_time = core.getTime() - time1
         
         #if botMode = short, don't wait for onset times
-        if task.botMode != 'short':
+        if train.botMode != 'short':
             # wait for onset time
-            while core.getTime() < trial['onset'] + task.startTime + pause_time:
+            while core.getTime() < trial['onset'] + train.startTime + pause_time:
                     key_response=event.getKeys(None,True)
                     if len(key_response)==0:
                         continue
                     for key,response_time in key_response:
-                        if task.quit_key==key:
-                            task.shutDownEarly()
-                        elif task.trigger_key==key:
-                            task.trigger_times.append(response_time-task.startTime)
-                            task.waitForKeypress()
+                        if train.quit_key==key:
+                            train.shutDownEarly()
+                        elif train.trigger_key==key:
+                            train.trigger_times.append(response_time-train.startTime)
+                            train.waitForKeypress()
                             continue
     
-        trial=task.presentTrial(trial)
-        task.writeToLog(json.dumps(trial))
-        task.alldata.append(trial)
+        trial=train.presentTrial(trial)
+        train.writeToLog(json.dumps(trial))
+        train.alldata.append(trial)
         #print('state = ' + str(trial['state'])+ ', value: ' + str(np.mean(trial['context']))) 
         
-    task.writeToLog(json.dumps({'trigger_times':task.trigger_times}))
-    task.writeData()
+    train.writeToLog(json.dumps({'trigger_times':train.trigger_times}))
+    train.writeData()
     if bot_on == False:
-        task.presentTextToWindow('Thank you. Please wait for the experimenter.')
-        task.waitForKeypress(task.quit_key)
+        train.presentTextToWindow('Thank you. Please wait for the experimenter.')
+        train.waitForKeypress(train.quit_key)
 
 
     # clean up
-    task.closeWindow()
+    train.closeWindow()
 
 #************************************
-# Send text about task performance
+# Send text about train performance
 #************************************
 
     if bot_on == False:   
@@ -380,7 +380,7 @@ if task_on:
 if test_on:
     #if experiment crashed for some reason between train and test set task_on
     #to false and the experiment will load up the parameters from the training
-    if task_on == False:
+    if train_on == False:
         train_file = glob.glob('../RawData/' + subject_code + '*Context_20*yaml')[0]
         train_name = train_file[11:-5]
         taskinfo, df, dfa = load_data(train_file, train_name, mode = 'train')
@@ -388,9 +388,9 @@ if test_on:
         states = taskinfo['states']
         ts_order = [states[0]['ts'],states[1]['ts']] 
     else:
-        action_keys = task.getActions()
-        ts_order = task.getTSorder()
-    test_config_file = makeConfigList(taskname = taskname + '_noFB', iden = subject_code, exp_len = test_len, 
+        action_keys = train.getActions()
+        ts_order = train.getTSorder()
+    test_config_file = makeConfigList(taskname = taskname + '_test', iden = subject_code, exp_len = test_len, 
                                       recursive_p = recursive_p, FBDuration = 0, FBonset = 0, action_keys = action_keys,
                                       ts_order = ts_order)
                                       
@@ -451,18 +451,18 @@ if test_on:
         test.writeToLog(json.dumps(trial))
         test.alldata.append(trial)
     
-    test.writeToLog(json.dumps({'trigger_times':task.trigger_times}))
+    test.writeToLog(json.dumps({'trigger_times':test.trigger_times}))
     test.writeData()
     if bot_on == False:
         test.presentTextToWindow('Thank you. Please wait for the experimenter.')
-        test.waitForKeypress(task.quit_key)
+        test.waitForKeypress(test.quit_key)
     
     # clean up
     test.closeWindow()
     
 
 #************************************
-# Send text about task performance
+# Send text about test performance
 #************************************
 
     if bot_on == False:   

@@ -36,7 +36,6 @@ axes = {'titleweight' : 'bold'
         }
 plt.rc('font', **font)
 plt.rc('axes', **axes)
-plt.rc('figure', figsize = (12,8))
 
 save = False
 plot = False
@@ -407,7 +406,10 @@ behav_sum['best_model'] = np.argmax(model_likelihoods.sum())
 
 if plot == True:
     
+    contexts = np.unique(test_dfa.context)
+    figdims = (16,12)
     #Plot conformity to a number of measures (models, experimental ts, midline)
+    plt.figure(figsize = figdims)
     plt.subplot(2,1,1)
     plt.hold(True)
     plt.plot(pd.ewma(np.equal(train_dfa.context_sign==1,train_dfa.subj_ts), span = 50), lw = 3, label = 'midline rule')
@@ -417,7 +419,7 @@ if plot == True:
     plt.axhline(.5, color = 'k', lw = 3, ls = '--')
     plt.ylabel('EWMA (span = 50) conformity')
     plt.title('Training')
-    pylab.legend(loc='best',prop={'size':20})
+    pylab.legend(loc='lower right',prop={'size':20})
     
     
     plt.subplot(2,1,2)
@@ -428,14 +430,15 @@ if plot == True:
     plt.plot(pd.ewma(np.equal(test_dfa.ts,test_dfa.subj_ts),span = 50), lw = 3, label = 'experiment TS')  
     plt.xlabel('Trial')
     plt.axhline(.5, color = 'k', lw = 3, ls = '--')
-    pylab.legend(loc='best',prop={'size':20})
+    pylab.legend(loc='lower right',prop={'size':20})
     
+    plt.figure(figsize = figdims)
     #Plot task-set count by context value
     plt.hold(True) 
     plt.plot(test_dfa.groupby('context').subj_ts.mean(), lw = 3, color = 'c', label = 'Subject')
     plt.plot(test_dfa.groupby('context').opt_observer_choices.mean(), lw = 3, color = 'c', ls = '--', label = 'optimal observer')
     plt.plot(test_dfa.groupby('context').midline_observer_choices.mean(), lw = 3, color = 'c', ls = ':', label = 'midline rule')
-    plt.xticks(list(range(12)),np.round(list(sub.index),2))
+    plt.xticks(list(range(12)),contexts)
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position')
     plt.ylabel('Task-set 2 %')
@@ -443,6 +446,8 @@ if plot == True:
     
     
     #plot distribution of switches, by task-set
+    plt.figure(figsize = figdims)
+    plt.subplot(2,1,1)
     plt.hold(True) 
     sub = switch_counts['subject']
     plt.plot(sub[0], lw = 3, color = 'm', label = 'switch to ts 1')
@@ -453,13 +458,14 @@ if plot == True:
     sub = switch_counts['midline_observer']
     plt.plot(sub[0], lw = 3, color = 'm', ls = '-.', label = 'midline rule')
     plt.plot(sub[1], lw = 3, color = 'c', ls = '-.')
-    plt.xticks(list(range(12)),np.round(list(sub.index),2))
+    plt.xticks(list(range(12)),contexts)
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position')
     plt.ylabel('Counts')
     pylab.legend(loc='upper right',prop={'size':20})
     
     #As above, using normalized measure
+    plt.subplot(2,1,2)
     plt.hold(True) 
     sub = norm_switch_counts['subject']
     plt.plot(sub[0], lw = 3, color = 'm', label = 'switch to ts 1')
@@ -470,13 +476,14 @@ if plot == True:
     sub = norm_switch_counts['midline_observer']
     plt.plot(sub[0], lw = 3, color = 'm', ls = '-.', label = 'midline rule')
     plt.plot(sub[1], lw = 3, color = 'c', ls = '-.')
-    plt.xticks(list(range(12)),np.round(list(sub.index),2))
+    plt.xticks(list(range(12)),contexts)
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position')
     plt.ylabel('Normalized Counts Compared to Midline Rule')
     pylab.legend(loc='best',prop={'size':20})
     
     #look at RT
+    plt.figure(figsize = figdims)
     plt.subplot(4,1,1)
     plt.plot(test_dfa.rt*1000,'ro')
     plt.title('RT over experiment', size = 24)
@@ -515,7 +522,7 @@ if plot == True:
     
 
     #RT for switch vs stay for different trial-by-trial context diff
-    test_dfa.groupby(['subj_switch','context_diff']).mean().rt.unstack(level = 0).plot(kind='bar', color = ['c','m'])     
+    test_dfa.groupby(['subj_switch','context_diff']).mean().rt.unstack(level = 0).plot(kind='bar', color = ['c','m'], figsize = figdims)     
     
     #Plot rt against optimal model certainty
     ggplot(test_dfa, aes('opt_certainty', 'rt')) + geom_point() + geom_smooth(method = 'lm')
