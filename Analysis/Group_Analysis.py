@@ -43,8 +43,12 @@ plot = False
 # Load Data
 #*********************************************
 group_behavior = {}
-fullInfo = False
 
+fullInfo = True
+
+gtrain_df = pd.DataFrame()
+gtest_df = pd.DataFrame()
+gtaskinfo = []
 if fullInfo:
    train_files = glob.glob('../RawData/*FullInfo_20*yaml')
    test_files = glob.glob('../RawData/*FullInfo_noFB*yaml') 
@@ -78,18 +82,34 @@ for train_file, test_file in zip(train_files,test_files):
         taskinfo, test_dfa = load_data(test_file, test_name, mode = 'test')
         test_dict = {'taskinfo': taskinfo, 'dfa': test_dfa}
         pickle.dump(test_dict, open('../Data/' + test_name + '.p','wb'))
-        
+    
+
+
+
+#*********************************************
+# Preliminary Setup
+#*********************************************
 
     
-    #*********************************************
-    # Preliminary Setup
-    #*********************************************
     recursive_p = taskinfo['recursive_p']
     states = taskinfo['states']
     state_dis = [norm(states[0]['c_mean'], states[0]['c_sd']), norm(states[1]['c_mean'], states[1]['c_sd']) ]
     ts_order = [states[0]['ts'],states[1]['ts']]
     ts_dis = [state_dis[i] for i in ts_order]
+    ts2_side = np.sign(ts_dis[1].mean())
+    taskinfo['ts2_side'] = ts2_side
+    #To ensure TS2 is always associated with the 'top' of the screen, or positive
+    #context values, flip the context values if this isn't the case.
+    #This ensures that TS1 is always the shape task-set and, for analysis purposes,
+    #always associated with the bottom of the screen
+    train_dfa['true_context'] = train_dfa['context']
+    test_dfa['true_context'] = test_dfa['context']
     
+    if ts2_side == -1:
+        train_dfa['context'] = train_dfa['context']* -1
+        test_dfa['context'] = test_dfa['context']* -1
+        ts_dis = ts_dis [::-1]
+        
     #What was the mean contextual value for each taskset during this train run?
     train_ts_means = list(train_dfa.groupby('ts').agg(np.mean).context)
     #Same for standard deviation
@@ -98,14 +118,18 @@ for train_file, test_file in zip(train_files,test_files):
     #And do the same for recursive_p
     train_recursive_p = 1- train_dfa.switch.mean()
     
+    
+    #decompose contexts
     test_dfa['abs_context'] = abs(test_dfa.context)    
     train_dfa['abs_context'] = abs(train_dfa.context)
-    
-    behav_sum = odict()
-    
-    
+    train_dfa['context_sign'] = np.sign(train_dfa.context)
+    test_dfa['context_sign'] = np.sign(test_dfa.context)
+    #Create vector of context differences
+    test_dfa['context_diff'] = test_dfa['context'].diff()
+
+
     #*********************************************
-    # Set up perfect observer
+    # Set up observers
     #*********************************************
     
     #This observer know the exact statistics of the task, always chooses correctly
@@ -115,229 +139,225 @@ for train_file, test_file in zip(train_files,test_files):
     #deterministic feedback). Basically, after receiving FB, the ideal observer
     #knows exactly what task it is in and should act accordingly.
     
-    for dfa in [train_dfa]:
-        observer_prior = [.5,.5]
-        observer_choices = []
-        for i,trial in dfa.iterrows():
-            c = trial.context
-            ts = trial.ts
-            conf= calc_posterior(c,observer_prior,ts_dis)    
-            obs_choice = np.argmax(conf)
-            observer_choices.append(obs_choice)
-            observer_prior = np.round([.9*(1-ts)+.1*ts,.9*ts+.1*(1-ts)],2)
-            
-        dfa['observer_choices'] = observer_choices
-        dfa['observer_switch'] = abs(dfa.observer_choices.diff())
-        dfa['conform_observer'] = np.equal(train_dfa.subj_ts, observer_choices)
-    
-    #Optimal observer for test        
-    optimal_observer = BiasPredModel(train_ts_dis, [.5,.5], recursive_prob = train_recursive_p)
+    observer_prior = [.5,.5]
     observer_choices = []
-    for i,trial in test_dfa.iterrows():
+    for i,trial in train_dfa.iterrows():
         c = trial.context
-        conf = optimal_observer.calc_posterior(c)
+        ts = trial.ts
+        conf= calc_posterior(c,observer_prior,ts_dis)    
         obs_choice = np.argmax(conf)
         observer_choices.append(obs_choice)
-    test_dfa['observer_choices'] = observer_choices
-    test_dfa['observer_switch'] = abs(test_dfa.observer_choices.diff())
-    test_dfa['conform_observer'] = np.equal(test_dfa.subj_ts, observer_choices)
-    
-    #*********************************************
-    # Generic Experimental Settings
-    #*********************************************
-    
-    behav_sum['train_len'] = len(train_dfa)
-    behav_sum['test_len'] = len(test_dfa)
-    
-    #*********************************************
-    # Performance
-    #*********************************************    
-    
-    #accuracy is defined in relation to the ideal observer
-    behav_sum['train_ts1_acc'], behav_sum['train_ts2_acc'] = list(train_dfa.groupby('ts').conform_observer.mean())
-    behav_sum['test_ts1_acc'], behav_sum['test_ts2_acc'] = list(test_dfa.groupby('ts').conform_observer.mean())
-    
-    #Very course estimate of learning: is there a change in performance over trials?
-    #Threshold p < .01, and if so, what direction?
-    learn_direct = []
-    for sub in [train_dfa, test_dfa]:
-        logit = sm.Logit(sub['conform_observer'], sm.add_constant(sub[['trial_count']]))
-        result = logit.fit()
-        learn_direct.append(int(result.pvalues[1]<.01) * np.sign(result.params[1]))
-    behav_sum['learning?'] = learn_direct
-    
-    #*********************************************
-    # Switch costs 
-    #*********************************************
-    
-    #RT difference when switching to either action of a new task-set
-    TS_switch_cost = np.mean(test_dfa.query('subj_switch == True')['rt']) - np.mean(test_dfa.query('subj_switch == False')['rt'])
-    #RT difference when switching to the other action within a task-set
-    switch_resp_cost = np.mean(test_dfa.query('rep_resp == False and subj_switch != True')['rt']) - np.mean(test_dfa.query('rep_resp == True')['rt'])
-    TS_minus_resp_switch_cost = TS_switch_cost - switch_resp_cost
-    behav_sum['Switch_cost'] = TS_minus_resp_switch_cost
-    
-    #*********************************************
-    # linear fit of RT based on absolute context
-    #*********************************************
-    
-    result = sm.GLS(test_dfa.rt,sm.add_constant(test_dfa.abs_context)).fit()
-    behav_sum['context->rt'] = result.params[1] * int(result.pvalues[1]<.05)
-    
-    
-    #*********************************************
-    # Switch training accuracy
-    #*********************************************
-    
-    behav_sum['train_switch_acc'] = train_dfa.groupby('subj_switch').conform_observer.mean()[1]
-    
-    #*********************************************
-    # Contributors to task-set choice
-    #*********************************************
-    sub = sm.add_constant(test_dfa[['context','subj_ts','rt']])
-    sub['last_ts'] = sub.subj_ts.shift(1)
-    predictors = sub.drop(['subj_ts'],axis = 1)
-    logit = sm.Logit(sub['subj_ts'],predictors, missing = 'drop')
-    result = logit.fit()
-    print(result.summary())
-    
-    #*********************************************
-    # Model fitting
-    #*********************************************
-    
-    #*************************************
-    #Model Functions
-    #*************************************
-    
-    def bias_fitfunc(dfa, rp, tsb):
-        model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
-        model_likelihoods = []
-        for i,trial in dfa.iterrows():
-            c = trial.context
-            trial_choice = trial.subj_ts
-            conf = model.calc_posterior(c)
-            model_likelihoods.append(conf[trial_choice])
-        return model_likelihoods
+        observer_prior = np.round([.9*(1-ts)+.1*ts,.9*ts+.1*(1-ts)],2)
         
-    def bias_errfunc(dfa,rp,tsb):
-        return (bias_fitfunc(dfa,rp,tsb) - np.ones(len(dfa)))
+    train_dfa['opt_observer_choices'] = observer_choices
+    train_dfa['opt_observer_switch'] = abs((train_dfa.opt_observer_choices).diff())
+    train_dfa['conform_opt_observer'] = np.equal(train_dfa.subj_ts, observer_choices)
     
-    def bias_fit_temp(dfa, tsb, rp, t):
-        model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp, temp = t)
-        model_choices = []
-        for i,trial in dfa.iterrows():
-            c = trial.context
-            model.calc_posterior(c)
-            model_choices.append(model.choose())
-        dfa['model_choices'] = model_choices
-        return dfa.groupby('context').model_choices.mean()
-        
-    def estimate_fitfunc(dfa, m,s,rp):
-        model = EstimatePredModel(init_prior, mean = m, std = s, recursive_prob = rp)
-        model_likelihoods = []
-        for i,trial in dfa.iterrows():
-            c = trial.context
-            trial_choice = trial.subj_ts
-            conf = model.calc_posterior(c)
-            model_likelihoods.append(conf[trial_choice])
-        return model_likelihoods    
+    #Optimal observer for train, without feedback     
+    no_fb_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = 1, recursive_prob = train_recursive_p)
+    observer_choices = []
+    posteriors = []
+    for i,trial in train_dfa.iterrows():
+        c = trial.context
+        posteriors.append(no_fb_observer.calc_posterior(c)[1])
+    posteriors = np.array(posteriors)
+    train_dfa['no_fb_observer_posterior'] = posteriors
+    train_dfa['opt_observer_choices'] = (posteriors>.5).astype(int)
+    train_dfa['no_fb_observer_switch'] = (train_dfa.no_fb_observer_posterior>.5).diff()
+    train_dfa['conform_no_fb_observer'] = np.equal(train_dfa.subj_ts, posteriors>.5)
     
-    def estimate_errfunc(dfa,m,s,rp):
-        return (estimate_fitfunc(dfa,m,s,rp) - np.ones(len(dfa)))    
-        
-    def estimate_fit_temp(dfa, m,s,rp, t):
-        model = EstimatePredModel(init_prior,mean = m, std = s, recursive_prob = rp, temp = t)
-        model_choices = []
-        for i,trial in dfa.iterrows():
-            c = trial.context
-            model.calc_posterior(c)
-            model_choices.append(model.choose())
-        dfa['model_choices'] = model_choices
-        return dfa.groupby('context').model_choices.mean()
-        
-        
-        
-    init_prior = [.5,.5]
-    
-    #Fit bias model
-    model = lmfit.Model(bias_fitfunc, independent_vars = ['dfa'])    
-    params = lmfit.Parameters()
-    params.add('tsb', value = 1, min = 0)
-    params.add('rp', value = train_recursive_p)
-    modelfit = model.fit(np.ones(len(test_dfa)), params, dfa = test_dfa)
-    tsb, brp = [modelfit.values.get(k) for k in ['tsb', 'rp']]
-    behav_sum['bias_fit_params'] = modelfit.values
-    behav_sum['bias_fit_error'] = np.sum(np.square(bias_errfunc(test_dfa,brp,tsb)))
-    #Fit softmax temp
-    model = lmfit.Model(bias_fit_temp, independent_vars = ['dfa','tsb','rp'])    
-    params = lmfit.Parameters()
-    params.add('t', min = .01)
-    modelfit = model.fit(test_dfa.groupby('context').subj_ts.mean(), params, dfa = test_dfa, tsb = tsb, rp = brp)
-    btemp = modelfit.values['t'] 
-        
-    #Fit Estimate model
-    model = lmfit.Model(estimate_fitfunc, independent_vars = ['dfa'])    
-    params = lmfit.Parameters()
-    params.add('m', value = train_ts_dis[0].mean(), min = -1, max = 1)
-    params.add('s', value = train_ts_dis[0].std())
-    params.add('rp', value = train_recursive_p)
-    modelfit = model.fit(np.ones(len(test_dfa)), params, dfa = test_dfa)
-    m, s, erp = [modelfit.values.get(k) for k in ['m','s','rp']]
-    behav_sum['estimate_fit_params'] = modelfit.values
-    behav_sum['estimate_fit_error'] = np.sum(np.square(estimate_errfunc(test_dfa,m,s,erp)))
-    #Fit softmax temp
-    model = lmfit.Model(estimate_fit_temp, independent_vars = ['dfa','m','s','rp'])    
-    params = lmfit.Parameters()
-    params.add('t', min = .01)
-    modelfit = model.fit(test_dfa.groupby('context').subj_ts.mean(), params, dfa = test_dfa, m=m, s=s, rp=erp)
-    etemp = modelfit.values['t']
-    
-    #record temp settings
-    behav_sum['softmax_temps'] = {'bias_temp':btemp, 'estimate_temp':etemp}
-     
-     
-    model_choice = ['ignore','single','optimal']
-    models = [ \
-        PredModel(train_ts_dis, init_prior, mode = "ignore", recursive_prob = train_recursive_p),\
-        PredModel(train_ts_dis, init_prior, mode = "single", recursive_prob = train_recursive_p),\
-        PredModel(train_ts_dis, init_prior, mode = "optimal", recursive_prob = train_recursive_p)]
-        
-    model_posteriors = pd.DataFrame(columns = ['ignore','single','optimal'], dtype = 'float64')
-    model_choices = pd.DataFrame(columns = ['ignore','single','optimal'], dtype = 'float64')
-    model_likelihoods = pd.DataFrame(columns = ['ignore','single','optimal','rand','ts0','ts1'], dtype = 'float64')
-
+    #Optimal observer for test        
+    optimal_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = 1, recursive_prob = train_recursive_p)
+    observer_choices = []
+    posteriors = []
     for i,trial in test_dfa.iterrows():
         c = trial.context
-        trial_choice = trial.subj_ts
-        
-        model_posterior= []
-        model_choice=[]
-        model_prob_match = []
-        trial_model_likelihoods = []
-        for j,model in enumerate(models):
-            conf = model.calc_posterior(c)
-            model_posterior += [conf[0]]
-            model_choice += [model.choose()]
-            trial_model_likelihoods += [conf[trial_choice]]
-        #add on 'straw model' predictions.
-        trial_model_likelihoods += [.5,[.9,.1][trial_choice], [.1,.9][trial_choice]] 
-       
-       #record trial estimates
-        model_likelihoods.loc[i] = np.log(trial_model_likelihoods)
-        model_posteriors.loc[i] = model_posterior
-        model_choices.loc[i] = model_choice
-        
-    behav_sum['best_model'] = np.argmax(model_likelihoods.sum())
+        posteriors.append(optimal_observer.calc_posterior(c)[1])
+    posteriors = np.array(posteriors)
+    
+    ##Fix the INT
+    test_dfa['opt_observer_posterior'] = posteriors
+    test_dfa['opt_observer_choices'] = (posteriors>.5).astype(int)
+    test_dfa['opt_observer_switch'] = (test_dfa.opt_observer_posterior>.5).diff()
+    test_dfa['conform_opt_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
+    
+    test_dfa['midline_observer_choices'] = (test_dfa.context_sign == 1).astype('int')
+    test_dfa['midline_observer_switch'] = abs((test_dfa.midline_observer_choices).diff())
+    test_dfa['conform_midline_observer'] = np.equal(test_dfa.subj_ts, test_dfa.midline_observer_choices)
+
+    train_dfa['id'] = subj_name
+    test_dfa['id'] = subj_name
+    gtrain_df = pd.concat([gtrain_df,train_dfa])
+    gtest_df = pd.concat([gtest_df,test_dfa])   
+    gtaskinfo.append(taskinfo)
+    
+gtaskinfo = pd.DataFrame(gtaskinfo)
 
 
-    #*********************************************
-    # Add to group dictionary
-    #*********************************************
-    group_behavior[subj_name] = behav_sum
+
+
+
+#*********************************************
+# Switch Analysis
+#*********************************************
+#Count the number of times there was a switch to each TS for each context value
+switch_counts = odict()
+switch_counts['midline_observer'] = gtest_df.query('midline_observer_switch == True').groupby(['midline_observer_choices','context']).trial_count.count().unstack(level = 0)
+switch_counts['subject'] = gtest_df.query('subj_switch == True').groupby(['subj_ts','context']).trial_count.count().unstack(level = 0)
+switch_counts['opt_observer'] = gtest_df.query('opt_observer_switch == True').groupby(['opt_observer_choices','context']).trial_count.count().unstack(level = 0)
+
+#normalize switch counts by the midline rule. The midline rule represents
+#the  number of switches someone would make if they switched task-sets
+#every time the stimuli's position crossed the midline to that position
+norm_switch_counts = odict()
+for key in switch_counts:
+    empty_df = pd.DataFrame(index = np.unique(gtest_df.context), columns = [0,1])
+    empty_df.index.name = 'context'
+    empty_df.loc[switch_counts[key].index] = switch_counts[key]
+    switch_counts[key] = empty_df
+    norm_switch_counts[key] = switch_counts[key].div(switch_counts['midline_observer'],axis = 0)
+
+behav_sum['switch_counts'] = switch_counts['subject']
+behav_sum['ts2_side'] = ts2_side
+behav_sum['norm_switch_counts'] = norm_switch_counts['subject']
+
+gtest_df.query('opt_observer_switch == True').groupby('context').mean().opt_observer_posterior
+
+
+
+#*********************************************
+# Plotting
+#*********************************************
+
+gtest_df = gtest_df.query('id != "Pilot021"')
+ids = np.unique(gtest_df.id)
+
+#Plot task-set count by context value
+plt.hold(True) 
+plt.plot(gtest_df.groupby('context').subj_ts.mean(), lw = 3, color = 'c', label = 'Subject')
+plt.plot(gtest_df.groupby('context').opt_observer_choices.mean(), lw = 3, color = 'c', ls = '--', label = 'optimal observer')
+plt.plot(gtest_df.groupby('context').midline_observer_choices.mean(), lw = 3, color = 'c', ls = ':', label = 'midline rule')
+plt.xticks(list(range(12)),np.round(list(sub.index),2))
+plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
+plt.xlabel('Stimulus Vertical Position')
+plt.ylabel('Task-set 2 %')
+pylab.legend(loc='upper right',prop={'size':20})
+for subj in ids:
+    subj_df = gtest_df.query('id == "%s"' %subj)
+    plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'k', alpha = .1)
+
+#plot distribution of switches, by task-set
+plt.hold(True) 
+sub = switch_counts['subject']
+plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to ts 1')
+plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to ts 2')
+sub = switch_counts['opt_observer']
+plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
+plt.plot(sub[1], lw = 4, color = 'c', ls = '--')
+sub = switch_counts['midline_observer']
+plt.plot(sub[0], lw = 4, color = 'm', ls = '-.', label = 'midline rule')
+plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
+plt.xticks(list(range(12)),np.round(list(sub.index),2))
+plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
+plt.xlabel('Stimulus Vertical Position')
+plt.ylabel('Counts')
+pylab.legend(loc='upper right',prop={'size':20})
+for subj in ids:
+    subj_df = gtest_df.query('id == "%s"' %subj)
+    subj_switch_counts = odict()
+    subj_switch_counts['midline_observer'] = subj_df.query('midline_observer_switch == True').groupby(['midline_observer_choices','context']).trial_count.count().unstack(level = 0)
+    subj_switch_counts['subject'] = subj_df.query('subj_switch == True').groupby(['subj_ts','context']).trial_count.count().unstack(level = 0)
+    subj_switch_counts['opt_observer'] = subj_df.query('opt_observer_switch == True').groupby(['opt_observer_choices','context']).trial_count.count().unstack(level = 0)
+    
+    #normalize switch counts by the midline rule. The midline rule represents
+    #the  number of switches someone would make if they switched task-sets
+    #every time the stimuli's position crossed the midline to that position
+    subj_norm_switch_counts = odict()
+    for key in subj_switch_counts:
+        empty_df = pd.DataFrame(index = np.unique(subj_df.context), columns = [0,1])
+        empty_df.index.name = 'context'
+        empty_df.loc[switch_counts[key].index] = subj_switch_counts[key]
+        subj_switch_counts[key] = empty_df*len(ids)
+        subj_norm_switch_counts[key] = subj_switch_counts[key].div(subj_switch_counts['midline_observer'],axis = 0)
+    sub = subj_switch_counts['subject']
+    plt.plot(sub[0], lw = 3, color = 'm', alpha = .15)
+    plt.plot(sub[1], lw = 3, color = 'c', alpha = .15)
+#    sub = switch_counts['opt_observer']
+#    plt.plot(sub[0], lw = 3, color = 'm', ls = '--', alpha = .15)
+#    plt.plot(sub[1], lw = 3, color = 'c', ls = '--', alpha = .15)
+
+
+    
+#As above, using normalized measure
+plt.hold(True) 
+sub = norm_switch_counts['subject']
+plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to ts 1')
+plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to ts 2')
+sub = norm_switch_counts['opt_observer']
+plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
+plt.plot(sub[1], lw = 4, color = 'c', ls = '--')
+sub = norm_switch_counts['midline_observer']
+plt.plot(sub[0], lw = 4, color = 'm', ls = '-.', label = 'midline rule')
+plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
+plt.xticks(list(range(12)),np.round(list(sub.index),2))
+plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
+plt.xlabel('Stimulus Vertical Position')
+plt.ylabel('Normalized Counts Compared to Midline Rule')
+pylab.legend(loc='best',prop={'size':20})
+for subj in ids:
+    subj_df = gtest_df.query('id == "%s"' %subj)
+    subj_switch_counts = odict()
+    subj_switch_counts['midline_observer'] = subj_df.query('midline_observer_switch == True').groupby(['midline_observer_choices','context']).trial_count.count().unstack(level = 0)
+    subj_switch_counts['subject'] = subj_df.query('subj_switch == True').groupby(['subj_ts','context']).trial_count.count().unstack(level = 0)
+    subj_switch_counts['opt_observer'] = subj_df.query('opt_observer_switch == True').groupby(['opt_observer_choices','context']).trial_count.count().unstack(level = 0)
+    
+    #normalize switch counts by the midline rule. The midline rule represents
+    #the  number of switches someone would make if they switched task-sets
+    #every time the stimuli's position crossed the midline to that position
+    subj_norm_switch_counts = odict()
+    for key in subj_switch_counts:
+        empty_df = pd.DataFrame(index = np.unique(subj_df.context), columns = [0,1])
+        empty_df.index.name = 'context'
+        empty_df.loc[switch_counts[key].index] = subj_switch_counts[key]
+        subj_switch_counts[key] = empty_df*len(ids)
+        subj_norm_switch_counts[key] = subj_switch_counts[key].div(subj_switch_counts['midline_observer'],axis = 0)
+    sub = subj_norm_switch_counts['subject']
+    plt.plot(sub[0], lw = 3, color = 'm', alpha = .15)
+    plt.plot(sub[1], lw = 3, color = 'c', alpha = .15)
+#    sub = switch_counts['opt_observer']
+#    plt.plot(sub[0], lw = 3, color = 'm', ls = '--', alpha = .15)
+#    plt.plot(sub[1], lw = 3, color = 'c', ls = '--', alpha = .15)
     
     
-    
-group_df = pd.DataFrame(group_behavior).transpose()   
-group_df = group_df[list(behav_sum.keys())]
-    
-        
+#look at RT
+plt.subplot(4,1,1)
+gtest_df.rt.hist(bins = 25)
+plt.ylabel('Count across subject')
+
+plt.subplot(4,1,2)
+plt.hold(True)
+gtest_df.query('subj_switch == 0')['rt'].plot(kind='density', color = 'm', lw = 5, label = 'stay')
+gtest_df.query('subj_switch == 1')['rt'].plot(kind='density', color = 'c', lw = 5, label = 'switch')
+gtest_df.query('subj_switch == 0')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
+gtest_df.query('subj_switch == 1')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
+plt.xlabel('RT')
+pylab.legend(loc='upper right',prop={'size':20})
+
+plt.subplot(4,1,3)
+plt.hold(True)
+gtest_df.query('subj_switch == 0 and rep_resp == 1')['rt'].plot(kind='density', color = 'm', lw = 5, label = 'repeat response')
+gtest_df.query('subj_switch == 0 and rep_resp == 0')['rt'].plot(kind='density', color = 'c', lw = 5, label = 'change response (within task-set)')
+gtest_df.query('subj_switch == 0 and rep_resp == 1')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
+gtest_df.query('subj_switch == 0 and rep_resp == 0')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
+plt.xlabel('RT')
+plt.ylabel('Normed Count')
+pylab.legend(loc='upper right',prop={'size':20})
+
+plt.subplot(4,1,4)
+plt.hold(True)
+gtest_df.query('subj_ts == 0')['rt'].plot(kind='density', color = 'm', lw = 5, label = 'ts1')
+gtest_df.query('subj_ts == 1')['rt'].plot(kind='density', color = 'c', lw = 5, label = 'ts2')
+gtest_df.query('subj_ts == 0')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
+gtest_df.query('subj_ts == 1')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
+plt.xlabel('RT')
+pylab.legend(loc='upper right',prop={'size':20})
