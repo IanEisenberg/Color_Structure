@@ -17,6 +17,7 @@ import pickle
 import glob
 import re
 import lmfit
+from ggplot import *
 from collections import OrderedDict as odict
 
 
@@ -33,7 +34,7 @@ axes = {'titleweight' : 'bold'
         }
 plt.rc('font', **font)
 plt.rc('axes', **axes)
-plt.rc('figure', figsize = (16,12))
+plt.rc('figure', figsize = (12,8))
 
 save = False
 plot = False
@@ -180,7 +181,8 @@ for train_file, test_file in zip(train_files,test_files):
     test_dfa['opt_observer_choices'] = (posteriors>.5).astype(int)
     test_dfa['opt_observer_switch'] = (test_dfa.opt_observer_posterior>.5).diff()
     test_dfa['conform_opt_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
-    
+    test_dfa['opt_certainty'] = (abs(test_dfa.opt_observer_posterior-.5))/.5
+
     test_dfa['midline_observer_choices'] = (test_dfa.context_sign == 1).astype('int')
     test_dfa['midline_observer_switch'] = abs((test_dfa.midline_observer_choices).diff())
     test_dfa['conform_midline_observer'] = np.equal(test_dfa.subj_ts, test_dfa.midline_observer_choices)
@@ -217,9 +219,6 @@ for key in switch_counts:
     switch_counts[key] = empty_df
     norm_switch_counts[key] = switch_counts[key].div(switch_counts['midline_observer'],axis = 0)
 
-behav_sum['switch_counts'] = switch_counts['subject']
-behav_sum['ts2_side'] = ts2_side
-behav_sum['norm_switch_counts'] = norm_switch_counts['subject']
 
 gtest_df.query('opt_observer_switch == True').groupby('context').mean().opt_observer_posterior
 
@@ -231,133 +230,139 @@ gtest_df.query('opt_observer_switch == True').groupby('context').mean().opt_obse
 
 gtest_df = gtest_df.query('id != "Pilot021"')
 ids = np.unique(gtest_df.id)
-
-#Plot task-set count by context value
-plt.hold(True) 
-plt.plot(gtest_df.groupby('context').subj_ts.mean(), lw = 3, color = 'c', label = 'Subject')
-plt.plot(gtest_df.groupby('context').opt_observer_choices.mean(), lw = 3, color = 'c', ls = '--', label = 'optimal observer')
-plt.plot(gtest_df.groupby('context').midline_observer_choices.mean(), lw = 3, color = 'c', ls = ':', label = 'midline rule')
-plt.xticks(list(range(12)),np.round(list(sub.index),2))
-plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
-plt.xlabel('Stimulus Vertical Position')
-plt.ylabel('Task-set 2 %')
-pylab.legend(loc='upper right',prop={'size':20})
-for subj in ids:
-    subj_df = gtest_df.query('id == "%s"' %subj)
-    plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'k', alpha = .1)
-
-#plot distribution of switches, by task-set
-plt.hold(True) 
-sub = switch_counts['subject']
-plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to ts 1')
-plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to ts 2')
-sub = switch_counts['opt_observer']
-plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
-plt.plot(sub[1], lw = 4, color = 'c', ls = '--')
-sub = switch_counts['midline_observer']
-plt.plot(sub[0], lw = 4, color = 'm', ls = '-.', label = 'midline rule')
-plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
-plt.xticks(list(range(12)),np.round(list(sub.index),2))
-plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
-plt.xlabel('Stimulus Vertical Position')
-plt.ylabel('Counts')
-pylab.legend(loc='upper right',prop={'size':20})
-for subj in ids:
-    subj_df = gtest_df.query('id == "%s"' %subj)
-    subj_switch_counts = odict()
-    subj_switch_counts['midline_observer'] = subj_df.query('midline_observer_switch == True').groupby(['midline_observer_choices','context']).trial_count.count().unstack(level = 0)
-    subj_switch_counts['subject'] = subj_df.query('subj_switch == True').groupby(['subj_ts','context']).trial_count.count().unstack(level = 0)
-    subj_switch_counts['opt_observer'] = subj_df.query('opt_observer_switch == True').groupby(['opt_observer_choices','context']).trial_count.count().unstack(level = 0)
+contexts = np.unique(gtest_df.context)
+if plot == True:
+    #Plot task-set count by context value
+    plt.hold(True) 
+    plt.plot(gtest_df.groupby('context').subj_ts.mean(), lw = 3, color = 'c', label = 'Subject')
+    plt.plot(gtest_df.groupby('context').opt_observer_choices.mean(), lw = 3, color = 'c', ls = '--', label = 'optimal observer')
+    plt.plot(gtest_df.groupby('context').midline_observer_choices.mean(), lw = 3, color = 'c', ls = ':', label = 'midline rule')
+    plt.xticks(list(range(12)),contexts)
+    plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
+    plt.xlabel('Stimulus Vertical Position')
+    plt.ylabel('Task-set 2 %')
+    pylab.legend(loc='best',prop={'size':20})
+    for subj in ids:
+        subj_df = gtest_df.query('id == "%s"' %subj)
+        plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'k', alpha = .1)
     
-    #normalize switch counts by the midline rule. The midline rule represents
-    #the  number of switches someone would make if they switched task-sets
-    #every time the stimuli's position crossed the midline to that position
-    subj_norm_switch_counts = odict()
-    for key in subj_switch_counts:
-        empty_df = pd.DataFrame(index = np.unique(subj_df.context), columns = [0,1])
-        empty_df.index.name = 'context'
-        empty_df.loc[switch_counts[key].index] = subj_switch_counts[key]
-        subj_switch_counts[key] = empty_df*len(ids)
-        subj_norm_switch_counts[key] = subj_switch_counts[key].div(subj_switch_counts['midline_observer'],axis = 0)
-    sub = subj_switch_counts['subject']
-    plt.plot(sub[0], lw = 3, color = 'm', alpha = .15)
-    plt.plot(sub[1], lw = 3, color = 'c', alpha = .15)
-#    sub = switch_counts['opt_observer']
-#    plt.plot(sub[0], lw = 3, color = 'm', ls = '--', alpha = .15)
-#    plt.plot(sub[1], lw = 3, color = 'c', ls = '--', alpha = .15)
-
-
-    
-#As above, using normalized measure
-plt.hold(True) 
-sub = norm_switch_counts['subject']
-plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to ts 1')
-plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to ts 2')
-sub = norm_switch_counts['opt_observer']
-plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
-plt.plot(sub[1], lw = 4, color = 'c', ls = '--')
-sub = norm_switch_counts['midline_observer']
-plt.plot(sub[0], lw = 4, color = 'm', ls = '-.', label = 'midline rule')
-plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
-plt.xticks(list(range(12)),np.round(list(sub.index),2))
-plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
-plt.xlabel('Stimulus Vertical Position')
-plt.ylabel('Normalized Counts Compared to Midline Rule')
-pylab.legend(loc='best',prop={'size':20})
-for subj in ids:
-    subj_df = gtest_df.query('id == "%s"' %subj)
-    subj_switch_counts = odict()
-    subj_switch_counts['midline_observer'] = subj_df.query('midline_observer_switch == True').groupby(['midline_observer_choices','context']).trial_count.count().unstack(level = 0)
-    subj_switch_counts['subject'] = subj_df.query('subj_switch == True').groupby(['subj_ts','context']).trial_count.count().unstack(level = 0)
-    subj_switch_counts['opt_observer'] = subj_df.query('opt_observer_switch == True').groupby(['opt_observer_choices','context']).trial_count.count().unstack(level = 0)
-    
-    #normalize switch counts by the midline rule. The midline rule represents
-    #the  number of switches someone would make if they switched task-sets
-    #every time the stimuli's position crossed the midline to that position
-    subj_norm_switch_counts = odict()
-    for key in subj_switch_counts:
-        empty_df = pd.DataFrame(index = np.unique(subj_df.context), columns = [0,1])
-        empty_df.index.name = 'context'
-        empty_df.loc[switch_counts[key].index] = subj_switch_counts[key]
-        subj_switch_counts[key] = empty_df*len(ids)
-        subj_norm_switch_counts[key] = subj_switch_counts[key].div(subj_switch_counts['midline_observer'],axis = 0)
-    sub = subj_norm_switch_counts['subject']
-    plt.plot(sub[0], lw = 3, color = 'm', alpha = .15)
-    plt.plot(sub[1], lw = 3, color = 'c', alpha = .15)
-#    sub = switch_counts['opt_observer']
-#    plt.plot(sub[0], lw = 3, color = 'm', ls = '--', alpha = .15)
-#    plt.plot(sub[1], lw = 3, color = 'c', ls = '--', alpha = .15)
+    #plot distribution of switches, by task-set
+    plt.hold(True) 
+    sub = switch_counts['subject']
+    plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to ts 1')
+    plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to ts 2')
+    sub = switch_counts['opt_observer']
+    plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
+    plt.plot(sub[1], lw = 4, color = 'c', ls = '--')
+    sub = switch_counts['midline_observer']
+    plt.plot(sub[0], lw = 4, color = 'm', ls = '-.', label = 'midline rule')
+    plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
+    plt.xticks(list(range(12)),np.round(list(sub.index),2))
+    plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
+    plt.xlabel('Stimulus Vertical Position')
+    plt.ylabel('Counts')
+    pylab.legend(loc='upper right',prop={'size':20})
+    for subj in ids:
+        subj_df = gtest_df.query('id == "%s"' %subj)
+        subj_switch_counts = odict()
+        subj_switch_counts['midline_observer'] = subj_df.query('midline_observer_switch == True').groupby(['midline_observer_choices','context']).trial_count.count().unstack(level = 0)
+        subj_switch_counts['subject'] = subj_df.query('subj_switch == True').groupby(['subj_ts','context']).trial_count.count().unstack(level = 0)
+        subj_switch_counts['opt_observer'] = subj_df.query('opt_observer_switch == True').groupby(['opt_observer_choices','context']).trial_count.count().unstack(level = 0)
+        
+        #normalize switch counts by the midline rule. The midline rule represents
+        #the  number of switches someone would make if they switched task-sets
+        #every time the stimuli's position crossed the midline to that position
+        subj_norm_switch_counts = odict()
+        for key in subj_switch_counts:
+            empty_df = pd.DataFrame(index = np.unique(subj_df.context), columns = [0,1])
+            empty_df.index.name = 'context'
+            empty_df.loc[switch_counts[key].index] = subj_switch_counts[key]
+            subj_switch_counts[key] = empty_df*len(ids)
+            subj_norm_switch_counts[key] = subj_switch_counts[key].div(subj_switch_counts['midline_observer'],axis = 0)
+        sub = subj_switch_counts['subject']
+        plt.plot(sub[0], lw = 3, color = 'm', alpha = .15)
+        plt.plot(sub[1], lw = 3, color = 'c', alpha = .15)
+    #    sub = switch_counts['opt_observer']
+    #    plt.plot(sub[0], lw = 3, color = 'm', ls = '--', alpha = .15)
+    #    plt.plot(sub[1], lw = 3, color = 'c', ls = '--', alpha = .15)
     
     
-#look at RT
-plt.subplot(4,1,1)
-gtest_df.rt.hist(bins = 25)
-plt.ylabel('Count across subject')
+        
+    #As above, using normalized measure
+    plt.hold(True) 
+    sub = norm_switch_counts['subject']
+    plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to ts 1')
+    plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to ts 2')
+    sub = norm_switch_counts['opt_observer']
+    plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
+    plt.plot(sub[1], lw = 4, color = 'c', ls = '--')
+    sub = norm_switch_counts['midline_observer']
+    plt.plot(sub[0], lw = 4, color = 'm', ls = '-.', label = 'midline rule')
+    plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
+    plt.xticks(list(range(12)),np.round(list(sub.index),2))
+    plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
+    plt.xlabel('Stimulus Vertical Position')
+    plt.ylabel('Normalized Counts Compared to Midline Rule')
+    pylab.legend(loc='best',prop={'size':20})
+    for subj in ids:
+        subj_df = gtest_df.query('id == "%s"' %subj)
+        subj_switch_counts = odict()
+        subj_switch_counts['midline_observer'] = subj_df.query('midline_observer_switch == True').groupby(['midline_observer_choices','context']).trial_count.count().unstack(level = 0)
+        subj_switch_counts['subject'] = subj_df.query('subj_switch == True').groupby(['subj_ts','context']).trial_count.count().unstack(level = 0)
+        subj_switch_counts['opt_observer'] = subj_df.query('opt_observer_switch == True').groupby(['opt_observer_choices','context']).trial_count.count().unstack(level = 0)
+        
+        #normalize switch counts by the midline rule. The midline rule represents
+        #the  number of switches someone would make if they switched task-sets
+        #every time the stimuli's position crossed the midline to that position
+        subj_norm_switch_counts = odict()
+        for key in subj_switch_counts:
+            empty_df = pd.DataFrame(index = np.unique(subj_df.context), columns = [0,1])
+            empty_df.index.name = 'context'
+            empty_df.loc[switch_counts[key].index] = subj_switch_counts[key]
+            subj_switch_counts[key] = empty_df*len(ids)
+            subj_norm_switch_counts[key] = subj_switch_counts[key].div(subj_switch_counts['midline_observer'],axis = 0)
+        sub = subj_norm_switch_counts['subject']
+        plt.plot(sub[0], lw = 3, color = 'm', alpha = .15)
+        plt.plot(sub[1], lw = 3, color = 'c', alpha = .15)
+    #    sub = switch_counts['opt_observer']
+    #    plt.plot(sub[0], lw = 3, color = 'm', ls = '--', alpha = .15)
+    #    plt.plot(sub[1], lw = 3, color = 'c', ls = '--', alpha = .15)
 
-plt.subplot(4,1,2)
-plt.hold(True)
-gtest_df.query('subj_switch == 0')['rt'].plot(kind='density', color = 'm', lw = 5, label = 'stay')
-gtest_df.query('subj_switch == 1')['rt'].plot(kind='density', color = 'c', lw = 5, label = 'switch')
-gtest_df.query('subj_switch == 0')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
-gtest_df.query('subj_switch == 1')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
-plt.xlabel('RT')
-pylab.legend(loc='upper right',prop={'size':20})
-
-plt.subplot(4,1,3)
-plt.hold(True)
-gtest_df.query('subj_switch == 0 and rep_resp == 1')['rt'].plot(kind='density', color = 'm', lw = 5, label = 'repeat response')
-gtest_df.query('subj_switch == 0 and rep_resp == 0')['rt'].plot(kind='density', color = 'c', lw = 5, label = 'change response (within task-set)')
-gtest_df.query('subj_switch == 0 and rep_resp == 1')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
-gtest_df.query('subj_switch == 0 and rep_resp == 0')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
-plt.xlabel('RT')
-plt.ylabel('Normed Count')
-pylab.legend(loc='upper right',prop={'size':20})
-
-plt.subplot(4,1,4)
-plt.hold(True)
-gtest_df.query('subj_ts == 0')['rt'].plot(kind='density', color = 'm', lw = 5, label = 'ts1')
-gtest_df.query('subj_ts == 1')['rt'].plot(kind='density', color = 'c', lw = 5, label = 'ts2')
-gtest_df.query('subj_ts == 0')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
-gtest_df.query('subj_ts == 1')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
-plt.xlabel('RT')
-pylab.legend(loc='upper right',prop={'size':20})
+    #RT for switch vs stay for different trial-by-trial context diff
+    gtest_df.groupby(['subj_switch','context_diff']).mean().rt.unstack(level = 0).plot(kind='bar', color = ['c','m'])     
+            
+    #Plot rt against optimal model certainty
+    ggplot(gtest_df, aes('opt_certainty', 'rt', color = 'id')) + geom_point() + geom_smooth(method = 'lm')
+       
+    #look at RT
+    plt.subplot(4,1,1)
+    gtest_df.rt.hist(bins = 25)
+    plt.ylabel('Count across subject')
+    
+    plt.subplot(4,1,2)
+    plt.hold(True)
+    gtest_df.query('subj_switch == 0')['rt'].plot(kind='density', color = 'm', lw = 5, label = 'stay')
+    gtest_df.query('subj_switch == 1')['rt'].plot(kind='density', color = 'c', lw = 5, label = 'switch')
+    gtest_df.query('subj_switch == 0')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
+    gtest_df.query('subj_switch == 1')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
+    plt.xlabel('RT')
+    pylab.legend(loc='upper right',prop={'size':20})
+    
+    plt.subplot(4,1,3)
+    plt.hold(True)
+    gtest_df.query('subj_switch == 0 and rep_resp == 1')['rt'].plot(kind='density', color = 'm', lw = 5, label = 'repeat response')
+    gtest_df.query('subj_switch == 0 and rep_resp == 0')['rt'].plot(kind='density', color = 'c', lw = 5, label = 'change response (within task-set)')
+    gtest_df.query('subj_switch == 0 and rep_resp == 1')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
+    gtest_df.query('subj_switch == 0 and rep_resp == 0')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
+    plt.xlabel('RT')
+    plt.ylabel('Normed Count')
+    pylab.legend(loc='upper right',prop={'size':20})
+    
+    plt.subplot(4,1,4)
+    plt.hold(True)
+    gtest_df.query('subj_ts == 0')['rt'].plot(kind='density', color = 'm', lw = 5, label = 'ts1')
+    gtest_df.query('subj_ts == 1')['rt'].plot(kind='density', color = 'c', lw = 5, label = 'ts2')
+    gtest_df.query('subj_ts == 0')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
+    gtest_df.query('subj_ts == 1')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
+    plt.xlabel('RT')
+    pylab.legend(loc='upper right',prop={'size':20})

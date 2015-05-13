@@ -36,7 +36,7 @@ axes = {'titleweight' : 'bold'
         }
 plt.rc('font', **font)
 plt.rc('axes', **axes)
-plt.rc('figure', figsize = (16,12))
+plt.rc('figure', figsize = (12,8))
 
 save = False
 plot = False
@@ -55,7 +55,7 @@ else:
     train_files = glob.glob('../RawData/*Context_20*yaml')
     test_files = glob.glob('../RawData/*Context_noFB*yaml')
 
-subj_i = 3
+subj_i = 5
 train_file = train_files[subj_i]
 test_file = test_files[subj_i]
 
@@ -244,12 +244,16 @@ behav_sum['norm_switch_counts'] = norm_switch_counts['subject']
 test_dfa.query('opt_observer_switch == True').groupby('context').mean().opt_observer_posterior
 
 #*********************************************
-# linear fit of RT based on absolute context
+# linear fit of RT based on different factors
 #*********************************************
 
+#absolute context
 result = sm.GLS(np.log(test_dfa.rt),sm.add_constant(test_dfa.abs_context)).fit()
 behav_sum['context->rt'] = result.params[1] * int(result.pvalues[1]<.05)
 
+#optimal model confidence
+test_dfa['opt_certainty'] = (abs(test_dfa.opt_observer_posterior-.5))/.5
+result = sm.GLS(np.log(test_dfa.rt),sm.add_constant(test_dfa.opt_certainty)).fit()
 
 #*********************************************
 # Switch training accuracy
@@ -361,6 +365,7 @@ if fitting == True:
     
     behav_sum['softmax_temps'] = {'bias_temp':btemp, 'estimate_temp':etemp}
 
+init_prior = [.5,.5]
 models = [ \
     PredModel(train_ts_dis, init_prior, mode = "ignore", recursive_prob = train_recursive_p),\
     PredModel(train_ts_dis, init_prior, mode = "single", recursive_prob = train_recursive_p),\
@@ -412,7 +417,7 @@ if plot == True:
     plt.axhline(.5, color = 'k', lw = 3, ls = '--')
     plt.ylabel('EWMA (span = 50) conformity')
     plt.title('Training')
-    pylab.legend(loc='bottom right',prop={'size':20})
+    pylab.legend(loc='best',prop={'size':20})
     
     
     plt.subplot(2,1,2)
@@ -423,7 +428,7 @@ if plot == True:
     plt.plot(pd.ewma(np.equal(test_dfa.ts,test_dfa.subj_ts),span = 50), lw = 3, label = 'experiment TS')  
     plt.xlabel('Trial')
     plt.axhline(.5, color = 'k', lw = 3, ls = '--')
-    pylab.legend(loc='bottom right',prop={'size':20})
+    pylab.legend(loc='best',prop={'size':20})
     
     #Plot task-set count by context value
     plt.hold(True) 
@@ -434,7 +439,7 @@ if plot == True:
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position')
     plt.ylabel('Task-set 2 %')
-    pylab.legend(loc='upper right',prop={'size':20})
+    pylab.legend(loc='best',prop={'size':20})
     
     
     #plot distribution of switches, by task-set
@@ -512,10 +517,9 @@ if plot == True:
     #RT for switch vs stay for different trial-by-trial context diff
     test_dfa.groupby(['subj_switch','context_diff']).mean().rt.unstack(level = 0).plot(kind='bar', color = ['c','m'])     
     
-    #Plot subject conformity to model 
-    ggplot(test_dfa[1:], aes(x='context',y='conform_opt_observer', color = 'subj_switch')) + stat_summary()
+    #Plot rt against optimal model certainty
+    ggplot(test_dfa, aes('opt_certainty', 'rt')) + geom_point() + geom_smooth(method = 'lm')
     
-
     #Plot run
     plotting_dict = {'optimal': ['optimal', 'b','optimal'],
                     'single': ['single', 'c','TS(t-1)'],
