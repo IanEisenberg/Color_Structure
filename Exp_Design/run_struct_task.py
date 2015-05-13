@@ -48,15 +48,23 @@ avg_train_trial_len = avg_test_trial_len + 1 #factor in FB
 train_len = int(round(train_mins*60/avg_train_trial_len/4)*4)
 test_len = int(round(test_mins*60/avg_test_trial_len/4)*4)
 recursive_p = .9
-if fullInfo:
-    trainname = 'Prob_Context_FullInfo'
+
+#counterbalance ts_order (which ts is associated with top of screen)
+if len(lines)%2 == 0:
+    ts_order = [0,1]
 else:
+    ts_order = [1,0]
+    
+if fullInfo:
     trainname = 'Prob_Context'
+else:
+    trainname = 'Prob_Context_PoorInfo'
 
 
 #set up config files
 practice_config_file = '../Config_Files/Prob_Context_Practice_config.npy'
-train_config_file = makeConfigList(taskname = trainname, iden = subject_code, exp_len = train_len, recursive_p = recursive_p)
+train_config_file = makeConfigList(taskname = trainname, iden = subject_code, exp_len = train_len, 
+                                   recursive_p = recursive_p, ts_order = ts_order)
 
 if fullInfo == False:
     practice_config_file = makePracticeConfigList(taskname = trainname + '_Practice')
@@ -340,21 +348,10 @@ if train_on:
         trial=train.presentTrial(trial)
         train.writeToLog(json.dumps(trial))
         train.alldata.append(trial)
-        #print('state = ' + str(trial['state'])+ ', value: ' + str(np.mean(trial['context']))) 
         
-    train.writeToLog(json.dumps({'trigger_times':train.trigger_times}))
-    train.writeData()
-    if bot_on == False:
-        train.presentTextToWindow('Thank you. Please wait for the experimenter.')
-        train.waitForKeypress(train.quit_key)
-
-
-    # clean up
-    train.closeWindow()
-
-#************************************
-# Send text about train performance
-#************************************
+    #************************************
+    # Send text about train performance
+    #************************************
 
     if bot_on == False:   
         username = "thedummyspeaks@gmail.com"
@@ -367,11 +364,22 @@ if train_on:
         
         msg = """From: %s
         To: %s
-        Subject: text-message
+        Subject: "Training done"
         
         %s""" % (username, atttext, message)
         server.sendmail(username, atttext, msg)
         server.quit()
+        
+    # clean up and save
+    train.writeToLog(json.dumps({'trigger_times':train.trigger_times}))
+    train.writeData()
+    if bot_on == False:
+        train.presentTextToWindow('Thank you. Please wait for the experimenter.')
+        train.waitForKeypress(train.quit_key)
+
+    train.closeWindow()
+
+
 
 #************************************
 # Start test
@@ -389,8 +397,7 @@ if test_on:
         ts_order = [states[0]['ts'],states[1]['ts']] 
     else:
         action_keys = train.getActions()
-        ts_order = train.getTSorder()
-    test_config_file = makeConfigList(taskname = taskname + '_test', iden = subject_code, exp_len = test_len, 
+    test_config_file = makeConfigList(taskname = trainsname + '_test', iden = subject_code, exp_len = test_len, 
                                       recursive_p = recursive_p, FBDuration = 0, FBonset = 0, action_keys = action_keys,
                                       ts_order = ts_order)
                                       
@@ -450,20 +457,10 @@ if test_on:
         trial=test.presentTrial(trial)
         test.writeToLog(json.dumps(trial))
         test.alldata.append(trial)
-    
-    test.writeToLog(json.dumps({'trigger_times':test.trigger_times}))
-    test.writeData()
-    if bot_on == False:
-        test.presentTextToWindow('Thank you. Please wait for the experimenter.')
-        test.waitForKeypress(test.quit_key)
-    
-    # clean up
-    test.closeWindow()
-    
 
-#************************************
-# Send text about test performance
-#************************************
+    #************************************
+    # Send text about test performance
+    #************************************
 
     if bot_on == False:   
         username = "thedummyspeaks@gmail.com"
@@ -481,6 +478,19 @@ if test_on:
         %s""" % (username, atttext, message)
         server.sendmail(username, atttext, msg)
         server.quit()
+       
+    # clean up and save
+    test.writeToLog(json.dumps({'trigger_times':test.trigger_times}))
+    test.writeData()
+    if bot_on == False:
+        test.presentTextToWindow('Thank you. Please wait for the experimenter.')
+        test.waitForKeypress(test.quit_key)
+    
+    
+    test.closeWindow()
+    
+
+
     
 #************************************
 # Determine payment

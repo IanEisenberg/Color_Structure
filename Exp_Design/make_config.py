@@ -12,9 +12,6 @@ import datetime
 
 def makeConfigList(taskname = 'Prob_Context', iden = '000', 
                    recursive_p = .9, 
-                   #tasksets relate to stimulus dimensions
-                   ts1 = 0, #relates to first stimulus dimension
-                   ts2 = 1, #relates to second stimulus dimension
                    exp_len = 200,
                    stimulusDuration = 1.5,
                    FBDuration = .5,
@@ -38,7 +35,7 @@ def makeConfigList(taskname = 'Prob_Context', iden = '000',
     stim_ids = [(0,2),(0,3),(1,2),(1,3)]
     
     if not ts_order:
-        ts_order = [ts1,ts2]
+        ts_order = [0,1]
         r.shuffle(ts_order)
     states = {0: {'ts': ts_order[0], 'c_mean': -.3, 'c_sd': .37}, 
                 1: {'ts': ts_order[1], 'c_mean': .3, 'c_sd': .37}}
@@ -145,9 +142,6 @@ def makeConfigList(taskname = 'Prob_Context', iden = '000',
 def makePracticeConfigList(taskname = 'Prob_Context_Practice', 
                    recursive_p = .9, 
                    #tasksets relate to stimulus dimensions
-                   #specify action (1 or 0) to take in response to each stim
-                   ts1 = 0, #relates to first stimulus dimension
-                   ts2 = 1, #relates to second stimulus dimension
                    exp_len = 20,
                    stimulusDuration = 1.5,
                    FBDuration = .5,
@@ -164,7 +158,7 @@ def makePracticeConfigList(taskname = 'Prob_Context_Practice',
     stim_ids = [(0,2),(0,3),(1,2),(1,3)]
     #each taskset is define as a nxm matrix where n = # of stims and
     #m = # of actions. In theory, 'n' could be further decomposed into features
-    ts_order = [ts1,ts2]
+    ts_order = [0,1]
     r.shuffle(ts_order)
     states = {0: {'ts': ts_order[0], 'c_mean': -.3, 'c_sd': .37}, 
                 1: {'ts': ts_order[1], 'c_mean': .3, 'c_sd': .37}}
@@ -250,10 +244,6 @@ def makePracticeConfigList(taskname = 'Prob_Context_Practice',
 #uses the second.
 def makeFullInfoPracticeConfigList(taskname = 'Prob_Context_FullInfo_Practice', 
                    recursive_p = .9, 
-                   #tasksets relate to stimulus dimensions
-                   #specify action (1 or 0) to take in response to each stim
-                   ts1 = 0, #relates to first stimulus dimension
-                   ts2 = 1, #relates to second stimulus dimension
                    exp_len = 32,
                    stimulusDuration = 1.5,
                    FBDuration = .5,
@@ -269,7 +259,7 @@ def makeFullInfoPracticeConfigList(taskname = 'Prob_Context_FullInfo_Practice',
     stim_ids = [(0,2),(0,3),(1,2),(1,3)]
     #each taskset is define as a nxm matrix where n = # of stims and
     #m = # of actions. In theory, 'n' could be further decomposed into features
-    ts_order = [ts1,ts2]
+    ts_order = [0,1]
     states = {0: {'ts': ts_order[0], 'c_mean': -.3, 'c_sd': .37}, 
                 1: {'ts': ts_order[1], 'c_mean': .3, 'c_sd': .37}}
 
