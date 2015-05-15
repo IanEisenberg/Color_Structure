@@ -7,7 +7,7 @@ import smtplib
 import json
 import webbrowser
 from prob_context_task import probContextTask
-from make_config import makeConfigList, makePracticeConfigList, makeFullInfoPracticeConfigList
+from make_config import makeConfigList, makePracticeConfigList
 from test_bot import test_bot
 import glob
 from Load_Data import load_data
@@ -20,9 +20,7 @@ subdata=[]
 practice_on = True
 train_on = True
 test_on = True
-#fullInfo refers to instructions and practice where subjects are explicitely
-#told that they either have to pay attention to color OR shape.
-fullInfo = True
+
 bot_on = False
 bot_mode = "ignore_base" #other for optimal
 
@@ -55,21 +53,16 @@ if len(lines)%2 == 0:
 else:
     ts_order = [1,0]
     
-if fullInfo:
-    trainname = 'Prob_Context'
-else:
-    trainname = 'Prob_Context_PoorInfo'
+trainname = 'Prob_Context'
+
 
 
 #set up config files
 practice_config_file = '../Config_Files/Prob_Context_Practice_config.npy'
 train_config_file = makeConfigList(taskname = trainname, iden = subject_code, exp_len = train_len, 
                                    recursive_p = recursive_p, ts_order = ts_order)
+practice_config_file = makePracticeConfigList(taskname = trainname + '_Practice')
 
-if fullInfo == False:
-    practice_config_file = makePracticeConfigList(taskname = trainname + '_Practice')
-else:
-    practice_config_file = makeFullInfoPracticeConfigList(taskname = trainname + '_Practice')
 practice=probContextTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'practice')
 
 train=probContextTask(train_config_file,subject_code, fullscreen = fullscr)
@@ -87,137 +80,84 @@ if practice_on:
     # prepare to start
     practice.setupWindow()
     practice.defineStims()
-    if fullInfo == False:
-        task_intro_text = [
-            'Welcome\n\nPress 5 to move through instructions',
-            """
-            This experiment starts with a training phase followed by a testing phase.
-            Training will last about 45 minutes and testing will last 30 minutes.
-            
-            Your performance on the training AND test phase determines your bonus payment. 
-            To perform well on the test phase you'll need to stay
-            motivated and learn as much as possible in the training phase.
-            """,
-            """
-            In the training phase, shapes will appear on the screen
-            one at a time, and you will need to learn how to respond to them.
-            
-            Your responses will consist of one of four buttons: 'd', 'f', 'j' and 'k'.
-            Use your index and middle fingers on both hands to respond.
-            
-            The goal is to learn the best key(s) to press for each shape.
-            
-            Press '5' to see the four shapes that will be used in practice.
-            """,
-            """
-            As you could see, these shapes differ in their identity (which
-            shape they are) and their color.
-            
-            Your responses should depend on these features.
-            """,
-            """
-            The shape's vertical position will also be changing on each trial.
-            
-            The best key to press in response to each shape 
-            partially depends on the shape's vertical position. 
-            
-            After you press '5' you'll see two example trials.
-            """,
-            """
-            After you press a key, the shape will disappear and 
-            you will get a point if you responded correctly.
-            
-            After the training phase, there will be a test phase 
-            with no feedback. You will still be earning points, and these
-            test phase points will also be used to determine your bonus pay.
-            
-            It is therefore very important that you use the points 
-            in the training phase to learn how to best respond to each shape 
-            and how your response depends on the shape's vertical position.
-            """,
-            """
-            You must respond while the shape is on the screen.
-            Please respond as quickly and accurately as possible.
-            
-            The task is hard! Stay motivated and try to learn
-            all you can.
-            
-            We will start with a brief practice session. 
-            Please wait for the experimenter.
-            """
-        ]
-    else:
-        task_intro_text = [
-            'Welcome\n\nPress 5 to move through instructions',
-            """
-            This experiment starts with a training phase followed by a testing phase.
-            Training will last 45 minutes and testing will last 30 minutes.
-            
-            Your performance on the training AND test phase determines your bonus payment. 
-            To perform well on the test phase you'll need to stay
-            motivated and learn as much as possible in the training phase.
-            """,
-            """
-            In the training phase, shapes will appear on the screen
-            one at a time, and you will need to learn how to respond to them.
-            
-            Your responses will consist of one of four buttons: 'd', 'f', 'j' and 'k'.
-            Use your index and middle fingers on both hands to respond.
-            
-            The goal is to learn the best key(s) to press for each shape.
-            After you press a key, the shape will disappear and 
-            you will get a point if you responded correctly.
-            
-            Press '5' to see the four shapes that will be used in practice.
-            """,
-            """
-            As you could see, these shapes differ in their identity (which
-            shape they are) and their color.
-            
-            Your responses should depend on these features. At certain points
-            in the experiment you should respond based on color, and at other times
-            you should respond based on identity, but not both at the same time.
-            
-            We will now practice responding to the shapes. For these trials,
-            just pay attention to the identity of the shape when making your response.
-            
-            Please wait for the experimenter.
-            """,
-            """
-            In those trials, one key worked for the pentagon, and one worked for the triangle.
-            
-            We'll now practice responding to the color of the shape.
-            
-            Please wait for the experimenter.
-            """,
-            """
-            As you may have noticed, the shape's vertical position on the screen
-            changes on each trial.
-            
-            The vertical position of the shape partially
-            determines whether you should respond based on color or identity.
-            """,
-            """
-            After the training phase, there will be a test phase 
-            with no feedback. You will still be earning points, and these
-            test phase points will also be used to determine your bonus pay.
-            
-            It is therefore important that you use the points 
-            in the training phase to learn when to respond based on 
-            the color or identity of the shapes and how your response
-            depends on the shape's vertical position.
-            """,
-            """
-            You must respond while the shape is on the screen.
-            Please respond as quickly and accurately as possible.
-            
-            The task is hard! Stay motivated and try to learn
-            all you can.
-            
-            We will start with a brief practice session. 
-            Please wait for the experimenter.
-            """
-        ]
+    task_intro_text = [
+        'Welcome\n\nPress 5 to move through instructions',
+        """
+        This experiment starts with a training phase followed by a testing phase.
+        Training will last 45 minutes and testing will last 30 minutes.
+        
+        Your performance on the training AND test phase determines your bonus payment. 
+        To perform well on the test phase you'll need to stay
+        motivated and learn as much as possible in the training phase.
+        """,
+        """
+        In the training phase, shapes will appear on the screen
+        one at a time, and you will need to learn how to respond to them.
+        
+        Your responses will consist of one of four buttons: 'd', 'f', 'j' and 'k'.
+        Use your index and middle fingers on both hands to respond.
+        
+        The goal is to learn the best key(s) to press for each shape.
+        After you press a key, the shape will disappear and 
+        you will get a point if you responded correctly.
+        
+        Press '5' to see the four shapes that will be used in practice.
+        """,
+        """
+        As you could see, these shapes differ in their identity (which
+        shape they are) and their color.
+        
+        Your responses should depend on these features. At certain points
+        in the experiment you should respond based on color, and at other times
+        you should respond based on identity, but not both at the same time.
+        
+        We will now practice responding to the shapes. For these trials,
+        just pay attention to the identity of the shape when making your response.
+        
+        Please wait for the experimenter.
+        """,
+        """
+        In those trials, one key worked for the pentagon, and one worked for the triangle.
+        
+        We'll now practice responding to the color of the shape.
+        
+        Please wait for the experimenter.
+        """,
+        """
+        In those trials, one key worked for yellow shapes and one for green shapes.
+        
+        For the rest of the experiment, the shape's vertical position will also 
+        change from trial to trial.
+        
+        Press "5" to see this in a few trials.
+        """,
+        """
+        Your job in this experiment is to figure out on which trials you
+        should respond based on identity and on which trials you should
+        respond based on shape.
+        
+        Use the points during the training phase to learn how to respond.
+        """,
+        """
+        After the training phase, there will be a test phase 
+        with no feedback. You will still be earning points, and these
+        test phase points will also be used to determine your bonus pay.
+        
+        Because there is no feedback, it will be impossible to learn anything
+        new during the test phase. Therefore it is important that you learn all
+        you can during the training phase.
+        """,
+        """
+        You must respond while the shape is on the screen.
+        Please respond as quickly and accurately as possible.
+        
+        The task is hard! Stay motivated and try to learn
+        all you can.
+        
+        We will start with a brief practice session. 
+        Please wait for the experimenter.
+        """
+    ]
     
     for line in task_intro_text:
         practice.presentTextToWindow(line)
@@ -229,8 +169,9 @@ if practice_on:
             resp,practice.startTime=practice.waitForKeypress(practice.trigger_key)
             practice.checkRespForQuitKey(resp)
         if "pay attention to the identity of the shape" in line:
+            pos_count = 0
             startTime = core.getTime()
-            for trial in practice.stimulusInfo[0:12]:
+            for trial in practice.stimulusInfo[0:40]:
                 # wait for onset time
                 while core.getTime() < trial['onset'] + startTime:
                         key_response=event.getKeys(None,True)
@@ -240,11 +181,18 @@ if practice_on:
                             if practice.quit_key==key:
                                 practice.shutDownEarly()
                 trial=practice.presentTrial(trial)
-            elapsed_time = core.getTime() - startTime
+                if trial['FB'] == 1:
+                    pos_count += 1
+                else:
+                    pos_count = 0
+                if pos_count ==6:
+                    break
             core.wait(1)
         if "responding to the color of the shape" in line:
+            pos_count = 0
             startTime = core.getTime()
-            for trial in practice.stimulusInfo[12:24]: #Onset time FIx!
+            elapsed_time = practice.stimulusInfo[39]['onset']+1
+            for trial in practice.stimulusInfo[40:80]: 
                 # wait for onset time
                 while core.getTime() < trial['onset'] + startTime - elapsed_time:
                         key_response=event.getKeys(None,True)
@@ -254,12 +202,34 @@ if practice_on:
                             if practice.quit_key==key:
                                 practice.shutDownEarly()
                 trial=practice.presentTrial(trial)
-            elapsed_time = core.getTime() - startTime + elapsed_time
+                if trial['FB'] == 1:
+                    pos_count += 1
+                else:
+                    pos_count = 0
+                if pos_count ==6:
+                    break
+            core.wait(1)
+        if "see this in a few trials" in line:
+            pos_count = 0
+            startTime = core.getTime()
+            elapsed_time = practice.stimulusInfo[79]['onset']+1
+            for trial in practice.stimulusInfo[80:84]: 
+                # wait for onset time
+                while core.getTime() < trial['onset'] + startTime - elapsed_time:
+                        key_response=event.getKeys(None,True)
+                        if len(key_response)==0:
+                            continue
+                        for key,response_time in key_response:
+                            if practice.quit_key==key:
+                                practice.shutDownEarly()
+                trial=practice.presentTrial(trial)
             core.wait(1)
     
-    for trial in practice.stimulusInfo:
+    for trial in practice.stimulusInfo[84:]:
         # wait for onset time
-        while core.getTime() < trial['onset'] + practice.startTime:
+        startTime = core.getTime()
+        elapsed_time = practice.stimulusInfo[83]['onset'] + 1
+        while core.getTime() < trial['onset'] + practice.startTime - elapsed_time:
                 key_response=event.getKeys(None,True)
                 if len(key_response)==0:
                     continue
