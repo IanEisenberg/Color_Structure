@@ -48,7 +48,7 @@ test_len = int(round(test_mins*60/avg_test_trial_len/4)*4)
 recursive_p = .9
 
 #counterbalance ts_order (which ts is associated with top of screen)
-if len(lines)%2 == 0:
+if int(subject_code)%2 == 0:
     ts_order = [0,1]
 else:
     ts_order = [1,0]
