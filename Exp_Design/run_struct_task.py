@@ -367,7 +367,7 @@ if test_on:
         ts_order = [states[0]['ts'],states[1]['ts']] 
     else:
         action_keys = train.getActions()
-    test_config_file = makeConfigList(taskname = trainsname + '_test', iden = subject_code, exp_len = test_len, 
+    test_config_file = makeConfigList(taskname = trainname + '_test', iden = subject_code, exp_len = test_len, 
                                       recursive_p = recursive_p, FBDuration = 0, FBonset = 0, action_keys = action_keys,
                                       ts_order = ts_order)
                                       
