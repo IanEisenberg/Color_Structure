@@ -55,6 +55,7 @@ def load_data(datafile, name, mode = 'train'):
     dfa['subj_ts'] = [int(response in [2,3]) for response in dfa.response]
     dfa['subj_switch'] = abs(dfa.subj_ts.diff())
     dfa['correct'] = [dfa.response[i] == dfa.stim[i][dfa.ts[i]] for i in dfa.index]
+    dfa['stim_conform'] = [dfa.response.loc[i] in dfa.stim.loc[i] for i in dfa.index]
     dfa = dfa.convert_objects(convert_numeric = True)
     
     return (taskinfo, dfa)

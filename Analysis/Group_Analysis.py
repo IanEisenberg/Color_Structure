@@ -44,17 +44,14 @@ plot = False
 #*********************************************
 group_behavior = {}
 
-fullInfo = True
 
 gtrain_df = pd.DataFrame()
 gtest_df = pd.DataFrame()
 gtaskinfo = []
-if fullInfo:
-   train_files = glob.glob('../RawData/*FullInfo_20*yaml')
-   test_files = glob.glob('../RawData/*FullInfo_noFB*yaml') 
-else:
-    train_files = glob.glob('../RawData/*Context_20*yaml')
-    test_files = glob.glob('../RawData/*Context_noFB*yaml')
+
+train_files = glob.glob('../RawData/*Context_20*yaml')
+test_files = glob.glob('../RawData/*Context_test*yaml') 
+
     
 count = 0
 for train_file, test_file in zip(train_files,test_files):
@@ -194,8 +191,12 @@ for train_file, test_file in zip(train_files,test_files):
     
 gtaskinfo = pd.DataFrame(gtaskinfo)
 
-
-
+#Exclude subjects where stim_confom is below some threshold (probably should make this chance)
+select_ids = gtest_df.groupby('id').mean().stim_conform>.6
+select_ids = select_ids[select_ids]
+select_rows = [i in select_ids for i in gtest_df.id]
+gtest_df = gtest_df[select_rows]
+ids = select_ids.index
 
 
 #*********************************************
@@ -227,7 +228,6 @@ gtest_df.query('opt_observer_switch == True').groupby('context').mean().opt_obse
 # Plotting
 #*********************************************
 
-gtest_df = gtest_df.query('id != "Pilot021"')
 ids = np.unique(gtest_df.id)
 contexts = np.unique(gtest_df.context)
 figdims = (16,12)

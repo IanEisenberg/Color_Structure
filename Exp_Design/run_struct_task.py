@@ -134,7 +134,7 @@ if practice_on:
         """
         Your job in this experiment is to figure out on which trials you
         should respond based on identity and on which trials you should
-        respond based on shape.
+        respond based on color.
         
         Use the points during the training phase to learn how to respond.
         """,
