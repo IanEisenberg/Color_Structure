@@ -5,3 +5,9 @@ Pilot014 - Potentially not neurotypical.
 the task. Told the subject to turn off music and pay attention - he did, but when checking
 on him later, I noticed that you wouldn't respond often. During the test phase, it
 seems like he was just selected answers as quickly as possible to get out.
+
+034 - accidentally quit 30 minutes into the training. Started a new training using the
+same config file with 15 minutes of training. That didn't actually shorten training and so
+I interrupted her after about 20 minutes. Thus there will be no RawData for 034, but 
+two log files - one for 034, and one for 034_second_run. For test there is a rawdata
+called 034.
