@@ -1,0 +1,35 @@
+---
+title: "Subject_Analysis"
+output: html_document
+---
+
+Load up the data
+
+```{r set up libraries}
+library(ggplot2)
+library(plyr)
+library(lme4)
+```
+
+```{r Load data}
+  gtest_df = read.csv('Analysis_Output/gtest_df.csv')
+  gtest_learn_df = read.csv('Analysis_Output/gtest_learn_df.csv')
+  gtest_df$id = factor(gtest_df$id)
+  gtest_learn_df$id = factor(gtest_learn_df$id)
+```
+
+```{r Model certainty vs rt}
+#Plot rt against optimal model certainty
+plot_df = gtest_learn_df
+ggplot(data = plot_df, aes(opt_certainty, log_rt, color = id)) + geom_point() + geom_smooth(method = 'lm')
+
+rs1 = lmer(log_rt ~ opt_certainty + (1 + opt_certainty|id), data = gtest_learn_df)
+summary(rs1) 
+
+rs2 = lmer(log_rt ~ abs_context + (1 + abs_context|id), data = gtest_learn_df)
+summary(rs2) 
+
+summary(glmer(subj_ts ~ midline_observer_choices + opt_observer_choices + (1+opt_observer_posterior | id), family = binomial, data = gtest_learn_df))
+
+```
+
