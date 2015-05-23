@@ -182,10 +182,27 @@ def makePracticeConfigList(taskname = 'Prob_Context_FullInfo_Practice',
         "probs" = P(reward | correct) and P(reward | incorrect), and "actions" =
         correct action for stim 1 and stim 2.
         """
+        
+        trial_states = [1] #start off the function
+        #creates the task-set trial list. Task-sets alternate based on recusive_p
+        #with a maximum repetition of 25 trials. This function also makes sure
+        #that each task-set composes at least 40% of trials
+        while abs(np.mean(trial_states)-.5) > .1:
+            curr_state = r.choice([0,1])
+            trial_states = []
+            state_reps = 0
+            for trial in range(40):
+                trial_states.append(curr_state)
+                if r.random() > recursive_p or state_reps > 25:
+                    curr_state = 1-curr_state
+                    state_reps = 0
+                else:
+                    state_reps += 1
+        
         trialList = []    
         trial_count = 1
         curr_onset = 2 #initial onset
-        state_list = [0]*40 + [1]*40 + list(np.random.randint(0,2,40))
+        state_list = [0]*40 + [1]*40 + trial_states
         exp_len = len(state_list)
         stims = r.sample(stim_ids*int(exp_len*.25),exp_len)
         states = {0: {'ts': ts_order[0], 'c_mean': -.3, 'c_sd': .37}, 
