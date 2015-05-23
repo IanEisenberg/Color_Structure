@@ -36,7 +36,6 @@ from collections import OrderedDict as odict
 
 plot = False
 save = False
-fitting = True
 
 #*********************************************
 # Load Data
@@ -47,6 +46,8 @@ group_behavior = {}
 gtrain_df = pd.DataFrame()
 gtest_df = pd.DataFrame()
 gtaskinfo = []
+
+fit_dict = pickle.load(open('Analysis_Output/parameter_fits.p','rb'))
 
 train_files = glob.glob('../RawData/*Context_20*yaml')
 test_files = glob.glob('../RawData/*Context_test*yaml') 
@@ -129,52 +130,60 @@ for train_file, test_file in zip(train_files,test_files):
     #*********************************************
     # Model fitting
     #*********************************************
-
-    if fitting == True:
-        #*************************************
-        #Model Functions
-        #*************************************
     
-        def bias_fitfunc(rp, contexts, choices, tsb):
-            model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
-            model_likelihoods = []
-            for i,c in enumerate(contexts):
-                trial_choice = choices[i]
-                conf = model.calc_posterior(c)
-                model_likelihoods.append(conf[trial_choice])
-            return np.array(model_likelihoods)
-        
-        def bias_errfunc(params,contexts,choices):
-            rp = params['rp'].value
-            tsb = params['tsb'].value
-            #minimize:
-            #return abs(np.log(bias_fitfunc(rp,contexts,choices,tsb))) #log posterior for each choice
-            return abs(np.sum(np.log(bias_fitfunc(rp,contexts,choices,tsb)))) #single value
-        
-        init_prior = [.5,.5]
     
-        #Fit bias model
-        #attempt to simplify:
-        fit_params = lmfit.Parameters()
-        fit_params.add('rp', value = .5, min = 0, max = 1)
-        fit_params.add('tsb', value = .5, min = 0)
-        out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'contexts':list(test_dfa.context), 'choices':list(test_dfa.subj_ts)})
-        fit_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = out.values['tsb'], recursive_prob = out.values['rp'])
-        lmfit.report_fit(out)
-        
-        #Fit observer for test        
-        observer_choices = []
-        posteriors = []
-        for i,trial in test_dfa.iterrows():
-            c = trial.context
-            posteriors.append(fit_observer.calc_posterior(c)[1])
-        posteriors = np.array(posteriors)
+    costs = ['array', 'scalar']
+    for cost in costs:
+        if subj_name + '_' + cost + '_cost' in fit_dict.keys():
+            continue
+        else:
+            #Fitting Functions
+            def bias_fitfunc(rp, contexts, choices, tsb):
+                model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
+                model_likelihoods = []
+                for i,c in enumerate(contexts):
+                    trial_choice = choices[i]
+                    conf = model.calc_posterior(c)
+                    model_likelihoods.append(conf[trial_choice])
+                return np.array(model_likelihoods)
+    
+            def bias_errfunc(params,contexts,choices):
+                rp = params['rp'].value
+                tsb = params['tsb'].value
+                #minimize:
+                if cost == 'array':
+                    return abs(np.log(bias_fitfunc(rp,contexts,choices,tsb))) #log posterior for each choice
+                elif cost == 'scalar':
+                    return abs(np.sum(np.log(bias_fitfunc(rp,contexts,choices,tsb)))) #single value
+    
+            init_prior = [.5,.5]
+    
+            #Fit bias model
+            #attempt to simplify:
+            fit_params = lmfit.Parameters()
+            fit_params.add('rp', value = .5, min = 0, max = 1)
+            fit_params.add('tsb', value = .5, min = 0)
+            out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'contexts':list(test_dfa.context), 'choices':list(test_dfa.subj_ts)})
+            lmfit.report_fit(out)
+            fit_dict[subj_name + '_' + cost + '_cost'] = out.values
+    
+    
+    
+    params = fit_dict[subj_name + '_scalar_cost']
+    fit_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = params['tsb'], recursive_prob = params['rp'])
+    #Fit observer for test        
+    observer_choices = []
+    posteriors = []
+    for i,trial in test_dfa.iterrows():
+        c = trial.context
+        posteriors.append(fit_observer.calc_posterior(c)[1])
+    posteriors = np.array(posteriors)
 
-        test_dfa['fit_observer_posterior'] = posteriors
-        test_dfa['fit_observer_choices'] = (posteriors>.5).astype(int)
-        test_dfa['fit_observer_switch'] = (test_dfa.fit_observer_posterior>.5).diff()
-        test_dfa['conform_fit_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
-        test_dfa['fit_certainty'] = (abs(test_dfa.fit_observer_posterior-.5))/.5
+    test_dfa['fit_observer_posterior'] = posteriors
+    test_dfa['fit_observer_choices'] = (posteriors>.5).astype(int)
+    test_dfa['fit_observer_switch'] = (test_dfa.fit_observer_posterior>.5).diff()
+    test_dfa['conform_fit_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
+    test_dfa['fit_certainty'] = (abs(test_dfa.fit_observer_posterior-.5))/.5
 
     #*********************************************
     # Set up observers
@@ -294,6 +303,9 @@ for key in switch_counts:
     switch_counts[key] = empty_df
     norm_switch_counts[key] = switch_counts[key].div(switch_counts['ignore_observer'],axis = 0)
 
+if save == True:
+    pickle.dump(fit_dict,open('Analysis_Output/parameter_fits.p','wb'))
+
 #*********************************************
 # Plotting
 #*********************************************
@@ -308,9 +320,10 @@ if plot == True:
     #Plot task-set count by context value
     p1 = plt.figure(figsize = figdims)
     plt.hold(True) 
-    plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 3, color = 'c', label = 'Subject')
+    plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 3, color = 'r', label = 'Subject')
+    plt.plot(plot_df.groupby('context').fit_observer_choices.mean(), lw = 3, color = 'c', label = 'fit observer')
     plt.plot(plot_df.groupby('context').opt_observer_choices.mean(), lw = 3, color = 'c', ls = '--', label = 'optimal observer')
-    plt.plot(plot_df.groupby('context').fit_observer_choices.mean(), lw = 3, color = 'c', ls = ':', label = 'ignore rule')
+    plt.plot(plot_df.groupby('context').ignore_observer_choices.mean(), lw = 3, color = 'c', ls = ':', label = 'ignore rule')
     plt.xticks(list(range(12)),contexts)
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position')
@@ -460,12 +473,12 @@ if plot == True:
         
             
     
-if save == True:
-    ggsave(conf_rt_p, '../Plots/Model_Certainty_vs_RT.pdf', format = 'pdf')
-    ggsave(conf_rt_id_p, '../Plots/Model_Certainty_vs_RT_ids.pdf', format = 'pdf')
-    ggsave(rt_abs_con_p, '../Plots/Context_vs_RT_id.pdf', format = 'pdf')
-    p1.savefig('../Plots/TS2%_vs_context.pdf', format = 'pdf')
-    p2.savefig('../Plots/TS_proportions.pdf', format = 'pdf')
-    p3.savefig('../Plots/RTs.pdf', format = 'pdf')
-    p4.savefig('../Plots/RT_across_context_diffs.pdf', format = 'pdf')
+	if save == True:
+		ggsave(conf_rt_p, '../Plots/Model_Certainty_vs_RT.pdf', format = 'pdf')
+		ggsave(conf_rt_id_p, '../Plots/Model_Certainty_vs_RT_ids.pdf', format = 'pdf')
+		ggsave(rt_abs_con_p, '../Plots/Context_vs_RT_id.pdf', format = 'pdf')
+		p1.savefig('../Plots/TS2%_vs_context.pdf', format = 'pdf')
+		p2.savefig('../Plots/TS_proportions.pdf', format = 'pdf')
+		p3.savefig('../Plots/RTs.pdf', format = 'pdf')
+		p4.savefig('../Plots/RT_across_context_diffs.pdf', format = 'pdf')
     

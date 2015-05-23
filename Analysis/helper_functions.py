@@ -52,7 +52,11 @@ def calc_posterior(data,prior,likelihood_dist):
         dinom = np.sum(numer)
     posterior = numer/dinom
     return posterior
-    
+
+#*********************************************
+# Plotting
+#*********************************************
+
 def plot_run(sub,plotting_dict, exclude = []):
     #plot the posterior estimates for different models, the TS they currently select
     #and the vertical position of the stimulus

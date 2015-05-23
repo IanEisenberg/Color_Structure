@@ -165,6 +165,7 @@ if fitting == True:
     test_dfa['fit_observer_switch'] = (test_dfa.fit_observer_posterior>.5).diff()
     test_dfa['conform_fit_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
     test_dfa['fit_certainty'] = (abs(test_dfa.fit_observer_posterior-.5))/.5
+    
 #*********************************************
 # Set up caricature observers
 #*********************************************
@@ -255,6 +256,7 @@ for sub in [train_dfa, test_dfa]:
 behav_sum['learning?'] = learn_direct
 
 behav_sum['TS2_percent'] = test_dfa.groupby('context').subj_ts.mean()
+
 #*********************************************
 # Switch costs 
 #*********************************************
@@ -265,8 +267,6 @@ TS_switch_cost = np.mean(test_dfa.query('subj_switch == True')['rt']) - np.mean(
 switch_resp_cost = np.mean(test_dfa.query('rep_resp == False and subj_switch != True')['rt']) - np.mean(test_dfa.query('rep_resp == True')['rt'])
 TS_minus_resp_switch_cost = TS_switch_cost - switch_resp_cost
 behav_sum['Switch_cost'] = TS_minus_resp_switch_cost
-
-
 
 #*********************************************
 # Switch Analysis
@@ -314,20 +314,6 @@ try:
 except:
     print("No fit observer!")
     
-#*********************************************
-# Switch training accuracy
-#*********************************************
-
-behav_sum['train_switch_acc'] = train_dfa.groupby('subj_switch').conform_opt_observer.mean()[1]
-
-#*********************************************
-# Contributors to task-set choice
-#*********************************************
-sub = sm.add_constant(test_dfa[['context_sign','abs_context','context','subj_ts','rt']])
-sub['last_ts'] = sub.subj_ts.shift(1)
-predictors = sub.drop(['subj_ts'],axis = 1)
-result = smf.logit(formula = 'subj_ts ~ context + last_ts', data = sub, missing = 'drop').fit()
-
 
 #*********************************************
 # Models
@@ -335,42 +321,8 @@ result = smf.logit(formula = 'subj_ts ~ context + last_ts', data = sub, missing 
 
 model_subj_compare = test_dfa[['subj_ts','fit_observer_posterior', 'opt_observer_posterior', 'ignore_observer_posterior']].corr()
 
-fit_log_posterior = np.sum(np.log([abs(test_dfa.subj_ts.loc[i] - (1-test_dfa.fit_observer_posterior.loc[i])) for i in test_dfa.index]))
+fit_log_posterior = np.sum(np.log([abs(test_dfa.subj_ts.loc[i] - (1-test_dfa.opt_observer_posterior.loc[i])) for i in test_dfa.index]))
 midline_rule_log_posterior = np.sum(np.log([abs(test_dfa.subj_ts.loc[i] - (1-abs(test_dfa.ignore_observer_choices.loc[i]-.2))) for i in test_dfa.index]))
-
-init_prior = [.5,.5]
-models = [ \
-    PredModel(train_ts_dis, init_prior, mode = "ignore", recursive_prob = train_recursive_p),\
-    PredModel(train_ts_dis, init_prior, mode = "single", recursive_prob = train_recursive_p),\
-    PredModel(train_ts_dis, init_prior, mode = "optimal", recursive_prob = train_recursive_p)]
-    
-model_posteriors = pd.DataFrame(columns = ['ignore','single','optimal'], dtype = 'float64')
-model_choices = pd.DataFrame(columns = ['ignore','single','optimal'], dtype = 'float64')
-model_likelihoods = pd.DataFrame(columns = ['ignore','single','optimal','rand','ts0','ts1'], dtype = 'float64')
-
-for i,trial in test_dfa.iterrows():
-    c = trial.context
-    trial_choice = trial.subj_ts
-    
-    model_posterior= []
-    model_choice=[]
-    trial_model_likelihoods = []
-    for j,model in enumerate(models):
-        conf = model.calc_posterior(c)
-        model_posterior += [conf[0]]
-        model_choice += [model.choose()]
-        trial_model_likelihoods += [conf[trial_choice]]
-    #add on 'straw model' predictions.
-    trial_model_likelihoods += [.5,[.9,.1][trial_choice], [.1,.9][trial_choice]] 
-   
-   #record trial estimates
-    model_likelihoods.loc[i] = np.log(trial_model_likelihoods)
-    model_posteriors.loc[i] = model_posterior
-    model_choices.loc[i] = model_choice
-    
-behav_sum['best_model'] = np.argmax(model_likelihoods.sum())
-
-
 
 
 #*********************************************
