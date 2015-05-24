@@ -16,6 +16,7 @@ import pickle
 import glob
 import re
 import lmfit
+import seaborn as sns
 from ggplot import *
 from collections import OrderedDict as odict
 
@@ -34,8 +35,8 @@ from collections import OrderedDict as odict
 #plt.rc('font', **font)
 #plt.rc('axes', **axes)
 
-plot = False
-save = False
+plot = True
+save = True
 
 #*********************************************
 # Load Data
@@ -343,12 +344,15 @@ if plot == True:
     sub = switch_counts['subject']
     plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to ts 1')
     plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to ts 2')
+    sub = switch_counts['fit_observer']
+    plt.plot(sub[0], lw = 4, color = 'm', ls = '-.', label = 'fit observer')
+    plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
     sub = switch_counts['opt_observer']
     plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
     plt.plot(sub[1], lw = 4, color = 'c', ls = '--')
     sub = switch_counts['ignore_observer']
-    plt.plot(sub[0], lw = 4, color = 'm', ls = '-.', label = 'ignore rule')
-    plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
+    plt.plot(sub[0], lw = 4, color = 'm', ls = ':', label = 'ignore rule')
+    plt.plot(sub[1], lw = 4, color = 'c', ls = ':')
     plt.xticks(list(range(12)),np.round(list(sub.index),2))
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position')
@@ -372,8 +376,8 @@ if plot == True:
             subj_switch_counts[key] = empty_df*len(ids)
             subj_norm_switch_counts[key] = subj_switch_counts[key].div(subj_switch_counts['ignore_observer'],axis = 0)
         sub = subj_switch_counts['subject']
-        plt.plot(sub[0], lw = 3, color = 'm', alpha = .15)
-        plt.plot(sub[1], lw = 3, color = 'c', alpha = .15)
+        plt.plot(sub[0], lw = 3, color = 'm', alpha = .10)
+        plt.plot(sub[1], lw = 3, color = 'c', alpha = .10)
     #    sub = switch_counts['opt_observer']
     #    plt.plot(sub[0], lw = 3, color = 'm', ls = '--', alpha = .15)
     #    plt.plot(sub[1], lw = 3, color = 'c', ls = '--', alpha = .15)
@@ -386,12 +390,15 @@ if plot == True:
     sub = norm_switch_counts['subject']
     plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to ts 1')
     plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to ts 2')
+    sub = norm_switch_counts['fit_observer']
+    plt.plot(sub[0], lw = 4, color = 'm',  ls = '-.', label = 'fit observer')
+    plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
     sub = norm_switch_counts['opt_observer']
     plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
     plt.plot(sub[1], lw = 4, color = 'c', ls = '--')
     sub = norm_switch_counts['ignore_observer']
-    plt.plot(sub[0], lw = 4, color = 'm', ls = '-.', label = 'ignore rule')
-    plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
+    plt.plot(sub[0], lw = 4, color = 'm', ls = ':', label = 'ignore rule')
+    plt.plot(sub[1], lw = 4, color = 'c', ls = ':')
     plt.xticks(list(range(12)),np.round(list(sub.index),2))
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position')
@@ -416,8 +423,8 @@ if plot == True:
             subj_switch_counts[key] = empty_df*len(ids)
             subj_norm_switch_counts[key] = subj_switch_counts[key].div(subj_switch_counts['ignore_observer'],axis = 0)
         sub = subj_norm_switch_counts['subject']
-        plt.plot(sub[0], lw = 3, color = 'm', alpha = .15)
-        plt.plot(sub[1], lw = 3, color = 'c', alpha = .15)
+        plt.plot(sub[0], lw = 3, color = 'm', alpha = .10)
+        plt.plot(sub[1], lw = 3, color = 'c', alpha = .10)
     #    sub = switch_counts['opt_observer']
     #    plt.plot(sub[0], lw = 3, color = 'm', ls = '--', alpha = .15)
     #    plt.plot(sub[1], lw = 3, color = 'c', ls = '--', alpha = .15)
@@ -430,8 +437,8 @@ if plot == True:
     
     plt.subplot(4,1,2)    
     plt.hold(True)
-    plot_df.query('subj_switch == 0')['rt'].plot(kind='density', color = 'm', lw = 5, label = 'stay')
-    plot_df.query('subj_switch == 1')['rt'].plot(kind='density', color = 'c', lw = 5, label = 'switch')
+    sns.kdeplot(plot_df.query('subj_switch == 0')['rt'],color = 'm', lw = 5, label = 'stay')
+    sns.kdeplot(plot_df.query('subj_switch == 1')['rt'],color = 'c', lw = 5, label = 'switch')
     plot_df.query('subj_switch == 0')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
     plot_df.query('subj_switch == 1')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
     plt.xlabel('RT')
@@ -439,8 +446,8 @@ if plot == True:
     
     plt.subplot(4,1,3)
     plt.hold(True)
-    plot_df.query('subj_switch == 0 and rep_resp == 1')['rt'].plot(kind='density', color = 'm', lw = 5, label = 'repeat response')
-    plot_df.query('subj_switch == 0 and rep_resp == 0')['rt'].plot(kind='density', color = 'c', lw = 5, label = 'change response (within task-set)')
+    sns.kdeplot(plot_df.query('subj_switch == 0 and rep_resp == 1')['rt'], color = 'm', lw = 5, label = 'repeat response')
+    sns.kdeplot(plot_df.query('subj_switch == 0 and rep_resp == 0')['rt'], color = 'c', lw = 5, label = 'change response (within task-set)')
     plot_df.query('subj_switch == 0 and rep_resp == 1')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
     plot_df.query('subj_switch == 0 and rep_resp == 0')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
     plt.xlabel('RT')
@@ -449,8 +456,8 @@ if plot == True:
     
     plt.subplot(4,1,4)
     plt.hold(True)
-    plot_df.query('subj_ts == 0')['rt'].plot(kind='density', color = 'm', lw = 5, label = 'ts1')
-    plot_df.query('subj_ts == 1')['rt'].plot(kind='density', color = 'c', lw = 5, label = 'ts2')
+    sns.kdeplot(plot_df.query('subj_ts == 0')['rt'], color = 'm', lw = 5, label = 'ts1')
+    sns.kdeplot(plot_df.query('subj_ts == 1')['rt'], color = 'c', lw = 5, label = 'ts2')
     plot_df.query('subj_ts == 0')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
     plot_df.query('subj_ts == 1')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
     plt.xlabel('RT')
@@ -458,7 +465,7 @@ if plot == True:
     
     #RT for switch vs stay for different trial-by-trial context diff
     p4 = plot_df.groupby(['subj_switch','context_diff']).mean().rt.unstack(level = 0).plot(marker = 'o',color = ['c','m'], figsize = figdims)     
-    p4 = p3.get_figure()
+    p4 = p4.get_figure()
            
     #Plot rt against optimal model certainty
     opt_conf_rt_p = ggplot(plot_df.query('rt>.1'), aes('opt_certainty', 'log_rt')) + geom_point(color = 'coral') + geom_smooth(method = 'lm')
@@ -473,12 +480,12 @@ if plot == True:
         
             
     
-	if save == True:
-		ggsave(conf_rt_p, '../Plots/Model_Certainty_vs_RT.pdf', format = 'pdf')
-		ggsave(conf_rt_id_p, '../Plots/Model_Certainty_vs_RT_ids.pdf', format = 'pdf')
-		ggsave(rt_abs_con_p, '../Plots/Context_vs_RT_id.pdf', format = 'pdf')
-		p1.savefig('../Plots/TS2%_vs_context.pdf', format = 'pdf')
-		p2.savefig('../Plots/TS_proportions.pdf', format = 'pdf')
-		p3.savefig('../Plots/RTs.pdf', format = 'pdf')
-		p4.savefig('../Plots/RT_across_context_diffs.pdf', format = 'pdf')
+    if save == True:
+        ggsave(fit_conf_rt_p, '../Plots/Fit_Certainty_vs_RT.pdf', format = 'pdf')
+        ggsave(fit_conf_rt_id_p, '../Plots/Fit_Certainty_vs_RT_ids.pdf', format = 'pdf')
+        ggsave(rt_abs_con_p, '../Plots/Context_vs_RT_id.pdf', format = 'pdf')
+        p1.savefig('../Plots/TS2%_vs_context.pdf', format = 'pdf')
+        p2.savefig('../Plots/TS_proportions.pdf', format = 'pdf')
+        p3.savefig('../Plots/RTs.pdf', format = 'pdf')
+        p4.savefig('../Plots/RT_across_context_diffs.pdf', format = 'pdf')
     
