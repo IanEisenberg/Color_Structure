@@ -22,7 +22,7 @@ from collections import OrderedDict as odict
 
 
 #*********************************************
-# Set up plotting defaults
+# Set up defaults
 #*********************************************
 
 #font = {'family' : 'normal',
@@ -35,20 +35,29 @@ from collections import OrderedDict as odict
 #plt.rc('font', **font)
 #plt.rc('axes', **axes)
 
-plot = True
+plot = False
 save = True
+#choose whether the model has a variable bias term
+bias = False
 
 #*********************************************
 # Load Data
 #*********************************************
+if bias == True:
+    try:
+        fit_dict = pickle.load(open('Analysis_Output/bias_parameter_fits.p','rb'))
+    except:
+        fit_dict = {}
+else:
+    try:
+        fit_dict = pickle.load(open('Analysis_Output/nobias_parameter_fits.p','rb'))
+    except:
+        fit_dict = {}
+
 group_behavior = {}
-
-
 gtrain_df = pd.DataFrame()
 gtest_df = pd.DataFrame()
 gtaskinfo = []
-
-fit_dict = pickle.load(open('Analysis_Output/parameter_fits.p','rb'))
 
 train_files = glob.glob('../RawData/*Context_20*yaml')
 test_files = glob.glob('../RawData/*Context_test*yaml') 
@@ -163,7 +172,10 @@ for train_file, test_file in zip(train_files,test_files):
             #attempt to simplify:
             fit_params = lmfit.Parameters()
             fit_params.add('rp', value = .5, min = 0, max = 1)
-            fit_params.add('tsb', value = .5, min = 0)
+            if bias == True:
+                fit_params.add('tsb', value = 1, min = 0)
+            else:
+                fit_params.add('tsb', value = 1, vary = False, min = 0)
             out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'contexts':list(test_dfa.context), 'choices':list(test_dfa.subj_ts)})
             lmfit.report_fit(out)
             fit_dict[subj_name + '_' + cost + '_cost'] = out.values
@@ -305,8 +317,12 @@ for key in switch_counts:
     norm_switch_counts[key] = switch_counts[key].div(switch_counts['ignore_observer'],axis = 0)
 
 if save == True:
-    pickle.dump(fit_dict,open('Analysis_Output/parameter_fits.p','wb'))
-
+    if bias == True:
+        pickle.dump(fit_dict,open('Analysis_Output/bias_parameter_fits.p','wb'))
+    else:
+        pickle.dump(fit_dict,open('Analysis_Output/nobias_parameter_fits.p','wb'))
+    gtest_learn_df.to_csv('Analysis_Output/gtest_learn_df.csv')
+    
 #*********************************************
 # Plotting
 #*********************************************
@@ -484,8 +500,8 @@ if plot == True:
         ggsave(fit_conf_rt_p, '../Plots/Fit_Certainty_vs_RT.pdf', format = 'pdf')
         ggsave(fit_conf_rt_id_p, '../Plots/Fit_Certainty_vs_RT_ids.pdf', format = 'pdf')
         ggsave(rt_abs_con_p, '../Plots/Context_vs_RT_id.pdf', format = 'pdf')
-        p1.savefig('../Plots/TS2%_vs_context.pdf', format = 'pdf')
-        p2.savefig('../Plots/TS_proportions.pdf', format = 'pdf')
+        p1.savefig('../Plots    S2%_vs_context.pdf', format = 'pdf')
+        p2.savefig('../Plots    S_proportions.pdf', format = 'pdf')
         p3.savefig('../Plots/RTs.pdf', format = 'pdf')
         p4.savefig('../Plots/RT_across_context_diffs.pdf', format = 'pdf')
     

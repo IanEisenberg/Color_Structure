@@ -9,12 +9,13 @@ import yaml
 import numpy as np
 import pandas as pd
 
-def load_data(datafile, name, mode = 'train'):
+def load_data(datafile, name, mode = 'train', drop = True):
     """
     Load a temporal structure task data file. Cleans up the raw data (returns
     the first action/rt, removes trials without a response). Returns the global
     taskinfo, the cleaned up data and a new dataset for analysis (with some
-    variables removed, and some created)
+    variables removed, and some created). If drop is true, trials without a response
+    are dropped.
     
     Finally saves the data as csv files
     """
@@ -32,9 +33,10 @@ def load_data(datafile, name, mode = 'train'):
     responses = [x[0] for x in df.response.values]
     df.rt[:] = rts
     df.response[:] = responses
-    #Remove missed trials:
-    df = df[df.rt != 999]
-    df = df.reset_index(drop=True)
+    if drop == True:
+        #Remove missed trials:
+        df = df[df.rt != 999]
+        df = df.reset_index(drop=True)
     #change responses to numerical values if need be:
     if type(df['response'].loc[df.index[0]]) == str:
         df['response'] = [taskinfo['action_keys'].index(response) for response in df.response]

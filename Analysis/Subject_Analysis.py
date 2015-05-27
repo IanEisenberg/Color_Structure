@@ -47,8 +47,11 @@ fitting = True
 
 train_files = glob.glob('../RawData/*Context_20*yaml')
 test_files = glob.glob('../RawData/*Context_test*yaml')
+subj = '045'
+for s in test_files:
+    if subj in s:
+        subj_i = test_files.index(s)
 
-subj_i = 15
 train_file = train_files[subj_i]
 test_file = test_files[subj_i]
 
@@ -138,8 +141,8 @@ if fitting == True:
         rp = params['rp'].value
         tsb = params['tsb'].value
         #minimize:
-        return abs(np.log(bias_fitfunc(rp,contexts,choices,tsb))) #log posterior for each choice
-        #return abs(np.sum(np.log(bias_fitfunc(rp,contexts,choices,tsb)))) #single value
+        #return abs(np.log(bias_fitfunc(rp,contexts,choices,tsb))) #log posterior for each choice
+        return abs(np.sum(np.log(bias_fitfunc(rp,contexts,choices,tsb)))) #single value
         
     init_prior = [.5,.5]
     
@@ -147,7 +150,7 @@ if fitting == True:
     #attempt to simplify:
     fit_params = lmfit.Parameters()
     fit_params.add('rp', value = .5, min = 0, max = 1)
-    fit_params.add('tsb', value = .5, min = 0)
+    fit_params.add('tsb', value = 1, vary = False, min = 0)
     out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'contexts':list(test_dfa.context), 'choices':list(test_dfa.subj_ts)})
     fit_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = out.values['tsb'], recursive_prob = out.values['rp'])
     lmfit.report_fit(out)
