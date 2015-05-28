@@ -34,7 +34,7 @@ test_files = glob.glob('../Data/*Context_test*.p')
 for train_file, test_file in zip(train_files,test_files):
     test_name = test_file[11:-5]
     train_name = train_file[11:-5]
-    subj_name = test_file[8:11]
+    subj_name = re.match(r'.*/Data/(\w*)_Prob*', test_name).group(1)
     print(subj_name)
     
     try:

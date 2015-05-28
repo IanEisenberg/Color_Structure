@@ -25,20 +25,20 @@ from collections import OrderedDict as odict
 # Set up defaults
 #*********************************************
 
-#font = {'family' : 'normal',
-#        'weight' : 'normal',
-#        'size'   : 20,
-#        }
-#        
-#axes = {'titleweight' : 'bold'
-#        }
-#plt.rc('font', **font)
-#plt.rc('axes', **axes)
+font = {'family' : 'normal',
+        'weight' : 'normal',
+        'size'   : 20,
+        }
+        
+axes = {'titleweight' : 'bold'
+        }
+plt.rc('font', **font)
+plt.rc('axes', **axes)
 
-plot = False
+plot = True
 save = True
 #choose whether the model has a variable bias term
-bias = False
+bias = True
 
 #*********************************************
 # Load Data
@@ -70,7 +70,7 @@ for train_file, test_file in zip(train_files,test_files):
     
     test_name = test_file[11:-5]
     train_name = train_file[11:-5]
-    subj_name = re.match(r'(\w*)_Prob*', test_name).group(1)
+    subj_name = re.match(r'.*/RawData/(\w*)_Prob*', test_file).group(1)
     print(subj_name)
     try:
         train_dict = pickle.load(open('../Data/' + train_name + '.p','rb'))
@@ -245,7 +245,6 @@ for train_file, test_file in zip(train_files,test_files):
         posteriors.append(optimal_observer.calc_posterior(c)[1])
     posteriors = np.array(posteriors)
     
-    ##Fix the INT
     test_dfa['opt_observer_posterior'] = posteriors
     test_dfa['opt_observer_choices'] = (posteriors>.5).astype(int)
     test_dfa['opt_observer_switch'] = (test_dfa.opt_observer_posterior>.5).diff()
@@ -327,10 +326,11 @@ if save == True:
 # Plotting
 #*********************************************
 
-ids = np.unique(gtest_df.id)
 contexts = np.unique(gtest_df.context)
 figdims = (16,12)
+fontsize = 20
 plot_df = gtest_learn_df
+plot_df['rt'] = plot_df['rt']*1000
 plot_ids = learn_ids
 if plot == True:
     
@@ -343,8 +343,8 @@ if plot == True:
     plt.plot(plot_df.groupby('context').ignore_observer_choices.mean(), lw = 3, color = 'c', ls = ':', label = 'ignore rule')
     plt.xticks(list(range(12)),contexts)
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
-    plt.xlabel('Stimulus Vertical Position')
-    plt.ylabel('Task-set 2 %')
+    plt.xlabel('Stimulus Vertical Position', size = fontsize)
+    plt.ylabel('Task-set 2 %', size = fontsize)
     pylab.legend(loc='best',prop={'size':20})
     for subj in ids:
         subj_df = plot_df.query('id == "%s"' %subj)
@@ -352,9 +352,26 @@ if plot == True:
             plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'r', alpha = .1)
         else:
             plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'k', alpha = .1)
-            
-    #plot distribution of switches, by task-set
+    
+
+    #Plot task-set count by context value
     p2 = plt.figure(figsize = figdims)
+    plt.hold(True) 
+    plt.xticks(list(range(12)),contexts)
+    plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
+    plt.xlabel('Stimulus Vertical Position', size = fontsize)
+    plt.ylabel('Task-set 2 %', size = fontsize)
+    for subj in plot_ids[0:5]:
+        subj_df = plot_df.query('id == "%s"' %subj)
+        plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2,  alpha = 1, label = subj_df.id[0])
+    plt.gca().set_color_cycle(None)
+    for subj in plot_ids[0:5]:
+        subj_df = plot_df.query('id == "%s"' %subj)
+        plt.plot(subj_df.groupby('context').fit_observer_choices.mean(), lw = 2, ls = '--', alpha = 1)
+    pylab.legend(loc='best',prop={'size':20})
+        
+    #plot distribution of switches, by task-set
+    p3 = plt.figure(figsize = figdims)
     plt.subplot(2,1,1)
     plt.hold(True) 
     sub = switch_counts['subject']
@@ -371,8 +388,8 @@ if plot == True:
     plt.plot(sub[1], lw = 4, color = 'c', ls = ':')
     plt.xticks(list(range(12)),np.round(list(sub.index),2))
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
-    plt.xlabel('Stimulus Vertical Position')
-    plt.ylabel('Counts')
+    plt.xlabel('Stimulus Vertical Position', size = fontsize)
+    plt.ylabel('Switch Counts', size = fontsize)
     pylab.legend(loc='upper right',prop={'size':20})
     for subj in plot_ids:
         subj_df = plot_df.query('id == "%s"' %subj)
@@ -394,9 +411,6 @@ if plot == True:
         sub = subj_switch_counts['subject']
         plt.plot(sub[0], lw = 3, color = 'm', alpha = .10)
         plt.plot(sub[1], lw = 3, color = 'c', alpha = .10)
-    #    sub = switch_counts['opt_observer']
-    #    plt.plot(sub[0], lw = 3, color = 'm', ls = '--', alpha = .15)
-    #    plt.plot(sub[1], lw = 3, color = 'c', ls = '--', alpha = .15)
     
     
         
@@ -417,9 +431,9 @@ if plot == True:
     plt.plot(sub[1], lw = 4, color = 'c', ls = ':')
     plt.xticks(list(range(12)),np.round(list(sub.index),2))
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
-    plt.xlabel('Stimulus Vertical Position')
-    plt.ylabel('Normalized Counts Compared to ignore Rule')
-    pylab.legend(loc='best',prop={'size':20})
+    plt.xlabel('Stimulus Vertical Position', size = fontsize)
+    plt.ylabel('Normalized Switch Counts', size = fontsize)
+    pylab.legend(loc='upper right',prop={'size':20})
     pylab.ylim([-1,4])
     for subj in plot_ids:
         subj_df = plot_df.query('id == "%s"' %subj)
@@ -441,15 +455,13 @@ if plot == True:
         sub = subj_norm_switch_counts['subject']
         plt.plot(sub[0], lw = 3, color = 'm', alpha = .10)
         plt.plot(sub[1], lw = 3, color = 'c', alpha = .10)
-    #    sub = switch_counts['opt_observer']
-    #    plt.plot(sub[0], lw = 3, color = 'm', ls = '--', alpha = .15)
-    #    plt.plot(sub[1], lw = 3, color = 'c', ls = '--', alpha = .15)
+
 
     #look at RT
-    p3 = plt.figure(figsize = figdims)
+    p4 = plt.figure(figsize = figdims)
     plt.subplot(4,1,1)
     plot_df.rt.hist(bins = 25)
-    plt.ylabel('Count across subject')
+    plt.ylabel('Frequency', size = fontsize)
     
     plt.subplot(4,1,2)    
     plt.hold(True)
@@ -457,8 +469,9 @@ if plot == True:
     sns.kdeplot(plot_df.query('subj_switch == 1')['rt'],color = 'c', lw = 5, label = 'switch')
     plot_df.query('subj_switch == 0')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
     plot_df.query('subj_switch == 1')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
-    plt.xlabel('RT')
     pylab.legend(loc='upper right',prop={'size':20})
+    plt.xlim(xmin = 0)
+
     
     plt.subplot(4,1,3)
     plt.hold(True)
@@ -466,42 +479,49 @@ if plot == True:
     sns.kdeplot(plot_df.query('subj_switch == 0 and rep_resp == 0')['rt'], color = 'c', lw = 5, label = 'change response (within task-set)')
     plot_df.query('subj_switch == 0 and rep_resp == 1')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
     plot_df.query('subj_switch == 0 and rep_resp == 0')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
-    plt.xlabel('RT')
-    plt.ylabel('Normed Count')
+    plt.ylabel('Probability Density', size = fontsize)
     pylab.legend(loc='upper right',prop={'size':20})
-    
+    plt.xlim(xmin = 0)
+
+        
     plt.subplot(4,1,4)
     plt.hold(True)
     sns.kdeplot(plot_df.query('subj_ts == 0')['rt'], color = 'm', lw = 5, label = 'ts1')
     sns.kdeplot(plot_df.query('subj_ts == 1')['rt'], color = 'c', lw = 5, label = 'ts2')
     plot_df.query('subj_ts == 0')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
     plot_df.query('subj_ts == 1')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
-    plt.xlabel('RT')
+    plt.xlabel('Reaction Time (ms)', size = fontsize)
     pylab.legend(loc='upper right',prop={'size':20})
-    
+    plt.xlim(xmin = 0)
+
+    	    
     #RT for switch vs stay for different trial-by-trial context diff
-    p4 = plot_df.groupby(['subj_switch','context_diff']).mean().rt.unstack(level = 0).plot(marker = 'o',color = ['c','m'], figsize = figdims)     
-    p4 = p4.get_figure()
+    p5 = plot_df.groupby(['subj_switch','context_diff']).mean().rt.unstack(level = 0).plot(marker = 'o',color = ['c','m'], figsize = figdims, fontsize = fontsize)     
+    p5 = p5.get_figure()
            
     #Plot rt against optimal model certainty
-    opt_conf_rt_p = ggplot(plot_df.query('rt>.1'), aes('opt_certainty', 'log_rt')) + geom_point(color = 'coral') + geom_smooth(method = 'lm')
-    fit_conf_rt_p = ggplot(plot_df.query('rt>.1'), aes('fit_certainty', 'log_rt')) + geom_point(color = 'coral') + geom_smooth(method = 'lm')
-
+    #Take out RT < 100 ms
+    opt_conf_rt_p = ggplot(plot_df.query('rt>100'), aes('opt_certainty', 'log_rt')) + geom_point(color = 'coral') + geom_smooth(method = 'lm')
+    fit_conf_rt_p = ggplot(plot_df.query('rt>100'), aes('fit_certainty', 'log_rt')) + geom_point(color = 'coral') + geom_smooth(method = 'lm') \
+		+ xlab('Model Certainty') + ylab('Log Reaction Time')
+		
     #split by id
-    opt_conf_rt_id_p = ggplot(plot_df.query('rt>.1'), aes('opt_certainty', 'log_rt', color = 'id')) + geom_point() + geom_smooth(method = 'lm')
-    fit_conf_rt_id_p = ggplot(plot_df.query('rt>.1'), aes('fit_certainty', 'log_rt', color = 'id')) + geom_point() + geom_smooth(method = 'lm')
+    opt_conf_rt_id_p = ggplot(plot_df.query('rt>100'), aes('opt_certainty', 'log_rt', color = 'id')) + geom_point() + geom_smooth(method = 'lm')
+    fit_conf_rt_id_p = ggplot(plot_df.query('rt>100'), aes('fit_certainty', 'log_rt', color = 'id')) + geom_point() + geom_smooth(method = 'lm')  \
+    	+ xlab('Model Certainty') + ylab('Log Reaction Time')
 
     #Plot rt against absolute context
-    rt_abs_con_p = ggplot(plot_df.query('rt>.1'), aes('abs_context', 'log_rt', color = 'id')) + geom_point() + geom_smooth(method = 'lm')
-        
+    rt_abs_con_p = ggplot(plot_df.query('rt>100'), aes('abs_context', 'log_rt', color = 'id')) + geom_point() + geom_smooth(method = 'lm') \
+        + xlab('Distance From Center') + ylab('Log Reaction Time')
             
     
     if save == True:
         ggsave(fit_conf_rt_p, '../Plots/Fit_Certainty_vs_RT.pdf', format = 'pdf')
         ggsave(fit_conf_rt_id_p, '../Plots/Fit_Certainty_vs_RT_ids.pdf', format = 'pdf')
         ggsave(rt_abs_con_p, '../Plots/Context_vs_RT_id.pdf', format = 'pdf')
-        p1.savefig('../Plots    S2%_vs_context.pdf', format = 'pdf')
-        p2.savefig('../Plots    S_proportions.pdf', format = 'pdf')
-        p3.savefig('../Plots/RTs.pdf', format = 'pdf')
-        p4.savefig('../Plots/RT_across_context_diffs.pdf', format = 'pdf')
+        p1.savefig('../Plots/TS2%_vs_context.pdf', format = 'pdf')
+        p2.savefig('../Plots/Individual_subject_fits.pdf',format = 'pdf')
+        p3.savefig('../Plots/TS_proportions.pdf', format = 'pdf')
+        p4.savefig('../Plots/RTs.pdf', format = 'pdf')
+        p5.savefig('../Plots/RT_across_context_diffs.pdf', format = 'pdf')
     
