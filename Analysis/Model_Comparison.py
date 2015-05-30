@@ -32,9 +32,7 @@ train_files = glob.glob('../Data/*Context_20*.p')
 test_files = glob.glob('../Data/*Context_test*.p') 
     
 for train_file, test_file in zip(train_files,test_files):
-    test_name = test_file[11:-5]
-    train_name = train_file[11:-5]
-    subj_name = re.match(r'.*/Data/(\w*)_Prob*', test_name).group(1)
+    subj_name = re.match(r'../Data/(\w*)_Prob*', test_file).group(1)
     print(subj_name)
     
     try:
@@ -117,6 +115,22 @@ for train_file, test_file in zip(train_files,test_files):
         test_dfa[bias +'conform_fit_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
         test_dfa[bias +'fit_certainty'] = (abs(test_dfa[bias + 'fit_observer_posterior']-.5))/.5
         
+        
+        #Optimal observer for test        
+        optimal_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = 1, recursive_prob = train_recursive_p)
+        observer_choices = []
+        posteriors = []
+        for i,trial in test_dfa.iterrows():
+            c = trial.context
+            posteriors.append(optimal_observer.calc_posterior(c)[1])
+        posteriors = np.array(posteriors)
+    
+        test_dfa['opt_observer_posterior'] = posteriors
+        test_dfa['opt_observer_choices'] = (posteriors>.5).astype(int)
+        test_dfa['opt_observer_switch'] = (test_dfa.opt_observer_posterior>.5).diff()
+        test_dfa['conform_opt_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
+        test_dfa['opt_certainty'] = (abs(test_dfa.opt_observer_posterior-.5))/.5
+    
     test_dfa['id'] = subj_name
     gtest_df = pd.concat([gtest_df,test_dfa])   
     gtaskinfo.append(taskinfo)
@@ -144,14 +158,15 @@ learn_ids = select_ids.index
 #********************************************* 
 compare_df = gtest_learn_df
   
-model_subj_compare = compare_df[['subj_ts','nobiasfit_observer_posterior', 'biasfit_observer_posterior']].corr()
+model_subj_compare = compare_df[['subj_ts','opt_observer_posterior','nobiasfit_observer_posterior', 'biasfit_observer_posterior']].corr()
 
+optfit_log_posterior = np.log(abs(compare_df.subj_ts-(1-compare_df.opt_observer_posterior)))
 biasfit_log_posterior = np.log(abs(compare_df.subj_ts-(1-compare_df.biasfit_observer_posterior)))
 nobiasfit_log_posterior = np.log(abs(compare_df.subj_ts-(1-compare_df.nobiasfit_observer_posterior)))
 midline_rule_log_posterior = np.log(abs(compare_df.subj_ts - (1-abs((compare_df.context_sign==1).astype(int)-.1))))
 
-compare_df = pd.concat([compare_df[['id','subj_ts','context']], biasfit_log_posterior, nobiasfit_log_posterior, midline_rule_log_posterior], axis = 1)
-compare_df.columns = ['id','subj_ts','context','bias','nobias','midline']
+compare_df = pd.concat([compare_df[['id','subj_ts','context']], optfit_log_posterior, biasfit_log_posterior, nobiasfit_log_posterior, midline_rule_log_posterior], axis = 1)
+compare_df.columns = ['id','subj_ts','context','optimal','bias','nobias','midline']
 compare_df['random_log'] = np.log(.5)
 
 summary = compare_df.groupby('id').sum().drop(['context','subj_ts'],axis = 1)

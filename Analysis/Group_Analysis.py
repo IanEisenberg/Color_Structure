@@ -68,8 +68,6 @@ for train_file, test_file in zip(train_files,test_files):
     if count != 0:
         pass #continue
     
-    test_name = test_file[11:-5]
-    train_name = train_file[11:-5]
     subj_name = re.match(r'.*/RawData/(\w*)_Prob*', test_file).group(1)
     print(subj_name)
     try:
@@ -340,7 +338,7 @@ if plot == True:
     plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 3, color = 'r', label = 'Subject')
     plt.plot(plot_df.groupby('context').fit_observer_choices.mean(), lw = 3, color = 'c', label = 'fit observer')
     plt.plot(plot_df.groupby('context').opt_observer_choices.mean(), lw = 3, color = 'c', ls = '--', label = 'optimal observer')
-    plt.plot(plot_df.groupby('context').ignore_observer_choices.mean(), lw = 3, color = 'c', ls = ':', label = 'ignore rule')
+    plt.plot(plot_df.groupby('context').ignore_observer_choices.mean(), lw = 3, color = 'c', ls = ':', label = 'midline rule')
     plt.xticks(list(range(12)),contexts)
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
@@ -384,7 +382,7 @@ if plot == True:
     plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
     plt.plot(sub[1], lw = 4, color = 'c', ls = '--')
     sub = switch_counts['ignore_observer']
-    plt.plot(sub[0], lw = 4, color = 'm', ls = ':', label = 'ignore rule')
+    plt.plot(sub[0], lw = 4, color = 'm', ls = ':', label = 'midline rule')
     plt.plot(sub[1], lw = 4, color = 'c', ls = ':')
     plt.xticks(list(range(12)),np.round(list(sub.index),2))
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
@@ -427,13 +425,12 @@ if plot == True:
     plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
     plt.plot(sub[1], lw = 4, color = 'c', ls = '--')
     sub = norm_switch_counts['ignore_observer']
-    plt.plot(sub[0], lw = 4, color = 'm', ls = ':', label = 'ignore rule')
+    plt.plot(sub[0], lw = 4, color = 'm', ls = ':', label = 'midline rule')
     plt.plot(sub[1], lw = 4, color = 'c', ls = ':')
     plt.xticks(list(range(12)),np.round(list(sub.index),2))
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
     plt.ylabel('Normalized Switch Counts', size = fontsize)
-    pylab.legend(loc='upper right',prop={'size':20})
     pylab.ylim([-1,4])
     for subj in plot_ids:
         subj_df = plot_df.query('id == "%s"' %subj)
@@ -503,16 +500,16 @@ if plot == True:
     #Take out RT < 100 ms
     opt_conf_rt_p = ggplot(plot_df.query('rt>100'), aes('opt_certainty', 'log_rt')) + geom_point(color = 'coral') + geom_smooth(method = 'lm')
     fit_conf_rt_p = ggplot(plot_df.query('rt>100'), aes('fit_certainty', 'log_rt')) + geom_point(color = 'coral') + geom_smooth(method = 'lm') \
-		+ xlab('Model Certainty') + ylab('Log Reaction Time')
+		+ xlab('Model Confidence') + ylab('Log Reaction Time') + xlim(-.05,1.05)
 		
     #split by id
     opt_conf_rt_id_p = ggplot(plot_df.query('rt>100'), aes('opt_certainty', 'log_rt', color = 'id')) + geom_point() + geom_smooth(method = 'lm')
     fit_conf_rt_id_p = ggplot(plot_df.query('rt>100'), aes('fit_certainty', 'log_rt', color = 'id')) + geom_point() + geom_smooth(method = 'lm')  \
-    	+ xlab('Model Certainty') + ylab('Log Reaction Time')
+    	+ xlab('Model Confidence') + ylab('Log Reaction Time') + xlim(-.05,1.05)
 
     #Plot rt against absolute context
     rt_abs_con_p = ggplot(plot_df.query('rt>100'), aes('abs_context', 'log_rt', color = 'id')) + geom_point() + geom_smooth(method = 'lm') \
-        + xlab('Distance From Center') + ylab('Log Reaction Time')
+        + xlab('Distance From Center') + ylab('Log Reaction Time') + xlim(-.05,1.05)
             
     
     if save == True:

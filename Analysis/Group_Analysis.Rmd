@@ -21,15 +21,21 @@ library(lme4)
 ```{r Model certainty vs rt}
 #Plot rt against optimal model certainty
 plot_df = gtest_learn_df
-ggplot(data = plot_df, aes(opt_certainty, log_rt, color = id)) + geom_point() + geom_smooth(method = 'lm')
+ggplot(data = plot_df, aes(fit_certainty, log_rt, color = id)) + geom_point() + geom_smooth(method = 'lm')
 
-rs1 = lmer(log_rt ~ opt_certainty + (1 + opt_certainty|id), data = gtest_learn_df)
+rs1 = lmer(log_rt ~ fit_certainty + (1 + fit_certainty|id), data = gtest_learn_df)
 summary(rs1) 
 
 rs2 = lmer(log_rt ~ abs_context + (1 + abs_context|id), data = gtest_learn_df)
 summary(rs2) 
 
-summary(glmer(subj_ts ~ midline_observer_choices + opt_observer_choices + (1+opt_observer_posterior | id), family = binomial, data = gtest_learn_df))
+rs3 = glmer(subj_ts ~ fit_observer_posterior + context + (1 + fit_observer_posterior | id), family = binomial, data = gtest_learn_df)
+summary(rs3)
 
+summary(glm(subj_ts ~ fit_observer_posterior , family = binomial, data = gtest_learn_df))
+```
+
+```{r}
+  sum((gtest_learn_df$subj_ts-gtest_learn_df$fit_observer_posterior)/(gtest_learn_df$fit_observer_posterior*(1-gtest_learn_df$fit_observer_posterior))^.5)
 ```
 
