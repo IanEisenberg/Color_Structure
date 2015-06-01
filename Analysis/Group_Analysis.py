@@ -67,8 +67,10 @@ for train_file, test_file in zip(train_files,test_files):
     count += 1
     if count != 0:
         pass #continue
-    
-    subj_name = re.match(r'.*/RawData/(\w*)_Prob*', test_file).group(1)
+    train_name = train_file[11:-5]
+    test_name = test_file[11:-5]
+
+    subj_name = re.match(r'.*/RawData\\(\w*)_Prob*', test_file).group(1)
     print(subj_name)
     try:
         train_dict = pickle.load(open('../Data/' + train_name + '.p','rb'))
@@ -271,6 +273,7 @@ for train_file, test_file in zip(train_files,test_files):
     
 gtaskinfo = pd.DataFrame(gtaskinfo)
 
+tmp = gtest_df
 #Exclude subjects where stim_confom is below some threshold 
 select_ids = gtest_df.groupby('id').mean().stim_conform>.75
 select_ids = select_ids[select_ids]
@@ -327,7 +330,7 @@ if save == True:
 contexts = np.unique(gtest_df.context)
 figdims = (16,12)
 fontsize = 20
-plot_df = gtest_learn_df
+plot_df = gtest_learn_df.copy()
 plot_df['rt'] = plot_df['rt']*1000
 plot_ids = learn_ids
 if plot == True:
@@ -335,14 +338,14 @@ if plot == True:
     #Plot task-set count by context value
     p1 = plt.figure(figsize = figdims)
     plt.hold(True) 
-    plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 3, color = 'r', label = 'Subject')
-    plt.plot(plot_df.groupby('context').fit_observer_choices.mean(), lw = 3, color = 'c', label = 'fit observer')
+    plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 3, color = 'r', label = 'subject')
+    plt.plot(plot_df.groupby('context').fit_observer_choices.mean(), lw = 3, color = 'c', label = 'bias observer')
     plt.plot(plot_df.groupby('context').opt_observer_choices.mean(), lw = 3, color = 'c', ls = '--', label = 'optimal observer')
     plt.plot(plot_df.groupby('context').ignore_observer_choices.mean(), lw = 3, color = 'c', ls = ':', label = 'midline rule')
     plt.xticks(list(range(12)),contexts)
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
-    plt.ylabel('Task-set 2 %', size = fontsize)
+    plt.ylabel('STS choice %', size = fontsize)
     pylab.legend(loc='best',prop={'size':20})
     for subj in ids:
         subj_df = plot_df.query('id == "%s"' %subj)
@@ -358,7 +361,7 @@ if plot == True:
     plt.xticks(list(range(12)),contexts)
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
-    plt.ylabel('Task-set 2 %', size = fontsize)
+    plt.ylabel('STS choice %', size = fontsize)
     for subj in plot_ids[0:5]:
         subj_df = plot_df.query('id == "%s"' %subj)
         plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2,  alpha = 1, label = subj_df.id[0])
@@ -373,10 +376,10 @@ if plot == True:
     plt.subplot(2,1,1)
     plt.hold(True) 
     sub = switch_counts['subject']
-    plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to ts 1')
-    plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to ts 2')
+    plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to CTS')
+    plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to STS')
     sub = switch_counts['fit_observer']
-    plt.plot(sub[0], lw = 4, color = 'm', ls = '-.', label = 'fit observer')
+    plt.plot(sub[0], lw = 4, color = 'm', ls = '-.', label = 'bias observer')
     plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
     sub = switch_counts['opt_observer']
     plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
@@ -416,10 +419,10 @@ if plot == True:
     plt.subplot(2,1,2)
     plt.hold(True) 
     sub = norm_switch_counts['subject']
-    plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to ts 1')
-    plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to ts 2')
+    plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to CTS')
+    plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to STS')
     sub = norm_switch_counts['fit_observer']
-    plt.plot(sub[0], lw = 4, color = 'm',  ls = '-.', label = 'fit observer')
+    plt.plot(sub[0], lw = 4, color = 'm',  ls = '-.', label = 'bias observer')
     plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
     sub = norm_switch_counts['opt_observer']
     plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
@@ -431,7 +434,7 @@ if plot == True:
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
     plt.ylabel('Normalized Switch Counts', size = fontsize)
-    pylab.ylim([-1,4])
+    pylab.ylim([-1,3])
     for subj in plot_ids:
         subj_df = plot_df.query('id == "%s"' %subj)
         subj_switch_counts = odict()

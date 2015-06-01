@@ -32,7 +32,7 @@ train_files = glob.glob('../Data/*Context_20*.p')
 test_files = glob.glob('../Data/*Context_test*.p') 
     
 for train_file, test_file in zip(train_files,test_files):
-    subj_name = re.match(r'../Data/(\w*)_Prob*', test_file).group(1)
+    subj_name = re.match(r'.*/Data\\(\w*)_Prob*', test_file).group(1)
     print(subj_name)
     
     try:
