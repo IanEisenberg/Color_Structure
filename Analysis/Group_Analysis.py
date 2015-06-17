@@ -35,7 +35,7 @@ axes = {'titleweight' : 'bold'
 plt.rc('font', **font)
 plt.rc('axes', **axes)
 
-plot = True
+plot = False
 save = True
 #choose whether the model has a variable bias term
 bias = True
@@ -53,7 +53,11 @@ else:
         fit_dict = pickle.load(open('Analysis_Output/nobias_parameter_fits.p','rb'))
     except:
         fit_dict = {}
-
+try:
+    midline_fit_dict = pickle.load(open('Analysis_Output/midline_parameter_fits.p','rb'))
+except:
+    midline_fit_dict = {}
+    
 group_behavior = {}
 gtrain_df = pd.DataFrame()
 gtest_df = pd.DataFrame()
@@ -67,7 +71,9 @@ for train_file, test_file in zip(train_files,test_files):
     count += 1
     if count != 0:
         pass #continue
-    
+    train_name = train_file[11:-5]
+    test_name = test_file[11:-5]
+
     subj_name = re.match(r'.*/RawData/(\w*)_Prob*', test_file).group(1)
     print(subj_name)
     try:
@@ -140,65 +146,63 @@ for train_file, test_file in zip(train_files,test_files):
     #*********************************************
     
     
-    costs = ['array', 'scalar']
-    for cost in costs:
-        if subj_name + '_' + cost + '_cost' in fit_dict.keys():
-            continue
+
+    if subj_name + '_fullRun' not in fit_dict.keys():
+        #Fitting Functions
+        def bias_fitfunc(rp, tsb, df):
+            model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
+            model_likelihoods = []
+            for i in df.index:
+                c = df.context[i]
+                trial_choice = df.subj_ts[i]
+                conf = model.calc_posterior(c)
+                model_likelihoods.append(conf[trial_choice])
+            return np.array(model_likelihoods)
+
+        def bias_errfunc(params,df):
+            rp = params['rp'].value
+            tsb = params['tsb'].value
+            #minimize
+            return abs(np.sum(np.log(bias_fitfunc(rp,tsb,df)))) #single value
+
+        init_prior = [.5,.5]
+
+        #Fit bias model
+        #attempt to simplify:
+        fit_params = lmfit.Parameters()
+        fit_params.add('rp', value = .5, min = 0, max = 1)
+        if bias == True:
+            fit_params.add('tsb', value = 1, min = 0)
         else:
-            #Fitting Functions
-            def bias_fitfunc(rp, contexts, choices, tsb):
-                model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
-                model_likelihoods = []
-                for i,c in enumerate(contexts):
-                    trial_choice = choices[i]
-                    conf = model.calc_posterior(c)
-                    model_likelihoods.append(conf[trial_choice])
-                return np.array(model_likelihoods)
-    
-            def bias_errfunc(params,contexts,choices):
-                rp = params['rp'].value
-                tsb = params['tsb'].value
-                #minimize:
-                if cost == 'array':
-                    return abs(np.log(bias_fitfunc(rp,contexts,choices,tsb))) #log posterior for each choice
-                elif cost == 'scalar':
-                    return abs(np.sum(np.log(bias_fitfunc(rp,contexts,choices,tsb)))) #single value
-    
-            init_prior = [.5,.5]
-    
-            #Fit bias model
-            #attempt to simplify:
-            fit_params = lmfit.Parameters()
-            fit_params.add('rp', value = .5, min = 0, max = 1)
-            if bias == True:
-                fit_params.add('tsb', value = 1, min = 0)
-            else:
-                fit_params.add('tsb', value = 1, vary = False, min = 0)
-            out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'contexts':list(test_dfa.context), 'choices':list(test_dfa.subj_ts)})
-            lmfit.report_fit(out)
-            fit_dict[subj_name + '_' + cost + '_cost'] = out.values
+            fit_params.add('tsb', value = 1, vary = False, min = 0)
+        out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa})
+        lmfit.report_fit(out)
+        fit_dict[subj_name + '_fullRun'] = out.values
     
     
+    #fit midline rule random probability:
+    if subj_name + '_fullRun' not in midline_fit_dict.keys():
+        #Fitting Functions
+        def midline_errfunc(params,df):
+            eps = params['eps'].value
+            context_sgn = np.array([max(i,0) for i in df.context_sign])
+            choice = df.subj_ts
+            #minimize
+            return -np.sum(np.log(abs(abs(choice - (1-context_sgn))-eps)))
+            
+        #Fit bias model
+        #attempt to simplify:
+        fit_params = lmfit.Parameters()
+        fit_params.add('eps', value = .1, min = 0, max = 1)
+        midline_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa})
+        lmfit.report_fit(midline_out)
+        midline_fit_dict[subj_name + '_fullRun'] = midline_out.values
     
-    params = fit_dict[subj_name + '_scalar_cost']
-    fit_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = params['tsb'], recursive_prob = params['rp'])
-    #Fit observer for test        
-    observer_choices = []
-    posteriors = []
-    for i,trial in test_dfa.iterrows():
-        c = trial.context
-        posteriors.append(fit_observer.calc_posterior(c)[1])
-    posteriors = np.array(posteriors)
-
-    test_dfa['fit_observer_posterior'] = posteriors
-    test_dfa['fit_observer_choices'] = (posteriors>.5).astype(int)
-    test_dfa['fit_observer_switch'] = (test_dfa.fit_observer_posterior>.5).diff()
-    test_dfa['conform_fit_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
-    test_dfa['fit_certainty'] = (abs(test_dfa.fit_observer_posterior-.5))/.5
-
     #*********************************************
     # Set up observers
     #*********************************************
+    
+    #**************TRAIN*********************
     
     #This observer know the exact statistics of the task, always chooses correctly
     #given that it chooses the correct task-set, and perfectly learns from feedback.
@@ -206,7 +210,6 @@ for train_file, test_file in zip(train_files,test_files):
     #of the correct task-set on each trial (which a subject 'could' do due to the
     #deterministic feedback). Basically, after receiving FB, the ideal observer
     #knows exactly what task it is in and should act accordingly.
-    
     observer_prior = [.5,.5]
     observer_choices = []
     for i,trial in train_dfa.iterrows():
@@ -233,6 +236,26 @@ for train_file, test_file in zip(train_files,test_files):
     train_dfa['opt_observer_choices'] = (posteriors>.5).astype(int)
     train_dfa['no_fb_observer_switch'] = (train_dfa.no_fb_observer_posterior>.5).diff()
     train_dfa['conform_no_fb_observer'] = np.equal(train_dfa.subj_ts, posteriors>.5)
+    
+    
+    #**************TEST*********************
+    
+    #Bias observer for test    
+    params = fit_dict[subj_name + '_fullRun']
+    fit_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = params['tsb'], recursive_prob = params['rp'])
+    #Fit observer for test        
+    observer_choices = []
+    posteriors = []
+    for i,trial in test_dfa.iterrows():
+        c = trial.context
+        posteriors.append(fit_observer.calc_posterior(c)[1])
+    posteriors = np.array(posteriors)
+
+    test_dfa['fit_observer_posterior'] = posteriors
+    test_dfa['fit_observer_choices'] = (posteriors>.5).astype(int)
+    test_dfa['fit_observer_switch'] = (test_dfa.fit_observer_posterior>.5).diff()
+    test_dfa['conform_fit_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
+    test_dfa['fit_certainty'] = (abs(test_dfa.fit_observer_posterior-.5))/.5
     
     #Optimal observer for test        
     optimal_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = 1, recursive_prob = train_recursive_p)
@@ -268,7 +291,8 @@ for train_file, test_file in zip(train_files,test_files):
     gtrain_df = pd.concat([gtrain_df,train_dfa])
     gtest_df = pd.concat([gtest_df,test_dfa])   
     gtaskinfo.append(taskinfo)
-    
+
+ 
 gtaskinfo = pd.DataFrame(gtaskinfo)
 
 #Exclude subjects where stim_confom is below some threshold 
@@ -289,6 +313,14 @@ select_rows = [i in select_ids for i in gtest_df.id]
 gtest_learn_df = gtest_df[select_rows]
 learn_ids = select_ids.index
 
+if save == True:
+    if bias == True:
+        pickle.dump(fit_dict,open('Analysis_Output/bias_parameter_fits.p','wb'))
+    else:
+        pickle.dump(fit_dict,open('Analysis_Output/nobias_parameter_fits.p','wb'))
+    pickle.dump(midline_fit_dict,open('Analysis_Output/midline_parameter_fits.p','wb'))
+    gtest_learn_df.to_csv('Analysis_Output/gtest_learn_df.csv')
+    
 #*********************************************
 # Switch Analysis
 #*********************************************
@@ -313,13 +345,7 @@ for key in switch_counts:
     switch_counts[key] = empty_df
     norm_switch_counts[key] = switch_counts[key].div(switch_counts['ignore_observer'],axis = 0)
 
-if save == True:
-    if bias == True:
-        pickle.dump(fit_dict,open('Analysis_Output/bias_parameter_fits.p','wb'))
-    else:
-        pickle.dump(fit_dict,open('Analysis_Output/nobias_parameter_fits.p','wb'))
-    gtest_learn_df.to_csv('Analysis_Output/gtest_learn_df.csv')
-    
+  
 #*********************************************
 # Plotting
 #*********************************************
@@ -327,7 +353,7 @@ if save == True:
 contexts = np.unique(gtest_df.context)
 figdims = (16,12)
 fontsize = 20
-plot_df = gtest_learn_df
+plot_df = gtest_learn_df.copy()
 plot_df['rt'] = plot_df['rt']*1000
 plot_ids = learn_ids
 if plot == True:
@@ -335,14 +361,14 @@ if plot == True:
     #Plot task-set count by context value
     p1 = plt.figure(figsize = figdims)
     plt.hold(True) 
-    plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 3, color = 'r', label = 'Subject')
-    plt.plot(plot_df.groupby('context').fit_observer_choices.mean(), lw = 3, color = 'c', label = 'fit observer')
+    plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 3, color = 'r', label = 'subject')
+    plt.plot(plot_df.groupby('context').fit_observer_choices.mean(), lw = 3, color = 'c', label = 'bias observer')
     plt.plot(plot_df.groupby('context').opt_observer_choices.mean(), lw = 3, color = 'c', ls = '--', label = 'optimal observer')
     plt.plot(plot_df.groupby('context').ignore_observer_choices.mean(), lw = 3, color = 'c', ls = ':', label = 'midline rule')
     plt.xticks(list(range(12)),contexts)
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
-    plt.ylabel('Task-set 2 %', size = fontsize)
+    plt.ylabel('STS choice %', size = fontsize)
     pylab.legend(loc='best',prop={'size':20})
     for subj in ids:
         subj_df = plot_df.query('id == "%s"' %subj)
@@ -358,7 +384,7 @@ if plot == True:
     plt.xticks(list(range(12)),contexts)
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
-    plt.ylabel('Task-set 2 %', size = fontsize)
+    plt.ylabel('STS choice %', size = fontsize)
     for subj in plot_ids[0:5]:
         subj_df = plot_df.query('id == "%s"' %subj)
         plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2,  alpha = 1, label = subj_df.id[0])
@@ -373,10 +399,10 @@ if plot == True:
     plt.subplot(2,1,1)
     plt.hold(True) 
     sub = switch_counts['subject']
-    plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to ts 1')
-    plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to ts 2')
+    plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to CTS')
+    plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to STS')
     sub = switch_counts['fit_observer']
-    plt.plot(sub[0], lw = 4, color = 'm', ls = '-.', label = 'fit observer')
+    plt.plot(sub[0], lw = 4, color = 'm', ls = '-.', label = 'bias observer')
     plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
     sub = switch_counts['opt_observer']
     plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
@@ -416,10 +442,10 @@ if plot == True:
     plt.subplot(2,1,2)
     plt.hold(True) 
     sub = norm_switch_counts['subject']
-    plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to ts 1')
-    plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to ts 2')
+    plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to CTS')
+    plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to STS')
     sub = norm_switch_counts['fit_observer']
-    plt.plot(sub[0], lw = 4, color = 'm',  ls = '-.', label = 'fit observer')
+    plt.plot(sub[0], lw = 4, color = 'm',  ls = '-.', label = 'bias observer')
     plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
     sub = norm_switch_counts['opt_observer']
     plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
@@ -431,7 +457,7 @@ if plot == True:
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
     plt.ylabel('Normalized Switch Counts', size = fontsize)
-    pylab.ylim([-1,4])
+    pylab.ylim([-1,3])
     for subj in plot_ids:
         subj_df = plot_df.query('id == "%s"' %subj)
         subj_switch_counts = odict()

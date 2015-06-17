@@ -18,6 +18,17 @@ library(lme4)
   gtest_learn_df$id = factor(gtest_learn_df$id)
 ```
 
+
+```{r}
+  rt_df = gtest_learn_df
+  rt_df$subj_switch = as.factor(rt_df$subj_switch)
+  summary(lmer(log_rt ~ subj_switch + rep_resp + (1 + subj_switch +rep_resp | id), data = rt_df))
+  summary(lmer(log_rt ~ subj_switch + rep_resp + (1 + subj_switch +rep_resp | id), data = rt_df))
+
+  rt_df$abs_context_diff = abs(rt_df$context_diff)
+  summary(lmer(log_rt ~ subj_switch + rep_resp + abs_context_diff + (1 + subj_switch +rep_resp + abs_context_diff | id), data = rt_df))
+```
+
 ```{r Model certainty vs rt}
 #Plot rt against optimal model certainty
 plot_df = gtest_learn_df

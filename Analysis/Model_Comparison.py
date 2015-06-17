@@ -32,7 +32,7 @@ train_files = glob.glob('../Data/*Context_20*.p')
 test_files = glob.glob('../Data/*Context_test*.p') 
     
 for train_file, test_file in zip(train_files,test_files):
-    subj_name = re.match(r'../Data/(\w*)_Prob*', test_file).group(1)
+    subj_name = re.match(r'.*/Data\\(\w*)_Prob*', test_file).group(1)
     print(subj_name)
     
     try:
@@ -166,16 +166,13 @@ nobiasfit_log_posterior = np.log(abs(compare_df.subj_ts-(1-compare_df.nobiasfit_
 midline_rule_log_posterior = np.log(abs(compare_df.subj_ts - (1-abs((compare_df.context_sign==1).astype(int)-.1))))
 
 compare_df = pd.concat([compare_df[['id','subj_ts','context']], optfit_log_posterior, biasfit_log_posterior, nobiasfit_log_posterior, midline_rule_log_posterior], axis = 1)
-compare_df.columns = ['id','subj_ts','context','optimal','bias','nobias','midline']
+compare_df.columns = ['id','subj_ts','context','optimal','bias','nobias', 'midline']
 compare_df['random_log'] = np.log(.5)
 
 summary = compare_df.groupby('id').sum().drop(['context','subj_ts'],axis = 1)
 plt.hold(True)
 summary.plot(figsize = (16,12), fontsize = 16)
 plt.ylabel('Log Posterior')
-
-
-
 
 
 
