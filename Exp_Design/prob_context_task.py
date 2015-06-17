@@ -45,7 +45,7 @@ class probContextTask:
         try:
             self.loadStimulusFileNP(config_file)
         except:
-            print mode + ': cannot load config file'
+            print(mode + ': cannot load config file')
             sys.exit()
                                                         
         self.logfilename='%s_%s_%s.log'%(self.subject_code,self.taskname,self.timestamp)

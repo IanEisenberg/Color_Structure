@@ -93,8 +93,7 @@ for train_file, test_file in zip(train_files,test_files):
         taskinfo, test_dfa = load_data(test_file, test_name, mode = 'test')
         test_dict = {'taskinfo': taskinfo, 'dfa': test_dfa}
         pickle.dump(test_dict, open('../Data/' + test_name + '.p','wb'))
-    
-    print('loaded')
+
 
 
 #*********************************************

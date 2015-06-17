@@ -11,7 +11,8 @@ from make_config import makeConfigList, makePracticeConfigList
 from test_bot import test_bot
 import glob
 from Load_Data import load_data
-
+import os
+import shutil
 #set-up some variables
 
 verbose=True
@@ -20,9 +21,10 @@ subdata=[]
 practice_on = True
 train_on = True
 test_on = True
-
 bot_on = False
 bot_mode = "ignore_base" #other for optimal
+home = os.getenv('HOME') 
+save_dir = home + '/Mega/IanE_RawData/Prob_Context_Task/' #cloud storage
 
 # set things up for practice, training and tests
 try:
@@ -68,7 +70,7 @@ practice=probContextTask(practice_config_file,subject_code, fullscreen = fullscr
 train=probContextTask(train_config_file,subject_code, fullscreen = fullscr)
 if bot_on == True:
     train.setBot(bot = test_bot(train_config_file, mode = bot_mode), mode = "full")
-train.writeToLog(train.toJSON())
+train.writeToLog(train.toJSON(),loc = save_dir + 'Log/')
 
 
 
@@ -316,7 +318,7 @@ if train_on:
                             continue
     
         trial=train.presentTrial(trial)
-        train.writeToLog(json.dumps(trial))
+        train.writeToLog(json.dumps(trial), loc = save_dir + 'Log/')
         train.alldata.append(trial)
         
     #************************************
@@ -341,8 +343,8 @@ if train_on:
         server.quit()
         
     # clean up and save
-    train.writeToLog(json.dumps({'trigger_times':train.trigger_times}))
-    train.writeData()
+    train.writeToLog(json.dumps({'trigger_times':train.trigger_times}), loc = save_dir + 'Log/')
+    train.writeData(loc = save_dir + 'RawData/')
     if bot_on == False:
         train.presentTextToWindow('Thank you. Please wait for the experimenter.')
         train.waitForKeypress(train.quit_key)
@@ -375,7 +377,7 @@ if test_on:
     if bot_on == True:
         test.setBot(bot = test_bot(test_config_file, mode = bot_mode), mode = "full")
 
-    test.writeToLog(test.toJSON())
+    test.writeToLog(test.toJSON(), loc = save_dir + 'Log/')
     
     # prepare to start
     test.setupWindow()
@@ -425,7 +427,7 @@ if test_on:
                             continue
     
         trial=test.presentTrial(trial)
-        test.writeToLog(json.dumps(trial))
+        test.writeToLog(json.dumps(trial), loc = save_dir + 'Log/')
         test.alldata.append(trial)
 
     #************************************
@@ -450,8 +452,8 @@ if test_on:
         server.quit()
        
     # clean up and save
-    test.writeToLog(json.dumps({'trigger_times':test.trigger_times}))
-    test.writeData()
+    test.writeToLog(json.dumps({'trigger_times':test.trigger_times}), loc = save_dir + 'Log/')
+    test.writeData(loc = save_dir + 'RawData/')
     if bot_on == False:
         test.presentTextToWindow('Thank you. Please wait for the experimenter.')
         test.waitForKeypress(test.quit_key)

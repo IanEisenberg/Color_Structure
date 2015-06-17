@@ -15,6 +15,7 @@ import statsmodels.api as sm
 import pickle
 import glob
 import re
+import os
 import lmfit
 import seaborn as sns
 from ggplot import *
@@ -43,6 +44,7 @@ bias = True
 #*********************************************
 # Load Data
 #*********************************************
+home = os.getenv('HOME')
 if bias == True:
     try:
         fit_dict = pickle.load(open('Analysis_Output/bias_parameter_fits.p','rb'))
@@ -63,17 +65,16 @@ gtrain_df = pd.DataFrame()
 gtest_df = pd.DataFrame()
 gtaskinfo = []
 
-train_files = glob.glob('../RawData/*Context_20*yaml')
-test_files = glob.glob('../RawData/*Context_test*yaml') 
+train_files = glob.glob(home + '/MEGA/IanE_RawData/Prob_Context_Task/RawData/*Context_20*yaml')
+test_files = glob.glob(home + '/MEGA/IanE_RawData/Prob_Context_Task/RawData/*Context_test*yaml')
     
 count = 0
 for train_file, test_file in zip(train_files,test_files):
     count += 1
     if count != 0:
         pass #continue
-    train_name = train_file[11:-5]
-    test_name = test_file[11:-5]
-
+    train_name = re.match(r'.*/RawData/([0-9][0-9][0-9].*).yaml', train_file).group(1)
+    test_name = re.match(r'.*/RawData/([0-9][0-9][0-9].*).yaml', test_file).group(1)
     subj_name = re.match(r'.*/RawData/(\w*)_Prob*', test_file).group(1)
     print(subj_name)
     try:
