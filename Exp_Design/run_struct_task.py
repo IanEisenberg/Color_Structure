@@ -25,6 +25,7 @@ bot_on = False
 bot_mode = "ignore_base" #other for optimal
 home = os.getenv('HOME') 
 save_dir = home + '/Mega/IanE_RawData/Prob_Context_Task/' #cloud storage
+trainname = 'Prob_Context'
 
 # set things up for practice, training and tests
 try:
@@ -55,18 +56,17 @@ if int(subject_code)%2 == 0:
 else:
     ts_order = [1,0]
     
-trainname = 'Prob_Context'
-
-
-
 #set up config files
 practice_config_file = '../Config_Files/Prob_Context_Practice_config.npy'
+try:
+    practice=probContextTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'practice')
+except:
+    practice_config_file = makePracticeConfigList(taskname = trainname + '_Practice')
+    practice=probContextTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'practice')
+    
 train_config_file = makeConfigList(taskname = trainname, iden = subject_code, exp_len = train_len, 
                                    recursive_p = recursive_p, ts_order = ts_order)
-practice_config_file = makePracticeConfigList(taskname = trainname + '_Practice')
-
-practice=probContextTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'practice')
-
+    
 train=probContextTask(train_config_file,subject_code, fullscreen = fullscr)
 if bot_on == True:
     train.setBot(bot = test_bot(train_config_file, mode = bot_mode), mode = "full")
