@@ -9,16 +9,11 @@ from scipy.stats import norm
 import pandas as pd
 import matplotlib.pyplot as plt
 from Load_Data import load_data
-from helper_classes import PredModel, BiasPredModel, EstimatePredModel
+from helper_classes import BiasPredModel
 from helper_functions import *
 import statsmodels.api as sm
-import pickle
-import glob
-import re
-import os
-import lmfit
+import pickle, glob, re, os, lmfit
 import seaborn as sns
-from ggplot import *
 from collections import OrderedDict as odict
 
 
@@ -173,7 +168,7 @@ for train_file, test_file in zip(train_files,test_files):
         if bias == True:
             fit_params.add('tsb', value = 1, min = 0)
         else:
-            fit_params.add('tsb', value = 1, vary = False, min = 0)
+            fit_params.add('tsb', value = 1, vary = False)
         first_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[0:df_midpoint]})
         second_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[df_midpoint:]})
         lmfit.report_fit(first_out)
