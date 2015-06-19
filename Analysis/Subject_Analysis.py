@@ -44,10 +44,17 @@ fitting = True
 #*********************************************
 # Load Data
 #*********************************************
+home = os.getenv('HOME')
+try:
+    fit_dict = pickle.load(open('Analysis_Output/bias_parameter_fits.p','rb'))
+except:
+    fit_dict = {}
+    
+    
+train_files = glob.glob(home + '/MEGA/IanE_RawData/Prob_Context_Task/RawData/*Context_20*yaml')
+test_files = glob.glob(home + '/MEGA/IanE_RawData/Prob_Context_Task/RawData/*Context_test*yaml')
 
-train_files = glob.glob('../RawData/*Context_20*yaml')
-test_files = glob.glob('../RawData/*Context_test*yaml')
-subj = '045'
+subj = '034'
 for s in test_files:
     if subj in s:
         subj_i = test_files.index(s)
@@ -55,8 +62,8 @@ for s in test_files:
 train_file = train_files[subj_i]
 test_file = test_files[subj_i]
 
-test_name = test_file[11:-5]
-train_name = train_file[11:-5]
+train_name = re.match(r'.*/RawData/([0-9][0-9][0-9].*).yaml', train_file).group(1)
+test_name = re.match(r'.*/RawData/([0-9][0-9][0-9].*).yaml', test_file).group(1)
 subj_name = re.match(r'(\w*)_Prob*', test_name).group(1)
 
 try:
@@ -118,60 +125,12 @@ test_dfa['context_diff'] = test_dfa['context'].diff()
 
 
 behav_sum = odict()
+    
+#*********************************************
+# Set up observers
+#*********************************************
 
-#*********************************************
-# Model fitting
-#*********************************************
-
-if fitting == True:
-    #*************************************
-    #Model Functions
-    #*************************************
-    
-    def bias_fitfunc(rp, contexts, choices, tsb):
-        model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
-        model_likelihoods = []
-        for i,c in enumerate(contexts):
-            trial_choice = choices[i]
-            conf = model.calc_posterior(c)
-            model_likelihoods.append(conf[trial_choice])
-        return np.array(model_likelihoods)
-        
-    def bias_errfunc(params,contexts,choices):
-        rp = params['rp'].value
-        tsb = params['tsb'].value
-        #minimize:
-        #return abs(np.log(bias_fitfunc(rp,contexts,choices,tsb))) #log posterior for each choice
-        return abs(np.sum(np.log(bias_fitfunc(rp,contexts,choices,tsb)))) #single value
-        
-    init_prior = [.5,.5]
-    
-    #Fit bias model
-    #attempt to simplify:
-    fit_params = lmfit.Parameters()
-    fit_params.add('rp', value = .5, min = 0, max = 1)
-    fit_params.add('tsb', value = 1, vary = False, min = 0)
-    out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'contexts':list(test_dfa.context), 'choices':list(test_dfa.subj_ts)})
-    fit_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = out.values['tsb'], recursive_prob = out.values['rp'])
-    lmfit.report_fit(out)
-    
-    #Fit observer for test        
-    observer_choices = []
-    posteriors = []
-    for i,trial in test_dfa.iterrows():
-        c = trial.context
-        posteriors.append(fit_observer.calc_posterior(c)[1])
-    posteriors = np.array(posteriors)
-
-    test_dfa['fit_observer_posterior'] = posteriors
-    test_dfa['fit_observer_choices'] = (posteriors>.5).astype(int)
-    test_dfa['fit_observer_switch'] = (test_dfa.fit_observer_posterior>.5).diff()
-    test_dfa['conform_fit_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
-    test_dfa['fit_certainty'] = (abs(test_dfa.fit_observer_posterior-.5))/.5
-    
-#*********************************************
-# Set up caricature observers
-#*********************************************
+#**************TRAIN*********************
 
 #This observer know the exact statistics of the task, always chooses correctly
 #given that it chooses the correct task-set, and perfectly learns from feedback.
@@ -179,7 +138,6 @@ if fitting == True:
 #of the correct task-set on each trial (which a subject 'could' do due to the
 #deterministic feedback). Basically, after receiving FB, the ideal observer
 #knows exactly what task it is in and should act accordingly.
-
 observer_prior = [.5,.5]
 observer_choices = []
 for i,trial in train_dfa.iterrows():
@@ -191,7 +149,7 @@ for i,trial in train_dfa.iterrows():
     observer_prior = np.round([.9*(1-ts)+.1*ts,.9*ts+.1*(1-ts)],2)
     
 train_dfa['opt_observer_choices'] = observer_choices
-train_dfa['opt_observer_switch'] = (train_dfa.opt_observer_choices).diff()
+train_dfa['opt_observer_switch'] = abs((train_dfa.opt_observer_choices).diff())
 train_dfa['conform_opt_observer'] = np.equal(train_dfa.subj_ts, observer_choices)
 
 #Optimal observer for train, without feedback     
@@ -203,8 +161,29 @@ for i,trial in train_dfa.iterrows():
     posteriors.append(no_fb_observer.calc_posterior(c)[1])
 posteriors = np.array(posteriors)
 train_dfa['no_fb_observer_posterior'] = posteriors
+train_dfa['opt_observer_choices'] = (posteriors>.5).astype(int)
 train_dfa['no_fb_observer_switch'] = (train_dfa.no_fb_observer_posterior>.5).diff()
 train_dfa['conform_no_fb_observer'] = np.equal(train_dfa.subj_ts, posteriors>.5)
+
+
+#**************TEST*********************
+
+#Bias observer for test    
+params = fit_dict[subj_name + '_fullRun']
+fit_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = params['tsb'], recursive_prob = params['rp'])
+#Fit observer for test        
+observer_choices = []
+posteriors = []
+for i,trial in test_dfa.iterrows():
+    c = trial.context
+    posteriors.append(fit_observer.calc_posterior(c)[1])
+posteriors = np.array(posteriors)
+
+test_dfa['fit_observer_posterior'] = posteriors
+test_dfa['fit_observer_choices'] = (posteriors>.5).astype(int)
+test_dfa['fit_observer_switch'] = (test_dfa.fit_observer_posterior>.5).diff()
+test_dfa['conform_fit_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
+test_dfa['fit_certainty'] = (abs(test_dfa.fit_observer_posterior-.5))/.5
 
 #Optimal observer for test        
 optimal_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = 1, recursive_prob = train_recursive_p)
@@ -220,6 +199,7 @@ test_dfa['opt_observer_choices'] = (posteriors>.5).astype(int)
 test_dfa['opt_observer_switch'] = (test_dfa.opt_observer_posterior>.5).diff()
 test_dfa['conform_opt_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
 test_dfa['opt_certainty'] = (abs(test_dfa.opt_observer_posterior-.5))/.5
+
 
 #Ignore observer for test        
 ignore_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = 1, recursive_prob = .5)

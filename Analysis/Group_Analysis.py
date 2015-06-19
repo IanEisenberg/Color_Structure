@@ -9,15 +9,11 @@ from scipy.stats import norm
 import pandas as pd
 import matplotlib.pyplot as plt
 from Load_Data import load_data
-from helper_classes import PredModel, BiasPredModel, EstimatePredModel
+from helper_classes import BiasPredModel
 from helper_functions import *
 import statsmodels.api as sm
-import pickle
-import glob
-import re
-import lmfit
+import pickle, glob, re, lmfit, os
 import seaborn as sns
-import os
 from ggplot import *
 from collections import OrderedDict as odict
 
@@ -37,7 +33,7 @@ plt.rc('font', **font)
 plt.rc('axes', **axes)
 
 plot = False
-save = False
+save = True
 #choose whether the model has a variable bias term
 bias = True
 

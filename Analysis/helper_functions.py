@@ -27,6 +27,7 @@ def track_runs(iterable):
             current_element = element
             current_repeats = 1
         element_i += 1
+    track_repeats = track_repeats[1:]
     return track_repeats
     
 def bar(x, y, title):
