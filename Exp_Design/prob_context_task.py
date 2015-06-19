@@ -334,7 +334,7 @@ class probContextTask:
             trial['rt'].append(999)
             core.wait(.5)
             self.presentTextToWindow('Please Respond Faster')
-            core.wait(1)
+            core.wait(.5)
             self.clearWindow()
         return trial
             

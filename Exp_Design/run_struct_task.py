@@ -12,7 +12,6 @@ from test_bot import test_bot
 import glob
 from Load_Data import load_data
 import os
-import shutil
 #set-up some variables
 
 verbose=True
@@ -293,6 +292,7 @@ if train_on:
     
     pause_trial = train.stimulusInfo[len(train.stimulusInfo)/2]
     pause_time = 0
+    
     for trial in train.stimulusInfo:
         if not train.bot:
             if trial == pause_trial:
@@ -320,7 +320,7 @@ if train_on:
         trial=train.presentTrial(trial)
         train.writeToLog(json.dumps(trial), loc = save_dir + 'Log/')
         train.alldata.append(trial)
-        
+
     #************************************
     # Send text about train performance
     #************************************
@@ -403,6 +403,7 @@ if test_on:
         
     pause_trial = test.stimulusInfo[len(test.stimulusInfo)/2]
     pause_time = 0
+    prompt_time = 0 #change if "please respond faster" comes on the screen
     for trial in test.stimulusInfo:
         if not test.bot:
             if trial == pause_trial:
@@ -415,7 +416,7 @@ if test_on:
         #if botMode = short, don't wait for onset times
         if test.botMode != 'short':
             # wait for onset time
-            while core.getTime() < trial['onset'] + test.startTime + pause_time:
+            while core.getTime() < trial['onset'] + test.startTime + pause_time + prompt_time:
                     key_response=event.getKeys(None,True)
                     if len(key_response)==0:
                         continue
@@ -429,7 +430,9 @@ if test_on:
         trial=test.presentTrial(trial)
         test.writeToLog(json.dumps(trial), loc = save_dir + 'Log/')
         test.alldata.append(trial)
-
+        if test.alldata[-1]['response'][0] == 999:
+            prompt_time += 1
+        
     #************************************
     # Send text about test performance
     #************************************
