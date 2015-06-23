@@ -146,6 +146,7 @@ for train_file, test_file in zip(train_files,test_files):
     if subj_name  + '_first' not in fit_dict.keys():
         #Fitting Functions
         def bias_fitfunc(rp, tsb, df):
+            init_prior = [.5,.5]
             model = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = tsb, recursive_prob = rp)
             model_likelihoods = []
             for i in df.index:
@@ -170,6 +171,13 @@ for train_file, test_file in zip(train_files,test_files):
         else:
             fit_params.add('tsb', value = 1, vary = False)
         first_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[0:df_midpoint]})
+        #attempt to simplify:
+        fit_params = lmfit.Parameters()
+        fit_params.add('rp', value = .5, min = 0, max = 1)
+        if bias == True:
+            fit_params.add('tsb', value = 1, min = 0)
+        else:
+            fit_params.add('tsb', value = 1, vary = False)
         second_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[df_midpoint:]})
         lmfit.report_fit(first_out)
         lmfit.report_fit(second_out)
@@ -193,6 +201,8 @@ for train_file, test_file in zip(train_files,test_files):
         fit_params = lmfit.Parameters()
         fit_params.add('eps', value = .1, min = 0, max = 1)
         midline_first_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa.iloc[0:df_midpoint]})
+        fit_params = lmfit.Parameters()
+        fit_params.add('eps', value = .1, min = 0, max = 1)
         midline_second_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa.iloc[df_midpoint:]})
         lmfit.report_fit(midline_first_out)
         midline_fit_dict[subj_name + '_first'] = midline_first_out.values

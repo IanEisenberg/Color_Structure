@@ -146,6 +146,7 @@ for train_file, test_file in zip(train_files,test_files):
     if subj_name + '_fullRun' not in fit_dict.keys():
         #Fitting Functions
         def bias_fitfunc(rp, tsb, df):
+            init_prior = [.5,.5]
             model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
             model_likelihoods = []
             for i in df.index:
@@ -161,7 +162,7 @@ for train_file, test_file in zip(train_files,test_files):
             #minimize
             return abs(np.sum(np.log(bias_fitfunc(rp,tsb,df)))) #single value
 
-        init_prior = [.5,.5]
+        
 
         #Fit bias model
         #attempt to simplify:
