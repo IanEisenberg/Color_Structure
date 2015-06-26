@@ -19,9 +19,8 @@ from collections import OrderedDict as odict
 from helper_classes import PredModel, BiasPredModel
 from helper_functions import *
 from ggplot import *
-import pickle
-import glob
-import re
+import pickle, glob, re, os
+
 
 #*********************************************
 # Set up plotting defaults
@@ -44,7 +43,7 @@ fitting = True
 #*********************************************
 # Load Data
 #*********************************************
-home = os.getenv('HOME')
+home = os.path.expanduser("~")
 try:
     fit_dict = pickle.load(open('Analysis_Output/bias_parameter_fits.p','rb'))
 except:
@@ -62,10 +61,9 @@ for s in test_files:
 train_file = train_files[subj_i]
 test_file = test_files[subj_i]
 
-train_name = re.match(r'.*/RawData/([0-9][0-9][0-9].*).yaml', train_file).group(1)
-test_name = re.match(r'.*/RawData/([0-9][0-9][0-9].*).yaml', test_file).group(1)
-subj_name = re.match(r'(\w*)_Prob*', test_name).group(1)
-
+train_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', train_file).group(1)
+test_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', test_file).group(1)
+subj_name = re.match(r'.*/RawData.(\w*)_Prob*', test_file).group(1)
 try:
     train_dict = pickle.load(open('../Data/' + train_name + '.p','rb'))
     taskinfo, train_dfa = [train_dict.get(k) for k in ['taskinfo','dfa']]

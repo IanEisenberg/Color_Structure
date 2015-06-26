@@ -39,7 +39,7 @@ bias = True
 #*********************************************
 # Load Data
 #*********************************************
-home = os.getenv('HOME')
+home = os.path.expanduser("~")
 if bias == True:
     try:
         fit_dict = pickle.load(open('Analysis_Output/bias_parameter_fits.p','rb'))
@@ -68,9 +68,9 @@ for train_file, test_file in zip(train_files,test_files):
     count += 1
     if count != 0:
         pass #continue
-    train_name = re.match(r'.*/RawData/([0-9][0-9][0-9].*).yaml', train_file).group(1)
-    test_name = re.match(r'.*/RawData/([0-9][0-9][0-9].*).yaml', test_file).group(1)
-    subj_name = re.match(r'.*/RawData/(\w*)_Prob*', test_file).group(1)
+    train_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', train_file).group(1)
+    test_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', test_file).group(1)
+    subj_name = re.match(r'.*/RawData.(\w*)_Prob*', test_file).group(1)
     print(subj_name)
     try:
         train_dict = pickle.load(open('../Data/' + train_name + '.p','rb'))
@@ -165,7 +165,7 @@ for train_file, test_file in zip(train_files,test_files):
         #Fit bias model
         #attempt to simplify:
         fit_params = lmfit.Parameters()
-        fit_params.add('rp', value = .5, min = 0, max = 1)
+        fit_params.add('rp', value = .6, min = 0, max = 1)
         if bias == True:
             fit_params.add('tsb', value = 1, min = 0)
         else:
@@ -173,7 +173,7 @@ for train_file, test_file in zip(train_files,test_files):
         first_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[0:df_midpoint]})
         #attempt to simplify:
         fit_params = lmfit.Parameters()
-        fit_params.add('rp', value = .5, min = 0, max = 1)
+        fit_params.add('rp', value = .6, min = 0, max = 1)
         if bias == True:
             fit_params.add('tsb', value = 1, min = 0)
         else:
