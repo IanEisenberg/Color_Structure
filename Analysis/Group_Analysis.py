@@ -9,15 +9,11 @@ from scipy.stats import norm
 import pandas as pd
 import matplotlib.pyplot as plt
 from Load_Data import load_data
-from helper_classes import PredModel, BiasPredModel, EstimatePredModel
+from helper_classes import BiasPredModel
 from helper_functions import *
 import statsmodels.api as sm
-import pickle
-import glob
-import re
-import lmfit
+import pickle, glob, re, lmfit, os
 import seaborn as sns
-import os
 from ggplot import *
 from collections import OrderedDict as odict
 
@@ -37,14 +33,14 @@ plt.rc('font', **font)
 plt.rc('axes', **axes)
 
 plot = False
-save = False
+save = True
 #choose whether the model has a variable bias term
 bias = True
 
 #*********************************************
 # Load Data
 #*********************************************
-home = os.getenv('HOME')
+home = os.path.expanduser("~")
 if bias == True:
     try:
         fit_dict = pickle.load(open('Analysis_Output/bias_parameter_fits.p','rb'))
@@ -73,9 +69,9 @@ for train_file, test_file in zip(train_files,test_files):
     count += 1
     if count != 0:
         pass #continue
-    train_name = re.match(r'.*/RawData/([0-9][0-9][0-9].*).yaml', train_file).group(1)
-    test_name = re.match(r'.*/RawData/([0-9][0-9][0-9].*).yaml', test_file).group(1)
-    subj_name = re.match(r'.*/RawData/(\w*)_Prob*', test_file).group(1)
+    train_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', train_file).group(1)
+    test_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', test_file).group(1)
+    subj_name = re.match(r'.*/RawData.(\w*)_Prob*', test_file).group(1)
     print(subj_name)
     try:
         train_dict = pickle.load(open('../Data/' + train_name + '.p','rb'))
@@ -150,6 +146,7 @@ for train_file, test_file in zip(train_files,test_files):
     if subj_name + '_fullRun' not in fit_dict.keys():
         #Fitting Functions
         def bias_fitfunc(rp, tsb, df):
+            init_prior = [.5,.5]
             model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
             model_likelihoods = []
             for i in df.index:
@@ -160,17 +157,17 @@ for train_file, test_file in zip(train_files,test_files):
             return np.array(model_likelihoods)
 
         def bias_errfunc(params,df):
-            rp = params['rp'].value
-            tsb = params['tsb'].value
+            rp = params['rp']
+            tsb = params['tsb']
             #minimize
             return abs(np.sum(np.log(bias_fitfunc(rp,tsb,df)))) #single value
 
-        init_prior = [.5,.5]
+        
 
         #Fit bias model
         #attempt to simplify:
         fit_params = lmfit.Parameters()
-        fit_params.add('rp', value = .5, min = 0, max = 1)
+        fit_params.add('rp', value = .6, min = 0, max = 1)
         if bias == True:
             fit_params.add('tsb', value = 1, min = 0)
         else:

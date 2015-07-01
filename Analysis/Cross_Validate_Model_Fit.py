@@ -9,16 +9,11 @@ from scipy.stats import norm
 import pandas as pd
 import matplotlib.pyplot as plt
 from Load_Data import load_data
-from helper_classes import PredModel, BiasPredModel, EstimatePredModel
+from helper_classes import BiasPredModel
 from helper_functions import *
 import statsmodels.api as sm
-import pickle
-import glob
-import re
-import os
-import lmfit
+import pickle, glob, re, os, lmfit
 import seaborn as sns
-from ggplot import *
 from collections import OrderedDict as odict
 
 
@@ -44,7 +39,7 @@ bias = True
 #*********************************************
 # Load Data
 #*********************************************
-home = os.getenv('HOME')
+home = os.path.expanduser("~")
 if bias == True:
     try:
         fit_dict = pickle.load(open('Analysis_Output/bias_parameter_fits.p','rb'))
@@ -73,9 +68,9 @@ for train_file, test_file in zip(train_files,test_files):
     count += 1
     if count != 0:
         pass #continue
-    train_name = re.match(r'.*/RawData/([0-9][0-9][0-9].*).yaml', train_file).group(1)
-    test_name = re.match(r'.*/RawData/([0-9][0-9][0-9].*).yaml', test_file).group(1)
-    subj_name = re.match(r'.*/RawData/(\w*)_Prob*', test_file).group(1)
+    train_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', train_file).group(1)
+    test_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', test_file).group(1)
+    subj_name = re.match(r'.*/RawData.(\w*)_Prob*', test_file).group(1)
     print(subj_name)
     try:
         train_dict = pickle.load(open('../Data/' + train_name + '.p','rb'))
@@ -151,6 +146,7 @@ for train_file, test_file in zip(train_files,test_files):
     if subj_name  + '_first' not in fit_dict.keys():
         #Fitting Functions
         def bias_fitfunc(rp, tsb, df):
+            init_prior = [.5,.5]
             model = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = tsb, recursive_prob = rp)
             model_likelihoods = []
             for i in df.index:
@@ -169,12 +165,19 @@ for train_file, test_file in zip(train_files,test_files):
         #Fit bias model
         #attempt to simplify:
         fit_params = lmfit.Parameters()
-        fit_params.add('rp', value = .5, min = 0, max = 1)
+        fit_params.add('rp', value = .6, min = 0, max = 1)
         if bias == True:
             fit_params.add('tsb', value = 1, min = 0)
         else:
-            fit_params.add('tsb', value = 1, vary = False, min = 0)
+            fit_params.add('tsb', value = 1, vary = False)
         first_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[0:df_midpoint]})
+        #attempt to simplify:
+        fit_params = lmfit.Parameters()
+        fit_params.add('rp', value = .6, min = 0, max = 1)
+        if bias == True:
+            fit_params.add('tsb', value = 1, min = 0)
+        else:
+            fit_params.add('tsb', value = 1, vary = False)
         second_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[df_midpoint:]})
         lmfit.report_fit(first_out)
         lmfit.report_fit(second_out)
@@ -198,6 +201,8 @@ for train_file, test_file in zip(train_files,test_files):
         fit_params = lmfit.Parameters()
         fit_params.add('eps', value = .1, min = 0, max = 1)
         midline_first_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa.iloc[0:df_midpoint]})
+        fit_params = lmfit.Parameters()
+        fit_params.add('eps', value = .1, min = 0, max = 1)
         midline_second_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa.iloc[df_midpoint:]})
         lmfit.report_fit(midline_first_out)
         midline_fit_dict[subj_name + '_first'] = midline_first_out.values

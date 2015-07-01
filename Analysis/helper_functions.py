@@ -8,6 +8,7 @@ Created on Fri Apr 24 16:22:54 2015
 import numpy as np
 import matplotlib.pyplot as plt
 import pylab
+import random as r
 
 def track_runs(iterable):
     """
@@ -27,6 +28,7 @@ def track_runs(iterable):
             current_element = element
             current_repeats = 1
         element_i += 1
+    track_repeats = track_repeats[1:]
     return track_repeats
     
 def bar(x, y, title):
@@ -53,6 +55,26 @@ def calc_posterior(data,prior,likelihood_dist):
     posterior = numer/dinom
     return posterior
 
+def genSeq(l,p):
+    seq = [round(r.random())]
+    for _ in range(l):
+        if r.random() < p:
+            seq.append(seq[-1])
+        else:
+            seq.append(abs(seq[-1]-1))
+    return seq
+
+def seqStats(l,p,reps):
+    seqs=[]
+    for _ in range(reps):
+        tmp = genSeq(l,p)
+        for i in track_runs(tmp):
+            seqs.append(i[0])
+    return (np.mean(seqs), np.std(seqs))
+    
+    
+    
+    
 #*********************************************
 # Plotting
 #*********************************************

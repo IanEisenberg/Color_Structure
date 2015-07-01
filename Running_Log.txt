@@ -11,3 +11,5 @@ same config file with 15 minutes of training. That didn't actually shorten train
 I interrupted her after about 20 minutes. Thus there will be no RawData for 034, but 
 two log files - one for 034, and one for 034_second_run. For test there is a rawdata
 called 034.
+
+059 - Won't be here later. Probably can't scan

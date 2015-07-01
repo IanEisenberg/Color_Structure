@@ -10,66 +10,6 @@ import numpy as np
 from scipy.stats import norm
 from helper_functions import softmax 
 
-class PredModel:
-    """
-    Prediction model that takes in data, and uses a prior over hypotheses
-    and the relevant to calculate posterior hypothesis estimates.
-    """
-    def __init__(self, likelihood_dist, prior, recursive_prob = .9,
-                 data_noise = 0, mode = "optimal"):
-        self.prior = prior
-        self.likelihood_dist = likelihood_dist
-        self.recursive_prob = recursive_prob
-        self.mode = mode
-        self.posterior = prior
-        
-    def calc_posterior(self, data, noise = 0):
-        """
-        Calculate the posterior probability of different distribution hypotheses
-        given the data. You can set a noise value which will set add gaussian
-        noise to the observation. The value specified will be a scaling parameter. 
-        It should always be less than one. 
-        """
-        ld = self.likelihood_dist
-        rp = self.recursive_prob
-        prior = self.prior
-        mode = self.mode
-
-        if noise:
-            data= min(max(data + noise*norm().rvs(),-1),1)
-                                   
-        trans_probs = np.array([[rp, 1-rp], [1-rp, rp]])    
-                     
-        n = len(prior)
-        likelihood = [dis.pdf(data) for dis in ld]
-        numer = np.array([likelihood[i] * prior[i] for i in range(n)])
-        try:
-            dinom = [np.sum(zip(*numer)[i]) for i in range(len(numer[0]))]
-        except TypeError:
-            dinom = np.sum(numer)
-        posterior = numer/dinom
-        
-        if mode == "single":
-            self.prior = trans_probs[np.argmax(posterior),:]
-        elif mode == 'optimal':
-            self.prior = np.dot(trans_probs,posterior)
-        self.posterior = posterior
-        return posterior
-        
-    def set_mode(self, mode):
-        self.mode = mode
-        
-    def choose(self, mode = 'softmax', eps = .1, inv_temp = 1):
-        if mode == "e-greedy":
-            if r.random() < eps:
-                return r.randint(0,2)
-            else:
-                return np.argmax(self.posterior)
-        elif mode == "softmax":
-            probs = softmax(self.posterior, inv_temp)
-            return np.random.choice(range(len(probs)), p = probs)
-        else:
-            return np.argmax(self.posterior)
             
 class BiasPredModel:
     """
