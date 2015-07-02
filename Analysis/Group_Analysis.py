@@ -61,8 +61,8 @@ gtrain_df = pd.DataFrame()
 gtest_df = pd.DataFrame()
 gtaskinfo = []
 
-train_files = glob.glob(home + '/MEGA/IanE_RawData/Prob_Context_Task/RawData/*Context_20*yaml')
-test_files = glob.glob(home + '/MEGA/IanE_RawData/Prob_Context_Task/RawData/*Context_test*yaml')
+train_files = glob.glob(home + '/MEGA/Prob_Context_Task/RawData/*Context_20*yaml')
+test_files = glob.glob(home + '/MEGA/Prob_Context_Task/RawData/*Context_test*yaml')
     
 count = 0
 for train_file, test_file in zip(train_files,test_files):
@@ -534,6 +534,14 @@ if plot == True:
     rt_abs_con_p = ggplot(plot_df.query('rt>100'), aes('abs_context', 'log_rt', color = 'id')) + geom_point() + geom_smooth(method = 'lm') \
         + xlab('Distance From Center') + ylab('Log Reaction Time') + xlim(-.05,1.05)
             
+    subj,task,model,fit = [],[],[],[]
+    df = gtest_df
+    for i in [ii for ii in np.unique(gtest_df.id) if ii not in np.unique(gtest_learn_df.id)]:
+        subj.append(np.mean([i[0] for i in track_runs(df[df['id'] == i].subj_ts)]))
+        task.append(np.mean([i[0] for i in track_runs(df[df['id'] == i].ts)]))
+        model.append((np.mean([i[0] for i in track_runs(df[df['id'] == i].opt_observer_choices)])))
+        fit.append((np.mean([i[0] for i in track_runs(df[df['id'] == i].fit_observer_choices)])))
+    plt.plot(task,subj,'o')
     
     if save == True:
         ggsave(fit_conf_rt_p, '../Plots/Fit_Certainty_vs_RT.pdf', format = 'pdf')

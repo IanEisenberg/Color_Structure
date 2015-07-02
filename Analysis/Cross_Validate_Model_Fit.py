@@ -60,8 +60,8 @@ gtrain_df = pd.DataFrame()
 gtest_df = pd.DataFrame()
 gtaskinfo = []
 
-train_files = glob.glob(home + '/MEGA/IanE_RawData/Prob_Context_Task/RawData/*Context_20*yaml')
-test_files = glob.glob(home + '/MEGA/IanE_RawData/Prob_Context_Task/RawData/*Context_test*yaml')
+train_files = glob.glob(home + '/MEGA/Prob_Context_Task/RawData/*Context_20*yaml')
+test_files = glob.glob(home + '/MEGA/Prob_Context_Task/RawData/*Context_test*yaml')
     
 count = 0
 for train_file, test_file in zip(train_files,test_files):
