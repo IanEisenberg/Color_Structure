@@ -46,7 +46,6 @@ class BiasPredModel:
                                    
         trans_probs = np.array([[rp, 1-rp], [1-rp, rp]])    
         
-		data = [.4,.5]
 		n = len(prior)
 		likelihood = np.array([dis.pdf(data) for dis in ld])
 		numer = np.array([likelihood[i] * prior[i] for i in range(n)])
