@@ -27,7 +27,10 @@ class BiasPredModel:
     def calc_posterior(self, data, noise = 0):
         """
         Calculate the posterior probability of different distribution hypotheses
-        given the data. You can set a noise value which will set add gaussian
+        given a data point. You can pass in multiple data points but this function
+		will only calculate the posterior based on the current prior and will not update
+		in between each data point.
+		You can set a noise value which will set add gaussian
         noise to the observation. The value specified will be a scaling parameter. 
         It should always be less than one. 
         """
@@ -42,15 +45,13 @@ class BiasPredModel:
             data= min(max(data + noise*norm().rvs(),-1),1)
                                    
         trans_probs = np.array([[rp, 1-rp], [1-rp, rp]])    
-                     
-        n = len(prior)
-        likelihood = np.array([dis.pdf(data) for dis in ld])
-        numer = np.array([likelihood[i] * prior[i] for i in range(n)])
-        try:
-            dinom = [np.sum(zip(*numer)[i]) for i in range(len(numer[0]))]
-        except TypeError:
-            dinom = np.sum(numer)
-        posterior = numer/dinom
+        
+		data = [.4,.5]
+		n = len(prior)
+		likelihood = np.array([dis.pdf(data) for dis in ld])
+		numer = np.array([likelihood[i] * prior[i] for i in range(n)])
+		dinom = np.sum(numer,0)
+		posterior = numer/dinom
         
         self.prior = np.dot(trans_probs,posterior)
         self.posterior = posterior
