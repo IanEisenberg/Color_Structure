@@ -8,9 +8,10 @@ Created on Tue Apr 14 18:09:29 2015
 import random as r
 import numpy as np
 from scipy.stats import norm
-from helper_functions import softmax 
 
-            
+def softmax(probs, inv_temp):
+    return np.exp(probs*inv_temp)/sum(np.exp(probs*inv_temp))
+    
 class BiasPredModel:
     """
     Prediction model that takes in data, and uses a prior over hypotheses
@@ -46,64 +47,12 @@ class BiasPredModel:
                                    
         trans_probs = np.array([[rp, 1-rp], [1-rp, rp]])    
         
-		n = len(prior)
-		likelihood = np.array([dis.pdf(data) for dis in ld])
-		numer = np.array([likelihood[i] * prior[i] for i in range(n)])
-		dinom = np.sum(numer,0)
-		posterior = numer/dinom
-        
-        self.prior = np.dot(trans_probs,posterior)
-        self.posterior = posterior
-        return posterior
-       
-    def choose(self, mode = 'softmax', eps = .1, inv_temp = 1):
-        if mode == "e-greedy":
-            if r.random() < eps:
-                return r.randint(0,2)
-            else:
-                return np.argmax(self.posterior)
-        elif mode == "softmax":
-            probs = softmax(self.posterior, inv_temp)
-            return np.random.choice(range(len(probs)), p = probs)
-        else:
-            return np.argmax(self.posterior)
-
-class EstimatePredModel:
-    """
-    Prediction model that takes in data, and uses a prior over hypotheses
-    and the relevant to calculate posterior hypothesis estimates.
-    """
-    def __init__(self, prior, mean = 0, std = .37, recursive_prob = .9):
-        self.prior = np.array(prior)
-        self.likelihood_dist = [norm(mean, std),norm(-mean,std)]
-        self.recursive_prob = recursive_prob
-        self.posterior = prior
-        
-    def calc_posterior(self, data, noise = 0):
-        """
-        Calculate the posterior probability of different distribution hypotheses
-        given the data. You can set a noise value which will set add gaussian
-        noise to the observation. The value specified will be a scaling parameter. 
-        It should always be less than one. 
-        """
-        ld = self.likelihood_dist
-        rp = self.recursive_prob
-        prior = self.prior
-
-        if noise:
-            data= min(max(data + noise*norm().rvs(),-1),1)
-                                   
-        trans_probs = np.array([[rp, 1-rp], [1-rp, rp]])    
-                     
         n = len(prior)
         likelihood = np.array([dis.pdf(data) for dis in ld])
         numer = np.array([likelihood[i] * prior[i] for i in range(n)])
-        try:
-            dinom = [np.sum(zip(*numer)[i]) for i in range(len(numer[0]))]
-        except TypeError:
-            dinom = np.sum(numer)
+        dinom = np.sum(numer,0)
         posterior = numer/dinom
-        
+
         self.prior = np.dot(trans_probs,posterior)
         self.posterior = posterior
         return posterior
@@ -119,7 +68,7 @@ class EstimatePredModel:
             return np.random.choice(range(len(probs)), p = probs)
         else:
             return np.argmax(self.posterior)
-            
+
 class DataGenerator:
     """
     creates generator for taskset data based on task-set distributions and

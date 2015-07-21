@@ -35,7 +35,7 @@ plt.rc('axes', **axes)
 plot = False
 save = True
 #choose whether the model has a variable bias term
-bias = True
+bias = False
 
 #*********************************************
 # Load Data
@@ -141,59 +141,12 @@ for train_file, test_file in zip(train_files,test_files):
     # Model fitting
     #*********************************************
     
-    
-
     if subj_name + '_fullRun' not in fit_dict.keys():
-        #Fitting Functions
-        def bias_fitfunc(rp, tsb, df):
-            init_prior = [.5,.5]
-            model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
-            model_likelihoods = []
-            for i in df.index:
-                c = df.context[i]
-                trial_choice = df.subj_ts[i]
-                conf = model.calc_posterior(c)
-                model_likelihoods.append(conf[trial_choice])
-            return np.array(model_likelihoods)
+        fit_dict[subj_name + '_fullRun'] = fit_model(train_ts_dis,test_dfa, bias, mode = "biasmodel")
 
-        def bias_errfunc(params,df):
-            rp = params['rp']
-            tsb = params['tsb']
-            #minimize
-            return abs(np.sum(np.log(bias_fitfunc(rp,tsb,df)))) #single value
-
-        
-
-        #Fit bias model
-        #attempt to simplify:
-        fit_params = lmfit.Parameters()
-        fit_params.add('rp', value = .6, min = 0, max = 1)
-        if bias == True:
-            fit_params.add('tsb', value = 1, min = 0)
-        else:
-            fit_params.add('tsb', value = 1, vary = False, min = 0)
-        out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa})
-        lmfit.report_fit(out)
-        fit_dict[subj_name + '_fullRun'] = out.values
-    
-    
     #fit midline rule random probability:
     if subj_name + '_fullRun' not in midline_fit_dict.keys():
-        #Fitting Functions
-        def midline_errfunc(params,df):
-            eps = params['eps'].value
-            context_sgn = np.array([max(i,0) for i in df.context_sign])
-            choice = df.subj_ts
-            #minimize
-            return -np.sum(np.log(abs(abs(choice - (1-context_sgn))-eps)))
-            
-        #Fit bias model
-        #attempt to simplify:
-        fit_params = lmfit.Parameters()
-        fit_params.add('eps', value = .1, min = 0, max = 1)
-        midline_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa})
-        lmfit.report_fit(midline_out)
-        midline_fit_dict[subj_name + '_fullRun'] = midline_out.values
+       midlinefit_dict[subj_name + '_fullRun'] = fit_model(train_ts_dis,test_dfa,mode = "midline")
     
     #*********************************************
     # Set up observers
@@ -541,7 +494,7 @@ if plot == True:
         task.append(np.mean([i[0] for i in track_runs(df[df['id'] == i].ts)]))
         model.append((np.mean([i[0] for i in track_runs(df[df['id'] == i].opt_observer_choices)])))
         fit.append((np.mean([i[0] for i in track_runs(df[df['id'] == i].fit_observer_choices)])))
-    plt.plot(task,subj,'o')
+    plt.plot(model,subj,'o')
     
     if save == True:
         ggsave(fit_conf_rt_p, '../Plots/Fit_Certainty_vs_RT.pdf', format = 'pdf')

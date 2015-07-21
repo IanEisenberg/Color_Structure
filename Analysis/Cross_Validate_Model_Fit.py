@@ -144,69 +144,13 @@ for train_file, test_file in zip(train_files,test_files):
     
     df_midpoint = round(len(test_dfa)/2)
     if subj_name  + '_first' not in fit_dict.keys():
-        #Fitting Functions
-        def bias_fitfunc(rp, tsb, df):
-            init_prior = [.5,.5]
-            model = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = tsb, recursive_prob = rp)
-            model_likelihoods = []
-            for i in df.index:
-                c = df.context[i]
-                trial_choice = df.subj_ts[i]
-                conf = model.calc_posterior(c)
-                model_likelihoods.append(conf[trial_choice])
-            return np.array(model_likelihoods)
-
-        def bias_errfunc(params,df):
-            rp = params['rp'].value
-            tsb = params['tsb'].value
-            #minimize
-            return abs(np.sum(np.log(bias_fitfunc(rp,tsb,df)))) #single value
-
-        #Fit bias model
-        #attempt to simplify:
-        fit_params = lmfit.Parameters()
-        fit_params.add('rp', value = .6, min = 0, max = 1)
-        if bias == True:
-            fit_params.add('tsb', value = 1, min = 0)
-        else:
-            fit_params.add('tsb', value = 1, vary = False)
-        first_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[0:df_midpoint]})
-        #attempt to simplify:
-        fit_params = lmfit.Parameters()
-        fit_params.add('rp', value = .6, min = 0, max = 1)
-        if bias == True:
-            fit_params.add('tsb', value = 1, min = 0)
-        else:
-            fit_params.add('tsb', value = 1, vary = False)
-        second_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[df_midpoint:]})
-        lmfit.report_fit(first_out)
-        lmfit.report_fit(second_out)
-        fit_dict[subj_name + '_first'] = first_out.values
-        fit_dict[subj_name + '_second'] = second_out.values
+        fit_dict[subj_name + '_first'] = fit_model(train_ts_dis,test_dfa.iloc[0:df_midpoint],mode = "biasmodel")
+        fit_dict[subj_name + '_second'] = fit_model(train_ts_dis,test_dfa.iloc[df_midpoint:],mode = "biasmodel")
     
-    
-
     #fit midline rule random probability:
     if subj_name + '_first' not in midline_fit_dict.keys():
-        #Fitting Functions
-        def midline_errfunc(params,df):
-            eps = params['eps'].value
-            context_sgn = np.array([max(i,0) for i in df.context_sign])
-            choice = df.subj_ts
-            #minimize
-            return -np.sum(np.log(abs(abs(choice - (1-context_sgn))-eps)))
-            
-        #Fit bias model
-        #attempt to simplify:
-        fit_params = lmfit.Parameters()
-        fit_params.add('eps', value = .1, min = 0, max = 1)
-        midline_first_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa.iloc[0:df_midpoint]})
-        fit_params = lmfit.Parameters()
-        fit_params.add('eps', value = .1, min = 0, max = 1)
-        midline_second_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa.iloc[df_midpoint:]})
-        lmfit.report_fit(midline_first_out)
-        midline_fit_dict[subj_name + '_first'] = midline_first_out.values
-        midline_fit_dict[subj_name + '_second'] = midline_second_out.values
+        midline_fit_dict[subj_name + '_first'] = fit_model(train_ts_dis,test_dfa.iloc[0:df_midpoint],mode = "midline")
+        midline_fit_dict[subj_name + '_second'] = fit_model(train_ts_dis,test_dfa.iloc[df_midpoint:],mode = "midline")
         
     #*********************************************
     # Set up observers

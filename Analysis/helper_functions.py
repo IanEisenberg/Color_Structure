@@ -7,8 +7,9 @@ Created on Fri Apr 24 16:22:54 2015
 
 import numpy as np
 import matplotlib.pyplot as plt
-import pylab
+import pylab, lmfit
 import random as r
+from helper_classes import BiasPredModel
 
 def track_runs(iterable):
     """
@@ -74,7 +75,63 @@ def seqStats(l,p,reps):
     
     
     
+def fit_model(train_ts_dis, data, init_prior = [.5,.5], bias = True, mode = "biasmodel"):
+    """
+    Function to fit parameters to the bias model (recursive probability and
+    task set bias) or the midline model (probability of random action)
+    Mode must equal "biasmodel" or "midline". If mode == "biasmodel", bias
+    can either be set to True or False. If False, tsb will be fixed at 1, 
+    forcing the model to have no bias towards either task-set.
+    """
+    if mode == "biasmodel":
+        #Fitting Functions
+        def bias_fitfunc(rp, tsb, df):
+            init_prior = [.5,.5]
+            model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
+            model_likelihoods = []
+            for i in df.index:
+                c = df.context[i]
+                trial_choice = df.subj_ts[i]
+                conf = model.calc_posterior(c)
+                model_likelihoods.append(conf[trial_choice])
+            return np.array(model_likelihoods)
     
+        def bias_errfunc(params,df):
+            rp = params['rp']
+            tsb = params['tsb']
+            #minimize
+            return abs(np.sum(np.log(bias_fitfunc(rp,tsb,df)))) #single value
+            
+        #Fit bias model
+        #attempt to simplify:
+        fit_params = lmfit.Parameters()
+        fit_params.add('rp', value = .6, min = 0, max = 1)
+        if bias == True:
+            fit_params.add('tsb', value = 1, min = 0)
+        else:
+            fit_params.add('tsb', value = 1, vary = False, min = 0)
+        out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
+        lmfit.report_fit(out)
+        return out.values
+        
+    elif mode == "midline":
+         #Fitting Functions
+        def midline_errfunc(params,df):
+            eps = params['eps'].value
+            context_sgn = np.array([max(i,0) for i in df.context_sign])
+            choice = df.subj_ts
+            #minimize
+            return -np.sum(np.log(abs(abs(choice - (1-context_sgn))-eps)))
+            
+        #Fit bias model
+        #attempt to simplify:
+        fit_params = lmfit.Parameters()
+        fit_params.add('eps', value = .1, min = 0, max = 1)
+        midline_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
+        lmfit.report_fit(midline_out)
+        return midline_out.values
+
+
 #*********************************************
 # Plotting
 #*********************************************
