@@ -148,7 +148,6 @@ for train_file, test_file in zip(train_files,test_files):
     
     df_midpoint = round(len(test_dfa)/2)
     if subj_name  + '_first' not in fit_dict.keys():
-<<<<<<< HEAD
         #Fitting Function
         def bias_errfunc(params,df):
             rp = params['rp'].value
@@ -185,10 +184,7 @@ for train_file, test_file in zip(train_files,test_files):
         lmfit.report_fit(second_out)
         fit_dict[subj_name + '_first'] = first_out.values
         fit_dict[subj_name + '_second'] = second_out.values
-=======
-        fit_dict[subj_name + '_first'] = fit_model(train_ts_dis,test_dfa.iloc[0:df_midpoint],mode = "biasmodel")
-        fit_dict[subj_name + '_second'] = fit_model(train_ts_dis,test_dfa.iloc[df_midpoint:],mode = "biasmodel")
->>>>>>> 402bf4c5dad87e997ae9f9f61d86765d08dd2650
+
     
     #fit midline rule random probability:
     if subj_name + '_first' not in midline_fit_dict.keys():

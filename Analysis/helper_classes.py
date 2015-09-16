@@ -47,7 +47,6 @@ class BiasPredModel:
            
         trans_probs = np.array([[rp, 1-rp], [1-rp, rp]])    
         
-<<<<<<< HEAD
         n = len(prior)
         likelihood = np.array([dis.pdf(data) for dis in ld])
         numer = np.array([likelihood[i] * prior[i] for i in range(n)])
@@ -97,8 +96,7 @@ class EstimatePredModel:
                                    
         trans_probs = np.array([[rp, 1-rp], [1-rp, rp]])    
                      
-=======
->>>>>>> 402bf4c5dad87e997ae9f9f61d86765d08dd2650
+
         n = len(prior)
         likelihood = np.array([dis.pdf(data) for dis in ld])
         numer = np.array([likelihood[i] * prior[i] for i in range(n)])
@@ -121,7 +119,6 @@ class EstimatePredModel:
         else:
             return np.argmax(self.posterior)
 
-<<<<<<< HEAD
 class SwitchModel:
     """
     Prediction model that takes in data, and uses a prior over hypotheses
@@ -146,8 +143,7 @@ class SwitchModel:
        
 
             
-=======
->>>>>>> 402bf4c5dad87e997ae9f9f61d86765d08dd2650
+
 class DataGenerator:
     """
     creates generator for taskset data based on task-set distributions and
