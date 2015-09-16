@@ -167,12 +167,6 @@ class probContextTask:
                     start=True
         self.clearWindow()
         return key_response,core.getTime()
-
-    def waitSeconds(self,duration):
-        """ wait for some amount of time (in seconds)
-        """
-        
-        core.wait(duration)
         
     def closeWindow(self):
         """ close the main window
