@@ -146,7 +146,6 @@ for train_file, test_file in zip(train_files,test_files):
     #*********************************************
     
     if subj_name + '_fullRun' not in fit_dict.keys():
-<<<<<<< HEAD
         #Fitting Functions
         def bias_errfunc(params,df):
             rp = params['rp']
@@ -162,15 +161,24 @@ for train_file, test_file in zip(train_files,test_files):
                 model_likelihoods.append(conf[trial_choice])
             #minimize
             return abs(np.sum(np.log(np.array(model_likelihoods)))) #single value
+        
+        #Fit bias model
+        #attempt to simplify:
+        fit_params = lmfit.Parameters()
+        fit_params.add('rp', value = .6, min = 0, max = 1)
+        if bias == True:
+            fit_params.add('tsb', value = 1, min = 0)
+        else:
+            fit_params.add('tsb', value = 1, vary = False)
+        bias_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[0:df_midpoint]})
+        lmfit.report_fit(bias_out)
+        fit_dict[subj_name + 'fullRun'] = bias_out.values
 
         
-=======
-        fit_dict[subj_name + '_fullRun'] = fit_model(train_ts_dis,test_dfa, bias, mode = "biasmodel")
->>>>>>> 402bf4c5dad87e997ae9f9f61d86765d08dd2650
+
 
     #fit midline rule random probability:
     if subj_name + '_fullRun' not in midline_fit_dict.keys():
-<<<<<<< HEAD
         #Fitting Functions
         def midline_errfunc(params,df):
             eps = params['eps'].value
@@ -214,9 +222,7 @@ for train_file, test_file in zip(train_files,test_files):
         switch_out = lmfit.minimize(switch_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa})
         lmfit.report_fit(switch_out)
         switch_fit_dict[subj_name + '_fullRun'] = switch_out.values
-=======
-       midlinefit_dict[subj_name + '_fullRun'] = fit_model(train_ts_dis,test_dfa,mode = "midline")
->>>>>>> 402bf4c5dad87e997ae9f9f61d86765d08dd2650
+
     
     #*********************************************
     # Set up observers

@@ -188,8 +188,23 @@ for train_file, test_file in zip(train_files,test_files):
     
     #fit midline rule random probability:
     if subj_name + '_first' not in midline_fit_dict.keys():
-        midline_fit_dict[subj_name + '_first'] = fit_model(train_ts_dis,test_dfa.iloc[0:df_midpoint],mode = "midline")
-        midline_fit_dict[subj_name + '_second'] = fit_model(train_ts_dis,test_dfa.iloc[df_midpoint:],mode = "midline")
+        def midline_errfunc(params,df):
+            eps = params['eps'].value
+            context_sgn = np.array([max(i,0) for i in df.context_sign])
+            choice = df.subj_ts
+            #minimize
+            return -np.sum(np.log(abs(abs(choice - (1-context_sgn))-eps)))
+            
+
+        fit_params = lmfit.Parameters()
+        fit_params.add('eps', value = .1, min = 0, max = 1)
+        midline_first_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa.iloc[0:df_midpoint]})
+        fit_params = lmfit.Parameters()
+        fit_params.add('eps', value = .1, min = 0, max = 1)
+        midline_second_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa.iloc[df_midpoint:]})
+        
+        midline_fit_dict[subj_name + '_first'] = mid_first_out.values
+        midline_fit_dict[subj_name + '_second'] = mid_second_out.values
         
     if subj_name + '_first' not in switch_fit_dict.keys():
         #Fitting Functions
