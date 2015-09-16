@@ -4,7 +4,7 @@ from scipy.stats import norm
 import pandas as pd
 import matplotlib.pyplot as plt
 from Load_Data import load_data
-from helper_classes import PredModel, BiasPredModel, EstimatePredModel
+from helper_classes import BiasPredModel, SwitchModel
 from helper_functions import *
 import statsmodels.api as sm
 import pickle
@@ -27,6 +27,9 @@ gtaskinfo = []
 
 bias_fit_dict = pickle.load(open('Analysis_Output/bias_parameter_fits.p','rb'))
 nobias_fit_dict = pickle.load(open('Analysis_Output/nobias_parameter_fits.p','rb'))
+midline_fit_dict = pickle.load(open('Analysis_Output/midline_parameter_fits.p','rb'))
+switch_fit_dict = pickle.load(open('Analysis_Output/switch_parameter_fits.p','rb'))
+
 
 train_files = glob.glob('../Data/*Context_20*.p') 
 test_files = glob.glob('../Data/*Context_test*.p') 

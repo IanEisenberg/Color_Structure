@@ -9,7 +9,7 @@ from scipy.stats import norm
 import pandas as pd
 import matplotlib.pyplot as plt
 from Load_Data import load_data
-from helper_classes import BiasPredModel
+from helper_classes import BiasPredModel, SwitchModel
 from helper_functions import *
 import statsmodels.api as sm
 import pickle, glob, re, lmfit, os
@@ -55,6 +55,10 @@ try:
     midline_fit_dict = pickle.load(open('Analysis_Output/midline_parameter_fits.p','rb'))
 except:
     midline_fit_dict = {}
+try:
+    switch_fit_dict = pickle.load(open('Analysis_Output/switch_parameter_fits.p','rb'))
+except:
+    switch_fit_dict = {}
     
 group_behavior = {}
 gtrain_df = pd.DataFrame()
@@ -142,11 +146,77 @@ for train_file, test_file in zip(train_files,test_files):
     #*********************************************
     
     if subj_name + '_fullRun' not in fit_dict.keys():
+<<<<<<< HEAD
+        #Fitting Functions
+        def bias_errfunc(params,df):
+            rp = params['rp']
+            tsb = params['tsb']
+            
+            init_prior = [.5,.5]
+            model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
+            model_likelihoods = []
+            for i in df.index:
+                c = df.context[i]
+                trial_choice = df.subj_ts[i]
+                conf = model.calc_posterior(c)
+                model_likelihoods.append(conf[trial_choice])
+            #minimize
+            return abs(np.sum(np.log(np.array(model_likelihoods)))) #single value
+
+        
+=======
         fit_dict[subj_name + '_fullRun'] = fit_model(train_ts_dis,test_dfa, bias, mode = "biasmodel")
+>>>>>>> 402bf4c5dad87e997ae9f9f61d86765d08dd2650
 
     #fit midline rule random probability:
     if subj_name + '_fullRun' not in midline_fit_dict.keys():
+<<<<<<< HEAD
+        #Fitting Functions
+        def midline_errfunc(params,df):
+            eps = params['eps'].value
+            context_sgn = np.array([max(i,0) for i in df.context_sign])
+            choice = df.subj_ts
+            #minimize
+            return -np.sum(np.log(abs(abs(choice - (1-context_sgn))-eps)))
+            
+        #Fit bias model
+        #attempt to simplify:
+        fit_params = lmfit.Parameters()
+        fit_params.add('eps', value = .1, min = 0, max = 1)
+        midline_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa})
+        lmfit.report_fit(midline_out)
+        midline_fit_dict[subj_name + '_fullRun'] = midline_out.values
+        
+    if subj_name + '_fullRun' not in switch_fit_dict.keys():
+        #Fitting Functions
+        def switch_errfunc(params,df):
+            params = params.valuesdict()
+            rp1 = params['rp1']
+            rp2 = params['rp2']
+            
+            init_prior = [.5,.5]
+            model = SwitchModel(rp = [rp1, rp2])
+            model_likelihoods = []
+            model_likelihoods.append(.5)
+            for i in df.index[1:]:
+                last_choice = df.subj_ts[i-1]
+                trial_choice = df.subj_ts[i]
+                conf = model.calc_TS_prob(last_choice)
+                model_likelihoods.append(conf[trial_choice])
+                
+            #minimize
+            return abs(np.sum(np.log(model_likelihoods))) #single value
+            
+        #Fit switch model
+        fit_params = lmfit.Parameters()
+        fit_params.add('rp1', value = .5, min = 0, max = 1)
+        fit_params.add('rp2', value = .5, min = 0, max = 1)
+        switch_out = lmfit.minimize(switch_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa})
+        lmfit.report_fit(switch_out)
+        switch_fit_dict[subj_name + '_fullRun'] = switch_out.values
+=======
        midlinefit_dict[subj_name + '_fullRun'] = fit_model(train_ts_dis,test_dfa,mode = "midline")
+>>>>>>> 402bf4c5dad87e997ae9f9f61d86765d08dd2650
     
     #*********************************************
     # Set up observers
@@ -269,6 +339,7 @@ if save == True:
     else:
         pickle.dump(fit_dict,open('Analysis_Output/nobias_parameter_fits.p','wb'))
     pickle.dump(midline_fit_dict,open('Analysis_Output/midline_parameter_fits.p','wb'))
+    pickle.dump(switch_fit_dict,open('Analysis_Output/switch_parameter_fits.p','wb'))
     gtest_learn_df.to_csv('Analysis_Output/gtest_learn_df.csv')
     
 #*********************************************
@@ -322,24 +393,22 @@ if plot == True:
     pylab.legend(loc='best',prop={'size':20})
     for subj in ids:
         subj_df = plot_df.query('id == "%s"' %subj)
-        if subj_df.correct.mean() < .6:
-            plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'r', alpha = .1)
-        else:
-            plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'k', alpha = .1)
+        plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'k', alpha = .1)
     
 
     #Plot task-set count by context value
+    range_start = 20
     p2 = plt.figure(figsize = figdims)
     plt.hold(True) 
     plt.xticks(list(range(12)),contexts)
     plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
     plt.ylabel('STS choice %', size = fontsize)
-    for subj in plot_ids[0:5]:
+    for subj in plot_ids[range_start:range_start+10]:
         subj_df = plot_df.query('id == "%s"' %subj)
         plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2,  alpha = 1, label = subj_df.id[0])
     plt.gca().set_color_cycle(None)
-    for subj in plot_ids[0:5]:
+    for subj in plot_ids[range_start:range_start+10]:
         subj_df = plot_df.query('id == "%s"' %subj)
         plt.plot(subj_df.groupby('context').fit_observer_choices.mean(), lw = 2, ls = '--', alpha = 1)
     pylab.legend(loc='best',prop={'size':20})

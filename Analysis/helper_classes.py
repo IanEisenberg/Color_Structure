@@ -41,12 +41,64 @@ class BiasPredModel:
         ts_bias = self.ts_bias
         prior[1]*=ts_bias
         prior = prior/sum(prior)
+        
+        if noise:
+            data= min(max(data + noise*norm().rvs(),-1),1)
+           
+        trans_probs = np.array([[rp, 1-rp], [1-rp, rp]])    
+        
+<<<<<<< HEAD
+        n = len(prior)
+        likelihood = np.array([dis.pdf(data) for dis in ld])
+        numer = np.array([likelihood[i] * prior[i] for i in range(n)])
+        dinom = np.sum(numer,0)
+        posterior = numer/dinom
+        
+        self.prior = np.dot(trans_probs,posterior)
+        self.posterior = posterior
+        return posterior
+       
+    def choose(self, mode = 'softmax', eps = .1, inv_temp = 1):
+        if mode == "e-greedy":
+            if r.random() < eps:
+                return r.randint(0,2)
+            else:
+                return np.argmax(self.posterior)
+        elif mode == "softmax":
+            probs = softmax(self.posterior, inv_temp)
+            return np.random.choice(range(len(probs)), p = probs)
+        else:
+            return np.argmax(self.posterior)
+
+class EstimatePredModel:
+    """
+    Prediction model that takes in data, and uses a prior over hypotheses
+    and the relevant to calculate posterior hypothesis estimates.
+    """
+    def __init__(self, prior, mean = 0, std = .37, recursive_prob = .9):
+        self.prior = np.array(prior)
+        self.likelihood_dist = [norm(mean, std),norm(-mean,std)]
+        self.recursive_prob = recursive_prob
+        self.posterior = prior
+        
+    def calc_posterior(self, data, noise = 0):
+        """
+        Calculate the posterior probability of different distribution hypotheses
+        given the data. You can set a noise value which will set add gaussian
+        noise to the observation. The value specified will be a scaling parameter. 
+        It should always be less than one. 
+        """
+        ld = self.likelihood_dist
+        rp = self.recursive_prob
+        prior = self.prior
 
         if noise:
             data= min(max(data + noise*norm().rvs(),-1),1)
                                    
         trans_probs = np.array([[rp, 1-rp], [1-rp, rp]])    
-        
+                     
+=======
+>>>>>>> 402bf4c5dad87e997ae9f9f61d86765d08dd2650
         n = len(prior)
         likelihood = np.array([dis.pdf(data) for dis in ld])
         numer = np.array([likelihood[i] * prior[i] for i in range(n)])
@@ -69,6 +121,33 @@ class BiasPredModel:
         else:
             return np.argmax(self.posterior)
 
+<<<<<<< HEAD
+class SwitchModel:
+    """
+    Prediction model that takes in data, and uses a prior over hypotheses
+    and the relevant to calculate posterior hypothesis estimates.
+    """
+    def __init__(self, rp = [.9,.9]):
+        self.trans_probs = np.array([[rp[0], 1-rp[0]], [1-rp[1], rp[1]]])
+        
+    def calc_TS_prob(self, last_choice):
+        """
+        Calculate the probability of each task set given the previous choice.
+        This model assumes that task-sets switch by some probability and no
+        other information is available to assess task-set identity. It also 
+        assumes that the last choice indicates complete confidence in the previous
+        TS
+        """
+        if last_choice == -1:
+            return [.5,.5]
+        else:
+            return self.trans_probs[last_choice,:]
+    
+       
+
+            
+=======
+>>>>>>> 402bf4c5dad87e997ae9f9f61d86765d08dd2650
 class DataGenerator:
     """
     creates generator for taskset data based on task-set distributions and

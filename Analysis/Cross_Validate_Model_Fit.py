@@ -34,7 +34,7 @@ plt.rc('axes', **axes)
 plot = False
 save = True
 #choose whether the model has a variable bias term
-bias = True
+bias = False
 
 #*********************************************
 # Load Data
@@ -54,6 +54,10 @@ try:
     midline_fit_dict = pickle.load(open('Analysis_Output/midline_parameter_fits.p','rb'))
 except:
     midline_fit_dict = {}
+try:
+    switch_fit_dict = pickle.load(open('Analysis_Output/switch_parameter_fits.p','rb'))
+except:
+    switch_fit_dict = {}
     
 group_behavior = {}
 gtrain_df = pd.DataFrame()
@@ -66,7 +70,7 @@ test_files = glob.glob(home + '/MEGA/Prob_Context_Task/RawData/*Context_test*yam
 count = 0
 for train_file, test_file in zip(train_files,test_files):
     count += 1
-    if count != 0:
+    if count != 1:
         pass #continue
     train_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', train_file).group(1)
     test_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', test_file).group(1)
@@ -144,14 +148,86 @@ for train_file, test_file in zip(train_files,test_files):
     
     df_midpoint = round(len(test_dfa)/2)
     if subj_name  + '_first' not in fit_dict.keys():
+<<<<<<< HEAD
+        #Fitting Function
+        def bias_errfunc(params,df):
+            rp = params['rp'].value
+            tsb = params['tsb'].value
+            init_prior = [.5,.5]
+            model = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = tsb, recursive_prob = rp)
+            model_likelihoods = []
+            for i in df.index:
+                c = df.context[i]
+                trial_choice = df.subj_ts[i]
+                conf = model.calc_posterior(c)
+                model_likelihoods.append(conf[trial_choice])
+            #minimize
+            return abs(np.sum(np.log(np.array(model_likelihoods)))) #single value
+
+        #Fit bias model
+        #attempt to simplify:
+        fit_params = lmfit.Parameters()
+        fit_params.add('rp', value = .6, min = 0, max = 1)
+        if bias == True:
+            fit_params.add('tsb', value = 1, min = 0)
+        else:
+            fit_params.add('tsb', value = 1, vary = False)
+        first_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[0:df_midpoint]})
+        #attempt to simplify:
+        fit_params = lmfit.Parameters()
+        fit_params.add('rp', value = .6, min = 0, max = 1)
+        if bias == True:
+            fit_params.add('tsb', value = 1, min = 0)
+        else:
+            fit_params.add('tsb', value = 1, vary = False)
+        second_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[df_midpoint:]})
+        lmfit.report_fit(first_out)
+        lmfit.report_fit(second_out)
+        fit_dict[subj_name + '_first'] = first_out.values
+        fit_dict[subj_name + '_second'] = second_out.values
+=======
         fit_dict[subj_name + '_first'] = fit_model(train_ts_dis,test_dfa.iloc[0:df_midpoint],mode = "biasmodel")
         fit_dict[subj_name + '_second'] = fit_model(train_ts_dis,test_dfa.iloc[df_midpoint:],mode = "biasmodel")
+>>>>>>> 402bf4c5dad87e997ae9f9f61d86765d08dd2650
     
     #fit midline rule random probability:
     if subj_name + '_first' not in midline_fit_dict.keys():
         midline_fit_dict[subj_name + '_first'] = fit_model(train_ts_dis,test_dfa.iloc[0:df_midpoint],mode = "midline")
         midline_fit_dict[subj_name + '_second'] = fit_model(train_ts_dis,test_dfa.iloc[df_midpoint:],mode = "midline")
         
+    if subj_name + '_first' not in switch_fit_dict.keys():
+        #Fitting Functions
+        def switch_errfunc(params,df):
+            params = params.valuesdict()
+            rp1 = params['rp1']
+            rp2 = params['rp2']
+            
+            init_prior = [.5,.5]
+            model = SwitchModel(rp = [rp1, rp2])
+            model_likelihoods = []
+            model_likelihoods.append(.5)
+            for i in df.index[1:]:
+                last_choice = df.subj_ts[i-1]
+                trial_choice = df.subj_ts[i]
+                conf = model.calc_TS_prob(last_choice)
+                model_likelihoods.append(conf[trial_choice])
+                
+            #minimize
+            return abs(np.sum(np.log(model_likelihoods))) #single value
+            
+        #Fit switch model
+        fit_params = lmfit.Parameters()
+        fit_params.add('rp1', value = .5, min = 0, max = 1)
+        fit_params.add('rp2', value = .5, min = 0, max = 1)
+        switch_first_out = lmfit.minimize(switch_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa.iloc[0:df_midpoint]})
+        lmfit.report_fit(switch_first_out)
+        fit_params = lmfit.Parameters()
+        fit_params.add('rp1', value = .5, min = 0, max = 1)
+        fit_params.add('rp2', value = .5, min = 0, max = 1)        
+        switch_second_out = lmfit.minimize(switch_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa.iloc[df_midpoint:]})
+        lmfit.report_fit(switch_second_out)
+        switch_fit_dict[subj_name + '_first'] = switch_first_out.values
+        switch_fit_dict[subj_name + '_second'] = switch_second_out.values
     #*********************************************
     # Set up observers
     #*********************************************
@@ -164,14 +240,15 @@ for train_file, test_file in zip(train_files,test_files):
     
     #Fit observer for test        
     observer_choices = []
-    first_posteriors = []
-    second_posteriors = []
+    posteriors = []
     for i,trial in test_dfa.iterrows():
         c = trial.context
-        first_posteriors.append(first_fit_observer.calc_posterior(c)[1])
-        second_posteriors.append(second_fit_observer.calc_posterior(c)[1])
-    posteriors = np.array(second_posteriors[0:df_midpoint] + first_posteriors[df_midpoint:])
-
+        if i<df_midpoint:
+            posteriors.append(second_fit_observer.calc_posterior(c)[1])
+        else:
+            posteriors.append(first_fit_observer.calc_posterior(c)[1])
+    posteriors = np.array(posteriors)
+    
     test_dfa['fit_observer_posterior'] = posteriors
     test_dfa['fit_observer_choices'] = (posteriors>.5).astype(int)
     test_dfa['fit_observer_switch'] = (test_dfa.fit_observer_posterior>.5).diff()
@@ -184,13 +261,14 @@ for train_file, test_file in zip(train_files,test_files):
     
     #Fit observer for test        
     observer_choices = []
-    first_posteriors = []
-    second_posteriors = []
+    posteriors = []
     for i,trial in test_dfa.iterrows():
         c = max(0,np.sign(trial.context))
-        first_posteriors.append(abs(c - first_eps))
-        second_posteriors.append(abs(c - second_eps))
-    posteriors = np.array(second_posteriors[0:df_midpoint] + first_posteriors[df_midpoint:])
+        if i<df_midpoint:
+            posteriors.append(abs(c - second_eps))
+        else:
+            posteriors.append(abs(c - first_eps))
+    posteriors = np.array(posteriors)
 
     test_dfa['midline_observer_posterior'] = posteriors
     test_dfa['midline_observer_choices'] = (posteriors>.5).astype(int)
@@ -246,6 +324,7 @@ if save == True:
     else:
         pickle.dump(fit_dict,open('Analysis_Output/nobias_parameter_fits.p','wb'))
     pickle.dump(midline_fit_dict,open('Analysis_Output/midline_parameter_fits.p','wb'))
+    pickle.dump(switch_fit_dict,open('Analysis_Output/switch_parameter_fits.p','wb'))
     gtest_learn_df.to_csv('Analysis_Output/gtest_learn_df.csv')
     
     
