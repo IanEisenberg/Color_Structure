@@ -34,23 +34,20 @@ plt.rc('axes', **axes)
 
 plot = False
 save = True
-#choose whether the model has a variable bias term
-bias = False
+
 
 #*********************************************
 # Load Data
 #*********************************************
 home = os.path.expanduser("~")
-if bias == True:
-    try:
-        fit_dict = pickle.load(open('Analysis_Output/bias_parameter_fits.p','rb'))
-    except:
-        fit_dict = {}
-else:
-    try:
-        fit_dict = pickle.load(open('Analysis_Output/nobias_parameter_fits.p','rb'))
-    except:
-        fit_dict = {}
+try:
+    fit_dict = pickle.load(open('Analysis_Output/bias_parameter_fits.p','rb'))
+except:
+    fit_dict = {}
+try:
+    nobias_fit_dict = pickle.load(open('Analysis_Output/nobias_parameter_fits.p','rb'))
+except:
+    nobias_fit_dict = {}
 try:
     midline_fit_dict = pickle.load(open('Analysis_Output/midline_parameter_fits.p','rb'))
 except:
@@ -166,15 +163,36 @@ for train_file, test_file in zip(train_files,test_files):
         #attempt to simplify:
         fit_params = lmfit.Parameters()
         fit_params.add('rp', value = .6, min = 0, max = 1)
-        if bias == True:
-            fit_params.add('tsb', value = 1, min = 0)
-        else:
-            fit_params.add('tsb', value = 1, vary = False)
+        fit_params.add('tsb', value = 1, min = 0)
         bias_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[0:df_midpoint]})
         lmfit.report_fit(bias_out)
         fit_dict[subj_name + 'fullRun'] = bias_out.values
 
+    if subj_name + '_fullRun' not in nobias_fit_dict.keys():
+        #Fitting Functions
+        def bias_errfunc(params,df):
+            rp = params['rp']
+            tsb = params['tsb']
+            
+            init_prior = [.5,.5]
+            model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
+            model_likelihoods = []
+            for i in df.index:
+                c = df.context[i]
+                trial_choice = df.subj_ts[i]
+                conf = model.calc_posterior(c)
+                model_likelihoods.append(conf[trial_choice])
+            #minimize
+            return abs(np.sum(np.log(np.array(model_likelihoods)))) #single value
         
+        #Fit bias model
+        #attempt to simplify:
+        fit_params = lmfit.Parameters()
+        fit_params.add('rp', value = .6, min = 0, max = 1)
+        fit_params.add('tsb', value = 1, vary = False)
+        bias_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[0:df_midpoint]})
+        lmfit.report_fit(bias_out)
+        nobias_fit_dict[subj_name + 'fullRun'] = bias_out.values
 
 
     #fit midline rule random probability:
@@ -282,6 +300,23 @@ for train_file, test_file in zip(train_files,test_files):
     test_dfa['fit_observer_switch'] = (test_dfa.fit_observer_posterior>.5).diff()
     test_dfa['conform_fit_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
     test_dfa['fit_certainty'] = (abs(test_dfa.fit_observer_posterior-.5))/.5
+    
+    #NoBias observer for test    
+    params = fit_dict[subj_name + '_fullRun']
+    fit_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = params['tsb'], recursive_prob = params['rp'])
+    #Fit observer for test        
+    observer_choices = []
+    posteriors = []
+    for i,trial in test_dfa.iterrows():
+        c = trial.context
+        posteriors.append(fit_observer.calc_posterior(c)[1])
+    posteriors = np.array(posteriors)
+
+    test_dfa['nobias_fit_observer_posterior'] = posteriors
+    test_dfa['nobias_fit_observer_choices'] = (posteriors>.5).astype(int)
+    test_dfa['nobias_fit_observer_switch'] = (test_dfa.nobias_fit_observer_posterior>.5).diff()
+    test_dfa['conform_nobias_fit_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
+    test_dfa['nobias_fit_certainty'] = (abs(test_dfa.nobias_fit_observer_posterior-.5))/.5
     
     #Optimal observer for test        
     optimal_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = 1, recursive_prob = train_recursive_p)
