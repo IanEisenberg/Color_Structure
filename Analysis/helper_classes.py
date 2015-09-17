@@ -17,12 +17,12 @@ class BiasPredModel:
     Prediction model that takes in data, and uses a prior over hypotheses
     and the relevant to calculate posterior hypothesis estimates.
     """
-    def __init__(self, likelihood_dist, prior, r1 = .9, r2 = .9,
-                 data_noise = 0, ):
+    def __init__(self, likelihood_dist, prior, recursive_prob = .9,
+                 data_noise = 0, ts_bias = 1):
         self.prior = np.array(prior)
         self.likelihood_dist = likelihood_dist
-        self.r1 = r1
-        self.r2 = r2
+        self.recursive_prob = recursive_prob
+        self.ts_bias = ts_bias
         self.posterior = prior
         
     def calc_posterior(self, data, noise = 0):
@@ -36,15 +36,16 @@ class BiasPredModel:
         It should always be less than one. 
         """
         ld = self.likelihood_dist
+        rp = self.recursive_prob
         prior = self.prior
+        ts_bias = self.ts_bias
+        prior[1]*=ts_bias
         prior = prior/sum(prior)
         
         if noise:
             data= min(max(data + noise*norm().rvs(),-1),1)
            
-        #columns are transitions from (so first column are transitions from T1), rows are transitions to
-        trans_probs = np.tranpose(np.array([[self.r1, 1-self.r1], [1-self.r2, self.r2]])  )  
-        
+        trans_probs = np.array([[rp, 1-rp], [1-rp, rp]])            
         n = len(prior)
         likelihood = np.array([dis.pdf(data) for dis in ld])
         numer = np.array([likelihood[i] * prior[i] for i in range(n)])
