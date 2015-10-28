@@ -484,20 +484,32 @@ plot_ids = learn_ids
 if plot == True:
     
     #Plot task-set count by context value
+    sns.set_style("darkgrid", {"axes.linewidth": "1.25", "axes.edgecolor": ".15"})
     p1 = plt.figure(figsize = figdims)
     plt.hold(True) 
-    plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 3, color = 'r', label = 'subject')
-    plt.plot(plot_df.groupby('context').fit_observer_choices.mean(), lw = 3, color = 'c', label = 'bias observer')
-    plt.plot(plot_df.groupby('context').opt_observer_choices.mean(), lw = 3, color = 'c', ls = '--', label = 'optimal observer')
-    plt.plot(plot_df.groupby('context').ignore_observer_choices.mean(), lw = 3, color = 'c', ls = ':', label = 'midline rule')
+    plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 4, marker = 'o', markersize = 10, color = 'm', label = 'subject')
+    plt.plot(plot_df.groupby('context').bias2_observer_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', label = 'bias-2 observer')
+    plt.plot(plot_df.groupby('context').bias2_observer_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', label = 'bias-1 observer')
     plt.xticks(list(range(12)),contexts)
-    plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
-    plt.ylabel('STS choice %', size = fontsize)
+    plt.ylabel('TS2 choice %', size = fontsize)
     pylab.legend(loc='best',prop={'size':20})
     for subj in ids:
         subj_df = plot_df.query('id == "%s"' %subj)
-        plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'k', alpha = .1)
+        if subj_df.correct.mean() < .6:
+            plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'r', alpha = .1)
+        else:
+            plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'k', alpha = .1)
+    a = plt.axes([.62, .15, .3, .3])
+    plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 4, marker = 'o', markersize = 10, color = 'm', label = 'subject')
+    plt.plot(plot_df.groupby('context').eoptimal_observer_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', ls = '--', label = r'$\epsilon$-optimal observer')
+    plt.plot(plot_df.groupby('context').midline_observer_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', ls = ':', label = 'midline rule')
+    plt.tick_params(
+        axis = 'both',
+        which = 'both',
+        labelleft = 'off',
+        labelbottom = 'off')
+    pylab.legend(loc='upper left',prop={'size':14})
     
 
     #Plot task-set count by context value
