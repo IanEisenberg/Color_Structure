@@ -41,13 +41,21 @@ save = True
 #*********************************************
 home = os.path.expanduser("~")
 try:
-    fit_dict = pickle.load(open('Analysis_Output/bias_parameter_fits.p','rb'))
+    bias2_fit_dict = pickle.load(open('Analysis_Output/bias2_parameter_fits.p','rb'))
 except:
-    fit_dict = {}
+    bias2_fit_dict = {}
 try:
-    nobias_fit_dict = pickle.load(open('Analysis_Output/nobias_parameter_fits.p','rb'))
+    bias1_fit_dict = pickle.load(open('Analysis_Output/bias1_parameter_fits.p','rb'))
 except:
-    nobias_fit_dict = {}
+    bias1_fit_dict = {}
+try:
+    eoptimal_fit_dict = pickle.load(open('Analysis_Output/eoptimal_parameter_fits.p','rb'))
+except:
+    eoptimal_fit_dict = {}
+try:
+    ignore_fit_dict = pickle.load(open('Analysis_Output/ignore_parameter_fits.p','rb'))
+except:
+    ignore_fit_dict = {}
 try:
     midline_fit_dict = pickle.load(open('Analysis_Output/midline_parameter_fits.p','rb'))
 except:
@@ -62,8 +70,8 @@ gtrain_df = pd.DataFrame()
 gtest_df = pd.DataFrame()
 gtaskinfo = []
 
-train_files = glob.glob(home + '/MEGA/Prob_Context_Task/RawData/*Context_20*yaml')
-test_files = glob.glob(home + '/MEGA/Prob_Context_Task/RawData/*Context_test*yaml')
+train_files = glob.glob(home + '/Mega/IanE_RawData/Prob_Context_Task/RawData/*Context_20*yaml')
+test_files = glob.glob(home + '/Mega/IanE_RawData/Prob_Context_Task/RawData/*Context_test*yaml')
     
 count = 0
 for train_file, test_file in zip(train_files,test_files):
@@ -142,14 +150,42 @@ for train_file, test_file in zip(train_files,test_files):
     # Model fitting
     #*********************************************
     
-    if subj_name + '_fullRun' not in fit_dict.keys():
+    if subj_name + '_fullRun' not in bias2_fit_dict.keys():
         #Fitting Functions
-        def bias_errfunc(params,df):
-            rp = params['rp']
-            tsb = params['tsb']
+        def errfunc(params,df):
+            r1 = params['r1']
+            r2 = params['r2']
+            eps = params['eps']
             
             init_prior = [.5,.5]
-            model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
+            model = BiasPredModel(train_ts_dis, init_prior, r1 = r1, r2 = r2, eps = eps)
+            model_likelihoods = []
+            for i in df.index:
+                c = df.context[i]
+                trial_choice = df.subj_ts[i]
+                conf = model.calc_posterior(c)
+                model_likelihoods.append(conf[trial_choice])
+            #minimize
+            return abs(np.sum(np.log(np.array(model_likelihoods)))) #single value
+        
+        #Fit bias model
+        fit_params = lmfit.Parameters()
+        fit_params.add('r1', value = .5, min = 0, max = 1)
+        fit_params.add('r2', value = .5, min = 0, max = 1)
+        fit_params.add('eps', value = .1, min = 0, max = 1)
+        bias_out = lmfit.minimize(errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa})
+        lmfit.report_fit(bias_out)
+        bias2_fit_dict[subj_name + '_fullRun'] = bias_out.params.valuesdict()
+
+    if subj_name + '_fullRun' not in  bias1_fit_dict.keys():
+        #Fitting Functions
+        def errfunc(params,df):
+            r1 = params['rp']
+            r2 = params['rp']
+            eps = params['eps']
+            
+            init_prior = [.5,.5]
+            model = BiasPredModel(train_ts_dis, init_prior, r1 = r1, r2 = r2, eps = eps)
             model_likelihoods = []
             for i in df.index:
                 c = df.context[i]
@@ -162,20 +198,21 @@ for train_file, test_file in zip(train_files,test_files):
         #Fit bias model
         #attempt to simplify:
         fit_params = lmfit.Parameters()
-        fit_params.add('rp', value = .6, min = 0, max = 1)
-        fit_params.add('tsb', value = 1, min = 0)
-        bias_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[0:df_midpoint]})
+        fit_params.add('rp', value = .5, min = 0, max = 1)
+        fit_params.add('eps', value = .1, min = 0, max = 1)
+        bias_out = lmfit.minimize(errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa})
         lmfit.report_fit(bias_out)
-        fit_dict[subj_name + 'fullRun'] = bias_out.values
-
-    if subj_name + '_fullRun' not in nobias_fit_dict.keys():
+        bias1_fit_dict[subj_name + '_fullRun'] = bias_out.params.valuesdict()
+    
+    if subj_name + '_fullRun' not in  eoptimal_fit_dict.keys():
         #Fitting Functions
-        def bias_errfunc(params,df):
-            rp = params['rp']
-            tsb = params['tsb']
+        def errfunc(params,df):
+            r1 = train_recursive_p
+            r2 = train_recursive_p
+            eps = params['eps']
             
             init_prior = [.5,.5]
-            model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
+            model = BiasPredModel(train_ts_dis, init_prior, r1 = r1, r2 = r2, eps = eps)
             model_likelihoods = []
             for i in df.index:
                 c = df.context[i]
@@ -188,12 +225,34 @@ for train_file, test_file in zip(train_files,test_files):
         #Fit bias model
         #attempt to simplify:
         fit_params = lmfit.Parameters()
-        fit_params.add('rp', value = .6, min = 0, max = 1)
-        fit_params.add('tsb', value = 1, vary = False)
-        bias_out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa.iloc[0:df_midpoint]})
+        fit_params.add('eps', value = .1, min = 0, max = 1)
+        bias_out = lmfit.minimize(errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa})
         lmfit.report_fit(bias_out)
-        nobias_fit_dict[subj_name + 'fullRun'] = bias_out.values
+        eoptimal_fit_dict[subj_name + '_fullRun'] = bias_out.params.valuesdict()
 
+    #fit ignore rule random probability:
+    if subj_name + '_fullRun' not in midline_fit_dict.keys():
+        #Fitting Functions
+        def errfunc(params,df):
+            eps = params['eps']   
+            init_prior = [.5,.5]
+            model = BiasPredModel(train_ts_dis, init_prior, r1 = .5, r2 = .5, eps = eps)
+            model_likelihoods = []
+            for i in df.index:
+                c = df.context[i]
+                trial_choice = df.subj_ts[i]
+                conf = model.calc_posterior(c)
+                model_likelihoods.append(conf[trial_choice])
+            #minimize
+            return abs(np.sum(np.log(np.array(model_likelihoods)))) #single value
+        
+        #Fit bias model
+        #attempt to simplify:
+        fit_params = lmfit.Parameters()
+        fit_params.add('eps', value = .1, min = 0, max = 1)
+        bias_out = lmfit.minimize(errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa})
+        lmfit.report_fit(bias_out)
+        ignore_fit_dict[subj_name + '_fullRun'] = bias_out.params.valuesdict()
 
     #fit midline rule random probability:
     if subj_name + '_fullRun' not in midline_fit_dict.keys():
@@ -269,7 +328,7 @@ for train_file, test_file in zip(train_files,test_files):
     train_dfa['conform_opt_observer'] = np.equal(train_dfa.subj_ts, observer_choices)
     
     #Optimal observer for train, without feedback     
-    no_fb_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = 1, recursive_prob = train_recursive_p)
+    no_fb_observer = BiasPredModel(train_ts_dis, [.5,.5], r1 = train_recursive_p, r2 = train_recursive_p, eps = 0)
     observer_choices = []
     posteriors = []
     for i,trial in train_dfa.iterrows():
@@ -284,9 +343,9 @@ for train_file, test_file in zip(train_files,test_files):
     
     #**************TEST*********************
     
-    #Bias observer for test    
-    params = fit_dict[subj_name + '_fullRun']
-    fit_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = params['tsb'], recursive_prob = params['rp'])
+    #Bias2 observer for test    
+    params = bias2_fit_dict[subj_name + '_fullRun']
+    fit_observer = BiasPredModel(train_ts_dis, [.5,.5], r1 = params['r1'], r2 = params['r2'], eps = params['eps'])
     #Fit observer for test        
     observer_choices = []
     posteriors = []
@@ -295,15 +354,15 @@ for train_file, test_file in zip(train_files,test_files):
         posteriors.append(fit_observer.calc_posterior(c)[1])
     posteriors = np.array(posteriors)
 
-    test_dfa['fit_observer_posterior'] = posteriors
-    test_dfa['fit_observer_choices'] = (posteriors>.5).astype(int)
-    test_dfa['fit_observer_switch'] = (test_dfa.fit_observer_posterior>.5).diff()
-    test_dfa['conform_fit_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
-    test_dfa['fit_certainty'] = (abs(test_dfa.fit_observer_posterior-.5))/.5
+    test_dfa['bias2_observer_posterior'] = posteriors
+    test_dfa['bias2_observer_choices'] = (posteriors>.5).astype(int)
+    test_dfa['bias2_observer_switch'] = (test_dfa.bias2_observer_posterior>.5).diff()
+    test_dfa['conform_bias2_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
+    test_dfa['bias2_certainty'] = (abs(test_dfa.bias2_observer_posterior-.5))/.5
     
-    #NoBias observer for test    
-    params = fit_dict[subj_name + '_fullRun']
-    fit_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = params['tsb'], recursive_prob = params['rp'])
+    #bias1 observer for test    
+    params = bias1_fit_dict[subj_name + '_fullRun']
+    fit_observer = BiasPredModel(train_ts_dis, [.5,.5], r1 = params['rp'], r2 = params['rp'], eps = params['eps'],)
     #Fit observer for test        
     observer_choices = []
     posteriors = []
@@ -312,30 +371,32 @@ for train_file, test_file in zip(train_files,test_files):
         posteriors.append(fit_observer.calc_posterior(c)[1])
     posteriors = np.array(posteriors)
 
-    test_dfa['nobias_fit_observer_posterior'] = posteriors
-    test_dfa['nobias_fit_observer_choices'] = (posteriors>.5).astype(int)
-    test_dfa['nobias_fit_observer_switch'] = (test_dfa.nobias_fit_observer_posterior>.5).diff()
-    test_dfa['conform_nobias_fit_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
-    test_dfa['nobias_fit_certainty'] = (abs(test_dfa.nobias_fit_observer_posterior-.5))/.5
+    test_dfa['bias1_observer_posterior'] = posteriors
+    test_dfa['bias1_observer_choices'] = (posteriors>.5).astype(int)
+    test_dfa['bias1_observer_switch'] = (test_dfa.bias1_observer_posterior>.5).diff()
+    test_dfa['conform_bias1_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
+    test_dfa['bias1_certainty'] = (abs(test_dfa.bias1_observer_posterior-.5))/.5
     
-    #Optimal observer for test        
-    optimal_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = 1, recursive_prob = train_recursive_p)
+    #eoptimal observer for test    
+    params = eoptimal_fit_dict[subj_name + '_fullRun']
+    fit_observer = BiasPredModel(train_ts_dis, [.5,.5], r1 = train_recursive_p, r2 = train_recursive_p, eps = params['eps'],)
+    #Fit observer for test        
     observer_choices = []
     posteriors = []
     for i,trial in test_dfa.iterrows():
         c = trial.context
-        posteriors.append(optimal_observer.calc_posterior(c)[1])
+        posteriors.append(fit_observer.calc_posterior(c)[1])
     posteriors = np.array(posteriors)
-    
-    test_dfa['opt_observer_posterior'] = posteriors
-    test_dfa['opt_observer_choices'] = (posteriors>.5).astype(int)
-    test_dfa['opt_observer_switch'] = (test_dfa.opt_observer_posterior>.5).diff()
-    test_dfa['conform_opt_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
-    test_dfa['opt_certainty'] = (abs(test_dfa.opt_observer_posterior-.5))/.5
 
+    test_dfa['eoptimal_observer_posterior'] = posteriors
+    test_dfa['eoptimal_observer_choices'] = (posteriors>.5).astype(int)
+    test_dfa['eoptimal_observer_switch'] = (test_dfa.eoptimal_observer_posterior>.5).diff()
+    test_dfa['conform_eoptimal_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
+    test_dfa['eoptimal_certainty'] = (abs(test_dfa.eoptimal_observer_posterior-.5))/.5
 
-    #Ignore observer for test        
-    ignore_observer = BiasPredModel(train_ts_dis, [.5,.5], ts_bias = 1, recursive_prob = .5)
+    #Ignore observer for test  
+    params = ignore_fit_dict[subj_name + '_fullRun']      
+    ignore_observer = BiasPredModel(train_ts_dis, [.5,.5],  r1 = .5, r2 = .5, eps = params['eps'])
     observer_choices = []
     posteriors = []
     for i,trial in test_dfa.iterrows():
@@ -375,10 +436,10 @@ gtest_learn_df = gtest_df[select_rows]
 learn_ids = select_ids.index
 
 if save == True:
-    if bias == True:
-        pickle.dump(fit_dict,open('Analysis_Output/bias_parameter_fits.p','wb'))
-    else:
-        pickle.dump(fit_dict,open('Analysis_Output/nobias_parameter_fits.p','wb'))
+    pickle.dump(bias2_fit_dict,open('Analysis_Output/bias2_parameter_fits.p','wb'))
+    pickle.dump(bias1_fit_dict,open('Analysis_Output/bias1_parameter_fits.p','wb'))
+    pickle.dump(eoptimal_fit_dict,open('Analysis_Output/eoptimal_parameter_fits.p','wb'))
+    pickle.dump(ignore_fit_dict,open('Analysis_Output/eoptimal_parameter_fits.p','wb'))
     pickle.dump(midline_fit_dict,open('Analysis_Output/midline_parameter_fits.p','wb'))
     pickle.dump(switch_fit_dict,open('Analysis_Output/switch_parameter_fits.p','wb'))
     gtest_learn_df.to_csv('Analysis_Output/gtest_learn_df.csv')
@@ -387,14 +448,16 @@ if save == True:
 # Switch Analysis
 #*********************************************
 #Count the number of times there was a switch to each TS for each context value
+#Count the number of times there was a switch to each TS for each context value
 switch_counts = odict()
-switch_counts['ignore_observer'] = gtest_learn_df.query('ignore_observer_switch == True').groupby(['ignore_observer_choices','context']).trial_count.count().unstack(level = 0)
+switch_counts['midline_observer'] = gtest_learn_df.query('midline_observer_switch == True').groupby(['midline_observer_choices','context']).trial_count.count().unstack(level = 0)
 switch_counts['subject'] = gtest_learn_df.query('subj_switch == True').groupby(['subj_ts','context']).trial_count.count().unstack(level = 0)
-switch_counts['opt_observer'] = gtest_learn_df.query('opt_observer_switch == True').groupby(['opt_observer_choices','context']).trial_count.count().unstack(level = 0)
-try:
-    switch_counts['fit_observer'] = gtest_learn_df.query('fit_observer_switch == True').groupby(['fit_observer_choices','context']).trial_count.count().unstack(level = 0)
-except:
-    print("No fit observer!")
+switch_counts['eoptimal_observer'] = gtest_learn_df.query('eoptimal_observer_switch == True').groupby(['eoptimal_observer_choices','context']).trial_count.count().unstack(level = 0)
+switch_counts['bias2_observer'] = gtest_learn_df.query('bias2_observer_switch == True').groupby(['bias2_observer_choices','context']).trial_count.count().unstack(level = 0)
+switch_counts['bias1_observer'] = gtest_learn_df.query('bias1_observer_switch == True').groupby(['bias1_observer_choices','context']).trial_count.count().unstack(level = 0)
+switch_counts['ignore_observer'] = gtest_learn_df.query('ignore_observer_switch == True').groupby(['ignore_observer_choices','context']).trial_count.count().unstack(level = 0)
+
+
 
 #normalize switch counts by the ignore rule. The ignore rule represents
 #the  number of switches someone would make if they switched task-sets

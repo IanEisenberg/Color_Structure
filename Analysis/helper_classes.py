@@ -15,15 +15,18 @@ def softmax(probs, inv_temp):
 class BiasPredModel:
     """
     Prediction model that takes in data, and uses a prior over hypotheses
-    and the relevant to calculate posterior hypothesis estimates.
+    and the relevant to calculate posterior hypothesis estimates. Eps
+    determines the probability of acting randomly each trial which translates
+    into a 'mixture model' calculation for the trial-by-trial posterior
     """
-    def __init__(self, likelihood_dist, prior, recursive_prob = .9,
-                 data_noise = 0, ts_bias = 1):
+    def __init__(self, likelihood_dist, prior, r1 = .9, r2 = .9, eps = 0,
+                 data_noise = 0):
         self.prior = np.array(prior)
         self.likelihood_dist = likelihood_dist
-        self.recursive_prob = recursive_prob
-        self.ts_bias = ts_bias
+        self.r1 = r1
+        self.r2 = r2
         self.posterior = prior
+        self.eps = eps
         
     def calc_posterior(self, data, noise = 0):
         """
@@ -36,16 +39,15 @@ class BiasPredModel:
         It should always be less than one. 
         """
         ld = self.likelihood_dist
-        rp = self.recursive_prob
+        r1 = self.r1
+        r2 = self.r2
+        eps = self.eps
         prior = self.prior
-        ts_bias = self.ts_bias
-        prior[1]*=ts_bias
-        prior = prior/sum(prior)
         
         if noise:
             data= min(max(data + noise*norm().rvs(),-1),1)
            
-        trans_probs = np.array([[rp, 1-rp], [1-rp, rp]])            
+        trans_probs = np.array([[r1, 1-r1], [1-r2, r2]]).transpose()            
         n = len(prior)
         likelihood = np.array([dis.pdf(data) for dis in ld])
         numer = np.array([likelihood[i] * prior[i] for i in range(n)])
@@ -53,6 +55,7 @@ class BiasPredModel:
         posterior = numer/dinom
         
         self.prior = np.dot(trans_probs,posterior)
+        posterior = (1-eps)*posterior+eps*np.array([.5,.5]) 
         self.posterior = posterior
         return posterior
        
@@ -68,55 +71,6 @@ class BiasPredModel:
         else:
             return np.argmax(self.posterior)
 
-class EstimatePredModel:
-    """
-    Prediction model that takes in data, and uses a prior over hypotheses
-    and the relevant to calculate posterior hypothesis estimates.
-    """
-    def __init__(self, prior, mean = 0, std = .37, recursive_prob = .9):
-        self.prior = np.array(prior)
-        self.likelihood_dist = [norm(mean, std),norm(-mean,std)]
-        self.recursive_prob = recursive_prob
-        self.posterior = prior
-        
-    def calc_posterior(self, data, noise = 0):
-        """
-        Calculate the posterior probability of different distribution hypotheses
-        given the data. You can set a noise value which will set add gaussian
-        noise to the observation. The value specified will be a scaling parameter. 
-        It should always be less than one. 
-        """
-        ld = self.likelihood_dist
-        rp = self.recursive_prob
-        prior = self.prior
-
-        if noise:
-            data= min(max(data + noise*norm().rvs(),-1),1)
-                                   
-        trans_probs = np.array([[rp, 1-rp], [1-rp, rp]])    
-                     
-
-        n = len(prior)
-        likelihood = np.array([dis.pdf(data) for dis in ld])
-        numer = np.array([likelihood[i] * prior[i] for i in range(n)])
-        dinom = np.sum(numer,0)
-        posterior = numer/dinom
-
-        self.prior = np.dot(trans_probs,posterior)
-        self.posterior = posterior
-        return posterior
-       
-    def choose(self, mode = 'softmax', eps = .1, inv_temp = 1):
-        if mode == "e-greedy":
-            if r.random() < eps:
-                return r.randint(0,2)
-            else:
-                return np.argmax(self.posterior)
-        elif mode == "softmax":
-            probs = softmax(self.posterior, inv_temp)
-            return np.random.choice(range(len(probs)), p = probs)
-        else:
-            return np.argmax(self.posterior)
 
 class SwitchModel:
     """
