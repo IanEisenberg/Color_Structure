@@ -534,19 +534,23 @@ if plot == True:
     pylab.legend(loc='upper left',prop={'size':14})
 
     #Plot task-set count by context value(axis='both', which='both', bottom='off', top='off', labelbottom='off', right='off', left='off', labelleft='off')
+    range_start = 0
     p2 = plt.figure(figsize = figdims)
     plt.hold(True) 
     plt.xticks(list(range(12)),contexts)
-    plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
     plt.ylabel('STS choice %', size = fontsize)
-    for subj in plot_ids[0:5]:
+    subj_df = plot_df.query('id == "%s"' %plot_ids[range_start])
+    plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2,  alpha = 1, label = 'subject')
+    for subj in plot_ids[range_start+1:range_start+5]:
         subj_df = plot_df.query('id == "%s"' %subj)
-        plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2,  alpha = 1, label = subj_df.id[0])
+        plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2,  alpha = 1)
     plt.gca().set_color_cycle(None)
-    for subj in plot_ids[0:5]:
+    subj_df = plot_df.query('id == "%s"' %plot_ids[range_start])
+    plt.plot(subj_df.groupby('context').bias2_observer_choices.mean(), lw = 2, ls = '--', label = 'bias-2 observer')
+    for subj in plot_ids[range_start+1:range_start+5]:
         subj_df = plot_df.query('id == "%s"' %subj)
-        plt.plot(subj_df.groupby('context').fit_observer_choices.mean(), lw = 2, ls = '--', alpha = 1)
+        plt.plot(subj_df.groupby('context').bias2_observer_choices.mean(), lw = 2, ls = '--')
     pylab.legend(loc='best',prop={'size':20})
         
     #plot distribution of switches, by task-set
