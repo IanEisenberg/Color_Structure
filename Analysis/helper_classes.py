@@ -77,10 +77,10 @@ class SwitchModel:
     Prediction model that takes in data, and uses a prior over hypotheses
     and the relevant to calculate posterior hypothesis estimates.
     """
-    def __init__(self, rp = [.9,.9]):
-        self.trans_probs = np.array([[rp[0], 1-rp[0]], [1-rp[1], rp[1]]])
+    def __init__(self, r1 = .9, r2 = .9):
+        self.trans_probs = np.array([[r1, 1-r1], [1-r2, r2]]).transpose()
         
-    def calc_TS_prob(self, last_choice):
+    def calc_TS_prob(self, last_choice = -1):
         """
         Calculate the probability of each task set given the previous choice.
         This model assumes that task-sets switch by some probability and no
@@ -91,7 +91,7 @@ class SwitchModel:
         if last_choice == -1:
             return [.5,.5]
         else:
-            return self.trans_probs[last_choice,:]
+            return self.trans_probs[:,last_choice]
     
        
 
