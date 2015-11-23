@@ -15,7 +15,10 @@ import statsmodels.api as sm
 import pickle, glob, re, os, lmfit
 import seaborn as sns
 from collections import OrderedDict as odict
+import warnings
 
+# Suppress runtimewarning due to pandas bug
+warnings.simplefilter(action = "ignore", category = RuntimeWarning)
 
 #*********************************************
 # Set up defaults
@@ -31,43 +34,47 @@ axes = {'titleweight' : 'bold'
 plt.rc('font', **font)
 plt.rc('axes', **axes)
 
-plot = False
-save = True
-#choose whether the model has a variable bias term
-bias = False
+plot = True
+save = False
+
 
 #*********************************************
 # Load Data
 #*********************************************
+home = os.path.expanduser("~")
+try:
+    bias2_fit_dict = pickle.load(open('Analysis_Output/bias2_parameter_fits.p','rb'))
+except:
+    bias2_fit_dict = {}
+try:
+    bias1_fit_dict = pickle.load(open('Analysis_Output/bias1_parameter_fits.p','rb'))
+except:
+    bias1_fit_dict = {}
+try:
+    eoptimal_fit_dict = pickle.load(open('Analysis_Output/eoptimal_parameter_fits.p','rb'))
+except:
+    eoptimal_fit_dict = {}
+try:
+    ignore_fit_dict = pickle.load(open('Analysis_Output/ignore_parameter_fits.p','rb'))
+except:
+    ignore_fit_dict = {}
+try:
+    midline_fit_dict = pickle.load(open('Analysis_Output/midline_parameter_fits.p','rb'))
+except:
+    midline_fit_dict = {}
+try:
+    switch_fit_dict = pickle.load(open('Analysis_Output/switch_parameter_fits.p','rb'))
+except:
+    switch_fit_dict = {}
+    
 if save == False:
-    gtest_learn_df = pd.DataFrame.from_csv('Analysis_Output/gtest_learn_df.csv')
-else:
-    home = os.path.expanduser("~")
-    try:
-        bias2_fit_dict = pickle.load(open('Analysis_Output/bias2_parameter_fits.p','rb'))
-    except:
-        bias2_fit_dict = {}
-    try:
-        bias1_fit_dict = pickle.load(open('Analysis_Output/bias1_parameter_fits.p','rb'))
-    except:
-        bias1_fit_dict = {}
-    try:
-        eoptimal_fit_dict = pickle.load(open('Analysis_Output/eoptimal_parameter_fits.p','rb'))
-    except:
-        eoptimal_fit_dict = {}
-    try:
-        ignore_fit_dict = pickle.load(open('Analysis_Output/ignore_parameter_fits.p','rb'))
-    except:
-        ignore_fit_dict = {}
-    try:
-        midline_fit_dict = pickle.load(open('Analysis_Output/midline_parameter_fits.p','rb'))
-    except:
-        midline_fit_dict = {}
-    try:
-        switch_fit_dict = pickle.load(open('Analysis_Output/switch_parameter_fits.p','rb'))
-    except:
-        switch_fit_dict = {}
-        
+    gtest_learn_df = pd.DataFrame.from_csv('Analysis_Output/gtest_learn_df_crossval.csv')
+    gtest_df = pd.DataFrame.from_csv('Analysis_Output/gtest_df_crossval.csv')
+    gtest_learn_df.id = gtest_learn_df.id.astype('str')
+    gtest_df.id = gtest_df.id.astype('str')
+    gtest_learn_df.id = gtest_learn_df.id.apply(lambda x: x.zfill(3))
+    gtest_df.id = gtest_df.id.apply(lambda x: x.zfill(3))
+else:        
     group_behavior = {}
     gtrain_df = pd.DataFrame()
     gtest_df = pd.DataFrame()
@@ -498,8 +505,8 @@ else:
     pickle.dump(ignore_fit_dict,open('Analysis_Output/ignore_parameter_fits.p','wb'))
     pickle.dump(midline_fit_dict,open('Analysis_Output/midline_parameter_fits.p','wb'))
     pickle.dump(switch_fit_dict,open('Analysis_Output/switch_parameter_fits.p','wb'))
-    gtest_learn_df.to_csv('Analysis_Output/gtest_learn_df.csv')
-        
+    gtest_learn_df.to_csv('Analysis_Output/gtest_learn_df_crossval.csv')
+    gtest_df.to_csv('Analysis_Output/gtest_df_crossval.csv')  
     
 #*********************************************
 # Switch Analysis
@@ -540,10 +547,7 @@ compare_df = pd.concat([compare_df[['id','subj_ts','context']], log_posteriors],
 compare_df['random_log'] = np.log(.5)
 
 summary = compare_df.groupby('id').sum().drop(['context','subj_ts'],axis = 1)
-p7 = plt.figure(figsize = figdims)
-plt.hold(True)
-for c in log_posteriors.columns[:-1]:
-    sns.kdeplot(summary[c])
+
 
 
     
@@ -556,26 +560,26 @@ figdims = (16,12)
 fontsize = 20
 plot_df = gtest_learn_df.copy()
 plot_df['rt'] = plot_df['rt']*1000
-plot_ids = learn_ids
+plot_ids = np.unique(plot_df.id)
 if plot == True:
     
-    #Plot task-set count by context value
+    # Plot task-set count by context value
     sns.set_style("darkgrid", {"axes.linewidth": "1.25", "axes.edgecolor": ".15"})
     p1 = plt.figure(figsize = figdims)
     plt.hold(True) 
     plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 4, marker = 'o', markersize = 10, color = 'm', label = 'subject')
     plt.plot(plot_df.groupby('context').bias2_observer_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', label = 'bias-2 observer')
-    plt.plot(plot_df.groupby('context').bias2_observer_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', label = 'bias-1 observer')
+    plt.plot(plot_df.groupby('context').bias1_observer_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', ls = '--', label = 'bias-1 observer')
     plt.xticks(list(range(12)),contexts)
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
     plt.ylabel('TS2 choice %', size = fontsize)
     pylab.legend(loc='best',prop={'size':20})
-    for subj in ids:
+    for subj in plot_ids:
         subj_df = plot_df.query('id == "%s"' %subj)
-        if subj_df.correct.mean() < .6:
-            plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'r', alpha = .1)
+        if subj_df.correct.mean() < .55:
+            plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'r', alpha = .2)
         else:
-            plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'k', alpha = .1)
+            plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'k', alpha = .2)
     a = plt.axes([.62, .15, .3, .3])
     plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 4, marker = 'o', markersize = 10, color = 'm', label = 'subject')
     plt.plot(plot_df.groupby('context').eoptimal_observer_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', ls = '--', label = r'$\epsilon$-optimal observer')
@@ -586,8 +590,9 @@ if plot == True:
         labelleft = 'off',
         labelbottom = 'off')
     pylab.legend(loc='upper left',prop={'size':14})
+    
 
-    #Plot task-set count by context value(axis='both', which='both', bottom='off', top='off', labelbottom='off', right='off', left='off', labelleft='off')
+    # Plot task-set count by context value
     range_start = 0
     p2 = plt.figure(figsize = figdims)
     plt.hold(True) 
@@ -607,19 +612,20 @@ if plot == True:
         plt.plot(subj_df.groupby('context').bias2_observer_choices.mean(), lw = 2, ls = '--')
     pylab.legend(loc='best',prop={'size':20})
         
-    #plot distribution of switches, by task-set
+    # plot distribution of switches, by task-set
     p3 = plt.figure(figsize = figdims)
+    plt.subplot(2,1,1)
     plt.hold(True) 
     sub = switch_counts['subject']
     plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to CTS')
     plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to STS')
-    sub = switch_counts['fit_observer']
+    sub = switch_counts['bias2_observer']
     plt.plot(sub[0], lw = 4, color = 'm', ls = '-.', label = 'bias observer')
     plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
-    sub = switch_counts['opt_observer']
+    sub = switch_counts['eoptimal_observer']
     plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
     plt.plot(sub[1], lw = 4, color = 'c', ls = '--')
-    sub = switch_counts['midline_observer']
+    sub = switch_counts['ignore_observer']
     plt.plot(sub[0], lw = 4, color = 'm', ls = ':', label = 'midline rule')
     plt.plot(sub[1], lw = 4, color = 'c', ls = ':')
     plt.xticks(list(range(12)),np.round(list(sub.index),2))
@@ -630,19 +636,26 @@ if plot == True:
     for subj in plot_ids:
         subj_df = plot_df.query('id == "%s"' %subj)
         subj_switch_counts = odict()
+        subj_switch_counts['ignore_observer'] = subj_df.query('ignore_observer_switch == True').groupby(['ignore_observer_choices','context']).trial_count.count().unstack(level = 0)
         subj_switch_counts['subject'] = subj_df.query('subj_switch == True').groupby(['subj_ts','context']).trial_count.count().unstack(level = 0)
-
+        subj_switch_counts['bias2_observer'] = subj_df.query('bias2_observer_switch == True').groupby(['bias2_observer_choices','context']).trial_count.count().unstack(level = 0)
+        
+        # normalize switch counts by the ignore rule. The ignore rule represents
+        # the  number of switches someone would make if they switched task-sets
+        # every time the stimuli's position crossed the ignore to that position
+        subj_norm_switch_counts = odict()
         for key in subj_switch_counts:
             empty_df = pd.DataFrame(index = np.unique(subj_df.context), columns = [0,1])
             empty_df.index.name = 'context'
             empty_df.loc[switch_counts[key].index] = subj_switch_counts[key]
-            subj_switch_counts[key] = empty_df*len(ids)
+            subj_switch_counts[key] = empty_df*len(plot_ids)
+            subj_norm_switch_counts[key] = subj_switch_counts[key].div(subj_switch_counts['ignore_observer'],axis = 0)
         sub = subj_switch_counts['subject']
         plt.plot(sub[0], lw = 3, color = 'm', alpha = .10)
         plt.plot(sub[1], lw = 3, color = 'c', alpha = .10)
     
 
-    #look at RT
+    # look at RT
     p4 = plt.figure(figsize = figdims)
     plt.subplot(4,1,1)
     plot_df.rt.hist(bins = 25)
@@ -655,7 +668,7 @@ if plot == True:
     plot_df.query('subj_switch == 0')['rt'].hist(bins = 25, alpha = .4, color = 'm', normed = True)
     plot_df.query('subj_switch == 1')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
     pylab.legend(loc='upper right',prop={'size':20})
-    plt.xlim(xmin = 0)
+    plt.xlim(xmin=0)
 
     
     plt.subplot(4,1,3)
@@ -666,7 +679,7 @@ if plot == True:
     plot_df.query('subj_switch == 0 and rep_resp == 0')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
     plt.ylabel('Probability Density', size = fontsize)
     pylab.legend(loc='upper right',prop={'size':20})
-    plt.xlim(xmin = 0)
+    plt.xlim(xmin=0)
 
         
     plt.subplot(4,1,4)
@@ -677,36 +690,79 @@ if plot == True:
     plot_df.query('subj_ts == 1')['rt'].hist(bins = 25, alpha = .4, color = 'c', normed = True)
     plt.xlabel('Reaction Time (ms)', size = fontsize)
     pylab.legend(loc='upper right',prop={'size':20})
-    plt.xlim(xmin = 0)
+    plt.xlim(xmin=0)
 
     	    
-    #RT for switch vs stay for different trial-by-trial context diff
+    # RT for switch vs stay for different trial-by-trial context diff
     p5 = plot_df.groupby(['subj_switch','context_diff']).mean().rt.unstack(level = 0).plot(marker = 'o',color = ['c','m'], figsize = figdims, fontsize = fontsize)     
     p5 = p5.get_figure()
-           
-    #Plot rt against optimal model certainty
-    #Take out RT < 100 ms
-    opt_conf_rt_p = ggplot(plot_df.query('rt>100'), aes('opt_certainty', 'log_rt')) + geom_point(color = 'coral') + geom_smooth(method = 'lm')
-    fit_conf_rt_p = ggplot(plot_df.query('rt>100'), aes('fit_certainty', 'log_rt')) + geom_point(color = 'coral') + geom_smooth(method = 'lm') \
-		+ xlab('Model Confidence') + ylab('Log Reaction Time') + xlim(-.05,1.05)
-		
-    #split by id
-    opt_conf_rt_id_p = ggplot(plot_df.query('rt>100'), aes('opt_certainty', 'log_rt', color = 'id')) + geom_point() + geom_smooth(method = 'lm')
-    fit_conf_rt_id_p = ggplot(plot_df.query('rt>100'), aes('fit_certainty', 'log_rt', color = 'id')) + geom_point() + geom_smooth(method = 'lm')  \
-    	+ xlab('Model Confidence') + ylab('Log Reaction Time') + xlim(-.05,1.05)
-
-    #Plot rt against absolute context
-    rt_abs_con_p = ggplot(plot_df.query('rt>100'), aes('abs_context', 'log_rt', color = 'id')) + geom_point() + geom_smooth(method = 'lm') \
-        + xlab('Distance From Center') + ylab('Log Reaction Time') + xlim(-.05,1.05)
-            
     
-    if save == True:
-        ggsave(fit_conf_rt_p, '../Plots/Fit_Certainty_vs_RT.pdf', format = 'pdf')
-        ggsave(fit_conf_rt_id_p, '../Plots/Fit_Certainty_vs_RT_ids.pdf', format = 'pdf')
-        ggsave(rt_abs_con_p, '../Plots/Context_vs_RT_id.pdf', format = 'pdf')
-        p1.savefig('../Plots/TS2%_vs_context.pdf', format = 'pdf')
-        p2.savefig('../Plots/Individual_subject_fits.pdf',format = 'pdf')
-        p3.savefig('../Plots/TS_proportions.pdf', format = 'pdf')
-        p4.savefig('../Plots/RTs.pdf', format = 'pdf')
-        p5.savefig('../Plots/RT_across_context_diffs.pdf', format = 'pdf')
+    # Plot rt against bias2 model posterior
+    sns.set_context('poster')
+    subj_df = plot_df.query('rt > 100 & id < "%s"' %plot_ids[3])       
+    p6 = sns.lmplot(x='bias2_observer_posterior',y='rt', hue = 'id', data = subj_df, order = 2, size = 6, col = 'id')
+    p6.set_xlabels("P(TS2)", size = fontsize)
+    p6.set_ylabels('Reaction time (ms)', size = fontsize)
+    
+    # Plot rt against bias2 model certainty
+    # Take out RT < 100 ms  
+    sns.set_context('poster')
+    subj_df = plot_df.query('rt > 100 & id < "%s"' %plot_ids[3])       
+    p7 = sns.lmplot(x ='bias2_certainty', y = 'rt', hue = 'id', col = 'id', size = 6, data = subj_df)   
+    p7.set_xlabels("Model Confidence", size = fontsize)
+    p7.set_ylabels('Reaction time (ms)', size = fontsize)
+    
+    p8 = sns.lmplot(x ='bias2_certainty', y = 'rt', hue = 'id', ci = None, legend = False, size = figdims[1], data = plot_df.query('rt>100'))  
+    plt.xlim(-.1,1.1)
+    p8.set_xlabels("Model Confidence", size = fontsize)
+    p8.set_ylabels('Reaction time (ms)', size = fontsize)
+    
+    # plot bias2 parameters
+    params_df = pd.DataFrame()
+    params_df['id'] = [x[1:3] for x in bias2_fit_dict if ('_fullRun' not in x)]
+    params_df['learner'] = [x[0:3] in plot_ids for x in bias2_fit_dict if ('_fullRun' not in x)] 
+    params_df['run'] = ['first' in x for x in bias2_fit_dict if ('_fullRun' not in x)] 
+    params_df['r1'] = [bias2_fit_dict[x]['r1'] for x in bias2_fit_dict if ('_fullRun' not in x)]
+    params_df['r2'] = [bias2_fit_dict[x]['r2'] for x in bias2_fit_dict if ('_fullRun' not in x)]
+    params_df['eps'] = [bias2_fit_dict[x]['eps'] for x in bias2_fit_dict if ('_fullRun' not in x)]
+    params_df = pd.melt(params_df, id_vars = ['id','learner', 'run'], value_vars = ['eps','r1','r2'], var_name = 'param', value_name = 'val')
+
+    p9 = plt.figure(figsize = figdims)
+    box_palette = sns.color_palette(['m','c'], desat = 1)
+    sns.boxplot(x = 'param', y = 'val', hue = 'learner', hue_order = [1,0], data = params_df, palette = box_palette)
+    sns.stripplot(x = 'param', y = 'val', hue = 'learner', hue_order = [1,0], data = params_df, jitter = True, edgecolor = "gray", palette = box_palette)
+    plt.xlabel("Parameter", size = fontsize)
+    plt.ylabel('Value', size = fontsize)
+    plt.title('Bias-2 Model Parameter Fits', size = fontsize+4)
+    plt.xticks([0,1,2], ('$\epsilon$','$r_1$','$r_2$'), size = fontsize)
+    
+    # plot bias1 parameters
+    params_df = pd.DataFrame()
+    params_df['id'] = [x[1:3] for x in bias1_fit_dict if ('_fullRun' not in x)]
+    params_df['learner'] = [x[0:3] in plot_ids for x in bias1_fit_dict if ('_fullRun' not in x)] 
+    params_df['r1'] = [bias2_fit_dict[x]['r1'] for x in bias1_fit_dict if ('_fullRun' not in x)]
+    params_df['eps'] = [bias2_fit_dict[x]['eps'] for x in bias1_fit_dict if ('_fullRun' not in x)]
+    params_df = pd.melt(params_df, id_vars = ['id','learner'], value_vars = ['eps','r1'], var_name = 'param', value_name = 'val')
+
+    p10 = plt.figure(figsize = figdims)
+    box_palette = sns.color_palette(['m','c'], desat = 1)
+    sns.boxplot(x = 'param', y = 'val', hue = 'learner', hue_order = [1,0], data = params_df, palette = box_palette)
+    sns.stripplot(x = 'param', y = 'val', hue = 'learner', hue_order = [1,0], data = params_df, jitter = True, edgecolor = "gray", palette = box_palette)
+    plt.xlabel("Parameter", size = fontsize)
+    plt.ylabel('Value', size = fontsize)
+    plt.title('Bias-1 Model Parameter Fits', size = fontsize+4)
+    plt.xticks([0,1,2], ('$\epsilon$','$r_1$'), size = fontsize)
+
+    
+    p11 = plt.figure(figsize = figdims)
+    plt.hold(True)
+    for c in log_posteriors.columns[:-1]:
+        sns.kdeplot(summary[c])
+            
+            
+    f = [bias2_fit_dict[x + '_first']['r1'] for x in plot_ids]
+    s = [bias2_fit_dict[x + '_second']['r1'] for x in plot_ids]
+    plt.plot(s,f,'o')
+    plt.plot([0, 1], [0, 1], transform=ax.transAxes)
+    
     

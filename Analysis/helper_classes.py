@@ -53,11 +53,10 @@ class BiasPredModel:
         numer = np.array([likelihood[i] * prior[i] for i in range(n)])
         dinom = np.sum(numer,0)
         posterior = numer/dinom
-        
         self.prior = np.dot(trans_probs,posterior)
-        posterior = (1-eps)*posterior+eps*np.array([.5,.5]) 
         self.posterior = posterior
-        return posterior
+        TS_probs = (1-eps)*posterior+eps/2  # mixed model of TS posteriors and random guessing
+        return TS_probs
        
     def choose(self, mode = 'softmax', eps = .1, inv_temp = 1):
         if mode == "e-greedy":
