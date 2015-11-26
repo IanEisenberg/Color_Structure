@@ -1,0 +1,52 @@
+---
+title: "Subject_Analysis"
+output: html_document
+---
+
+Load up the data
+
+```{r set up libraries}
+library(ggplot2)
+library(plyr)
+library(lme4)
+```
+
+```{r Load data}
+  gtest_df = read.csv('Analysis_Output/gtest_df.csv')
+  gtest_learn_df = read.csv('Analysis_Output/gtest_learn_df.csv')
+  gtest_df$id = factor(gtest_df$id)
+  gtest_learn_df$id = factor(gtest_learn_df$id)
+```
+
+
+```{r}
+  rt_df = gtest_learn_df
+  rt_df$subj_switch = as.factor(rt_df$subj_switch)
+  summary(lmer(log_rt ~ subj_switch + rep_resp + (1 + subj_switch +rep_resp | id), data = rt_df))
+  summary(lmer(log_rt ~ subj_switch + rep_resp + (1 + subj_switch +rep_resp | id), data = rt_df))
+
+  rt_df$abs_context_diff = abs(rt_df$context_diff)
+  summary(lmer(log_rt ~ subj_switch + rep_resp + abs_context_diff + (1 + subj_switch +rep_resp + abs_context_diff | id), data = rt_df))
+```
+
+```{r Model certainty vs rt}
+#Plot rt against optimal model certainty
+plot_df = gtest_learn_df
+ggplot(data = plot_df, aes(fit_certainty, log_rt, color = id)) + geom_point() + geom_smooth(method = 'lm')
+
+rs1 = lmer(log_rt ~ fit_certainty + (1 + fit_certainty|id), data = gtest_learn_df)
+summary(rs1) 
+
+rs2 = lmer(log_rt ~ abs_context + (1 + abs_context|id), data = gtest_learn_df)
+summary(rs2) 
+
+rs3 = glmer(subj_ts ~ fit_observer_posterior + context + (1 + fit_observer_posterior | id), family = binomial, data = gtest_learn_df)
+summary(rs3)
+
+summary(glm(subj_ts ~ fit_observer_posterior , family = binomial, data = gtest_learn_df))
+```
+
+```{r}
+  sum((gtest_learn_df$subj_ts-gtest_learn_df$fit_observer_posterior)/(gtest_learn_df$fit_observer_posterior*(1-gtest_learn_df$fit_observer_posterior))^.5)
+```
+
