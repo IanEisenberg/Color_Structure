@@ -34,14 +34,15 @@ axes = {'titleweight' : 'bold'
 plt.rc('font', **font)
 plt.rc('axes', **axes)
 
-plot = True
+plot = False
 save = False
 
 
 #*********************************************
 # Load Data
 #*********************************************
-home = os.path.expanduser("~")
+data_dir = "D:\\Ian"
+data_dir = "/mnt/Data/Ian"
 try:
     bias2_fit_dict = pickle.load(open('Analysis_Output/bias2_parameter_fits.p','rb'))
 except:
@@ -80,8 +81,8 @@ else:
     gtest_df = pd.DataFrame()
     gtaskinfo = []
     
-    train_files = glob.glob(home + '/Mega/IanE_RawData/Prob_Context_Task/RawData/*Context_20*yaml')
-    test_files = glob.glob(home + '/Mega/IanE_RawData/Prob_Context_Task/RawData/*Context_test*yaml')
+    train_files = sorted(glob.glob(data_dir + '/Mega/IanE_RawData/Prob_Context_Task/RawData/*Context_20*yaml'))
+    test_files = sorted(glob.glob(data_dir + '/Mega/IanE_RawData/Prob_Context_Task/RawData/*Context_test*yaml'))
         
     count = 0
     for train_file, test_file in zip(train_files,test_files):
@@ -507,6 +508,7 @@ else:
     pickle.dump(switch_fit_dict,open('Analysis_Output/switch_parameter_fits.p','wb'))
     gtest_learn_df.to_csv('Analysis_Output/gtest_learn_df_crossval.csv')
     gtest_df.to_csv('Analysis_Output/gtest_df_crossval.csv')  
+    gtrain_df.to_csv('Analysis_Output/gtrain_df_crossval.csv')
     
 #*********************************************
 # Switch Analysis

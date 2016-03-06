@@ -23,14 +23,14 @@ warnings.simplefilter(action = "ignore", category = RuntimeWarning)
 # *********************************************
 # Set up defaults
 # *********************************************
-
 plot = False
 save = False
 
 # *********************************************
 # Load Data
 # ********************************************
-home = os.path.expanduser("~")
+data_dir = "D:\\Ian"
+data_dir = "/mnt/Data/Ian"
 try:
     bias2_fit_dict = pickle.load(open('Analysis_Output/bias2_parameter_fits.p', 'rb'))
 except:
@@ -69,19 +69,19 @@ else:
     gtest_df = pd.DataFrame()
     gtaskinfo = []
 
-    train_files = glob.glob(home + '/Mega/IanE_RawData/Prob_Context_Task/RawData/*Context_20*yaml')
-    test_files = glob.glob(home + '/Mega/IanE_RawData/Prob_Context_Task/RawData/*Context_test*yaml')
+    train_files = sorted(glob.glob(data_dir + '/Mega/IanE_RawData/Prob_Context_Task/RawData/*Context_20*yaml'))
+    test_files = sorted(glob.glob(data_dir + '/Mega/IanE_RawData/Prob_Context_Task/RawData/*Context_test*yaml'))
 
     count = 0
 
     for train_file, test_file in zip(train_files, test_files):
-        count += 1
-        if count != 0:
-            pass # continue
-        train_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', train_file).group(1)
-        test_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', test_file).group(1)
         subj_name = re.match(r'.*/RawData.(\w*)_Prob*', test_file).group(1)
         print(subj_name)
+        if count >= 3 or subj_name in ['023','025','026','027']:
+            pass
+        count += 1
+        train_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', train_file).group(1)
+        test_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', test_file).group(1)
         try:
             train_dict = pickle.load(open('../Data/' + train_name + '.p', 'rb'))
             taskinfo, train_dfa = [train_dict.get(k) for k in ['taskinfo', 'dfa']]
@@ -473,6 +473,9 @@ else:
     pickle.dump(switch_fit_dict,open('Analysis_Output/switch_parameter_fits.p','wb'))
     gtest_learn_df.to_csv('Analysis_Output/gtest_learn_df.csv')
     gtest_df.to_csv('Analysis_Output/gtest_df.csv')
+    gtrain_learn_df.to_csv('Analysis_Output/gtrain_learn_df.csv')
+    gtrain_df.to_csv('Analysis_Output/gtrain_df.csv')
+    gtaskinfo.to_csv = ('Analysis_Output_gtaskinfo.csv')
 # *********************************************
 # Switch Analysis
 # *********************************************
@@ -499,7 +502,13 @@ for key in switch_counts:
     switch_counts[key] = empty_df
     norm_switch_counts[key] = switch_counts[key].div(switch_counts['ignore_observer'],axis = 0)
 
+# *********************************************
+# Calculate how well the bias-2 model does
+# ********************************************* 
+r1 = pd.concat([gtest_learn_df['id'], gtest_learn_df['subj_ts']==gtest_learn_df['bias1_observer_choices']],1)
+np.mean(r1.groupby('id').mean())
 
+np.mean([bias2_fit_dict[w + '_fullRun']['r2'] for w in plot_ids] + [bias2_fit_dict[w + '_fullRun']['r1'] for w in plot_ids])
 # *********************************************
 # Model Comparison
 # ********************************************* 
