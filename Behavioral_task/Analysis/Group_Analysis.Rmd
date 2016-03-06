@@ -32,18 +32,14 @@ library(lme4)
 ```{r Model certainty vs rt}
 #Plot rt against optimal model certainty
 plot_df = gtest_learn_df
-ggplot(data = plot_df, aes(fit_certainty, log_rt, color = id)) + geom_point() + geom_smooth(method = 'lm')
+ggplot(data = plot_df, aes(bias2_certainty, log_rt, color = id)) + geom_point() + geom_smooth(method = 'lm')
 
-rs1 = lmer(log_rt ~ fit_certainty + (1 + fit_certainty|id), data = gtest_learn_df)
+rs1 = lmer(log_rt ~ bias2_certainty + (1 + bias2_certainty|id), data = gtest_learn_df)
 summary(rs1) 
 
-rs2 = lmer(log_rt ~ abs_context + (1 + abs_context|id), data = gtest_learn_df)
+rs2 = lm(log_rt ~ 1+ bias2_certainty, data = gtest_learn_df)
 summary(rs2) 
 
-rs3 = glmer(subj_ts ~ fit_observer_posterior + context + (1 + fit_observer_posterior | id), family = binomial, data = gtest_learn_df)
-summary(rs3)
-
-summary(glm(subj_ts ~ fit_observer_posterior , family = binomial, data = gtest_learn_df))
 ```
 
 ```{r}
