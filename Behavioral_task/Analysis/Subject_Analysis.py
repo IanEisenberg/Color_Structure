@@ -175,10 +175,11 @@ if plot == True:
     figdims = (16,12)
     fontsize = 20
     
-    plotting_dict = {'bias2': ['bias2_observer_posterior', 'r','bias2'],
-                     'ignore': ['ignore_observer_posterior', 'b','ignore'],
-                    'eoptimal': ['eoptimal_observer_posterior', 'm','eoptimal']}
-                    
+    plotting_dict = odict()
+    plotting_dict['ignore'] = ['ignore_observer_posterior', 'r','base rate neglect']
+    plotting_dict['eoptimal'] = ['eoptimal_observer_posterior', 'm','eoptimal']
+    plotting_dict['bias2'] = ['bias2_observer_posterior', 'c','bias2']
+    
     #bias2 much better fit than optimal, incorporates bias
     sub_id = '041'
     sub = gtest_df[gtest_df['id'] == int(sub_id)]
