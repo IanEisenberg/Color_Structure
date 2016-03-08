@@ -30,7 +30,7 @@ save = False
 # Load Data
 # ********************************************
 data_dir = "D:\\Ian"
-data_dir = "/mnt/Data/Ian"
+data_dir = "/ian/media/Data/Ian"
 try:
     bias2_fit_dict = pickle.load(open('Analysis_Output/bias2_parameter_fits.p', 'rb'))
 except:
@@ -580,13 +580,13 @@ if plot == True:
     plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2,  alpha = 1, label = 'subject')
     for subj in plot_ids[range_start+1:range_start+5]:
         subj_df = plot_df.query('id == "%s"' %subj)
-        plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2,  alpha = 1)
+        plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2,  alpha = 1, label = '_nolegend_')
     plt.gca().set_color_cycle(None)
     subj_df = plot_df.query('id == "%s"' %plot_ids[range_start])
     plt.plot(subj_df.groupby('context').bias2_observer_choices.mean(), lw = 2, ls = '--', label = 'bias-2 observer')
     for subj in plot_ids[range_start+1:range_start+5]:
         subj_df = plot_df.query('id == "%s"' %subj)
-        plt.plot(subj_df.groupby('context').bias2_observer_choices.mean(), lw = 2, ls = '--')
+        plt.plot(subj_df.groupby('context').bias2_observer_choices.mean(), lw = 2, ls = '--', label = '_nolegend_')
     pylab.legend(loc='best',prop={'size':20})
         
     # plot distribution of switches, by task-set
@@ -738,15 +738,15 @@ if plot == True:
         sns.kdeplot(summary[c])
         
     if save == True:
-        p1.savefig('../Plots/TS2%_vs_context.pdf', format = 'pdf')
-        p2.savefig('../Plots/Individual_subject_fits.pdf',format = 'pdf')
-        p3.savefig('../Plots/TS_proportions.pdf', format = 'pdf')
-        p4.savefig('../Plots/RTs.pdf', format = 'pdf')
-        p5.savefig('../Plots/RT_across_context_diffs.pdf', format = 'pdf')
-        p6.savefig('../Plots/rt_vs_posterior_3subj.pdf', format = 'pdf')
-        p7.savefig('../Plots/rt_vs_confidence_3subj.pdf', format = 'pdf')
-        p8.savefig('../Plots/rt_vs_confidence.pdf', format = 'pdf')
-        p9.savefig('../Plots/bias2_param_value.pdf', format = 'pdf')
-        p10.savefig('../Plots/bias1_param_value.pdf', format = 'pdf')
-        p11.savefig('../Plots/model_comparison.pdf', format = 'pdf')
+        p1.savefig('../Plots/TS2%_vs_context.png', format = 'png', dpi = 300)
+        p2.savefig('../Plots/Individual_subject_fits.png',format = 'png', dpi = 300)
+        p3.savefig('../Plots/TS_proportions.png', format = 'png', dpi = 300)
+        p4.savefig('../Plots/RTs.png', format = 'png')
+        p5.savefig('../Plots/RT_across_context_diffs.png', format = 'png', dpi = 300)
+        p6.savefig('../Plots/rt_vs_posterior_3subj.png', format = 'png', dpi = 300)
+        p7.savefig('../Plots/rt_vs_confidence_3subj.png', format = 'png', dpi = 300)
+        p8.savefig('../Plots/rt_vs_confidence.png', format = 'png', dpi = 300)
+        p9.savefig('../Plots/bias2_param_value.png', format = 'png', dpi = 300)
+        p10.savefig('../Plots/bias1_param_value.png', format = 'png', dpi = 300)
+        p11.savefig('../Plots/model_comparison.png', format = 'png', dpi = 300)
         
