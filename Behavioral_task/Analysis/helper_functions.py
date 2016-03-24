@@ -79,9 +79,10 @@ def seqStats(l,p,reps):
 # Model fitting functions
 #*********************************************
 
-def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5],  print_out = True):
+def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, model_type = 'action', print_out = True):
     """
-    Function to fit parameters to the bias2 model (fit r1, r2 and epsilon)
+    Function to fit parameters to the bias2 model (fit r1, r2 and epsilon).
+    Model can either fit to TS choices or actions
     """
     def errfunc(params,df):
         r1 = params['r1']
@@ -89,13 +90,19 @@ def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5],  print_out = True)
         eps = params['eps']
     
         init_prior = [.5,.5]
-        model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, eps=eps)
+        model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, TS_eps=eps, action_eps = action_eps)
         model_likelihoods = []
         for i in df.index:
+            s = df.stim[i]
             c = df.context[i]
-            trial_choice = df.subj_ts[i]
-            conf = model.calc_posterior(c)
-            model_likelihoods.append(conf[trial_choice])
+            TS_choice = df.subj_ts[i]
+            response_choice = df.response[i]
+            if model_type == 'TS':
+                TS_probs = model.calc_posterior(c)
+                model_likelihoods.append(TS_probs[TS_choice])
+            elif model_type == 'action':
+                action_probs = model.calc_action_posterior(s,c)
+                model_likelihoods.append(action_probs[response_choice])
         # minimize
         return abs(np.sum(np.log(np.array(model_likelihoods)))) # single value
     
@@ -109,7 +116,7 @@ def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5],  print_out = True)
         lmfit.report_fit(out)
     return out.params.valuesdict()
     
-def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5],  print_out = True):
+def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, model_type = 'action', print_out = True):
     """
     Function to fit parameters to the bias2 model (fit r and epsilon)
     """
@@ -119,13 +126,19 @@ def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5],  print_out = True)
         eps = params['eps']
 
         init_prior = [.5,.5]
-        model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, eps=eps)
+        model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, TS_eps=eps, action_eps = action_eps)
         model_likelihoods = []
         for i in df.index:
+            s = df.stim[i]
             c = df.context[i]
-            trial_choice = df.subj_ts[i]
-            conf = model.calc_posterior(c)
-            model_likelihoods.append(conf[trial_choice])
+            TS_choice = df.subj_ts[i]
+            response_choice = df.response[i]
+            if model_type == 'TS':
+                TS_probs = model.calc_posterior(c)
+                model_likelihoods.append(TS_probs[TS_choice])
+            elif model_type == 'action':
+                action_probs = model.calc_action_posterior(s,c)
+                model_likelihoods.append(action_probs[response_choice])
         # minimize
         return abs(np.sum(np.log(np.array(model_likelihoods)))) # single value
     
@@ -138,7 +151,7 @@ def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5],  print_out = True)
         lmfit.report_fit(out)
     return out.params.valuesdict()
     
-def fit_static_model(train_ts_dis, data, r_value, init_prior = [.5,.5],  print_out = True):
+def fit_static_model(train_ts_dis, data, r_value, init_prior = [.5,.5], action_eps = 0, model_type = 'action', print_out = True):
     """
     Function to fit any model where recursive probabilities are fixed, like an
     optimal model (r1=r2=.9) or a base-rate neglect model (r1=r2=.5)
@@ -149,13 +162,19 @@ def fit_static_model(train_ts_dis, data, r_value, init_prior = [.5,.5],  print_o
         eps = params['eps']
 
         init_prior = [.5,.5]
-        model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, eps=eps)
+        model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, TS_eps=eps, action_eps = action_eps)
         model_likelihoods = []
         for i in df.index:
+            s = df.stim[i]
             c = df.context[i]
-            trial_choice = df.subj_ts[i]
-            conf = model.calc_posterior(c)
-            model_likelihoods.append(conf[trial_choice])
+            TS_choice = df.subj_ts[i]
+            response_choice = df.response[i]
+            if model_type == 'TS':
+                TS_probs = model.calc_posterior(c)
+                model_likelihoods.append(TS_probs[TS_choice])
+            elif model_type == 'action':
+                action_probs = model.calc_action_posterior(s,c)
+                model_likelihoods.append(action_probs[response_choice])
         # minimize
         return abs(np.sum(np.log(np.array(model_likelihoods)))) # single value
     
