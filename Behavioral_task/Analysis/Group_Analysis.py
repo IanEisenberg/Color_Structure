@@ -8,7 +8,7 @@ import numpy as np
 from scipy.stats import norm
 from Load_Data import load_data
 from helper_classes import BiasPredModel, SwitchModel
-from helper_functions import calc_posterior
+from helper_functions import *
 import pickle, glob, re, lmfit, os
 import matplotlib.pyplot as plt
 from matplotlib import pylab
@@ -24,13 +24,13 @@ warnings.simplefilter(action = "ignore", category = RuntimeWarning)
 # Set up defaults
 # *********************************************
 plot = False
-save = False
+save = True
 
 # *********************************************
 # Load Data
 # ********************************************
 data_dir = "D:\\Ian"
-data_dir = "/ian/media/Data/Ian"
+data_dir = "/media/ian/Data/Ian"
 try:
     bias2_fit_dict = pickle.load(open('Analysis_Output/bias2_parameter_fits.p', 'rb'))
 except:
@@ -147,153 +147,24 @@ else:
         # *********************************************
 
         if subj_name + '_fullRun' not in bias2_fit_dict.keys():
-            # Fitting Functions
-            def errfunc(params, df):
-                r1 = params['r1']
-                r2 = params['r2']
-                eps = params['eps']
-
-                init_prior = [.5, .5]
-                model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, eps=eps)
-                model_likelihoods = []
-                for i in df.index:
-                    c = df.context[i]
-                    trial_choice = df.subj_ts[i]
-                    conf = model.calc_posterior(c)
-                    model_likelihoods.append(conf[trial_choice])
-                # minimize
-                return abs(np.sum(np.log(np.array(model_likelihoods))))  # single value
-
-            # Fit bias model
-            fit_params = lmfit.Parameters()
-            fit_params.add('r1', value=.5, min=0, max=1)
-            fit_params.add('r2', value=.5, min=0, max=1)
-            fit_params.add('eps', value=.1, min=0, max=1)
-            bias_out = lmfit.minimize(errfunc, fit_params, method = 'lbfgsb', kws={'df': test_dfa})
-            lmfit.report_fit(bias_out)
-            bias2_fit_dict[subj_name + '_fullRun'] = bias_out.params.valuesdict()
+            bias2_fit_dict[subj_name + '_fullRun'] = fit_bias2_model(train_ts_dis, test_dfa)
 
         if subj_name + '_fullRun' not in bias1_fit_dict.keys():
-            # Fitting Functions
-            def errfunc(params,df):
-                r1 = params['rp']
-                r2 = params['rp']
-                eps = params['eps']
-
-                init_prior = [.5,.5]
-                model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, eps=eps)
-                model_likelihoods = []
-                for i in df.index:
-                    c = df.context[i]
-                    trial_choice = df.subj_ts[i]
-                    conf = model.calc_posterior(c)
-                    model_likelihoods.append(conf[trial_choice])
-                # minimize
-                return abs(np.sum(np.log(np.array(model_likelihoods)))) # single value
-
-            # Fit bias model
-            # attempt to simplify:
-            fit_params = lmfit.Parameters()
-            fit_params.add('rp', value=.5, min=0, max=1)
-            fit_params.add('eps', value = .1, min=0, max=1)
-            bias_out = lmfit.minimize(errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa})
-            lmfit.report_fit(bias_out)
-            bias1_fit_dict[subj_name + '_fullRun'] = bias_out.params.valuesdict()
+            bias1_fit_dict[subj_name + '_fullRun'] = fit_bias1_model(train_ts_dis, test_dfa)
         
         if subj_name + '_fullRun' not in  eoptimal_fit_dict.keys():
-            # Fitting Functions
-            def errfunc(params,df):
-                r1 = train_recursive_p
-                r2 = train_recursive_p
-                eps = params['eps']
-                
-                init_prior = [.5,.5]
-                model = BiasPredModel(train_ts_dis, init_prior, r1 = r1, r2 = r2, eps = eps)
-                model_likelihoods = []
-                for i in df.index:
-                    c = df.context[i]
-                    trial_choice = df.subj_ts[i]
-                    conf = model.calc_posterior(c)
-                    model_likelihoods.append(conf[trial_choice])
-                # minimize
-                return abs(np.sum(np.log(np.array(model_likelihoods)))) # single value
-            
-            # Fit bias model
-            # attempt to simplify:
-            fit_params = lmfit.Parameters()
-            fit_params.add('eps', value = .1, min=0, max=1)
-            bias_out = lmfit.minimize(errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa})
-            lmfit.report_fit(bias_out)
-            eoptimal_fit_dict[subj_name + '_fullRun'] = bias_out.params.valuesdict()
-    
+            eoptimal_fit_dict[subj_name + '_fullRun'] = fit_static_model(train_ts_dis, test_dfa, train_recursive_p)
         # fit ignore rule random probability:
         if subj_name + '_fullRun' not in ignore_fit_dict.keys():
-            # Fitting Functions
-            def errfunc(params,df):
-                eps = params['eps']   
-                init_prior = [.5,.5]
-                model = BiasPredModel(train_ts_dis, init_prior, r1 = .5, r2 = .5, eps = eps)
-                model_likelihoods = []
-                for i in df.index:
-                    c = df.context[i]
-                    trial_choice = df.subj_ts[i]
-                    conf = model.calc_posterior(c)
-                    model_likelihoods.append(conf[trial_choice])
-                # minimize
-                return abs(np.sum(np.log(np.array(model_likelihoods)))) # single value
-            
-            # Fit bias model
-            # attempt to simplify:
-            fit_params = lmfit.Parameters()
-            fit_params.add('eps', value = .1, min=0, max=1)
-            ignore_out = lmfit.minimize(errfunc,fit_params, method = 'lbfgsb', kws= {'df':test_dfa})
-            lmfit.report_fit(ignore_out)
-            ignore_fit_dict[subj_name + '_fullRun'] = ignore_out.params.valuesdict()
-    
+            ignore_fit_dict[subj_name + '_fullRun'] = fit_static_model(train_ts_dis, test_dfa, .5)
+
         # fit midline rule random probability:
         if subj_name + '_fullRun' not in midline_fit_dict.keys():
-            # Fitting Functions
-            def midline_errfunc(params,df):
-                eps = params['eps'].value
-                context_sgn = np.array([max(i,0) for i in df.context_sign])
-                choice = df.subj_ts
-                # minimize
-                return -np.sum(np.log(abs(abs(choice - (1-context_sgn))-eps)))
-                
-            # Fit bias model
-            # attempt to simplify:
-            fit_params = lmfit.Parameters()
-            fit_params.add('eps', value = .1, min=0, max=1)
-            midline_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa})
-            lmfit.report_fit(midline_out)
-            midline_fit_dict[subj_name + '_fullRun'] = midline_out.params.valuesdict()
+            midline_fit_dict[subj_name + '_fullRun'] = fit_midline_model(test_dfa)
         
         # fit switch rule
         if subj_name + '_fullRun' not in switch_fit_dict.keys():
-            # Fitting Functions
-            def switch_errfunc(params,df):
-                params = params.valuesdict()
-                r1 = params['r1']
-                r2 = params['r2']   
-                model = SwitchModel(r1 = r1, r2 = r2)
-                model_likelihoods = []
-                model_likelihoods.append(.5)
-                for i in df.index[1:]:
-                    last_choice = df.subj_ts[i-1]
-                    trial_choice = df.subj_ts[i]
-                    conf = model.calc_TS_prob(last_choice)
-                    model_likelihoods.append(conf[trial_choice])
-                    
-                # minimize
-                return abs(np.sum(np.log(model_likelihoods))) # single value
-                
-            # Fit switch model
-            fit_params = lmfit.Parameters()
-            fit_params.add('r1', value=.5, min=0, max=1)
-            fit_params.add('r2', value=.5, min=0, max=1)
-            switch_out = lmfit.minimize(switch_errfunc,fit_params, method = 'lbfgsb', kws= {'df': test_dfa})
-            lmfit.report_fit(switch_out)
-            switch_fit_dict[subj_name + '_fullRun'] = switch_out.params.valuesdict()
+            switch_fit_dict[subj_name + '_fullRun'] = fit_switch_model(test_dfa)
     
         
         # *********************************************
@@ -340,68 +211,32 @@ else:
         
         # Bias2 observer for test    
         params = bias2_fit_dict[subj_name + '_fullRun']
-        fit_observer = BiasPredModel(train_ts_dis, [.5,.5], r1 = params['r1'], r2 = params['r2'], eps = params['eps'])
-        # Fit observer for test        
-        posteriors = []
-        for i,trial in test_dfa.iterrows():
-            c = trial.context
-            posteriors.append(fit_observer.calc_posterior(c)[1])
-        posteriors = np.array(posteriors)
-    
-        test_dfa['bias2_observer_posterior'] = posteriors
-        test_dfa['bias2_observer_choices'] = (posteriors>.5).astype(int)
-        test_dfa['bias2_observer_switch'] = (test_dfa.bias2_observer_posterior>.5).diff()
-        test_dfa['conform_bias2_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
-        test_dfa['bias2_certainty'] = (abs(test_dfa.bias2_observer_posterior-.5))/.5
-        
-        # bias1 observer for test    
+        bias2_observer = BiasPredModel(train_ts_dis, [.5,.5], r1 = params['r1'], r2 = params['r2'], eps = params['eps'])
         params = bias1_fit_dict[subj_name + '_fullRun']
-        fit_observer = BiasPredModel(train_ts_dis, [.5,.5], r1 = params['rp'], 
-            r2 = params['rp'], eps = params['eps'],)
-        # Fit observer for test        
-        posteriors = []
-        for i,trial in test_dfa.iterrows():
-            c = trial.context
-            posteriors.append(fit_observer.calc_posterior(c)[1])
-        posteriors = np.array(posteriors)
-    
-        test_dfa['bias1_observer_posterior'] = posteriors
-        test_dfa['bias1_observer_choices'] = (posteriors>.5).astype(int)
-        test_dfa['bias1_observer_switch'] = (test_dfa.bias1_observer_posterior>.5).diff()
-        test_dfa['conform_bias1_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
-        test_dfa['bias1_certainty'] = (abs(test_dfa.bias1_observer_posterior-.5))/.5
-        
-        # eoptimal observer for test    
+        bias1_observer = BiasPredModel(train_ts_dis, [.5,.5], r1 = params['rp'], r2 = params['rp'], eps = params['eps'])
         params = eoptimal_fit_dict[subj_name + '_fullRun']
-        fit_observer = BiasPredModel(train_ts_dis, [.5,.5], r1=train_recursive_p, 
-            r2=train_recursive_p, eps=params['eps'],)
+        eoptimal_observer = BiasPredModel(train_ts_dis, [.5,.5], r1=train_recursive_p, r2=train_recursive_p, eps=params['eps'])
         # Fit observer for test        
-        posteriors = []
+        bias2_posteriors = []
+        bias1_posteriors = []
+        eoptimal_posteriors = []
+        ignore_posteriors = []
         for i,trial in test_dfa.iterrows():
             c = trial.context
-            posteriors.append(fit_observer.calc_posterior(c)[1])
-        posteriors = np.array(posteriors)
+            bias2_posteriors.append(bias2_observer.calc_posterior(c)[1])
+            bias1_posteriors.append(bias1_observer.calc_posterior(c)[1])
+            eoptimal_posteriors.append(eoptimal_observer.calc_posterior(c)[1])
+            ignore_posteriors.append(eoptimal_observer.calc_posterior(c)[1])
+        bias2_posteriors = np.array(bias2_posteriors)
+        bias1_posteriors = np.array(bias1_posteriors)
+        eoptimal_posteriors = np.array(eoptimal_posteriors)
+        ignore_posteriors = np.array(eoptimal_posteriors)
     
-        test_dfa['eoptimal_observer_posterior'] = posteriors
-        test_dfa['eoptimal_observer_choices'] = (posteriors > .5).astype(int)
-        test_dfa['eoptimal_observer_switch'] = (test_dfa.eoptimal_observer_posterior > .5).diff()
-        test_dfa['conform_eoptimal_observer'] = np.equal(test_dfa.subj_ts, posteriors > .5)
-        test_dfa['eoptimal_certainty'] = (abs(test_dfa.eoptimal_observer_posterior-.5)) / .5
-    
-        # Ignore observer for test  
-        params = ignore_fit_dict[subj_name + '_fullRun']      
-        ignore_observer = BiasPredModel(train_ts_dis, [.5,.5],  r1 = .5, r2 = .5, 
-            eps = params['eps'])
-        posteriors = []
-        for i,trial in test_dfa.iterrows():
-            c = trial.context
-            posteriors.append(ignore_observer.calc_posterior(c)[1])
-        posteriors = np.array(posteriors)
-        test_dfa['ignore_observer_posterior'] = posteriors
-        test_dfa['ignore_observer_choices'] = (posteriors>.5).astype(int)
-        test_dfa['ignore_observer_switch'] = (test_dfa.ignore_observer_posterior>.5).diff()
-        test_dfa['conform_ignore_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
-    
+        test_dfa['bias2_posterior'] = bias2_posteriors
+        test_dfa['bias1_posterior'] = bias1_posteriors
+        test_dfa['eoptimal_posterior'] = eoptimal_posteriors
+        test_dfa['ignore_posterior'] = eoptimal_posteriors
+        
         # midline observer for test  
         eps = midline_fit_dict[subj_name + '_fullRun']['eps']
         posteriors = []
@@ -410,11 +245,7 @@ else:
             posteriors.append(abs(c - eps))
         posteriors = np.array(posteriors)
     
-        test_dfa['midline_observer_posterior'] = posteriors
-        test_dfa['midline_observer_choices'] = (posteriors>.5).astype(int)
-        test_dfa['midline_observer_switch'] = (test_dfa.midline_observer_posterior>.5).diff()
-        test_dfa['conform_midline_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
-        test_dfa['midline_certainty'] = (abs(test_dfa.midline_observer_posterior-.5))/.5 
+        test_dfa['midline_posterior'] = posteriors
     
         # Switch observer for test  
         params = switch_fit_dict[subj_name + '_fullRun']      
@@ -430,12 +261,15 @@ else:
             posteriors.append(conf[trial_choice])           
         posteriors = np.array(posteriors)
         
-        test_dfa['switch_observer_posterior'] = posteriors
-        test_dfa['switch_observer_choices'] = (posteriors>.5).astype(int)
-        test_dfa['switch_observer_switch'] = (test_dfa.switch_observer_posterior>.5).diff()
-        test_dfa['conform_switch_observer'] = np.equal(test_dfa.subj_ts, posteriors>.5)
-        test_dfa['switch_certainty'] = (abs(test_dfa.switch_observer_posterior-.5))/.5 
+        test_dfa['switch_posterior'] = posteriors
+
     
+        for model in ['bias2','bias1','eoptimal', 'ignore', 'midline', 'switch']:
+            test_dfa[model + '_choices'] = (test_dfa[model + '_posterior']>.5).astype(int)
+            test_dfa[model + '_certainty'] = (abs(test_dfa[model + '_posterior']-.5))/.5
+        
+        #test_dfa['bias2_observer_choices'] = (posteriors>.5).astype(int)
+        #test_dfa['bias2_observer_switch'] = (test_dfa.bias2_observer_posterior>.5).diff()
     
         train_dfa['id'] = subj_name
         test_dfa['id'] = subj_name
