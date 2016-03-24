@@ -8,8 +8,9 @@ import numpy as np
 from scipy.stats import norm
 from Load_Data import load_data
 from helper_classes import BiasPredModel, SwitchModel
-from helper_functions import *
-import pickle, glob, re, lmfit, os
+from helper_functions import fit_bias2_model, fit_bias1_model, fit_static_model, \
+    fit_switch_model, fit_midline_model
+import pickle, glob, re
 import matplotlib.pyplot as plt
 from matplotlib import pylab
 import pandas as pd
@@ -24,7 +25,7 @@ warnings.simplefilter(action = "ignore", category = RuntimeWarning)
 # Set up defaults
 # *********************************************
 plot = False
-save = True
+save = False
 
 # *********************************************
 # Load Data
@@ -129,6 +130,8 @@ else:
         train_ts_dis = [norm(m, s) for m, s in zip(train_ts_means, train_ts_std)]
         # And do the same for recursive_p
         train_recursive_p = 1 - train_dfa.switch.mean()
+        #how often did the response not match either of the stim's features
+        action_eps = 1-np.mean([test_dfa['response'][i] in test_dfa['stim'][i] for i in test_dfa.index])
 
         # decompose contexts
         test_dfa['abs_context'] = abs(test_dfa.context)
@@ -144,24 +147,25 @@ else:
         
         # *********************************************
         # Model fitting
-        # *********************************************
-
-        if subj_name + '_fullRun' not in bias2_fit_dict.keys():
-            bias2_fit_dict[subj_name + '_fullRun'] = fit_bias2_model(train_ts_dis, test_dfa)
-
-        if subj_name + '_fullRun' not in bias1_fit_dict.keys():
-            bias1_fit_dict[subj_name + '_fullRun'] = fit_bias1_model(train_ts_dis, test_dfa)
-        
-        if subj_name + '_fullRun' not in  eoptimal_fit_dict.keys():
-            eoptimal_fit_dict[subj_name + '_fullRun'] = fit_static_model(train_ts_dis, test_dfa, train_recursive_p)
-        # fit ignore rule random probability:
-        if subj_name + '_fullRun' not in ignore_fit_dict.keys():
-            ignore_fit_dict[subj_name + '_fullRun'] = fit_static_model(train_ts_dis, test_dfa, .5)
-
+        # *********************************************s
+        for model_type in ['action', 'TS']:
+            if subj_name + '_fullRun' not in bias2_fit_dict.keys():
+                bias2_fit_dict[subj_name + '_' + model_type + '_fullRun'] = fit_bias2_model(train_ts_dis, \
+                    test_dfa, action_eps = action_eps, model_type = model_type)
+            if subj_name + '_fullRun' not in bias1_fit_dict.keys():
+                bias1_fit_dict[subj_name + '_' + model_type + '_fullRun'] = fit_bias1_model(train_ts_dis, \
+                    test_dfa, action_eps = action_eps, model_type = model_type)
+    
+            if subj_name + '_fullRun' not in  eoptimal_fit_dict.keys():
+                eoptimal_fit_dict[subj_name + '_' + model_type + '_fullRun'] = fit_static_model(train_ts_dis, \
+                    test_dfa, r_value = train_recursive_p, action_eps = action_eps, model_type = model_type)
+            if subj_name + '_fullRun' not in ignore_fit_dict.keys():
+                ignore_fit_dict[subj_name + '_' + model_type + '_fullRun'] = fit_static_model(train_ts_dis, \
+                    test_dfa, r_value = .5, action_eps = action_eps, model_type = model_type)
+                    
         # fit midline rule random probability:
         if subj_name + '_fullRun' not in midline_fit_dict.keys():
             midline_fit_dict[subj_name + '_fullRun'] = fit_midline_model(test_dfa)
-        
         # fit switch rule
         if subj_name + '_fullRun' not in switch_fit_dict.keys():
             switch_fit_dict[subj_name + '_fullRun'] = fit_switch_model(test_dfa)

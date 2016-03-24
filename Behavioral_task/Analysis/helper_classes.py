@@ -19,31 +19,32 @@ class BiasPredModel:
     determines the probability of acting randomly each trial which translates
     into a 'mixture model' calculation for the trial-by-trial posterior
     """
-    def __init__(self, likelihood_dist, prior, r1 = .9, r2 = .9, eps = 0,
-                 data_noise = 0):
+    def __init__(self, likelihood_dist, prior, r1 = .9, r2 = .9, TS_eps = 0,
+                 action_eps = 0):
         self.prior = np.array(prior)
         self.likelihood_dist = likelihood_dist
         self.r1 = r1
         self.r2 = r2
         self.posterior = prior
-        self.eps = eps
+        self.TS_eps = TS_eps
+        self.action_eps = action_eps
         
-    def calc_posterior(self, data):
+    def calc_posterior(self, context):
         """
-        Calculate the posterior probability of different distribution hypotheses
-        given a data point. You can pass in multiple data points but this function
+        Calculate the posterior probability of different distribution hypotheses (TSs)
+        given a context point. You can pass in multiple context points but this function
 		will only calculate the posterior based on the current prior and will not update
-		in between each data point.
+		in between each context point.
         """
         ld = self.likelihood_dist
         r1 = self.r1
         r2 = self.r2
-        eps = self.eps
+        eps = self.TS_eps
         prior = self.prior
            
         trans_probs = np.array([[r1, 1-r1], [1-r2, r2]]).transpose()            
         n = len(prior)
-        likelihood = np.array([dis.pdf(data) for dis in ld])
+        likelihood = np.array([dis.pdf(context) for dis in ld])
         numer = np.array([likelihood[i] * prior[i] for i in range(n)])
         dinom = np.sum(numer,0)
         posterior = numer/dinom
@@ -51,6 +52,22 @@ class BiasPredModel:
         self.posterior = posterior
         TS_probs = (1-eps)*posterior+eps/2  # mixed model of TS posteriors and random guessing
         return TS_probs
+        
+    def calc_action_posterior(self, stim, context):
+        """
+        Calculate the posterior probability of different actions. Pass in one
+        context value and one stim
+        """
+        self.calc_posterior(context)
+        TS_eps = self.TS_eps
+        eps = self.action_eps
+        TS_probs = (1-TS_eps)*self.posterior+TS_eps/2
+        action_probs = np.zeros(4)
+        for i in range(len(stim)):
+            action_probs[stim[i]] = TS_probs[i]
+        action_probs = (1-eps)*action_probs+eps/len(action_probs)
+        return action_probs
+    
        
     def choose(self, mode = 'softmax', eps = .1, inv_temp = 1):
         if mode == "e-greedy":
