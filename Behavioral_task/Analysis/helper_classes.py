@@ -28,24 +28,18 @@ class BiasPredModel:
         self.posterior = prior
         self.eps = eps
         
-    def calc_posterior(self, data, noise = 0):
+    def calc_posterior(self, data):
         """
         Calculate the posterior probability of different distribution hypotheses
         given a data point. You can pass in multiple data points but this function
 		will only calculate the posterior based on the current prior and will not update
 		in between each data point.
-		You can set a noise value which will set add gaussian
-        noise to the observation. The value specified will be a scaling parameter. 
-        It should always be less than one. 
         """
         ld = self.likelihood_dist
         r1 = self.r1
         r2 = self.r2
         eps = self.eps
         prior = self.prior
-        
-        if noise:
-            data= min(max(data + noise*norm().rvs(),-1),1)
            
         trans_probs = np.array([[r1, 1-r1], [1-r2, r2]]).transpose()            
         n = len(prior)
@@ -76,8 +70,9 @@ class SwitchModel:
     Prediction model that takes in data, and uses a prior over hypotheses
     and the relevant to calculate posterior hypothesis estimates.
     """
-    def __init__(self, r1 = .9, r2 = .9):
+    def __init__(self, r1 = .9, r2 = .9, eps = 0):
         self.trans_probs = np.array([[r1, 1-r1], [1-r2, r2]]).transpose()
+        self.eps = eps
         
     def calc_TS_prob(self, last_choice = -1):
         """
@@ -87,10 +82,11 @@ class SwitchModel:
         assumes that the last choice indicates complete confidence in the previous
         TS
         """
+        eps = self.eps
         if last_choice == -1:
             return [.5,.5]
         else:
-            return self.trans_probs[:,last_choice]
+            return (1-eps)*self.trans_probs[:,last_choice]+eps/2
     
        
 

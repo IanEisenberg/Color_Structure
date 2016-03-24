@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pylab, lmfit
 import random as r
-from helper_classes import BiasPredModel
+from helper_classes import BiasPredModel, SwitchModel
 
 def track_runs(iterable):
     """
@@ -31,7 +31,7 @@ def track_runs(iterable):
         element_i += 1
     track_repeats = track_repeats[1:]
     return track_repeats
-    
+
 def bar(x, y, title):
     plot = plt.bar(x,y,width = .5)
     plt.title(str(title))
@@ -41,10 +41,10 @@ def moving_average(a, n=3) :
     ret = np.cumsum(a, dtype=float)
     ret[n:] = ret[n:] - ret[:-n]
     return ret[n - 1:] / n
-    
+
 def softmax(probs, inv_temp):
     return np.exp(probs*inv_temp)/sum(np.exp(probs*inv_temp))
-    
+
 def calc_posterior(data,prior,likelihood_dist):
     n = len(prior)
     likelihood = [dis.pdf(data) for dis in likelihood_dist]
@@ -72,66 +72,143 @@ def seqStats(l,p,reps):
         for i in track_runs(tmp):
             seqs.append(i[0])
     return (np.mean(seqs), np.std(seqs))
-    
-    
-    
-def fit_model(train_ts_dis, data, init_prior = [.5,.5], bias = True, mode = "biasmodel"):
+
+
+
+#*********************************************
+# Model fitting functions
+#*********************************************
+
+def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5],  print_out = True):
     """
-    Function to fit parameters to the bias model (recursive probability and
-    task set bias) or the midline model (probability of random action)
-    Mode must equal "biasmodel" or "midline". If mode == "biasmodel", bias
-    can either be set to True or False. If False, tsb will be fixed at 1, 
-    forcing the model to have no bias towards either task-set.
+    Function to fit parameters to the bias2 model (fit r1, r2 and epsilon)
     """
-    if mode == "biasmodel":
-        #Fitting Functions
-        def bias_fitfunc(rp, tsb, df):
-            init_prior = [.5,.5]
-            model = BiasPredModel(train_ts_dis, init_prior, ts_bias = tsb, recursive_prob = rp)
-            model_likelihoods = []
-            for i in df.index:
-                c = df.context[i]
-                trial_choice = df.subj_ts[i]
-                conf = model.calc_posterior(c)
-                model_likelihoods.append(conf[trial_choice])
-            return np.array(model_likelihoods)
+    def errfunc(params,df):
+        r1 = params['r1']
+        r2 = params['r2']
+        eps = params['eps']
     
-        def bias_errfunc(params,df):
-            rp = params['rp']
-            tsb = params['tsb']
-            #minimize
-            return abs(np.sum(np.log(bias_fitfunc(rp,tsb,df)))) #single value
-            
-        #Fit bias model
-        #attempt to simplify:
-        fit_params = lmfit.Parameters()
-        fit_params.add('rp', value = .6, min = 0, max = 1)
-        if bias == True:
-            fit_params.add('tsb', value = 1, min = 0)
-        else:
-            fit_params.add('tsb', value = 1, vary = False, min = 0)
-        out = lmfit.minimize(bias_errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
+        init_prior = [.5,.5]
+        model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, eps=eps)
+        model_likelihoods = []
+        for i in df.index:
+            c = df.context[i]
+            trial_choice = df.subj_ts[i]
+            conf = model.calc_posterior(c)
+            model_likelihoods.append(conf[trial_choice])
+        # minimize
+        return abs(np.sum(np.log(np.array(model_likelihoods)))) # single value
+    
+    # Fit bias model
+    fit_params = lmfit.Parameters()
+    fit_params.add('r1', value=.5, min=0, max=1)
+    fit_params.add('r2', value=.5, min=0, max=1)
+    fit_params.add('eps', value=.1, min=0, max=1)
+    out = lmfit.minimize(errfunc, fit_params, method = 'lbfgsb', kws={'df': data})
+    if print_out:
         lmfit.report_fit(out)
-        return out.values
-        
-    elif mode == "midline":
-         #Fitting Functions
-        def midline_errfunc(params,df):
-            eps = params['eps'].value
-            context_sgn = np.array([max(i,0) for i in df.context_sign])
-            choice = df.subj_ts
-            #minimize
-            return -np.sum(np.log(abs(abs(choice - (1-context_sgn))-eps)))
+    return out.params.valuesdict()
+    
+def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5],  print_out = True):
+    """
+    Function to fit parameters to the bias2 model (fit r and epsilon)
+    """
+    def errfunc(params,df):
+        r1 = params['rp']
+        r2 = params['rp']
+        eps = params['eps']
+
+        init_prior = [.5,.5]
+        model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, eps=eps)
+        model_likelihoods = []
+        for i in df.index:
+            c = df.context[i]
+            trial_choice = df.subj_ts[i]
+            conf = model.calc_posterior(c)
+            model_likelihoods.append(conf[trial_choice])
+        # minimize
+        return abs(np.sum(np.log(np.array(model_likelihoods)))) # single value
+    
+    # Fit bias model
+    fit_params = lmfit.Parameters()
+    fit_params.add('rp', value=.5, min=0, max=1)
+    fit_params.add('eps', value = .1, min=0, max=1)
+    out = lmfit.minimize(errfunc, fit_params, method = 'lbfgsb', kws={'df': data})
+    if print_out:
+        lmfit.report_fit(out)
+    return out.params.valuesdict()
+    
+def fit_static_model(train_ts_dis, data, r_value, init_prior = [.5,.5],  print_out = True):
+    """
+    Function to fit any model where recursive probabilities are fixed, like an
+    optimal model (r1=r2=.9) or a base-rate neglect model (r1=r2=.5)
+    """
+    def errfunc(params,df):
+        r1 = r_value
+        r2 = r_value
+        eps = params['eps']
+
+        init_prior = [.5,.5]
+        model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, eps=eps)
+        model_likelihoods = []
+        for i in df.index:
+            c = df.context[i]
+            trial_choice = df.subj_ts[i]
+            conf = model.calc_posterior(c)
+            model_likelihoods.append(conf[trial_choice])
+        # minimize
+        return abs(np.sum(np.log(np.array(model_likelihoods)))) # single value
+    
+    # Fit bias model
+    fit_params = lmfit.Parameters()
+    fit_params.add('eps', value = .1, min=0, max=1)
+    out = lmfit.minimize(errfunc, fit_params, method = 'lbfgsb', kws={'df': data})
+    if print_out:
+        lmfit.report_fit(out)
+    return out.params.valuesdict()
+
+def fit_midline_model(data):
+    def midline_errfunc(params,df):
+        eps = params['eps'].value
+        context_sgn = np.array([max(i,0) for i in df.context_sign])
+        choice = df.subj_ts
+        #minimize
+        return -np.sum(np.log(abs(abs(choice - (1-context_sgn))-eps)))
+
+    #Fit bias model
+    #attempt to simplify:
+    fit_params = lmfit.Parameters()
+    fit_params.add('eps', value = .1, min = 0, max = 1)
+    midline_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
+    lmfit.report_fit(midline_out)
+    return midline_out.values
+    
+def fit_switch_model(data):
+    def switch_errfunc(params,df):
+        params = params.valuesdict()
+        r1 = params['r1']
+        r2 = params['r2']   
+        eps = params['eps']
+        model = SwitchModel(r1 = r1, r2 = r2, eps = eps)
+        model_likelihoods = []
+        model_likelihoods.append(.5)
+        for i in df.index[1:]:
+            last_choice = df.subj_ts[i-1]
+            trial_choice = df.subj_ts[i]
+            conf = model.calc_TS_prob(last_choice)
+            model_likelihoods.append(conf[trial_choice])
             
-        #Fit bias model
-        #attempt to simplify:
-        fit_params = lmfit.Parameters()
-        fit_params.add('eps', value = .1, min = 0, max = 1)
-        midline_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
-        lmfit.report_fit(midline_out)
-        return midline_out.values
-
-
+        # minimize
+        return abs(np.sum(np.log(model_likelihoods))) # single value
+    # Fit switch model
+    fit_params = lmfit.Parameters()
+    fit_params.add('r1', value=.5, min=0, max=1)
+    fit_params.add('r2', value=.5, min=0, max=1)
+    fit_params.add('eps', value = .1, min = 0, max = 1)
+    switch_out = lmfit.minimize(switch_errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
+    lmfit.report_fit(switch_out)
+    return switch_out.params.valuesdict()
+    
 #*********************************************
 # Plotting
 #*********************************************
@@ -158,7 +235,7 @@ def plot_run(sub,plotting_dict, exclude = [], fontsize = 16):
     plt.plot(sub.trial_count, sub.context/2-1.5,'k', lw = 2, label = 'stimulus height')
     plt.plot(sub.trial_count, sub.con_2dim+2.85, 'yo', label = 'subject choice')
     plt.yticks([-2, -1.5, -1, 0, 1, 2, 3.1, 4.1], [ -1, 0 , 1,'0%', '50%',  '100%', 'TS2 Choice', 'TS1 Choice'], size = fontsize-4 )
-    plt.xticks(size = fontsize - 4)    
+    plt.xticks(size = fontsize - 4)
     plt.xlim([min(sub.index)-.5,max(sub.index)])
     plt.ylim(-2.5,5)
     #subdivide graph
@@ -171,4 +248,3 @@ def plot_run(sub,plotting_dict, exclude = [], fontsize = 16):
     ax.yaxis.set_label_coords(-.1, .45)
     pylab.legend(loc='upper center', bbox_to_anchor=(0.5, 1.08),
               ncol=3, fancybox=True, shadow=True, prop={'size':fontsize}, frameon = True)
-               
