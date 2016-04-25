@@ -9,7 +9,7 @@ from scipy.stats import norm
 from Load_Data import load_data
 from helper_classes import BiasPredModel, SwitchModel
 from helper_functions import fit_bias2_model, fit_bias1_model, fit_static_model, \
-    fit_switch_model, fit_midline_model, calc_posterior
+    fit_switch_model, fit_midline_model, calc_posterior, gen_TS_posteriors
 import pickle, glob, re
 import matplotlib.pyplot as plt
 from matplotlib import pylab
@@ -78,7 +78,7 @@ else:
     for train_file, test_file in zip(train_files, test_files):
         subj_name = re.match(r'.*/RawData.(\w*)_Prob*', test_file).group(1)
         print(subj_name)
-        if False:
+        if subj_name in ['034']:
             pass
         count += 1
         train_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', train_file).group(1)
@@ -130,6 +130,8 @@ else:
         train_ts_dis = [norm(m, s) for m, s in zip(train_ts_means, train_ts_std)]
         # And do the same for recursive_p
         train_recursive_p = 1 - train_dfa.switch.mean()
+        #how often did the response not match either of the stim's features
+        action_eps = 1-np.mean([test_dfa['response'][i] in test_dfa['stim'][i] for i in test_dfa.index])
 
         # decompose contexts
         test_dfa['abs_context'] = abs(test_dfa.context)
@@ -147,32 +149,32 @@ else:
         # Model fitting
         # *********************************************
         df_midpoint = round(len(test_dfa)/2)
-        
-        if subj_name + '_fullRun' not in bias2_fit_dict.keys():
-            bias2_fit_dict[subj_name + '_fullRun'] = fit_bias2_model(train_ts_dis, test_dfa)
-            bias1_fit_dict[subj_name + '_fullRun'] = fit_bias1_model(train_ts_dis, test_dfa)
-            eoptimal_fit_dict[subj_name + '_fullRun'] = fit_static_model(train_ts_dis, test_dfa, train_recursive_p)
-            ignore_fit_dict[subj_name + '_fullRun'] = fit_static_model(train_ts_dis, test_dfa, .5)
-            midline_fit_dict[subj_name + '_fullRun'] = fit_midline_model(test_dfa)
-            switch_fit_dict[subj_name + '_fullRun'] = fit_switch_model(test_dfa)
-        if subj_name + '_first' not in bias2_fit_dict.keys():
-            bias2_fit_dict[subj_name + '_first']  = fit_bias2_model(train_ts_dis, test_dfa.iloc[0:df_midpoint])
-            bias2_fit_dict[subj_name + '_second']  = fit_bias2_model(train_ts_dis, test_dfa.iloc[df_midpoint:])
-        if subj_name + '_first' not in bias1_fit_dict.keys():   
-            bias1_fit_dict[subj_name + '_first']  = fit_bias1_model(train_ts_dis, test_dfa.iloc[0:df_midpoint])
-            bias1_fit_dict[subj_name + '_second']  = fit_bias1_model(train_ts_dis, test_dfa.iloc[df_midpoint:])
-            
-            eoptimal_fit_dict[subj_name + '_first']  = fit_static_model(train_ts_dis, test_dfa.iloc[0:df_midpoint], train_recursive_p)
-            eoptimal_fit_dict[subj_name + '_second']  = fit_static_model(train_ts_dis, test_dfa.iloc[df_midpoint:], train_recursive_p)
-            
-            ignore_fit_dict[subj_name + '_first']  = fit_static_model(train_ts_dis, test_dfa.iloc[0:df_midpoint], .5)
-            ignore_fit_dict[subj_name + '_second']  = fit_static_model(train_ts_dis, test_dfa.iloc[df_midpoint:], .5)
-            
-            midline_fit_dict[subj_name + '_first'] = fit_midline_model(test_dfa.iloc[0:df_midpoint])
-            midline_fit_dict[subj_name + '_second'] = fit_midline_model(test_dfa.iloc[df_midpoint:])
-
-            switch_fit_dict[subj_name + '_first'] = fit_switch_model(test_dfa.iloc[0:df_midpoint])
-            switch_fit_dict[subj_name + '_second'] = fit_switch_model(test_dfa.iloc[df_midpoint:])
+        for model_type in ['TS', 'action']:
+            print(model_type)
+            if subj_name + '_' + model_type + '_first' not in bias2_fit_dict.keys():
+                bias2_fit_dict[subj_name + '_' + model_type + '_fullRun'] = fit_bias2_model(train_ts_dis, test_dfa, action_eps = action_eps, model_type = model_type)
+                bias2_fit_dict[subj_name + '_' + model_type + '_first']  = fit_bias2_model(train_ts_dis, test_dfa.iloc[0:df_midpoint], action_eps = action_eps, model_type = model_type)
+                bias2_fit_dict[subj_name + '_' + model_type + '_second']  = fit_bias2_model(train_ts_dis, test_dfa.iloc[df_midpoint:], action_eps = action_eps, model_type = model_type)
+            if subj_name + '_' + model_type + '_first' not in bias1_fit_dict.keys():    
+                bias1_fit_dict[subj_name + '_' + model_type + '_fullRun'] = fit_bias1_model(train_ts_dis, test_dfa, action_eps = action_eps, model_type = model_type)
+                bias1_fit_dict[subj_name + '_' + model_type + '_first']  = fit_bias1_model(train_ts_dis, test_dfa.iloc[0:df_midpoint], action_eps = action_eps, model_type = model_type)
+                bias1_fit_dict[subj_name + '_' + model_type + '_second']  = fit_bias1_model(train_ts_dis, test_dfa.iloc[df_midpoint:], action_eps = action_eps, model_type = model_type)
+            if subj_name + '_' + model_type + '_first' not in eoptimal_fit_dict.keys():                
+                eoptimal_fit_dict[subj_name + '_' + model_type + '_fullRun'] = fit_static_model(train_ts_dis, test_dfa, train_recursive_p, action_eps = action_eps, model_type = model_type)
+                eoptimal_fit_dict[subj_name + '_' + model_type + '_first']  = fit_static_model(train_ts_dis, test_dfa.iloc[0:df_midpoint], train_recursive_p, action_eps = action_eps, model_type = model_type)
+                eoptimal_fit_dict[subj_name + '_' + model_type + '_second']  = fit_static_model(train_ts_dis, test_dfa.iloc[df_midpoint:], train_recursive_p, action_eps = action_eps, model_type = model_type)
+            if subj_name + '_' + model_type + '_first' not in ignore_fit_dict.keys():                
+                ignore_fit_dict[subj_name + '_' + model_type + '_fullRun'] = fit_static_model(train_ts_dis, test_dfa, .5, action_eps = action_eps, model_type = model_type)                
+                ignore_fit_dict[subj_name + '_' + model_type + '_first']  = fit_static_model(train_ts_dis, test_dfa.iloc[0:df_midpoint], .5, action_eps = action_eps, model_type = model_type)
+                ignore_fit_dict[subj_name + '_' + model_type + '_second']  = fit_static_model(train_ts_dis, test_dfa.iloc[df_midpoint:], .5, action_eps = action_eps, model_type = model_type)
+            if subj_name + '_first' not in midline_fit_dict.keys():               
+                midline_fit_dict[subj_name + '_fullRun'] = fit_midline_model(test_dfa)                
+                midline_fit_dict[subj_name + '_first'] = fit_midline_model(test_dfa.iloc[0:df_midpoint])
+                midline_fit_dict[subj_name + '_second'] = fit_midline_model(test_dfa.iloc[df_midpoint:])
+            if subj_name + '_first' not in switch_fit_dict.keys():    
+                switch_fit_dict[subj_name + '_fullRun'] = fit_switch_model(test_dfa)                
+                switch_fit_dict[subj_name + '_first'] = fit_switch_model(test_dfa.iloc[0:df_midpoint])
+                switch_fit_dict[subj_name + '_second'] = fit_switch_model(test_dfa.iloc[df_midpoint:])
     
         
         # *********************************************
@@ -180,7 +182,6 @@ else:
         # *********************************************
         
         # **************TRAIN*********************
-        
         # This observer know the exact statistics of the task, always chooses correctly
         # given that it chooses the correct task-set, and perfectly learns from feedback.
         # This means that it sets the prior probability for each ts to the transition probabilities
@@ -202,7 +203,7 @@ else:
         train_dfa['conform_opt'] = np.equal(train_dfa.subj_ts, observer_choices)
         
         # Optimal observer for train, without feedback     
-        no_fb = BiasPredModel(train_ts_dis, [.5,.5], r1 = train_recursive_p, r2 = train_recursive_p, eps = 0)
+        no_fb = BiasPredModel(train_ts_dis, [.5,.5], r1 = train_recursive_p, r2 = train_recursive_p, TS_eps = 0, action_eps = action_eps)
         observer_choices = []
         posteriors = []
         for i,trial in train_dfa.iterrows():
@@ -216,36 +217,19 @@ else:
         
         
         # **************TEST*********************
-        
+        model_type = 'TS'
         # Bias2 observer for test    
-        params = bias2_fit_dict[subj_name + '_fullRun']
-        bias2 = BiasPredModel(train_ts_dis, [.5,.5], r1 = params['r1'], r2 = params['r2'], eps = params['eps'])
-        params = bias1_fit_dict[subj_name + '_fullRun']
-        bias1 = BiasPredModel(train_ts_dis, [.5,.5], r1 = params['rp'], r2 = params['rp'], eps = params['eps'])
-        params = eoptimal_fit_dict[subj_name + '_fullRun']
-        eoptimal = BiasPredModel(train_ts_dis, [.5,.5], r1=train_recursive_p, r2=train_recursive_p, eps=params['eps'])
-        params = ignore_fit_dict[subj_name + '_fullRun']
-        ignore = BiasPredModel(train_ts_dis, [.5,.5], r1=train_recursive_p, r2=train_recursive_p, eps=params['eps'])
+        params = bias2_fit_dict[subj_name + '_' + model_type + '_fullRun']
+        bias2 = BiasPredModel(train_ts_dis, [.5,.5],**params)
+        params = bias1_fit_dict[subj_name + '_' + model_type + '_fullRun']
+        bias1 = BiasPredModel(train_ts_dis, [.5,.5], **params)
+        params = eoptimal_fit_dict[subj_name + '_' + model_type + '_fullRun']
+        eoptimal = BiasPredModel(train_ts_dis, [.5,.5], **params)
+        params = ignore_fit_dict[subj_name + '_' + model_type + '_fullRun']
+        ignore = BiasPredModel(train_ts_dis, [.5,.5], **params)
+        
         # Fit observer for test        
-        bias2_posteriors = []
-        bias1_posteriors = []
-        eoptimal_posteriors = []
-        ignore_posteriors = []
-        for i,trial in test_dfa.iterrows():
-            c = trial.context
-            bias2_posteriors.append(bias2.calc_posterior(c)[1])
-            bias1_posteriors.append(bias1.calc_posterior(c)[1])
-            eoptimal_posteriors.append(eoptimal.calc_posterior(c)[1])
-            ignore_posteriors.append(ignore.calc_posterior(c)[1])
-        bias2_posteriors = np.array(bias2_posteriors)
-        bias1_posteriors = np.array(bias1_posteriors)
-        eoptimal_posteriors = np.array(eoptimal_posteriors)
-        ignore_posteriors = np.array(ignore_posteriors)
-    
-        test_dfa['bias2_posterior'] = bias2_posteriors
-        test_dfa['bias1_posterior'] = bias1_posteriors
-        test_dfa['eoptimal_posterior'] = eoptimal_posteriors
-        test_dfa['ignore_posterior'] = ignore_posteriors
+        gen_TS_posteriors([bias2, bias1, eoptimal, ignore], test_dfa, ['bias2', 'bias1', 'eoptimal', 'ignore'])        
         
         # midline observer for test  
         eps = midline_fit_dict[subj_name + '_fullRun']['eps']
@@ -259,7 +243,7 @@ else:
     
         # Switch observer for test  
         params = switch_fit_dict[subj_name + '_fullRun']      
-        switch = SwitchModel(r1 = params['r1'], r2 = params['r2'])
+        switch = SwitchModel(**params)
         posteriors = []
         for i,trial in test_dfa.iterrows():
             if i == 0:
@@ -346,19 +330,21 @@ compare_df['random_log'] = np.log(.5)
 summary = compare_df.groupby('id').sum().drop(['context','subj_ts'],axis = 1)
 
 # *********************************************
-# Model Comparison
+# Behavioral Analysis
 # ********************************************* 
 
 import statsmodels.formula.api as smf
 import statsmodels.api as sm
 
+switch_sums = []
 trials_since_switch = 0
 for i,row in gtest_learn_df.iterrows():
-    if row['switch'] == 0 or i == 0:
-        trials_since_switch += 1
-    else:
+    if row['switch'] == 1 or pd.isnull(row['switch']):
         trials_since_switch = 0
-    gtest_learn_df.set_value(i,'trials_since_switch', trials_since_switch)
+    else:
+        trials_since_switch += 1
+    switch_sums.append(trials_since_switch)
+gtest_learn_df['trials_since_switch'] = switch_sums
 
 df = gtest_learn_df
 res = smf.ols(formula='correct ~ trials_since_switch + rt', data=df).fit()
@@ -368,13 +354,15 @@ res = sm.OLS(df['bias2_certainty'], df[['trials_since_switch']]).fit()
 
 print(res.summary())
 
-plot_df = pd.DataFrame()
+plot_df = {}
 for i in np.unique(df['id']):
     temp_df = df.query('id == "%s"' % i)
     plot_df[i] = [temp_df.query('trials_since_switch == %s' % i)['correct'].mean() for i in np.unique(temp_df['trials_since_switch'])]
+plot_df = pd.DataFrame.from_dict(plot_df, orient='index').transpose()  
+
 plot_df = plot_df.unstack().reset_index(name = 'percent_correct')
 plot_df.rename(columns={'level_0': 'id', 'level_1': 'trials_since_switch'}, inplace=True)
-sns.lmplot(x = 'trials_since_switch', y = 'percent_correct', data = plot_df, hue = 'id')
+sns.lmplot(x = 'trials_since_switch', y = 'percent_correct', data = plot_df)
 smf.ols(formula = 'percent_correct ~ trials_since_switch', data = plot_df).fit().summary()
 
 # *********************************************
