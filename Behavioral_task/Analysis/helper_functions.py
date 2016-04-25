@@ -181,7 +181,7 @@ def fit_midline_model(data):
     fit_params.add('eps', value = .1, min = 0, max = 1)
     midline_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
     lmfit.report_fit(midline_out)
-    return midline_out.values
+    return midline_out.params.valuesdict()
     
 def fit_switch_model(data):
     def switch_errfunc(params,df):
