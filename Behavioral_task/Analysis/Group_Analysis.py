@@ -8,8 +8,9 @@ import numpy as np
 from scipy.stats import norm
 from Load_Data import load_data
 from helper_classes import BiasPredModel, SwitchModel
-from helper_functions import *
-import pickle, glob, re, lmfit, os
+from helper_functions import fit_bias2_model, fit_bias1_model, fit_static_model, \
+    fit_switch_model, fit_midline_model, calc_posterior
+import pickle, glob, re
 import matplotlib.pyplot as plt
 from matplotlib import pylab
 import pandas as pd
@@ -30,7 +31,7 @@ save = True
 # Load Data
 # ********************************************
 data_dir = "D:\\Ian"
-data_dir = "/media/ian/Data/Ian"
+data_dir = "/mnt/Data/Ian"
 try:
     bias2_fit_dict = pickle.load(open('Analysis_Output/bias2_parameter_fits.p', 'rb'))
 except:
@@ -77,7 +78,7 @@ else:
     for train_file, test_file in zip(train_files, test_files):
         subj_name = re.match(r'.*/RawData.(\w*)_Prob*', test_file).group(1)
         print(subj_name)
-        if count >= 3 or subj_name in ['023','025','026','027']:
+        if False:
             pass
         count += 1
         train_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', train_file).group(1)
@@ -145,26 +146,33 @@ else:
         # *********************************************
         # Model fitting
         # *********************************************
-
+        df_midpoint = round(len(test_dfa)/2)
+        
         if subj_name + '_fullRun' not in bias2_fit_dict.keys():
             bias2_fit_dict[subj_name + '_fullRun'] = fit_bias2_model(train_ts_dis, test_dfa)
-
-        if subj_name + '_fullRun' not in bias1_fit_dict.keys():
             bias1_fit_dict[subj_name + '_fullRun'] = fit_bias1_model(train_ts_dis, test_dfa)
-        
-        if subj_name + '_fullRun' not in  eoptimal_fit_dict.keys():
             eoptimal_fit_dict[subj_name + '_fullRun'] = fit_static_model(train_ts_dis, test_dfa, train_recursive_p)
-        # fit ignore rule random probability:
-        if subj_name + '_fullRun' not in ignore_fit_dict.keys():
             ignore_fit_dict[subj_name + '_fullRun'] = fit_static_model(train_ts_dis, test_dfa, .5)
-
-        # fit midline rule random probability:
-        if subj_name + '_fullRun' not in midline_fit_dict.keys():
             midline_fit_dict[subj_name + '_fullRun'] = fit_midline_model(test_dfa)
-        
-        # fit switch rule
-        if subj_name + '_fullRun' not in switch_fit_dict.keys():
             switch_fit_dict[subj_name + '_fullRun'] = fit_switch_model(test_dfa)
+        if subj_name + '_first' not in bias2_fit_dict.keys():
+            bias2_fit_dict[subj_name + '_first']  = fit_bias2_model(train_ts_dis, test_dfa.iloc[0:df_midpoint])
+            bias2_fit_dict[subj_name + '_second']  = fit_bias2_model(train_ts_dis, test_dfa.iloc[df_midpoint:])
+        if subj_name + '_first' not in bias1_fit_dict.keys():   
+            bias1_fit_dict[subj_name + '_first']  = fit_bias1_model(train_ts_dis, test_dfa.iloc[0:df_midpoint])
+            bias1_fit_dict[subj_name + '_second']  = fit_bias1_model(train_ts_dis, test_dfa.iloc[df_midpoint:])
+            
+            eoptimal_fit_dict[subj_name + '_first']  = fit_static_model(train_ts_dis, test_dfa.iloc[0:df_midpoint], train_recursive_p)
+            eoptimal_fit_dict[subj_name + '_second']  = fit_static_model(train_ts_dis, test_dfa.iloc[df_midpoint:], train_recursive_p)
+            
+            ignore_fit_dict[subj_name + '_first']  = fit_static_model(train_ts_dis, test_dfa.iloc[0:df_midpoint], .5)
+            ignore_fit_dict[subj_name + '_second']  = fit_static_model(train_ts_dis, test_dfa.iloc[df_midpoint:], .5)
+            
+            midline_fit_dict[subj_name + '_first'] = fit_midline_model(test_dfa.iloc[0:df_midpoint])
+            midline_fit_dict[subj_name + '_second'] = fit_midline_model(test_dfa.iloc[df_midpoint:])
+
+            switch_fit_dict[subj_name + '_first'] = fit_switch_model(test_dfa.iloc[0:df_midpoint])
+            switch_fit_dict[subj_name + '_second'] = fit_switch_model(test_dfa.iloc[df_midpoint:])
     
         
         # *********************************************
@@ -189,33 +197,35 @@ else:
             observer_choices.append(obs_choice)
             observer_prior = np.round([.9*(1-ts)+.1*ts,.9*ts+.1*(1-ts)],2)
             
-        train_dfa['opt_observer_choices'] = observer_choices
-        train_dfa['opt_observer_switch'] = abs((train_dfa.opt_observer_choices).diff())
-        train_dfa['conform_opt_observer'] = np.equal(train_dfa.subj_ts, observer_choices)
+        train_dfa['opt_choices'] = observer_choices
+        train_dfa['opt_switch'] = abs((train_dfa.opt_choices).diff())
+        train_dfa['conform_opt'] = np.equal(train_dfa.subj_ts, observer_choices)
         
         # Optimal observer for train, without feedback     
-        no_fb_observer = BiasPredModel(train_ts_dis, [.5,.5], r1 = train_recursive_p, r2 = train_recursive_p, eps = 0)
+        no_fb = BiasPredModel(train_ts_dis, [.5,.5], r1 = train_recursive_p, r2 = train_recursive_p, eps = 0)
         observer_choices = []
         posteriors = []
         for i,trial in train_dfa.iterrows():
             c = trial.context
-            posteriors.append(no_fb_observer.calc_posterior(c)[1])
+            posteriors.append(no_fb.calc_posterior(c)[1])
         posteriors = np.array(posteriors)
-        train_dfa['no_fb_observer_posterior'] = posteriors
-        train_dfa['opt_observer_choices'] = (posteriors>.5).astype(int)
-        train_dfa['no_fb_observer_switch'] = (train_dfa.no_fb_observer_posterior>.5).diff()
-        train_dfa['conform_no_fb_observer'] = np.equal(train_dfa.subj_ts, posteriors>.5)
+        train_dfa['no_fb_posterior'] = posteriors
+        train_dfa['opt_choices'] = (posteriors>.5).astype(int)
+        train_dfa['no_fb_switch'] = (train_dfa.no_fb_posterior>.5).diff()
+        train_dfa['conform_no_fb'] = np.equal(train_dfa.subj_ts, posteriors>.5)
         
         
         # **************TEST*********************
         
         # Bias2 observer for test    
         params = bias2_fit_dict[subj_name + '_fullRun']
-        bias2_observer = BiasPredModel(train_ts_dis, [.5,.5], r1 = params['r1'], r2 = params['r2'], eps = params['eps'])
+        bias2 = BiasPredModel(train_ts_dis, [.5,.5], r1 = params['r1'], r2 = params['r2'], eps = params['eps'])
         params = bias1_fit_dict[subj_name + '_fullRun']
-        bias1_observer = BiasPredModel(train_ts_dis, [.5,.5], r1 = params['rp'], r2 = params['rp'], eps = params['eps'])
+        bias1 = BiasPredModel(train_ts_dis, [.5,.5], r1 = params['rp'], r2 = params['rp'], eps = params['eps'])
         params = eoptimal_fit_dict[subj_name + '_fullRun']
-        eoptimal_observer = BiasPredModel(train_ts_dis, [.5,.5], r1=train_recursive_p, r2=train_recursive_p, eps=params['eps'])
+        eoptimal = BiasPredModel(train_ts_dis, [.5,.5], r1=train_recursive_p, r2=train_recursive_p, eps=params['eps'])
+        params = ignore_fit_dict[subj_name + '_fullRun']
+        ignore = BiasPredModel(train_ts_dis, [.5,.5], r1=train_recursive_p, r2=train_recursive_p, eps=params['eps'])
         # Fit observer for test        
         bias2_posteriors = []
         bias1_posteriors = []
@@ -223,19 +233,19 @@ else:
         ignore_posteriors = []
         for i,trial in test_dfa.iterrows():
             c = trial.context
-            bias2_posteriors.append(bias2_observer.calc_posterior(c)[1])
-            bias1_posteriors.append(bias1_observer.calc_posterior(c)[1])
-            eoptimal_posteriors.append(eoptimal_observer.calc_posterior(c)[1])
-            ignore_posteriors.append(eoptimal_observer.calc_posterior(c)[1])
+            bias2_posteriors.append(bias2.calc_posterior(c)[1])
+            bias1_posteriors.append(bias1.calc_posterior(c)[1])
+            eoptimal_posteriors.append(eoptimal.calc_posterior(c)[1])
+            ignore_posteriors.append(ignore.calc_posterior(c)[1])
         bias2_posteriors = np.array(bias2_posteriors)
         bias1_posteriors = np.array(bias1_posteriors)
         eoptimal_posteriors = np.array(eoptimal_posteriors)
-        ignore_posteriors = np.array(eoptimal_posteriors)
+        ignore_posteriors = np.array(ignore_posteriors)
     
         test_dfa['bias2_posterior'] = bias2_posteriors
         test_dfa['bias1_posterior'] = bias1_posteriors
         test_dfa['eoptimal_posterior'] = eoptimal_posteriors
-        test_dfa['ignore_posterior'] = eoptimal_posteriors
+        test_dfa['ignore_posterior'] = ignore_posteriors
         
         # midline observer for test  
         eps = midline_fit_dict[subj_name + '_fullRun']['eps']
@@ -249,7 +259,7 @@ else:
     
         # Switch observer for test  
         params = switch_fit_dict[subj_name + '_fullRun']      
-        switch_observer = SwitchModel(r1 = params['r1'], r2 = params['r2'])
+        switch = SwitchModel(r1 = params['r1'], r2 = params['r2'])
         posteriors = []
         for i,trial in test_dfa.iterrows():
             if i == 0:
@@ -257,7 +267,7 @@ else:
             else:
                 last_choice = test_dfa.subj_ts[i-1]
             trial_choice = trial.subj_ts
-            conf = switch_observer.calc_TS_prob(last_choice)
+            conf = switch.calc_TS_prob(last_choice)
             posteriors.append(conf[trial_choice])           
         posteriors = np.array(posteriors)
         
@@ -268,8 +278,8 @@ else:
             test_dfa[model + '_choices'] = (test_dfa[model + '_posterior']>.5).astype(int)
             test_dfa[model + '_certainty'] = (abs(test_dfa[model + '_posterior']-.5))/.5
         
-        #test_dfa['bias2_observer_choices'] = (posteriors>.5).astype(int)
-        #test_dfa['bias2_observer_switch'] = (test_dfa.bias2_observer_posterior>.5).diff()
+        #test_dfa['bias2_choices'] = (posteriors>.5).astype(int)
+        #test_dfa['bias2_switch'] = (test_dfa.bias2_posterior>.5).diff()
     
         train_dfa['id'] = subj_name
         test_dfa['id'] = subj_name
@@ -299,47 +309,22 @@ else:
     learn_ids = select_ids.index
 
 
-    pickle.dump(bias2_fit_dict,open('Analysis_Output/bias2_parameter_fits.p','wb'))
-    pickle.dump(bias1_fit_dict,open('Analysis_Output/bias1_parameter_fits.p','wb'))
-    pickle.dump(eoptimal_fit_dict,open('Analysis_Output/eoptimal_parameter_fits.p','wb'))
-    pickle.dump(ignore_fit_dict,open('Analysis_Output/ignore_parameter_fits.p','wb'))
-    pickle.dump(midline_fit_dict,open('Analysis_Output/midline_parameter_fits.p','wb'))
-    pickle.dump(switch_fit_dict,open('Analysis_Output/switch_parameter_fits.p','wb'))
+    pickle.dump(bias2_fit_dict,open('Analysis_Output/bias2_parameter_fits.p','wb'), protocol=2)
+    pickle.dump(bias1_fit_dict,open('Analysis_Output/bias1_parameter_fits.p','wb'), protocol=2)
+    pickle.dump(eoptimal_fit_dict,open('Analysis_Output/eoptimal_parameter_fits.p','wb'), protocol=2)
+    pickle.dump(ignore_fit_dict,open('Analysis_Output/ignore_parameter_fits.p','wb'), protocol=2)
+    pickle.dump(midline_fit_dict,open('Analysis_Output/midline_parameter_fits.p','wb'), protocol=2)
+    pickle.dump(switch_fit_dict,open('Analysis_Output/switch_parameter_fits.p','wb'), protocol=2)
     gtest_learn_df.to_csv('Analysis_Output/gtest_learn_df.csv')
     gtest_df.to_csv('Analysis_Output/gtest_df.csv')
     gtrain_learn_df.to_csv('Analysis_Output/gtrain_learn_df.csv')
     gtrain_df.to_csv('Analysis_Output/gtrain_df.csv')
     gtaskinfo.to_csv = ('Analysis_Output_gtaskinfo.csv')
-# *********************************************
-# Switch Analysis
-# *********************************************
-# Count the number of times there was a switch to each TS for each context value
-# Count the number of times there was a switch to each TS for each context value
-switch_counts = odict()
-switch_counts['midline_observer'] = gtest_learn_df.query('midline_observer_switch == True').groupby(['midline_observer_choices','context']).trial_count.count().unstack(level = 0)
-switch_counts['subject'] = gtest_learn_df.query('subj_switch == True').groupby(['subj_ts','context']).trial_count.count().unstack(level = 0)
-switch_counts['eoptimal_observer'] = gtest_learn_df.query('eoptimal_observer_switch == True').groupby(['eoptimal_observer_choices','context']).trial_count.count().unstack(level = 0)
-switch_counts['bias2_observer'] = gtest_learn_df.query('bias2_observer_switch == True').groupby(['bias2_observer_choices','context']).trial_count.count().unstack(level = 0)
-switch_counts['bias1_observer'] = gtest_learn_df.query('bias1_observer_switch == True').groupby(['bias1_observer_choices','context']).trial_count.count().unstack(level = 0)
-switch_counts['ignore_observer'] = gtest_learn_df.query('ignore_observer_switch == True').groupby(['ignore_observer_choices','context']).trial_count.count().unstack(level = 0)
-
-
-
-# normalize switch counts by the ignore rule. The ignore rule represents
-# the  number of switches someone would make if they switched task-sets
-# every time the stimuli's position crossed the ignore to that position
-norm_switch_counts = odict()
-for key in switch_counts:
-    empty_df = pd.DataFrame(index = np.unique(gtest_df.context), columns = [0,1])
-    empty_df.index.name = 'context'
-    empty_df.loc[switch_counts[key].index] = switch_counts[key]
-    switch_counts[key] = empty_df
-    norm_switch_counts[key] = switch_counts[key].div(switch_counts['ignore_observer'],axis = 0)
 
 # *********************************************
 # Calculate how well the bias-2 model does
 # ********************************************* 
-r1 = pd.concat([gtest_learn_df['id'], gtest_learn_df['subj_ts']==gtest_learn_df['bias1_observer_choices']],1)
+r1 = pd.concat([gtest_learn_df['id'], gtest_learn_df['subj_ts']==gtest_learn_df['bias1_choices']],1)
 np.mean(r1.groupby('id').mean())
 
 np.mean([bias2_fit_dict[w + '_fullRun']['r2'] for w in plot_ids] + [bias2_fit_dict[w + '_fullRun']['r1'] for w in plot_ids])
@@ -347,7 +332,7 @@ np.mean([bias2_fit_dict[w + '_fullRun']['r2'] for w in plot_ids] + [bias2_fit_di
 # Model Comparison
 # ********************************************* 
 compare_df = gtest_learn_df
-compare_df_subset= compare_df[['subj_ts','bias2_observer_posterior','bias1_observer_posterior','eoptimal_observer_posterior','ignore_observer_posterior','midline_observer_posterior','switch_observer_posterior']]
+compare_df_subset= compare_df[['subj_ts','bias2_posterior','bias1_posterior','eoptimal_posterior','ignore_posterior','midline_posterior','switch_posterior']]
 model_subj_compare = compare_df_subset.corr()
 
 log_posteriors = pd.DataFrame()
@@ -360,8 +345,38 @@ compare_df['random_log'] = np.log(.5)
 
 summary = compare_df.groupby('id').sum().drop(['context','subj_ts'],axis = 1)
 
+# *********************************************
+# Model Comparison
+# ********************************************* 
 
-  
+import statsmodels.formula.api as smf
+import statsmodels.api as sm
+
+trials_since_switch = 0
+for i,row in gtest_learn_df.iterrows():
+    if row['switch'] == 0 or i == 0:
+        trials_since_switch += 1
+    else:
+        trials_since_switch = 0
+    gtest_learn_df.set_value(i,'trials_since_switch', trials_since_switch)
+
+df = gtest_learn_df
+res = smf.ols(formula='correct ~ trials_since_switch + rt', data=df).fit()
+
+res = sm.GLM(df['correct'], df[['trials_since_switch']], family = sm.families.Binomial()).fit()
+res = sm.OLS(df['bias2_certainty'], df[['trials_since_switch']]).fit()
+
+print(res.summary())
+
+plot_df = pd.DataFrame()
+for i in np.unique(df['id']):
+    temp_df = df.query('id == "%s"' % i)
+    plot_df[i] = [temp_df.query('trials_since_switch == %s' % i)['correct'].mean() for i in np.unique(temp_df['trials_since_switch'])]
+plot_df = plot_df.unstack().reset_index(name = 'percent_correct')
+plot_df.rename(columns={'level_0': 'id', 'level_1': 'trials_since_switch'}, inplace=True)
+sns.lmplot(x = 'trials_since_switch', y = 'percent_correct', data = plot_df, hue = 'id')
+smf.ols(formula = 'percent_correct ~ trials_since_switch', data = plot_df).fit().summary()
+
 # *********************************************
 # Plotting
 # *********************************************
@@ -379,8 +394,8 @@ if plot == True:
     p1 = plt.figure(figsize = figdims)
     plt.hold(True) 
     plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 4, marker = 'o', markersize = 10, color = 'm', label = 'subject')
-    plt.plot(plot_df.groupby('context').bias2_observer_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', label = 'bias-2 observer')
-    plt.plot(plot_df.groupby('context').bias1_observer_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', ls = '--', label = 'bias-1 observer')
+    plt.plot(plot_df.groupby('context').bias2_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', label = 'bias-2 observer')
+    plt.plot(plot_df.groupby('context').bias1_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', ls = '--', label = 'bias-1 observer')
     plt.xticks(list(range(12)),contexts)
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
     plt.ylabel('TS2 choice %', size = fontsize)
@@ -393,8 +408,8 @@ if plot == True:
             plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2, color = 'k', alpha = .2)
     a = plt.axes([.62, .15, .3, .3])
     plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 4, marker = 'o', markersize = 10, color = 'm', label = 'subject')
-    plt.plot(plot_df.groupby('context').eoptimal_observer_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', ls = '--', label = r'$\epsilon$-optimal observer')
-    plt.plot(plot_df.groupby('context').midline_observer_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', ls = ':', label = 'midline rule')
+    plt.plot(plot_df.groupby('context').eoptimal_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', ls = '--', label = r'$\epsilon$-optimal observer')
+    plt.plot(plot_df.groupby('context').midline_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', ls = ':', label = 'midline rule')
     plt.tick_params(
         axis = 'both',
         which = 'both',
@@ -417,54 +432,11 @@ if plot == True:
         plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2,  alpha = 1, label = '_nolegend_')
     plt.gca().set_color_cycle(None)
     subj_df = plot_df.query('id == "%s"' %plot_ids[range_start])
-    plt.plot(subj_df.groupby('context').bias2_observer_choices.mean(), lw = 2, ls = '--', label = 'bias-2 observer')
+    plt.plot(subj_df.groupby('context').bias2_choices.mean(), lw = 2, ls = '--', label = 'bias-2 observer')
     for subj in plot_ids[range_start+1:range_start+5]:
         subj_df = plot_df.query('id == "%s"' %subj)
-        plt.plot(subj_df.groupby('context').bias2_observer_choices.mean(), lw = 2, ls = '--', label = '_nolegend_')
+        plt.plot(subj_df.groupby('context').bias2_choices.mean(), lw = 2, ls = '--', label = '_nolegend_')
     pylab.legend(loc='best',prop={'size':20})
-        
-    # plot distribution of switches, by task-set
-    p3 = plt.figure(figsize = figdims)
-    plt.subplot(2,1,1)
-    plt.hold(True) 
-    sub = switch_counts['subject']
-    plt.plot(sub[0], lw = 4, color = 'm', label = 'switch to CTS')
-    plt.plot(sub[1], lw = 4, color = 'c', label = 'switch to STS')
-    sub = switch_counts['bias2_observer']
-    plt.plot(sub[0], lw = 4, color = 'm', ls = '-.', label = 'bias observer')
-    plt.plot(sub[1], lw = 4, color = 'c', ls = '-.')
-    sub = switch_counts['eoptimal_observer']
-    plt.plot(sub[0], lw = 4, color = 'm', ls = '--', label = 'optimal observer')
-    plt.plot(sub[1], lw = 4, color = 'c', ls = '--')
-    sub = switch_counts['ignore_observer']
-    plt.plot(sub[0], lw = 4, color = 'm', ls = ':', label = 'midline rule')
-    plt.plot(sub[1], lw = 4, color = 'c', ls = ':')
-    plt.xticks(list(range(12)),np.round(list(sub.index),2))
-    plt.axvline(5.5, lw = 5, ls = '--', color = 'k')
-    plt.xlabel('Stimulus Vertical Position', size = fontsize)
-    plt.ylabel('Switch Counts', size = fontsize)
-    pylab.legend(loc='upper right',prop={'size':20})
-    for subj in plot_ids:
-        subj_df = plot_df.query('id == "%s"' %subj)
-        subj_switch_counts = odict()
-        subj_switch_counts['ignore_observer'] = subj_df.query('ignore_observer_switch == True').groupby(['ignore_observer_choices','context']).trial_count.count().unstack(level = 0)
-        subj_switch_counts['subject'] = subj_df.query('subj_switch == True').groupby(['subj_ts','context']).trial_count.count().unstack(level = 0)
-        subj_switch_counts['bias2_observer'] = subj_df.query('bias2_observer_switch == True').groupby(['bias2_observer_choices','context']).trial_count.count().unstack(level = 0)
-        
-        # normalize switch counts by the ignore rule. The ignore rule represents
-        # the  number of switches someone would make if they switched task-sets
-        # every time the stimuli's position crossed the ignore to that position
-        subj_norm_switch_counts = odict()
-        for key in subj_switch_counts:
-            empty_df = pd.DataFrame(index = np.unique(subj_df.context), columns = [0,1])
-            empty_df.index.name = 'context'
-            empty_df.loc[switch_counts[key].index] = subj_switch_counts[key]
-            subj_switch_counts[key] = empty_df*len(plot_ids)
-            subj_norm_switch_counts[key] = subj_switch_counts[key].div(subj_switch_counts['ignore_observer'],axis = 0)
-        sub = subj_switch_counts['subject']
-        plt.plot(sub[0], lw = 3, color = 'm', alpha = .10)
-        plt.plot(sub[1], lw = 3, color = 'c', alpha = .10)
-    
 
     # look at RT
     p4 = plt.figure(figsize = figdims)
@@ -511,7 +483,7 @@ if plot == True:
     # Plot rt against bias2 model posterior
     sns.set_context('poster')
     subj_df = plot_df.query('rt > 100 & id < "%s"' %plot_ids[3])       
-    p6 = sns.lmplot(x='bias2_observer_posterior',y='rt', hue = 'id', data = subj_df, order = 2, size = 6, col = 'id')
+    p6 = sns.lmplot(x='bias2_posterior',y='rt', hue = 'id', data = subj_df, order = 2, size = 6, col = 'id')
     p6.set_xlabels("P(TS2)", size = fontsize)
     p6.set_ylabels('Reaction time (ms)', size = fontsize)
     
@@ -545,7 +517,7 @@ if plot == True:
     plt.ylabel('Value', size = fontsize)
     plt.title('Bias-2 Model Parameter Fits', size = fontsize+4)
     plt.xticks([0,1,2], ('$\epsilon$','$r_1$','$r_2$'), size = fontsize)
-    np.corrcoef(gtest_learn_df.rt,gtest_learn_df.bias2_observer_posterior)
+    np.corrcoef(gtest_learn_df.rt,gtest_learn_df.bias2_posterior)
     
     # plot bias1 parameters
     params_df = pd.DataFrame()
@@ -563,7 +535,7 @@ if plot == True:
     plt.ylabel('Value', size = fontsize)
     plt.title('Bias-1 Model Parameter Fits', size = fontsize+4)
     plt.xticks([0,1,2], ('$\epsilon$','$r_1$'), size = fontsize)
-    np.corrcoef(gtest_learn_df.rt,gtest_learn_df.bias2_observer_posterior)
+    np.corrcoef(gtest_learn_df.rt,gtest_learn_df.bias2_posterior)
 
     
     p11 = plt.figure(figsize = figdims)
