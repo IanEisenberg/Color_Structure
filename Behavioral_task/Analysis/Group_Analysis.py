@@ -25,7 +25,7 @@ warnings.simplefilter(action = "ignore", category = RuntimeWarning)
 # Set up defaults
 # *********************************************
 plot = False
-save = True
+save = False
 
 # *********************************************
 # Load Data
@@ -58,12 +58,12 @@ except:
     switch_fit_dict = {}
 
 if save is False:
+    gtrain_learn_df = pd.DataFrame.from_csv('Analysis_Output/gtrain_learn_df.csv')
     gtest_learn_df = pd.DataFrame.from_csv('Analysis_Output/gtest_learn_df.csv')
     gtest_df = pd.DataFrame.from_csv('Analysis_Output/gtest_df.csv')
-    gtest_learn_df.id = gtest_learn_df.id.astype('str')
-    gtest_df.id = gtest_df.id.astype('str')
-    gtest_learn_df.id = gtest_learn_df.id.apply(lambda x: x.zfill(3))
-    gtest_df.id = gtest_df.id.apply(lambda x: x.zfill(3))
+    gtrain_learn_df.id = gtrain_learn_df.id.astype('str').apply(lambda x: x.zfill(3))
+    gtest_learn_df.id = gtest_learn_df.id.astype('str').apply(lambda x: x.zfill(3))
+
 else:
     group_behavior = {}
     gtrain_df = pd.DataFrame()
@@ -336,34 +336,41 @@ summary = compare_df.groupby('id').sum().drop(['context','subj_ts'],axis = 1)
 import statsmodels.formula.api as smf
 import statsmodels.api as sm
 
+df = gtest_learn_df
+
 switch_sums = []
 trials_since_switch = 0
-for i,row in gtest_learn_df.iterrows():
+for i,row in df.iterrows():
     if row['switch'] == 1 or pd.isnull(row['switch']):
         trials_since_switch = 0
     else:
         trials_since_switch += 1
     switch_sums.append(trials_since_switch)
-gtest_learn_df['trials_since_switch'] = switch_sums
+df['trials_since_switch'] = switch_sums
 
-df = gtest_learn_df
-res = smf.ols(formula='correct ~ trials_since_switch + rt', data=df).fit()
-
-res = sm.GLM(df['correct'], df[['trials_since_switch']], family = sm.families.Binomial()).fit()
-res = sm.OLS(df['bias2_certainty'], df[['trials_since_switch']]).fit()
-
+res = sm.OLS(df['correct'], df[['trials_since_switch']]).fit()
 print(res.summary())
 
-plot_df = {}
-for i in np.unique(df['id']):
-    temp_df = df.query('id == "%s"' % i)
-    plot_df[i] = [temp_df.query('trials_since_switch == %s' % i)['correct'].mean() for i in np.unique(temp_df['trials_since_switch'])]
-plot_df = pd.DataFrame.from_dict(plot_df, orient='index').transpose()  
+#df['model_correct'] = df['bias2_choices']==df['ts']
+#res = sm.OLS(df['model_correct'], df[['trials_since_switch']]).fit()
+#print(res.summary())
 
-plot_df = plot_df.unstack().reset_index(name = 'percent_correct')
-plot_df.rename(columns={'level_0': 'id', 'level_1': 'trials_since_switch'}, inplace=True)
-sns.lmplot(x = 'trials_since_switch', y = 'percent_correct', data = plot_df)
-smf.ols(formula = 'percent_correct ~ trials_since_switch', data = plot_df).fit().summary()
+
+
+for window in [(0,850)]:
+    window_df = df.query('trial_count >= %s and trial_count < %s' % (window[0], window[1]))
+    plot_dict = {}
+    for i in np.unique(window_df['id']):
+        temp_df = window_df.query('id == "%s"' % i)
+        plot_dict[i] = [temp_df.query('trials_since_switch == %s' % i)['correct'].mean() for i in np.unique(temp_df['trials_since_switch'])]
+        plot_dict['trials_since_switch'] = list(range(max([len(arr) for arr in plot_dict.values()])))
+    plot_df = pd.DataFrame.from_dict(plot_dict, orient='index').transpose()  
+    
+    plot_df = pd.melt(plot_df, id_vars = 'trials_since_switch', var_name = 'id', value_name = 'percent_correct')
+    plot_df = plot_df.query('trials_since_switch > 11')
+    sns.lmplot(x = 'trials_since_switch', y = 'percent_correct', data = plot_df, size = 8, hue = 'id')
+    plt.title('Trial window: ' + str(window), size = 20)
+    
 
 # *********************************************
 # Plotting
