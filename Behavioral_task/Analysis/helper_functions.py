@@ -5,7 +5,9 @@ Created on Fri Apr 24 16:22:54 2015
 @author: Ian
 """
 
+from scipy.stats import norm
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import pylab, lmfit
 import random as r
@@ -37,11 +39,6 @@ def bar(x, y, title):
     plt.title(str(title))
     return plot
 
-def moving_average(a, n=3) :
-    ret = np.cumsum(a, dtype=float)
-    ret[n:] = ret[n:] - ret[:-n]
-    return ret[n - 1:] / n
-
 def softmax(probs, inv_temp):
     return np.exp(probs*inv_temp)/sum(np.exp(probs*inv_temp))
 
@@ -57,14 +54,20 @@ def calc_posterior(data,prior,likelihood_dist):
     return posterior
 
 def genSeq(l,p):
-    seq = [round(r.random())]
-    for _ in range(l):
-        if r.random() < p:
-            seq.append(seq[-1])
-        else:
-            seq.append(abs(seq[-1]-1))
+    seq = [1]
+    while abs(np.mean(seq)-.5) > .1:
+        curr_state = round(r.random())
+        state_reps = 0
+        seq = []
+        for _ in range(l-1):
+            seq.append(curr_state)
+            if r.random() > p or state_reps > 25:
+                curr_state = 1-curr_state
+                state_reps = 0
+            else:
+                state_reps += 1
     return seq
-
+                
 def seqStats(l,p,reps):
     seqs=[]
     for _ in range(reps):
@@ -73,7 +76,44 @@ def seqStats(l,p,reps):
             seqs.append(i[0])
     return (np.mean(seqs), np.std(seqs))
 
-
+def genExperimentSeq(l, p, ts_dis):
+    """Generates an experiment seq
+    """
+    bin_boundaries = np.linspace(-1,1,11)
+    seq = genSeq(l,p)
+    context = []
+    for s in seq:
+        binned = -1.1 + np.digitize([ts_dis[s].rvs()],bin_boundaries)*.2
+        truncated_context = round(max(-1, min(1, binned[0])),2)
+        context.append(truncated_context)
+    df = pd.DataFrame({'context': pd.Series(context), 'ts': pd.Series(seq)})
+    return df
+        
+    
+def preproc_data(traindata, testdata, taskinfo):
+            """ Sets TS2 to always be associated with the 'top' of the screen (positive context values),
+            creates a log_rt column and outputs task statistics during training
+            :return: train_ts_dis, train_recursive_p, action_eps
+            """
+            #flip contexts if necessary
+            states = taskinfo['states']
+            tasksets = {val['ts']: {'c_mean': val['c_mean'], 'c_sd': val['c_sd']} for val in states.values()}
+            ts2_side = np.sign(tasksets[1]['c_mean'])
+            traindata['true_context'] = traindata['context']
+            testdata['true_context'] = testdata['context']            
+            traindata['context']*=ts2_side
+            testdata['context']*=ts2_side
+            #add log rt columns
+            traindata['log_rt'] = np.log(traindata.rt)
+            testdata['log_rt'] = np.log(testdata.rt)
+            # What was the mean contextual value for each taskset during this train run?
+            train_ts_means = list(traindata.groupby('ts').agg(np.mean).context)
+            # Same for standard deviation
+            train_ts_std = list(traindata.groupby('ts').agg(np.std).context)
+            train_ts_dis = [norm(m, s) for m, s in zip(train_ts_means, train_ts_std)]
+            train_recursive_p = 1 - traindata.switch.mean()
+            action_eps = 1-np.mean([testdata['response'][i] in testdata['stim'][i] for i in testdata.index])
+            return train_ts_dis, train_recursive_p, action_eps
 
 #*********************************************
 # Model fitting functions
