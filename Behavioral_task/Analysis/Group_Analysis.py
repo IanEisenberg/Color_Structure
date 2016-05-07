@@ -3,13 +3,12 @@ Created on Mon Apr 27 11:16:08 2015
 
 @author: Ian
 """
-
+import os
 import numpy as np
-from scipy.stats import norm
 from Load_Data import load_data
 from helper_classes import BiasPredModel, SwitchModel
 from helper_functions import fit_bias2_model, fit_bias1_model, fit_static_model, \
-    fit_switch_model, fit_midline_model, calc_posterior, gen_TS_posteriors
+    fit_switch_model, fit_midline_model, calc_posterior, gen_TS_posteriors, preproc_data
 import pickle, glob, re
 import matplotlib.pyplot as plt
 from matplotlib import pylab
@@ -30,8 +29,7 @@ save = False
 # *********************************************
 # Load Data
 # ********************************************
-data_dir = "D:\\Ian"
-data_dir = "/mnt/Data/Ian"
+data_dir = os.path.expanduser('~')
 try:
     bias2_fit_dict = pickle.load(open('Analysis_Output/bias2_parameter_fits.p', 'rb'))
 except:
@@ -103,47 +101,8 @@ else:
     # *********************************************
     # Preliminary Setup
     # *********************************************
-
-        recursive_p = taskinfo['recursive_p']
-        states = taskinfo['states']
-        state_dis = [norm(states[0]['c_mean'], states[0]['c_sd']), norm(states[1]['c_mean'], states[1]['c_sd']) ]
-        ts_order = [states[0]['ts'],states[1]['ts']]
-        ts_dis = [state_dis[i] for i in ts_order]
-        ts2_side = np.sign(ts_dis[1].mean())
-        taskinfo['ts2_side'] = ts2_side
-        # To ensure TS2 is always associated with the 'top' of the screen, or positive
-        # context values, flip the context values if this isn't the case.
-        # This ensures that TS1 is always the shape task-set and, for analysis purposes,
-        # always associated with the bottom of the screen
-        train_dfa['true_context'] = train_dfa['context']
-        test_dfa['true_context'] = test_dfa['context']
-
-        if ts2_side == -1:
-            train_dfa['context'] = train_dfa['context']* -1
-            test_dfa['context'] = test_dfa['context']* -1
-            ts_dis = ts_dis [::-1]
-
-        # What was the mean contextual value for each taskset during this train run?
-        train_ts_means = list(train_dfa.groupby('ts').agg(np.mean).context)
-        # Same for standard deviation
-        train_ts_std = list(train_dfa.groupby('ts').agg(np.std).context)
-        train_ts_dis = [norm(m, s) for m, s in zip(train_ts_means, train_ts_std)]
-        # And do the same for recursive_p
-        train_recursive_p = 1 - train_dfa.switch.mean()
-        #how often did the response not match either of the stim's features
-        action_eps = 1-np.mean([test_dfa['response'][i] in test_dfa['stim'][i] for i in test_dfa.index])
-
-        # decompose contexts
-        test_dfa['abs_context'] = abs(test_dfa.context)
-        train_dfa['abs_context'] = abs(train_dfa.context)
-        train_dfa['context_sign'] = np.sign(train_dfa.context)
-        test_dfa['context_sign'] = np.sign(test_dfa.context)
-        # Create vector of context differences
-        test_dfa['context_diff'] = test_dfa['context'].diff()
-
-        # transform rt
-        train_dfa['log_rt'] = np.log(train_dfa.rt)
-        test_dfa['log_rt'] = np.log(test_dfa.rt)
+        
+        train_ts_dis,train_recursive_p,action_eps = preproc_data(train_dfa,test_dfa,taskinfo)        
         
         # *********************************************
         # Model fitting
@@ -238,7 +197,6 @@ else:
             c = max(0,np.sign(trial.context))
             posteriors.append(abs(c - eps))
         posteriors = np.array(posteriors)
-    
         test_dfa['midline_posterior'] = posteriors
     
         # Switch observer for test  
@@ -254,7 +212,6 @@ else:
             conf = switch.calc_TS_prob(last_choice)
             posteriors.append(conf[trial_choice])           
         posteriors = np.array(posteriors)
-        
         test_dfa['switch_posterior'] = posteriors
 
     
