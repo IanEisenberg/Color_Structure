@@ -273,11 +273,11 @@ def fit_switch_model(data):
 # Generate Model Predtions
 #*********************************************
 
-def gen_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduce = True):
+def gen_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduce = True, postfix = ''):
     """ Generates an array of TS or model(s)
     :model: model or array of models that has a calc_posterior method
     :data: dataframe with a context
-    
+    :reduce: bool, if True only show the posterior for task-set 2
     """
     assert len(model_names)
     if not isinstance(models,list):
@@ -297,7 +297,7 @@ def gen_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduc
             elif model_type == 'action':
                 posterior = model.calc_action_posterior(s,c)
             if reduce:
-                model_posteriors[j].append(posterior[0])
+                model_posteriors[j].append(posterior[1])
             else:
                 model_posteriors[j].append(posterior)
             
@@ -306,7 +306,7 @@ def gen_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduc
             model_name = model_names[j]
         else:
             model_name = 'model_%s' % j
-        data[model_name + '_posterior'] = model_posteriors[j]
+        data[model_name + '_posterior' + postfix] = model_posteriors[j]
         
         
 #*********************************************
