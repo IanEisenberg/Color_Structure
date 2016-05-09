@@ -17,7 +17,7 @@ import seaborn as sns
 ts_dis = [norm(-.3,.37), norm(.3,.37)]
 exp_len = 800
 p = .9
-num_sims = 10
+num_sims = 100
 
 vals = []
 for _ in range(num_sims):

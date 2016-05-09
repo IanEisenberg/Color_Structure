@@ -297,13 +297,13 @@ def fit_switch_model(data, print_out = True, return_out = False):
     else:
         return out.params.valuesdict()
 
-def fit_memory_model(train_ts_dis, data, memory_len = None, perseverance = None, print_out = True, return_out = False):
+def fit_memory_model(train_ts_dis, data, k = None, perseverance = None, print_out = True, return_out = False):
     def errfunc(params,df):
         params = params.valuesdict()
-        memory_len = int(params['memory_len'])
+        k = params['k']
         perseverance = params['perseverance']   
-        eps = params['eps']
-        model = model = MemoryModel(train_ts_dis, memory_len = memory_len, perseverance = perseverance, TS_eps=eps)
+        TS_eps = params['TS_eps']
+        model = model = MemoryModel(train_ts_dis, k = k, perseverance = perseverance, TS_eps=TS_eps)
         model_likelihoods = []
         model_likelihoods.append(.5)
         for i in df.index[1:]:
@@ -312,17 +312,19 @@ def fit_memory_model(train_ts_dis, data, memory_len = None, perseverance = None,
             c = df.context[i]
             conf = model.calc_posterior(c, last_choice)
             model_likelihoods.append(conf[trial_choice])
+        # minimize
+        return abs(np.sum(np.log(np.array(model_likelihoods)))) # single value
     # Fit memory model
     fit_params = lmfit.Parameters()
-    if not memory_len:
-        fit_params.add('memory_len', value=1)
+    if k == None:
+        fit_params.add('k', value=1)
     else:
-        fit_params.add('memory_len', value = memory_len, vary = False)
-    if not perseverance:
+        fit_params.add('k', value = k, vary = False)
+    if perseverance == None:
         fit_params.add('perseverance', value=.5, min=0, max=1)
     else:
         fit_params.add('perseverance', value = perseverance, vary = False)
-    fit_params.add('eps', value = .1, min = 0, max = 1)
+    fit_params.add('TS_eps', value = .1, min = 0, max = 1)
     out = lmfit.minimize(errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
     fit_params = out.params.valuesdict()
     if print_out:

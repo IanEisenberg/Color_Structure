@@ -60,6 +60,10 @@ try:
     perseverance_fit_dict = pickle.load(open('Analysis_Output/perseverance_parameter_fits.p', 'rb'))
 except:
     perseverance_fit_dict = {}
+try:
+    permem_fit_dict = pickle.load(open('Analysis_Output/perseverance_parameter_fits.p', 'rb'))
+except:
+    permem_fit_dict = {}
 
 if save is False:
     gtrain_learn_df = pd.read_pickle('Analysis_Output/gtrain_learn_df.pkl')
@@ -141,14 +145,18 @@ else:
                 switch_fit_dict[subj_name + '_fullRun'] = fit_switch_model(test_dfa)                
                 switch_fit_dict[subj_name + '_first'] = fit_switch_model(test_dfa.iloc[0:df_midpoint])
                 switch_fit_dict[subj_name + '_second'] = fit_switch_model(test_dfa.iloc[df_midpoint:])
-            if subj_name + '_first' not in memory_fit_dict.keys(): 
-                memory_fit_dict[subj_name + '_fullRun'] = fit_memory_model(train_ts_dis, test_dfa, perseverance = 0)                
-                memory_fit_dict[subj_name + '_first'] = fit_memory_model(train_ts_dis, test_dfa.iloc[0:df_midpoint], perseverance = 0)
-                memory_fit_dict[subj_name + '_second'] = fit_memory_model(train_ts_dis, test_dfa.iloc[df_midpoint:], perseverance = 0)
-            if subj_name + '_first' not in perseverance_fit_dict.keys(): 
-                perseverance_fit_dict[subj_name + '_fullRun'] = fit_memory_model(train_ts_dis, test_dfa, memory_len = 1)                
-                perseverance_fit_dict[subj_name + '_first'] = fit_memory_model(train_ts_dis, test_dfa.iloc[0:df_midpoint], memory_len = 1)
-                perseverance_fit_dict[subj_name + '_second'] = fit_memory_model(train_ts_dis, test_dfa.iloc[df_midpoint:], memory_len = 1)
+            if subj_name + '_' + model_type + '_first' not in memory_fit_dict.keys(): 
+                memory_fit_dict[subj_name + '_' + model_type + '_fullRun'] = fit_memory_model(train_ts_dis, test_dfa, perseverance = 0)                
+                memory_fit_dict[subj_name + '_' + model_type + '_first'] = fit_memory_model(train_ts_dis, test_dfa.iloc[0:df_midpoint], perseverance = 0)
+                memory_fit_dict[subj_name + '_' + model_type+ '_second'] = fit_memory_model(train_ts_dis, test_dfa.iloc[df_midpoint:], perseverance = 0)
+            if subj_name + '_' + model_type + '_first' not in perseverance_fit_dict.keys(): 
+                perseverance_fit_dict[subj_name + '_' + model_type + '_fullRun'] = fit_memory_model(train_ts_dis, test_dfa, k = 0)    
+                perseverance_fit_dict[subj_name + '_' + model_type + '_first'] = fit_memory_model(train_ts_dis, test_dfa.iloc[0:df_midpoint], k = 0)
+                perseverance_fit_dict[subj_name + '_' + model_type + '_second'] = fit_memory_model(train_ts_dis, test_dfa.iloc[df_midpoint:], k = 0)
+            if subj_name + '_' + model_type + '_first' not in permem_fit_dict.keys(): 
+                permem_fit_dict[subj_name + '_' + model_type + '_fullRun'] = fit_memory_model(train_ts_dis, test_dfa)    
+                permem_fit_dict[subj_name + '_' + model_type + '_first'] = fit_memory_model(train_ts_dis, test_dfa.iloc[0:df_midpoint])
+                permem_fit_dict[subj_name + '_' + model_type + '_second'] = fit_memory_model(train_ts_dis, test_dfa.iloc[df_midpoint:])
             
         
         # *********************************************
@@ -204,16 +212,18 @@ else:
             params = ignore_fit_dict[subj_name + '_' + model_type + p]
             ignore = BiasPredModel(train_ts_dis, [.5,.5], **params)
             params = memory_fit_dict[subj_name + '_' + model_type + p]
-            ignore = MemoryModel(train_ts_dis, [.5,.5], **params)
+            memory = MemoryModel(train_ts_dis, **params)
             params = perseverance_fit_dict[subj_name + '_' + model_type + p]
-            ignore = MemoryModel(train_ts_dis, [.5,.5], **params)
+            perseverance = MemoryModel(train_ts_dis,  **params)
+            params = permem_fit_dict[subj_name + '_' + model_type + p]
+            permem = MemoryModel(train_ts_dis,  **params)
             if p != '_fullRun':
                 postfix = p
             else:
                 postfix = ''
                 
             # Fit observer for test        
-            gen_TS_posteriors([bias2, bias1, eoptimal, ignore], test_dfa, ['bias2', 'bias1', 'eoptimal', 'ignore'], postfix = postfix)
+            gen_TS_posteriors([bias2, bias1, eoptimal, ignore, memory, perseverance, permem], test_dfa, ['bias2', 'bias1', 'eoptimal', 'ignore', 'memory', 'perseverance', 'permem'], postfix = postfix)
         
         for model in ['bias2', 'bias1', 'eoptimal', 'ignore']:
             cross_posteriors = pd.concat([test_dfa[:df_midpoint][model + '_posterior_second'],test_dfa[df_midpoint:][model + '_posterior_first']])
