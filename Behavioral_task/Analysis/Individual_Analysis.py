@@ -204,17 +204,31 @@ else:
         
         # midline observer for test  
         eps = midline_fit_dict[subj_name + '_fullRun']['eps']
+        eps_first = midline_fit_dict[subj_name + '_first']['eps']
+        eps_second = midline_fit_dict[subj_name + '_second']['eps']
         posteriors = []
+        posteriors_cross = []
         for i,trial in test_dfa.iterrows():
             c = max(0,np.sign(trial.context))
             posteriors.append(abs(c - eps))
+            if i<df_midpoint:
+                posteriors_cross.append(abs(c-eps_second))
+            else:
+                posteriors_cross.append(abs(c-eps_first))
         posteriors = np.array(posteriors)
+        posteriors_cross = np.array(posteriors_cross)        
         test_dfa['midline_posterior'] = posteriors
+        test_dfa['midline_posterior_cross'] = posteriors_cross
     
         # Switch observer for test  
         params = switch_fit_dict[subj_name + '_fullRun']      
         switch = SwitchModel(**params)
+        params = switch_fit_dict[subj_name + '_first']      
+        switch_first = SwitchModel(**params)
+        params = switch_fit_dict[subj_name + '_second']      
+        switch_second = SwitchModel(**params)
         posteriors = []
+        posteriors_cross = []
         for i,trial in test_dfa.iterrows():
             if i == 0:
                  last_choice = -1 
@@ -222,9 +236,16 @@ else:
                 last_choice = test_dfa.subj_ts[i-1]
             trial_choice = trial.subj_ts
             conf = switch.calc_TS_prob(last_choice)
-            posteriors.append(conf[trial_choice])           
+            if i<df_midpoint:
+                conf_cross = switch_second.calc_TS_prob(last_choice)
+            else:
+                conf_cross = switch_first.calc_TS_prob(last_choice)
+            posteriors.append(conf[trial_choice])  
+            posteriors_cross.append(conf_cross[trial_choice])
         posteriors = np.array(posteriors)
+        posteriors_cross = np.array(posteriors_cross) 
         test_dfa['switch_posterior'] = posteriors
+        test_dfa['switch_posterior_cross'] = posteriors_cross
         
         #test_dfa['bias2_choices'] = (posteriors>.5).astype(int)
         #test_dfa['bias2_switch'] = (test_dfa.bias2_posterior>.5).diff()

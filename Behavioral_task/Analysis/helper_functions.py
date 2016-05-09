@@ -88,7 +88,19 @@ def genExperimentSeq(l, p, ts_dis):
         context.append(truncated_context)
     df = pd.DataFrame({'context': pd.Series(context), 'ts': pd.Series(seq)})
     return df
-        
+
+def simulateModel(model, ts_dis, model_name = 'model', l = 800, p = .9):
+    seq = genExperimentSeq(l,p,ts_dis)
+    posteriors = []
+    choices = []
+    for c in seq['context']:
+        posteriors.append(model.calc_posterior(c))
+        choices.append(model.choose(mode = 'prob_match'))
+    seq['subj_ts'] = choices
+    seq['posteriors'] = posteriors
+    seq['model'] = model_name
+    return seq
+          
     
 def preproc_data(traindata, testdata, taskinfo):
             """ Sets TS2 to always be associated with the 'top' of the screen (positive context values),
@@ -119,7 +131,7 @@ def preproc_data(traindata, testdata, taskinfo):
 # Model fitting functions
 #*********************************************
 
-def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, model_type = 'action', print_out = True):
+def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, model_type = 'action', print_out = True, return_out = False):
     """
     Function to fit parameters to the bias2 model (fit r1, r2 and epsilon).
     Model can either fit to TS choices or actions
@@ -133,14 +145,14 @@ def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, mo
         model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, TS_eps=eps, action_eps = action_eps)
         model_likelihoods = []
         for i in df.index:
-            s = df.stim[i]
             c = df.context[i]
             TS_choice = df.subj_ts[i]
-            response_choice = df.response[i]
             if model_type == 'TS':
                 TS_probs = model.calc_posterior(c)
                 model_likelihoods.append(TS_probs[TS_choice])
             elif model_type == 'action':
+                s = df.stim[i]
+                response_choice = df.response[i]
                 action_probs = model.calc_action_posterior(s,c)
                 model_likelihoods.append(action_probs[response_choice])
         # minimize
@@ -154,9 +166,12 @@ def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, mo
     out = lmfit.minimize(errfunc, fit_params, method = 'lbfgsb', kws={'df': data})
     if print_out:
         lmfit.report_fit(out)
-    return out.params.valuesdict()
+    if return_out:
+        return out
+    else:
+        return out.params.valuesdict()
     
-def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, model_type = 'action', print_out = True):
+def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, model_type = 'action', print_out = True, return_out = False):
     """
     Function to fit parameters to the bias2 model (fit r and epsilon)
     """
@@ -169,14 +184,14 @@ def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, mo
         model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, TS_eps=eps, action_eps = action_eps)
         model_likelihoods = []
         for i in df.index:
-            s = df.stim[i]
             c = df.context[i]
             TS_choice = df.subj_ts[i]
-            response_choice = df.response[i]
             if model_type == 'TS':
                 TS_probs = model.calc_posterior(c)
                 model_likelihoods.append(TS_probs[TS_choice])
             elif model_type == 'action':
+                s = df.stim[i]
+                response_choice = df.response[i]
                 action_probs = model.calc_action_posterior(s,c)
                 model_likelihoods.append(action_probs[response_choice])
         # minimize
@@ -189,9 +204,12 @@ def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, mo
     out = lmfit.minimize(errfunc, fit_params, method = 'lbfgsb', kws={'df': data})
     if print_out:
         lmfit.report_fit(out)
-    return out.params.valuesdict()
+    if return_out:
+        return out
+    else:
+        return out.params.valuesdict()
     
-def fit_static_model(train_ts_dis, data, r_value, init_prior = [.5,.5], action_eps = 0, model_type = 'action', print_out = True):
+def fit_static_model(train_ts_dis, data, r_value, init_prior = [.5,.5], action_eps = 0, model_type = 'action', print_out = True, return_out = False):
     """
     Function to fit any model where recursive probabilities are fixed, like an
     optimal model (r1=r2=.9) or a base-rate neglect model (r1=r2=.5)
@@ -203,14 +221,14 @@ def fit_static_model(train_ts_dis, data, r_value, init_prior = [.5,.5], action_e
         model = BiasPredModel(train_ts_dis, init_prior, rp = r_value, TS_eps=eps, action_eps = action_eps)
         model_likelihoods = []
         for i in df.index:
-            s = df.stim[i]
             c = df.context[i]
             TS_choice = df.subj_ts[i]
-            response_choice = df.response[i]
             if model_type == 'TS':
                 TS_probs = model.calc_posterior(c)
                 model_likelihoods.append(TS_probs[TS_choice])
             elif model_type == 'action':
+                s = df.stim[i]
+                response_choice = df.response[i]
                 action_probs = model.calc_action_posterior(s,c)
                 model_likelihoods.append(action_probs[response_choice])
         # minimize
@@ -224,9 +242,12 @@ def fit_static_model(train_ts_dis, data, r_value, init_prior = [.5,.5], action_e
         lmfit.report_fit(out)
     fit_params = out.params.valuesdict()
     fit_params['rp'] = r_value
-    return fit_params
+    if return_out:
+        return out
+    else:
+        return fit_params
 
-def fit_midline_model(data):
+def fit_midline_model(data, print_out = True, return_out = False):
     def midline_errfunc(params,df):
         eps = params['eps'].value
         context_sgn = np.array([max(i,0) for i in df.context_sign])
@@ -238,11 +259,15 @@ def fit_midline_model(data):
     #attempt to simplify:
     fit_params = lmfit.Parameters()
     fit_params.add('eps', value = .1, min = 0, max = 1)
-    midline_out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
-    lmfit.report_fit(midline_out)
-    return midline_out.params.valuesdict()
+    out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
+    if print_out:
+        lmfit.report_fit(out)
+    if return_out:
+        return out
+    else:
+        return out.params.valuesdict()
     
-def fit_switch_model(data):
+def fit_switch_model(data, print_out = True, return_out = False):
     def switch_errfunc(params,df):
         params = params.valuesdict()
         r1 = params['r1']
@@ -264,9 +289,13 @@ def fit_switch_model(data):
     fit_params.add('r1', value=.5, min=0, max=1)
     fit_params.add('r2', value=.5, min=0, max=1)
     fit_params.add('eps', value = .1, min = 0, max = 1)
-    switch_out = lmfit.minimize(switch_errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
-    lmfit.report_fit(switch_out)
-    return switch_out.params.valuesdict()
+    out = lmfit.minimize(switch_errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
+    if print_out:
+        lmfit.report_fit(out)
+    if return_out:
+        return out
+    else:
+        return out.params.valuesdict()
 
 
 #*********************************************
