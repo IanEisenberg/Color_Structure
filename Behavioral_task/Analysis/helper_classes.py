@@ -92,10 +92,10 @@ class MemoryModel:
     determines the probability of acting randomly each trial which translates
     into a 'mixture model' calculation for the trial-by-trial posterior
     """
-    def __init__(self, likelihood_dist, memory_len = 5, perseverance = 0, TS_eps = 0,
+    def __init__(self, likelihood_dist, k=1, perseverance = 0, TS_eps = 0,
                  action_eps = 0):
         self.likelihood_dist = likelihood_dist
-        self.memory_len = memory_len
+        self.k = k
         self.perseverance = perseverance
         self.history= []
         self.posterior = []
@@ -112,8 +112,8 @@ class MemoryModel:
         ld = self.likelihood_dist
         eps = self.TS_eps
         self.history.append(context)
-        self.history = self.history[-self.memory_len:]
-        likelihood = np.array([dis.pdf(np.mean(self.history)) for dis in ld])
+        avg_context = np.average(self.history,weights = [self.k**i for i in range(len(self.history))][::-1])
+        likelihood = np.array([dis.pdf(avg_context) for dis in ld])
         posterior = likelihood
         self.posterior = posterior
         if self.perseverance:
