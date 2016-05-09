@@ -14,6 +14,7 @@ import warnings
 import pickle
 import statsmodels.api as sm
 
+
 # Suppress runtimewarning due to pandas bug
 warnings.simplefilter(action = "ignore", category = RuntimeWarning)
 
@@ -47,11 +48,13 @@ gtest_learn_df.id = gtest_learn_df.id.astype('str').apply(lambda x: x.zfill(3))
 # Additional Model Variables
 # ********************************************* 
 model = 'TS'
-df = gtest_learn_df
+df = gtest_learn_df.copy()
 ids = np.unique(df['id'])
 for models in ['bias2','bias1','eoptimal', 'ignore', 'midline', 'switch']:
         df[models + '_choices'] = (df[models + '_posterior']>.5).astype(int)
         df[models + '_certainty'] = (abs(df[models + '_posterior']-.5))/.5
+        df[models + '_cross_choices'] = (df[models + '_posterior_cross']>.5).astype(int)
+        df[models + '_cross_certainty'] = (abs(df[models + '_posterior_cross']-.5))/.5
             
 # *********************************************
 # Calculate how well the bias-2 model does
@@ -80,9 +83,6 @@ summary = compare_df.groupby('id').sum().drop(['context','subj_ts'],axis = 1)
 # *********************************************
 # Behavioral Analysis
 # ********************************************* 
-
-
-df = gtest_learn_df
 
 switch_sums = []
 trials_since_switch = 0
@@ -282,7 +282,7 @@ if plot == True:
         sns.kdeplot(summary[c])
     
     p12 = sns.heatmap(model_subj_compare)
-
+    p13 = sns.heatmap(df.filter(regex='choices|subj_ts').corr())
     if save == True:
         p1.savefig('../Plots/TS2%_vs_context.png', format = 'png', dpi = 300)
         p2.savefig('../Plots/Individual_subject_fits.png',format = 'png', dpi = 300)

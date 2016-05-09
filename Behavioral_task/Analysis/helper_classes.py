@@ -78,6 +78,8 @@ class BiasPredModel:
                 return r.randint(0,2)
             else:
                 return np.argmax(self.posterior)
+        elif mode == 'prob_match':
+            return r.random() > self.posterior[0]
         elif mode == "softmax":
             probs = softmax(self.posterior, inv_temp)
             return np.random.choice(range(len(probs)), p = probs)
