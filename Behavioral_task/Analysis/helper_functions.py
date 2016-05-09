@@ -11,7 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import pylab, lmfit
 import random as r
-from helper_classes import BiasPredModel, SwitchModel
+from helper_classes import BiasPredModel, SwitchModel, MemoryModel
 
 def track_runs(iterable):
     """
@@ -89,13 +89,13 @@ def genExperimentSeq(l, p, ts_dis):
     df = pd.DataFrame({'context': pd.Series(context), 'ts': pd.Series(seq)})
     return df
 
-def simulateModel(model, ts_dis, model_name = 'model', l = 800, p = .9):
+def simulateModel(model, ts_dis, model_name = 'model', l = 800, p = .9, mode = 'e-greedy'):
     seq = genExperimentSeq(l,p,ts_dis)
     posteriors = []
     choices = []
     for c in seq['context']:
         posteriors.append(model.calc_posterior(c))
-        choices.append(model.choose(mode = 'prob_match'))
+        choices.append(model.choose(mode = mode))
     seq['subj_ts'] = choices
     seq['posteriors'] = posteriors
     seq['model'] = model_name
@@ -297,7 +297,42 @@ def fit_switch_model(data, print_out = True, return_out = False):
     else:
         return out.params.valuesdict()
 
-
+def fit_memory_model(train_ts_dis, data, memory_len = None, perseverance = None, print_out = True, return_out = False):
+    def errfunc(params,df):
+        params = params.valuesdict()
+        memory_len = int(params['memory_len'])
+        perseverance = params['perseverance']   
+        eps = params['eps']
+        model = model = MemoryModel(train_ts_dis, memory_len = memory_len, perseverance = perseverance, TS_eps=eps)
+        model_likelihoods = []
+        model_likelihoods.append(.5)
+        for i in df.index[1:]:
+            last_choice = df.subj_ts[i-1]
+            trial_choice = df.subj_ts[i]
+            c = df.context[i]
+            conf = model.calc_posterior(c, last_choice)
+            model_likelihoods.append(conf[trial_choice])
+    # Fit memory model
+    fit_params = lmfit.Parameters()
+    if not memory_len:
+        fit_params.add('memory_len', value=1)
+    else:
+        fit_params.add('memory_len', value = memory_len, vary = False)
+    if not perseverance:
+        fit_params.add('perseverance', value=.5, min=0, max=1)
+    else:
+        fit_params.add('perseverance', value = perseverance, vary = False)
+    fit_params.add('eps', value = .1, min = 0, max = 1)
+    out = lmfit.minimize(errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
+    fit_params = out.params.valuesdict()
+    if print_out:
+        lmfit.report_fit(out)
+    if return_out:
+        return out
+    else:
+        return fit_params
+    
+    
 #*********************************************
 # Generate Model Predtions
 #*********************************************

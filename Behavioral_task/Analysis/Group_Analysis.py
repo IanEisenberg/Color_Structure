@@ -67,7 +67,7 @@ np.mean([bias2_fit_dict[w + '_' + model + '_fullRun']['r2'] for w in ids] + [bia
 # Model Comparison
 # ********************************************* 
 compare_df = gtest_learn_df
-compare_df_subset = compare_df.filter(regex = 'subj_ts|posterior')
+compare_df_subset = compare_df.filter(regex = 'subj_ts|.*posterior_cross$')
 model_subj_compare = compare_df_subset.corr()
 
 log_posteriors = pd.DataFrame()
