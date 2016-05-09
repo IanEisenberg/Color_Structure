@@ -6,9 +6,9 @@ Created on Mon Apr 27 11:16:08 2015
 import os
 import numpy as np
 from Load_Data import load_data
-from helper_classes import BiasPredModel, SwitchModel
+from helper_classes import BiasPredModel, SwitchModel, MemoryModel
 from helper_functions import fit_bias2_model, fit_bias1_model, fit_static_model, \
-    fit_switch_model, fit_midline_model, calc_posterior, gen_TS_posteriors, preproc_data
+    fit_switch_model, fit_midline_model, fit_memory_model, calc_posterior, gen_TS_posteriors, preproc_data
 import pickle, glob, re
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -52,6 +52,14 @@ try:
     switch_fit_dict = pickle.load(open('Analysis_Output/switch_parameter_fits.p', 'rb'))
 except:
     switch_fit_dict = {}
+try:
+    memory_fit_dict = pickle.load(open('Analysis_Output/memory_parameter_fits.p', 'rb'))
+except:
+    memory_fit_dict = {}
+try:
+    perseverance_fit_dict = pickle.load(open('Analysis_Output/perseverance_parameter_fits.p', 'rb'))
+except:
+    perseverance_fit_dict = {}
 
 if save is False:
     gtrain_learn_df = pd.read_pickle('Analysis_Output/gtrain_learn_df.pkl')
@@ -133,7 +141,15 @@ else:
                 switch_fit_dict[subj_name + '_fullRun'] = fit_switch_model(test_dfa)                
                 switch_fit_dict[subj_name + '_first'] = fit_switch_model(test_dfa.iloc[0:df_midpoint])
                 switch_fit_dict[subj_name + '_second'] = fit_switch_model(test_dfa.iloc[df_midpoint:])
-    
+            if subj_name + '_first' not in memory_fit_dict.keys(): 
+                memory_fit_dict[subj_name + '_fullRun'] = fit_memory_model(train_ts_dis, test_dfa, perseverance = 0)                
+                memory_fit_dict[subj_name + '_first'] = fit_memory_model(train_ts_dis, test_dfa.iloc[0:df_midpoint], perseverance = 0)
+                memory_fit_dict[subj_name + '_second'] = fit_memory_model(train_ts_dis, test_dfa.iloc[df_midpoint:], perseverance = 0)
+            if subj_name + '_first' not in perseverance_fit_dict.keys(): 
+                perseverance_fit_dict[subj_name + '_fullRun'] = fit_memory_model(train_ts_dis, test_dfa, memory_len = 1)                
+                perseverance_fit_dict[subj_name + '_first'] = fit_memory_model(train_ts_dis, test_dfa.iloc[0:df_midpoint], memory_len = 1)
+                perseverance_fit_dict[subj_name + '_second'] = fit_memory_model(train_ts_dis, test_dfa.iloc[df_midpoint:], memory_len = 1)
+            
         
         # *********************************************
         # Set up observers
@@ -187,7 +203,10 @@ else:
             eoptimal = BiasPredModel(train_ts_dis, [.5,.5], **params)
             params = ignore_fit_dict[subj_name + '_' + model_type + p]
             ignore = BiasPredModel(train_ts_dis, [.5,.5], **params)
-            
+            params = memory_fit_dict[subj_name + '_' + model_type + p]
+            ignore = MemoryModel(train_ts_dis, [.5,.5], **params)
+            params = perseverance_fit_dict[subj_name + '_' + model_type + p]
+            ignore = MemoryModel(train_ts_dis, [.5,.5], **params)
             if p != '_fullRun':
                 postfix = p
             else:
@@ -300,6 +319,8 @@ else:
     pickle.dump(ignore_fit_dict,open('Analysis_Output/ignore_parameter_fits.p','wb'), protocol=2)
     pickle.dump(midline_fit_dict,open('Analysis_Output/midline_parameter_fits.p','wb'), protocol=2)
     pickle.dump(switch_fit_dict,open('Analysis_Output/switch_parameter_fits.p','wb'), protocol=2)
+    pickle.dump(switch_fit_dict,open('Analysis_Output/memory_parameter_fits.p','wb'), protocol=2)
+    pickle.dump(switch_fit_dict,open('Analysis_Output/perseverance_parameter_fits.p','wb'), protocol=2)
     gtest_learn_df.to_pickle('Analysis_Output/gtest_learn_df.pkl')
     gtest_conform_df.to_pickle('Analysis_Output/gtest_conform_df.pkl')
     gtest_df.to_pickle('Analysis_Output/gtest_df.pkl')

@@ -74,6 +74,59 @@ class BiasPredModel:
        
     def choose(self, mode = 'softmax', eps = .1, inv_temp = 1):
         if mode == "e-greedy":
+            eps = self.TS_eps
+            TS_probs = (1-eps)*self.posterior+eps/2
+            return r.random() > TS_probs[0]
+        elif mode == 'prob_match':
+            return r.random() > self.posterior[0]
+        elif mode == "softmax":
+            probs = softmax(self.posterior, inv_temp)
+            return np.random.choice(range(len(probs)), p = probs)
+        else:
+            return np.argmax(self.posterior)
+
+class MemoryModel:
+    """
+    Prediction model that takes in data, and uses a prior over hypotheses
+    and the relevant to calculate posterior hypothesis estimates. Eps
+    determines the probability of acting randomly each trial which translates
+    into a 'mixture model' calculation for the trial-by-trial posterior
+    """
+    def __init__(self, likelihood_dist, memory_len = 5, perseverance = 0, TS_eps = 0,
+                 action_eps = 0):
+        self.likelihood_dist = likelihood_dist
+        self.memory_len = memory_len
+        self.perseverance = perseverance
+        self.history= []
+        self.posterior = []
+        self.TS_eps = TS_eps
+        self.action_eps = action_eps
+        
+    def calc_posterior(self, context, last_TS):
+        """
+        Calculate the posterior probability of different distribution hypotheses (TSs)
+        given a context point. You can pass in multiple context points but this function
+		will only calculate the posterior based on the current prior and will not update
+		in between each context point.
+        """
+        ld = self.likelihood_dist
+        eps = self.TS_eps
+        self.history.append(context)
+        self.history = self.history[-self.memory_len:]
+        likelihood = np.array([dis.pdf(np.mean(self.history)) for dis in ld])
+        posterior = likelihood
+        self.posterior = posterior
+        if self.perseverance:
+            perseverance = np.array([0,0])
+            perseverance[last_TS] = 1
+            TS_probs = (1-self.perseverance)*posterior + self.perseverance*perseverance  # mixed model of TS posteriors and perseverence 
+        else:
+            TS_probs = posterior
+        TS_probs = (1-eps)*TS_probs+eps/2  # mixed model of TS posteriors and random guessing
+        return TS_probs
+       
+    def choose(self, mode = 'softmax', eps = .1, inv_temp = 1):
+        if mode == "e-greedy":
             if r.random() < eps:
                 return r.randint(0,2)
             else:
@@ -85,8 +138,8 @@ class BiasPredModel:
             return np.random.choice(range(len(probs)), p = probs)
         else:
             return np.argmax(self.posterior)
-
-
+            
+            
 class SwitchModel:
     """
     Prediction model that takes in data, and uses a prior over hypotheses
