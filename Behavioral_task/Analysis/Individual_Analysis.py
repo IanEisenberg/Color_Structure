@@ -8,7 +8,8 @@ import numpy as np
 from Load_Data import load_data
 from helper_classes import BiasPredModel, SwitchModel, MemoryModel
 from helper_functions import fit_bias2_model, fit_bias1_model, fit_static_model, \
-    fit_switch_model, fit_midline_model, fit_memory_model, calc_posterior, gen_TS_posteriors, preproc_data
+    fit_switch_model, fit_midline_model, fit_memory_model, calc_posterior, gen_bias_TS_posteriors, \
+    gen_memory_TS_posteriors, preproc_data
 import pickle, glob, re
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -223,7 +224,8 @@ else:
                 postfix = ''
                 
             # Fit observer for test        
-            gen_TS_posteriors([bias2, bias1, eoptimal, ignore, memory, perseverance, permem], test_dfa, ['bias2', 'bias1', 'eoptimal', 'ignore', 'memory', 'perseverance', 'permem'], postfix = postfix)
+            gen_bias_TS_posteriors([bias2, bias1, eoptimal, ignore], test_dfa, ['bias2', 'bias1', 'eoptimal', 'ignore'], postfix = postfix)
+            gen_memory_TS_posteriors([memory, perseverance, permem], test_dfa, ['memory', 'perseverance', 'permem'], postfix = postfix)
         
         for model in ['bias2', 'bias1', 'eoptimal', 'ignore']:
             cross_posteriors = pd.concat([test_dfa[:df_midpoint][model + '_posterior_second'],test_dfa[df_midpoint:][model + '_posterior_first']])

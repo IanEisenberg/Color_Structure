@@ -109,35 +109,38 @@ class MemoryModel:
 		will only calculate the posterior based on the current prior and will not update
 		in between each context point.
         """
-        ld = self.likelihood_dist
-        eps = self.TS_eps
-        self.history.append(context)
-        avg_context = np.average(self.history,weights = [self.k**i for i in range(len(self.history))][::-1])
-        likelihood = np.array([dis.pdf(avg_context) for dis in ld])
-        posterior = likelihood
-        self.posterior = posterior
-        if self.perseverance:
-            perseverance = np.array([0,0])
-            perseverance[last_TS] = 1
-            TS_probs = (1-self.perseverance)*posterior + self.perseverance*perseverance  # mixed model of TS posteriors and perseverence 
+        if last_TS == None:
+            return [np.nan] * len(self.likelihood_dist)
         else:
-            TS_probs = posterior
-        TS_probs = (1-eps)*TS_probs+eps/2  # mixed model of TS posteriors and random guessing
-        return TS_probs
-       
-    def choose(self, mode = 'softmax', eps = .1, inv_temp = 1):
-        if mode == "e-greedy":
-            if r.random() < eps:
-                return r.randint(0,2)
+            ld = self.likelihood_dist
+            eps = self.TS_eps
+            self.history.append(context)
+            avg_context = np.average(self.history,weights = [self.k**i for i in range(len(self.history))][::-1])
+            likelihood = np.array([dis.pdf(avg_context) for dis in ld])
+            posterior = likelihood
+            self.posterior = posterior
+            if self.perseverance:
+                perseverance = np.array([0,0])
+                perseverance[last_TS] = 1
+                TS_probs = (1-self.perseverance)*posterior + self.perseverance*perseverance  # mixed model of TS posteriors and perseverence 
+            else:
+                TS_probs = posterior
+            TS_probs = (1-eps)*TS_probs+eps/2  # mixed model of TS posteriors and random guessing
+            return TS_probs
+           
+        def choose(self, mode = 'softmax', eps = .1, inv_temp = 1):
+            if mode == "e-greedy":
+                if r.random() < eps:
+                    return r.randint(0,2)
+                else:
+                    return np.argmax(self.posterior)
+            elif mode == 'prob_match':
+                return r.random() > self.posterior[0]
+            elif mode == "softmax":
+                probs = softmax(self.posterior, inv_temp)
+                return np.random.choice(range(len(probs)), p = probs)
             else:
                 return np.argmax(self.posterior)
-        elif mode == 'prob_match':
-            return r.random() > self.posterior[0]
-        elif mode == "softmax":
-            probs = softmax(self.posterior, inv_temp)
-            return np.random.choice(range(len(probs)), p = probs)
-        else:
-            return np.argmax(self.posterior)
             
             
 class SwitchModel:

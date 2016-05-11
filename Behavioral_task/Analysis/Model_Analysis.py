@@ -20,16 +20,24 @@ p = .9
 num_sims = 100
 
 vals = []
-for _ in range(num_sims):
-    r1 = r.random()*.5
-    r2 = r.random()*.5
+for i in range(num_sims):
+    if (i % 10 == 0):
+        print(i)
+    r1 = r.random()
+    r2 = r.random()
     eps = r.random()
     model = BiasPredModel(ts_dis, [.5,.5], r1, r2, TS_eps = eps)
     df = simulateModel(model,ts_dis,'bias')
     bias2 = fit_bias2_model(ts_dis, df, action_eps = 0, model_type = 'TS', print_out = False, return_out = False)
     vals.append({'model_r1': r1, 'model_r2': r2, 'model_eps': eps, \
             'recovered_r1': bias2['r1'], 'recovered_r2': bias2['r2'], 'recovered_eps': bias2['TS_eps']})
+            
 df = pd.DataFrame(vals)
 sns.heatmap(df.corr())
+sns.plt.scatter(df['model_r2'],df['recovered_r2'])
 
+
+clean_df = df.query('recovered_eps < .5')
+sns.heatmap(clean_df.corr())
+sns.plt.scatter(clean_df['model_r2'],clean_df['recovered_r2'])
 
