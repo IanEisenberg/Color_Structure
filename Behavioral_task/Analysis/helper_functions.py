@@ -339,7 +339,7 @@ def fit_memory_model(train_ts_dis, data, k = None, perseverance = None, print_ou
 # Generate Model Predtions
 #*********************************************
 
-def gen_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduce = True, postfix = ''):
+def gen_bias_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduce = True, postfix = ''):
     """ Generates an array of TS or model(s)
     :model: model or array of models that has a calc_posterior method
     :data: dataframe with a context
@@ -366,6 +366,44 @@ def gen_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduc
                 model_posteriors[j].append(posterior[1])
             else:
                 model_posteriors[j].append(posterior)
+            
+    for j,posteriors in enumerate(model_posteriors):
+        if model_names:
+            model_name = model_names[j]
+        else:
+            model_name = 'model_%s' % j
+        data[model_name + '_posterior' + postfix] = model_posteriors[j]
+        
+
+def gen_memory_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduce = True, postfix = ''):
+    """ Generates an array of TS or model(s)
+    :model: model or array of models that has a calc_posterior method
+    :data: dataframe with a context
+    :reduce: bool, if True only show the posterior for task-set 2
+    """
+    assert len(model_names)
+    if not isinstance(models,list):
+        models = [models]
+    if model_names:
+        if not isinstance(model_names,list):
+            model_names = [model_names]
+        assert len(model_names) == len(models), \
+            'Model_names must be the same length as models'
+    model_posteriors = [[] for _ in  range(len(models))]
+    last_choice = None
+    for i,trial in data.iterrows():
+        c = trial.context
+        s = trial.stim
+        for j,model in enumerate(models):
+            if model_type == 'TS':
+                posterior = model.calc_posterior(c, last_choice)
+            elif model_type == 'action':
+                posterior = model.calc_action_posterior(s,c)
+            if reduce:
+                model_posteriors[j].append(posterior[1])
+            else:
+                model_posteriors[j].append(posterior)
+        last_choice = trial.subj_ts
             
     for j,posteriors in enumerate(model_posteriors):
         if model_names:
