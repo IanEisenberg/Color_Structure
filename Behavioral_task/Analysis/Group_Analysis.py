@@ -34,6 +34,10 @@ eoptimal_fit_dict = pickle.load(open('Analysis_Output/eoptimal_parameter_fits.p'
 ignore_fit_dict = pickle.load(open('Analysis_Output/ignore_parameter_fits.p', 'rb'))
 midline_fit_dict = pickle.load(open('Analysis_Output/midline_parameter_fits.p', 'rb'))
 switch_fit_dict = pickle.load(open('Analysis_Output/switch_parameter_fits.p', 'rb'))
+memory_fit_dict = pickle.load(open('Analysis_Output/memory_parameter_fits.p', 'rb'))
+perseverance_fit_dict = pickle.load(open('Analysis_Output/perseverance_parameter_fits.p', 'rb'))
+permem_fit_dict = pickle.load(open('Analysis_Output/permem_parameter_fits.p', 'rb'))
+
 
 
 gtrain_learn_df = pd.read_pickle('Analysis_Output/gtrain_learn_df.pkl')

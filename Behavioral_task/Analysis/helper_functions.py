@@ -303,7 +303,7 @@ def fit_memory_model(train_ts_dis, data, k = None, perseverance = None, print_ou
         k = params['k']
         perseverance = params['perseverance']   
         TS_eps = params['TS_eps']
-        model = model = MemoryModel(train_ts_dis, k = k, perseverance = perseverance, TS_eps=TS_eps)
+        model = MemoryModel(train_ts_dis, k = k, perseverance = perseverance, TS_eps=TS_eps)
         model_likelihoods = []
         model_likelihoods.append(.5)
         for i in df.index[1:]:
