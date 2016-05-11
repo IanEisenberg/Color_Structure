@@ -146,6 +146,8 @@ else:
                 switch_fit_dict[subj_name + '_fullRun'] = fit_switch_model(test_dfa)                
                 switch_fit_dict[subj_name + '_first'] = fit_switch_model(test_dfa.iloc[0:df_midpoint])
                 switch_fit_dict[subj_name + '_second'] = fit_switch_model(test_dfa.iloc[df_midpoint:])
+        for model_type in ['TS']:
+            print(model_type)
             if subj_name + '_' + model_type + '_first' not in memory_fit_dict.keys(): 
                 memory_fit_dict[subj_name + '_' + model_type + '_fullRun'] = fit_memory_model(train_ts_dis, test_dfa, perseverance = 0)                
                 memory_fit_dict[subj_name + '_' + model_type + '_first'] = fit_memory_model(train_ts_dis, test_dfa.iloc[0:df_midpoint], perseverance = 0)
