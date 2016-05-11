@@ -72,9 +72,10 @@ class BiasPredModel:
         return action_probs
     
        
-    def choose(self, mode = 'softmax', eps = .1, inv_temp = 1):
-        if mode == "e-greedy":
+    def choose(self, mode = 'e-greedy', eps = None, inv_temp = 1):
+        if eps == None:
             eps = self.TS_eps
+        if mode == "e-greedy":
             TS_probs = (1-eps)*self.posterior+eps/2
             return r.random() > TS_probs[0]
         elif mode == 'prob_match':
@@ -117,30 +118,28 @@ class MemoryModel:
             self.history.append(context)
             avg_context = np.average(self.history,weights = [self.k**i for i in range(len(self.history))][::-1])
             likelihood = np.array([dis.pdf(avg_context) for dis in ld])
+            likelihood = likelihood/np.sum(likelihood,0)
             posterior = likelihood
-            self.posterior = posterior
-            if self.perseverance:
-                perseverance = np.array([0,0])
-                perseverance[last_TS] = 1
-                TS_probs = (1-self.perseverance)*posterior + self.perseverance*perseverance  # mixed model of TS posteriors and perseverence 
-            else:
-                TS_probs = posterior
+            perseverance = np.array([0,0])
+            perseverance[last_TS] = 1
+            TS_probs = (1-self.perseverance)*posterior + self.perseverance*perseverance  # mixed model of TS posteriors and perseverence 
+            self.posterior = TS_probs
             TS_probs = (1-eps)*TS_probs+eps/2  # mixed model of TS posteriors and random guessing
             return TS_probs
            
-        def choose(self, mode = 'softmax', eps = .1, inv_temp = 1):
-            if mode == "e-greedy":
-                if r.random() < eps:
-                    return r.randint(0,2)
-                else:
-                    return np.argmax(self.posterior)
-            elif mode == 'prob_match':
-                return r.random() > self.posterior[0]
-            elif mode == "softmax":
-                probs = softmax(self.posterior, inv_temp)
-                return np.random.choice(range(len(probs)), p = probs)
-            else:
-                return np.argmax(self.posterior)
+    def choose(self, mode = 'e-greedy', eps = None, inv_temp = 1):
+        if eps == None:
+            eps = self.TS_eps
+        if mode == "e-greedy":
+            TS_probs = (1-eps)*self.posterior+eps/2
+            return r.random() > TS_probs[0]
+        elif mode == 'prob_match':
+            return r.random() > self.posterior[0]
+        elif mode == "softmax":
+            probs = softmax(self.posterior, inv_temp)
+            return np.random.choice(range(len(probs)), p = probs)
+        else:
+            return np.argmax(self.posterior)
             
             
 class SwitchModel:

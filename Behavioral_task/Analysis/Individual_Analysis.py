@@ -62,7 +62,7 @@ try:
 except:
     perseverance_fit_dict = {}
 try:
-    permem_fit_dict = pickle.load(open('Analysis_Output/perseverance_parameter_fits.p', 'rb'))
+    permem_fit_dict = pickle.load(open('Analysis_Output/permem_parameter_fits.p', 'rb'))
 except:
     permem_fit_dict = {}
 
