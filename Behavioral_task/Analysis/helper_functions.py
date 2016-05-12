@@ -302,8 +302,9 @@ def fit_memory_model(train_ts_dis, data, k = None, perseverance = None, print_ou
         params = params.valuesdict()
         k = params['k']
         perseverance = params['perseverance']   
+        bias = params['bias']
         TS_eps = params['TS_eps']
-        model = MemoryModel(train_ts_dis, k = k, perseverance = perseverance, TS_eps=TS_eps)
+        model = MemoryModel(train_ts_dis, k = k, perseverance = perseverance, bias = bias, TS_eps=TS_eps)
         model_likelihoods = []
         model_likelihoods.append(.5)
         for i in df.index[1:]:
@@ -324,6 +325,7 @@ def fit_memory_model(train_ts_dis, data, k = None, perseverance = None, print_ou
         fit_params.add('perseverance', value=.5, min=0, max=1)
     else:
         fit_params.add('perseverance', value = perseverance, vary = False)
+    fit_params.add('bias', value = .5, min = 0, max = 1)
     fit_params.add('TS_eps', value = .1, min = 0, max = 1)
     out = lmfit.minimize(errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
     fit_params = out.params.valuesdict()
@@ -339,7 +341,7 @@ def fit_memory_model(train_ts_dis, data, k = None, perseverance = None, print_ou
 # Generate Model Predtions
 #*********************************************
 
-def gen_bias_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduce = True, postfix = ''):
+def gen_bias_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduce = True, get_choice = False, postfix = ''):
     """ Generates an array of TS or model(s)
     :model: model or array of models that has a calc_posterior method
     :data: dataframe with a context
@@ -354,6 +356,7 @@ def gen_bias_TS_posteriors(models, data, model_names = None, model_type = 'TS', 
         assert len(model_names) == len(models), \
             'Model_names must be the same length as models'
     model_posteriors = [[] for _ in  range(len(models))]
+    model_choices = [[] for _ in  range(len(models))]
     for i,trial in data.iterrows():
         c = trial.context
         s = trial.stim
@@ -366,6 +369,8 @@ def gen_bias_TS_posteriors(models, data, model_names = None, model_type = 'TS', 
                 model_posteriors[j].append(posterior[1])
             else:
                 model_posteriors[j].append(posterior)
+            if get_choice:
+                model_choices[j].append([model.choose() for _ in range(10)])
             
     for j,posteriors in enumerate(model_posteriors):
         if model_names:
@@ -373,9 +378,11 @@ def gen_bias_TS_posteriors(models, data, model_names = None, model_type = 'TS', 
         else:
             model_name = 'model_%s' % j
         data[model_name + '_posterior' + postfix] = model_posteriors[j]
+        if get_choice:
+            data[model_name + '_choices' + postfix] = model_choices[j]
         
 
-def gen_memory_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduce = True, postfix = ''):
+def gen_memory_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduce = True, get_choice = False, postfix = ''):
     """ Generates an array of TS or model(s)
     :model: model or array of models that has a calc_posterior method
     :data: dataframe with a context
@@ -390,6 +397,7 @@ def gen_memory_TS_posteriors(models, data, model_names = None, model_type = 'TS'
         assert len(model_names) == len(models), \
             'Model_names must be the same length as models'
     model_posteriors = [[] for _ in  range(len(models))]
+    model_choices = [[] for _ in  range(len(models))]
     last_choice = None
     for i,trial in data.iterrows():
         c = trial.context
@@ -403,6 +411,8 @@ def gen_memory_TS_posteriors(models, data, model_names = None, model_type = 'TS'
                 model_posteriors[j].append(posterior[1])
             else:
                 model_posteriors[j].append(posterior)
+            if get_choice:
+                model_choices[j].append([model.choose() for _ in range(10)])
         last_choice = trial.subj_ts
             
     for j,posteriors in enumerate(model_posteriors):
@@ -411,6 +421,8 @@ def gen_memory_TS_posteriors(models, data, model_names = None, model_type = 'TS'
         else:
             model_name = 'model_%s' % j
         data[model_name + '_posterior' + postfix] = model_posteriors[j]
+        if get_choice:
+            data[model_name + '_choices' + postfix] = model_choices[j]
         
         
 #*********************************************

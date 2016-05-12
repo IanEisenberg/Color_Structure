@@ -77,9 +77,9 @@ class BiasPredModel:
             eps = self.TS_eps
         if mode == "e-greedy":
             TS_probs = (1-eps)*self.posterior+eps/2
-            return r.random() > TS_probs[0]
+            return np.random.choice(range(len(TS_probs)), p = TS_probs)
         elif mode == 'prob_match':
-            return r.random() > self.posterior[0]
+            return np.random.choice(range(len(self.posterior)), p = self.posterior)
         elif mode == "softmax":
             probs = softmax(self.posterior, inv_temp)
             return np.random.choice(range(len(probs)), p = probs)
@@ -92,15 +92,19 @@ class MemoryModel:
     and the relevant to calculate posterior hypothesis estimates. Eps
     determines the probability of acting randomly each trial which translates
     into a 'mixture model' calculation for the trial-by-trial posterior
+    :param k: discount rate over prior contexts
+    :param perseverance: bias to responding the same TS as the last trial
+    :param bias: bias to responding TS2. Higher values indicate greater P(TS2)
     """
-    def __init__(self, likelihood_dist, k=1, perseverance = 0, TS_eps = 0,
+    def __init__(self, likelihood_dist, k=1, perseverance = 0, bias = .5, TS_eps = 0,
                  action_eps = 0):
         self.likelihood_dist = likelihood_dist
         self.k = k
         self.perseverance = perseverance
         self.history= []
-        self.posterior = []
+        self.TS_probs = []
         self.TS_eps = TS_eps
+        self.bias = [1-bias, bias]
         self.action_eps = action_eps
         
     def calc_posterior(self, context, last_TS):
@@ -111,35 +115,42 @@ class MemoryModel:
 		in between each context point.
         """
         if last_TS == None:
-            return [np.nan] * len(self.likelihood_dist)
+            self.TS_probs = [np.nan] * len(self.likelihood_dist)
+            return self.TS_probs
         else:
+            TS_probs = []
             ld = self.likelihood_dist
             eps = self.TS_eps
             self.history.append(context)
             avg_context = np.average(self.history,weights = [self.k**i for i in range(len(self.history))][::-1])
             likelihood = np.array([dis.pdf(avg_context) for dis in ld])
+            likelihood = np.array([.6,.4])
             likelihood = likelihood/np.sum(likelihood,0)
-            posterior = likelihood
+            TS_probs = likelihood
+            TS_probs*= self.bias
+            TS_probs = TS_probs/np.sum(TS_probs,0)
             perseverance = np.array([0,0])
             perseverance[last_TS] = 1
-            TS_probs = (1-self.perseverance)*posterior + self.perseverance*perseverance  # mixed model of TS posteriors and perseverence 
-            self.posterior = TS_probs
+            TS_probs = (1-self.perseverance)*TS_probs + self.perseverance*perseverance  # mixed model of TS posteriors and perseverence 
+            self.TS_probs = TS_probs
             TS_probs = (1-eps)*TS_probs+eps/2  # mixed model of TS posteriors and random guessing
             return TS_probs
            
     def choose(self, mode = 'e-greedy', eps = None, inv_temp = 1):
+        if np.isnan(self.posterior[0]):
+            return np.nan
         if eps == None:
             eps = self.TS_eps
         if mode == "e-greedy":
-            TS_probs = (1-eps)*self.posterior+eps/2
-            return r.random() > TS_probs[0]
+            TS_probs = (1-eps)*self.TS_probs+eps/2
+            return np.random.choice(range(len(TS_probs)), p = TS_probs)
         elif mode == 'prob_match':
-            return r.random() > self.posterior[0]
+            return np.random.choice(range(len(self.TS_probs)), p = self.TS_probs)
         elif mode == "softmax":
             probs = softmax(self.posterior, inv_temp)
             return np.random.choice(range(len(probs)), p = probs)
         else:
-            return np.argmax(self.posterior)
+            return np.argmax(self.TS_probs)
             
             
 class SwitchModel:

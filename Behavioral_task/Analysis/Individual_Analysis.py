@@ -229,7 +229,7 @@ else:
             gen_bias_TS_posteriors([bias2, bias1, eoptimal, ignore], test_dfa, ['bias2', 'bias1', 'eoptimal', 'ignore'], postfix = postfix)
             gen_memory_TS_posteriors([memory, perseverance, permem], test_dfa, ['memory', 'perseverance', 'permem'], postfix = postfix)
         
-        for model in ['bias2', 'bias1', 'eoptimal', 'ignore']:
+        for model in ['bias2', 'bias1', 'eoptimal', 'ignore', 'memory', 'perseverance','permem']:
             cross_posteriors = pd.concat([test_dfa[:df_midpoint][model + '_posterior_second'],test_dfa[df_midpoint:][model + '_posterior_first']])
             test_dfa[model + '_posterior_cross'] = cross_posteriors
             test_dfa.drop([model + '_posterior_first', model + '_posterior_second'], inplace = True, axis = 1)
@@ -302,7 +302,7 @@ else:
     # Exclude subjects where stim_confom is below some threshold 
     select_ids = gtest_df.groupby('id').mean().stim_conform>.75
     select_ids = select_ids[select_ids]
-    select_rows = [i in select_ids for i in gtrain_df.id]
+    select_rows = [i in select_ids for i in gtrain_df.index]
     gtrain_conform_df = gtrain_df[select_rows]
     select_rows = [i in select_ids for i in gtest_df.id]
     gtest_conform_df = gtest_df[select_rows]

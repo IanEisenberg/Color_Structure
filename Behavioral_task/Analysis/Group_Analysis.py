@@ -38,8 +38,6 @@ memory_fit_dict = pickle.load(open('Analysis_Output/memory_parameter_fits.p', 'r
 perseverance_fit_dict = pickle.load(open('Analysis_Output/perseverance_parameter_fits.p', 'rb'))
 permem_fit_dict = pickle.load(open('Analysis_Output/permem_parameter_fits.p', 'rb'))
 
-
-
 gtrain_learn_df = pd.read_pickle('Analysis_Output/gtrain_learn_df.pkl')
 gtest_learn_df = pd.read_pickle('Analysis_Output/gtest_learn_df.pkl')
 gtest_conform_df = pd.read_pickle('Analysis_Output/gtest_conform_df.pkl')
@@ -54,7 +52,8 @@ gtest_learn_df.id = gtest_learn_df.id.astype('str').apply(lambda x: x.zfill(3))
 model = 'TS'
 df = gtest_learn_df.copy()
 ids = np.unique(df['id'])
-for models in ['bias2','bias1','eoptimal', 'ignore', 'midline', 'switch']:
+
+for models in ['bias2','bias1','eoptimal', 'ignore', 'midline', 'switch','memory','perseverance','permem']:
         df[models + '_choices'] = (df[models + '_posterior']>.5).astype(int)
         df[models + '_certainty'] = (abs(df[models + '_posterior']-.5))/.5
         df[models + '_cross_choices'] = (df[models + '_posterior_cross']>.5).astype(int)
@@ -70,8 +69,8 @@ np.mean([bias2_fit_dict[w + '_' + model + '_fullRun']['r2'] for w in ids] + [bia
 # *********************************************
 # Model Comparison
 # ********************************************* 
-compare_df = gtest_learn_df
-compare_df_subset = compare_df.filter(regex = 'subj_ts|.*posterior_cross$')
+compare_df = df.copy()
+compare_df_subset = compare_df.filter(regex = 'subj_ts|.*posterior$')
 model_subj_compare = compare_df_subset.corr()
 
 log_posteriors = pd.DataFrame()
@@ -84,6 +83,12 @@ compare_df['random_log'] = np.log(.5)
 
 summary = compare_df.groupby('id').sum().drop(['context','subj_ts'],axis = 1)
 
+num_params = [3,2,1,1,2,2,3,1,1,0]
+param_cost_df = np.log(df.groupby('id').count()).iloc[:,0:len(summary.columns)]*num_params
+param_cost_df.columns = summary.columns
+BIC_summary = -2*summary + param_cost_df
+BIC_summary['correct'] =  df.groupby('id')['correct'].mean()
+sns.plt.scatter(BIC_summary['correct'],BIC_summary['bias2_posterior_cross'])
 # *********************************************
 # Behavioral Analysis
 # ********************************************* 
@@ -115,7 +120,7 @@ for window in [(0,850)]:
     plot_df = pd.DataFrame.from_dict(plot_dict, orient='index').transpose()  
     
     plot_df = pd.melt(plot_df, id_vars = 'trials_since_switch', var_name = 'id', value_name = 'percent_correct')
-    sns.lmplot(x = 'trials_since_switch', y = 'percent_correct', data = plot_df, size = 8, hue = 'id', fit_reg = False)
+    sns.lmplot(x = 'trials_since_switch', y = 'percent_correct', data = plot_df, size = 8,  fit_reg = False)
     plt.title('Trial window: ' + str(window), size = 20)
     
 
@@ -126,7 +131,7 @@ for window in [(0,850)]:
 contexts = np.unique(gtest_df.context)
 figdims = (16,12)
 fontsize = 20
-plot_df = gtest_learn_df.copy()
+plot_df = df.copy()
 plot_df['rt'] = plot_df['rt']*1000
 plot_ids = np.unique(plot_df.id)
 if plot == True:
@@ -137,7 +142,7 @@ if plot == True:
     plt.hold(True) 
     plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 4, marker = 'o', markersize = 10, color = 'm', label = 'subject')
     plt.plot(plot_df.groupby('context').bias2_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', label = 'bias-2 observer')
-    plt.plot(plot_df.groupby('context').bias1_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', ls = '--', label = 'bias-1 observer')
+    plt.plot(plot_df.groupby('context').perseverance_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', ls = '--', label = 'bias-1 observer')
     plt.xticks(list(range(12)),contexts)
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
     plt.ylabel('TS2 choice %', size = fontsize)
@@ -174,10 +179,10 @@ if plot == True:
         plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2,  alpha = 1, label = '_nolegend_')
     plt.gca().set_color_cycle(None)
     subj_df = plot_df.query('id == "%s"' %plot_ids[range_start])
-    plt.plot(subj_df.groupby('context').bias2_choices.mean(), lw = 2, ls = '--', label = 'bias-2 observer')
+    plt.plot(subj_df.groupby('context').permem_choices.mean(), lw = 2, ls = '--', label = 'bias-2 observer')
     for subj in plot_ids[range_start+1:range_start+5]:
         subj_df = plot_df.query('id == "%s"' %subj)
-        plt.plot(subj_df.groupby('context').bias2_choices.mean(), lw = 2, ls = '--', label = '_nolegend_')
+        plt.plot(subj_df.groupby('context').permem_choices.mean(), lw = 2, ls = '--', label = '_nolegend_')
     pylab.legend(loc='best',prop={'size':20})
 
     # look at RT
@@ -248,7 +253,7 @@ if plot == True:
     params_df['learner'] = [x[0:3] in plot_ids for x in bias2_fit_dict if ('_fullRun' in x)] 
     params_df['r1'] = [bias2_fit_dict[x]['r1'] for x in bias2_fit_dict if ('_fullRun' in x)]
     params_df['r2'] = [bias2_fit_dict[x]['r2'] for x in bias2_fit_dict if ('_fullRun' in x)]
-    params_df['eps'] = [bias2_fit_dict[x]['eps'] for x in bias2_fit_dict if ('_fullRun' in x)]
+    params_df['eps'] = [bias2_fit_dict[x]['TS_eps'] for x in bias2_fit_dict if ('_fullRun' in x)]
     params_df = pd.melt(params_df, id_vars = ['id','learner'], value_vars = ['eps','r1','r2'], var_name = 'param', value_name = 'val')
 
     p9 = plt.figure(figsize = figdims)
@@ -266,7 +271,7 @@ if plot == True:
     params_df['id'] = [x[1:3] for x in bias1_fit_dict if ('_fullRun' in x)]
     params_df['learner'] = [x[0:3] in plot_ids for x in bias1_fit_dict if ('_fullRun' in x)] 
     params_df['r1'] = [bias2_fit_dict[x]['r1'] for x in bias1_fit_dict if ('_fullRun' in x)]
-    params_df['eps'] = [bias2_fit_dict[x]['eps'] for x in bias1_fit_dict if ('_fullRun' in x)]
+    params_df['eps'] = [bias2_fit_dict[x]['TS_eps'] for x in bias1_fit_dict if ('_fullRun' in x)]
     params_df = pd.melt(params_df, id_vars = ['id','learner'], value_vars = ['eps','r1'], var_name = 'param', value_name = 'val')
 
     p10 = plt.figure(figsize = figdims)
