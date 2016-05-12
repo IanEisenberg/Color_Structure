@@ -142,7 +142,7 @@ if plot == True:
     plt.hold(True) 
     plt.plot(plot_df.groupby('context').subj_ts.mean(), lw = 4, marker = 'o', markersize = 10, color = 'm', label = 'subject')
     plt.plot(plot_df.groupby('context').bias2_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', label = 'bias-2 observer')
-    plt.plot(plot_df.groupby('context').perseverance_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', ls = '--', label = 'bias-1 observer')
+    plt.plot(plot_df.groupby('context').eoptimal_choices.mean(), lw = 4, marker = 'o', markersize = 10, color = 'c', ls = '--', label = 'bias-1 observer')
     plt.xticks(list(range(12)),contexts)
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
     plt.ylabel('TS2 choice %', size = fontsize)
@@ -179,10 +179,10 @@ if plot == True:
         plt.plot(subj_df.groupby('context').subj_ts.mean(), lw = 2,  alpha = 1, label = '_nolegend_')
     plt.gca().set_color_cycle(None)
     subj_df = plot_df.query('id == "%s"' %plot_ids[range_start])
-    plt.plot(subj_df.groupby('context').permem_choices.mean(), lw = 2, ls = '--', label = 'bias-2 observer')
+    plt.plot(subj_df.groupby('context').bias2_choices.mean(), lw = 2, ls = '--', label = 'bias-2 observer')
     for subj in plot_ids[range_start+1:range_start+5]:
         subj_df = plot_df.query('id == "%s"' %subj)
-        plt.plot(subj_df.groupby('context').permem_choices.mean(), lw = 2, ls = '--', label = '_nolegend_')
+        plt.plot(subj_df.groupby('context').bias2_choices.mean(), lw = 2, ls = '--', label = '_nolegend_')
     pylab.legend(loc='best',prop={'size':20})
 
     # look at RT
