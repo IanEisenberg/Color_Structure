@@ -297,12 +297,6 @@ else:
 # *********************************************
 # Exclusion criterion
 # ********************************************* 
-    #model exclusion
-    eps_vals = [bias2_fit_dict[i + '_TS_fullRun']['TS_eps'] for  i in np.unique(gtest_df['id'])]
-    acc_vals = [gtest_df.query('id == "%s"' % i).correct.mean() for  i in np.unique(gtest_df['id'])]
-    plt.scatter(eps_vals, acc_vals)
-    plt.xlabel('eps')
-    plt.ylabel('acc')
     
     #arbitrary behavioral exclusion
     # Exclude subjects where stim_confom is below some threshold 
