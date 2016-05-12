@@ -302,14 +302,9 @@ def fit_memory_model(train_ts_dis, data, k = None, perseverance = None, print_ou
         params = params.valuesdict()
         k = params['k']
         perseverance = params['perseverance']   
-<<<<<<< HEAD
         bias = params['bias']
         TS_eps = params['TS_eps']
         model = MemoryModel(train_ts_dis, k = k, perseverance = perseverance, bias = bias, TS_eps=TS_eps)
-=======
-        TS_eps = params['TS_eps']
-        model = MemoryModel(train_ts_dis, k = k, perseverance = perseverance, TS_eps=TS_eps)
->>>>>>> 406af2f997ed5381e6e90283fd30c301b642fb01
         model_likelihoods = []
         model_likelihoods.append(.5)
         for i in df.index[1:]:
@@ -330,10 +325,7 @@ def fit_memory_model(train_ts_dis, data, k = None, perseverance = None, print_ou
         fit_params.add('perseverance', value=.5, min=0, max=1)
     else:
         fit_params.add('perseverance', value = perseverance, vary = False)
-<<<<<<< HEAD
     fit_params.add('bias', value = .5, min = 0, max = 1)
-=======
->>>>>>> 406af2f997ed5381e6e90283fd30c301b642fb01
     fit_params.add('TS_eps', value = .1, min = 0, max = 1)
     out = lmfit.minimize(errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
     fit_params = out.params.valuesdict()
@@ -349,11 +341,7 @@ def fit_memory_model(train_ts_dis, data, k = None, perseverance = None, print_ou
 # Generate Model Predtions
 #*********************************************
 
-<<<<<<< HEAD
 def gen_bias_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduce = True, get_choice = False, postfix = ''):
-=======
-def gen_bias_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduce = True, postfix = ''):
->>>>>>> 406af2f997ed5381e6e90283fd30c301b642fb01
     """ Generates an array of TS or model(s)
     :model: model or array of models that has a calc_posterior method
     :data: dataframe with a context
@@ -368,10 +356,7 @@ def gen_bias_TS_posteriors(models, data, model_names = None, model_type = 'TS', 
         assert len(model_names) == len(models), \
             'Model_names must be the same length as models'
     model_posteriors = [[] for _ in  range(len(models))]
-<<<<<<< HEAD
     model_choices = [[] for _ in  range(len(models))]
-=======
->>>>>>> 406af2f997ed5381e6e90283fd30c301b642fb01
     for i,trial in data.iterrows():
         c = trial.context
         s = trial.stim
@@ -384,29 +369,19 @@ def gen_bias_TS_posteriors(models, data, model_names = None, model_type = 'TS', 
                 model_posteriors[j].append(posterior[1])
             else:
                 model_posteriors[j].append(posterior)
-<<<<<<< HEAD
             if get_choice:
                 model_choices[j].append([model.choose() for _ in range(10)])
-=======
->>>>>>> 406af2f997ed5381e6e90283fd30c301b642fb01
-            
     for j,posteriors in enumerate(model_posteriors):
         if model_names:
             model_name = model_names[j]
         else:
             model_name = 'model_%s' % j
         data[model_name + '_posterior' + postfix] = model_posteriors[j]
-<<<<<<< HEAD
         if get_choice:
             data[model_name + '_choices' + postfix] = model_choices[j]
         
 
 def gen_memory_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduce = True, get_choice = False, postfix = ''):
-=======
-        
-
-def gen_memory_TS_posteriors(models, data, model_names = None, model_type = 'TS', reduce = True, postfix = ''):
->>>>>>> 406af2f997ed5381e6e90283fd30c301b642fb01
     """ Generates an array of TS or model(s)
     :model: model or array of models that has a calc_posterior method
     :data: dataframe with a context
@@ -421,10 +396,7 @@ def gen_memory_TS_posteriors(models, data, model_names = None, model_type = 'TS'
         assert len(model_names) == len(models), \
             'Model_names must be the same length as models'
     model_posteriors = [[] for _ in  range(len(models))]
-<<<<<<< HEAD
     model_choices = [[] for _ in  range(len(models))]
-=======
->>>>>>> 406af2f997ed5381e6e90283fd30c301b642fb01
     last_choice = None
     for i,trial in data.iterrows():
         c = trial.context
@@ -438,11 +410,8 @@ def gen_memory_TS_posteriors(models, data, model_names = None, model_type = 'TS'
                 model_posteriors[j].append(posterior[1])
             else:
                 model_posteriors[j].append(posterior)
-<<<<<<< HEAD
             if get_choice:
                 model_choices[j].append([model.choose() for _ in range(10)])
-=======
->>>>>>> 406af2f997ed5381e6e90283fd30c301b642fb01
         last_choice = trial.subj_ts
             
     for j,posteriors in enumerate(model_posteriors):
@@ -451,12 +420,8 @@ def gen_memory_TS_posteriors(models, data, model_names = None, model_type = 'TS'
         else:
             model_name = 'model_%s' % j
         data[model_name + '_posterior' + postfix] = model_posteriors[j]
-<<<<<<< HEAD
         if get_choice:
             data[model_name + '_choices' + postfix] = model_choices[j]
-=======
->>>>>>> 406af2f997ed5381e6e90283fd30c301b642fb01
-        
         
 #*********************************************
 # Plotting
