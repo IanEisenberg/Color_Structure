@@ -70,7 +70,7 @@ np.mean([bias2_fit_dict[w + '_' + model + '_fullRun']['r2'] for w in ids] + [bia
 # Model Comparison
 # ********************************************* 
 compare_df = df.copy()
-compare_df_subset = compare_df.filter(regex = 'subj_ts|.*posterior$')
+compare_df_subset = compare_df.filter(regex = 'subj_ts|.*posterior_cross$')
 model_subj_compare = compare_df_subset.corr()
 
 log_posteriors = pd.DataFrame()
@@ -89,6 +89,7 @@ param_cost_df.columns = summary.columns
 BIC_summary = -2*summary + param_cost_df
 BIC_summary['correct'] =  df.groupby('id')['correct'].mean()
 sns.plt.scatter(BIC_summary['correct'],BIC_summary['bias2_posterior_cross'])
+
 # *********************************************
 # Behavioral Analysis
 # ********************************************* 

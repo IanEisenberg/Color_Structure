@@ -302,7 +302,7 @@ else:
     # Exclude subjects where stim_confom is below some threshold 
     select_ids = gtest_df.groupby('id').mean().stim_conform>.75
     select_ids = select_ids[select_ids]
-    select_rows = [i in select_ids for i in gtrain_df.index]
+    select_rows = [i in select_ids for i in gtrain_df.id]
     gtrain_conform_df = gtrain_df[select_rows]
     select_rows = [i in select_ids for i in gtest_df.id]
     gtest_conform_df = gtest_df[select_rows]
