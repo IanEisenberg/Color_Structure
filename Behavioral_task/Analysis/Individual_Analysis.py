@@ -309,7 +309,7 @@ else:
     ids = select_ids.index
     
     # separate learner group
-    select_ids = gtest_conform_df.groupby('id').mean().correct > .55
+    select_ids = gtest_conform_df.groupby('id').mean().correct > .5
     select_ids = select_ids[select_ids]
     select_rows = [i in select_ids for i in gtrain_conform_df.id]
     gtrain_learn_df = gtrain_conform_df[select_rows]
