@@ -56,6 +56,23 @@ df = gtest_df.copy()
 ids = np.unique(df['id'])
 df.drop(['midline_posterior','midline_posterior_cross'], axis = 1, inplace = True)
 
+# *********************************************
+# Additional Variables
+# ********************************************* 
+for models in ['bias2','bias1','eoptimal', 'ignore', 'switch','memory','perseverance','permem']:
+        df[models + '_choice'] = (df[models + '_posterior']>.5).astype(int)
+        df[models + '_certainty'] = (abs(df[models + '_posterior']-.5))/.5
+
+switch_sums = []
+trials_since_switch = 0
+for i,row in df.iterrows():
+    if row['switch'] == 1 or pd.isnull(row['switch']):
+        trials_since_switch = 0
+    else:
+        trials_since_switch += 1
+    switch_sums.append(trials_since_switch)
+df['trials_since_switch'] = switch_sums
+
 
 # *********************************************
 # Selection Criterion
@@ -126,13 +143,9 @@ for i in range(len(best_models)):
     else:
         best_posterior += list(subj_df[model + '_posterior'])
 df['best_posterior'] = best_posterior
-    
-# *********************************************
-# Additional Model Variables
-# ********************************************* 
-for models in ['bias2','bias1','eoptimal', 'ignore', 'switch','memory','perseverance','permem','best']:
-        df[models + '_choice'] = (df[models + '_posterior']>.5).astype(int)
-        df[models + '_certainty'] = (abs(df[models + '_posterior']-.5))/.5
+df['best_choice'] = (df['best_posterior']>.5).astype(int)
+df['best_certainty'] = (abs(df['best_posterior']-.5))/.5
+
 
 # *********************************************
 # Behavioral Analysis
@@ -152,34 +165,6 @@ res = smf.glm(formula = formula, data = df_fail, family = sm.families.Binomial()
 res.summary()
 nonlearner_params = res.params[1:]
 
-
-
-switch_sums = []
-trials_since_switch = 0
-for i,row in df.iterrows():
-    if row['switch'] == 1 or pd.isnull(row['switch']):
-        trials_since_switch = 0
-    else:
-        trials_since_switch += 1
-    switch_sums.append(trials_since_switch)
-df['trials_since_switch'] = switch_sums
-
-res = sm.OLS(df['correct'], df[['trials_since_switch']]).fit()
-
-
-
-for window in [(0,850)]:
-    window_df = df.query('trial_count >= %s and trial_count < %s' % (window[0], window[1]))
-    plot_dict = {}
-    for i in np.unique(window_df['id']):
-        temp_df = window_df.query('id == "%s"' % i)
-        plot_dict[i] = [temp_df.query('trials_since_switch == %s' % i)['correct'].mean() for i in np.unique(temp_df['trials_since_switch'])]
-        plot_dict['trials_since_switch'] = list(range(max([len(arr) for arr in plot_dict.values()])))
-    plot_df = pd.DataFrame.from_dict(plot_dict, orient='index').transpose()  
-    
-    plot_df = pd.melt(plot_df, id_vars = 'trials_since_switch', var_name = 'id', value_name = 'percent_correct')
-    sns.lmplot(x = 'trials_since_switch', y = 'percent_correct', data = plot_df, size = 8,  fit_reg = False)
-    plt.title('Trial window: ' + str(window), size = 20)
     
 
 # *********************************************
@@ -299,11 +284,20 @@ if plot == True:
     plt.ylabel('Accuracy')
     plt.xlabel('Subject')
     
-    
-    with sns.axes_style("darkgrid", {"axes.linewidth": "1.25", "axes.edgecolor": ".15"}):
-        ax = plt.axes([.4, .55, .3, .3])
-    
-    
+
+    for window in [(0,850)]:
+        window_df = df.query('trial_count >= %s and trial_count < %s' % (window[0], window[1]))
+        plot_dict = {}
+        for i in np.unique(window_df['id']):
+            temp_df = window_df.query('id == "%s"' % i)
+            plot_dict[i] = [temp_df.query('trials_since_switch == %s' % i)['correct'].mean() for i in np.unique(temp_df['trials_since_switch'])]
+            plot_dict['trials_since_switch'] = list(range(max([len(arr) for arr in plot_dict.values()])))
+        plot_df = pd.DataFrame.from_dict(plot_dict, orient='index').transpose()  
+        
+        plot_df = pd.melt(plot_df, id_vars = 'trials_since_switch', var_name = 'id', value_name = 'percent_correct')
+        sns.lmplot(x = 'trials_since_switch', y = 'percent_correct', data = plot_df, size = 8,  fit_reg = False)
+        plt.title('Trial window: ' + str(window), size = 20)
+        
     
     #********** Back to Model Plots **************************
     # RT for switch vs stay for different trial-by-trial context diff
