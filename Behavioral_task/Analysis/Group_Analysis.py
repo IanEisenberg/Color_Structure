@@ -53,7 +53,6 @@ gtest_learn_df.id = gtest_learn_df.id.astype('str').apply(lambda x: x.zfill(3))
 # ********************************************* 
 model = 'TS'
 df = gtest_df.copy()
-ids = np.unique(df['id'])
 df.drop(['midline_posterior','midline_posterior_cross'], axis = 1, inplace = True)
 
 # *********************************************
@@ -78,8 +77,11 @@ df['trials_since_switch'] = switch_sums
 # Selection Criterion
 # ********************************************* 
 ## Exclude subjects based on behavioral criteria
-#select_ids = gtest_df.groupby('id').mean().stim_conform>.75
+select_ids = gtest_df.groupby('id').mean().stim_conform>.75
 #select_ids = np.logical_and(abs(.5-gtest_df.groupby('id')['subj_ts'].mean())<.475, select_ids)
+select_ids = select_ids[select_ids]
+select_rows = [i in select_ids for i in df.id]
+df = df[select_rows]
 
 ##exclude based on context sensivitiy
 #context_pval = []
@@ -93,10 +95,22 @@ df['trials_since_switch'] = switch_sums
 #select_rows = [i in select_ids for i in df.id]
 #df = df[select_rows]
 
+
+
+x = df.groupby('id')['correct'].mean()  
+k = range(1,10)
+k_error = []
+for k_i in k:  
+    c,label = scipy.cluster.vq.kmeans2(x,k_i)
+    k_error.append(np.sum(np.power([c[i] for i in label]-x,2)))
+
 #exclude subjects based on percent correct
 x = df.groupby('id')['correct'].mean()    
-c,label = scipy.cluster.vq.kmeans2(x,np.array([.51,.49]))
-select_ids = ids[label==0]
+c,label = scipy.cluster.vq.kmeans2(x,[.49,.51])
+
+
+ids = np.unique(df['id'])
+select_ids = ids[label==1]
 fail_rows = [i not in select_ids for i in df.id]
 select_rows = [i in select_ids for i in df.id]
 df_fail = df[fail_rows]
@@ -269,60 +283,88 @@ if plot == True:
     #learner nonlearner plots
     df.groupby(['last_TS','context']).subj_ts.mean().reset_index()    
     
-    p5 = plt.figure(figsize = [8,12])
-    p5.subplots_adjust(hspace=.3)
+    p5 = plt.figure(figsize = figdims)
+    p5.subplots_adjust(hspace=.3, wspace = .3)
     
-    plt.subplot2grid((2,2),(0,0), colspan = 2)
-    sns.plt.plot(delays,learner_params, 'b-o', label = 'Learners')
-    sns.plt.plot(delays,nonlearner_params, 'r-o', label = 'Non-Learners')
-    plt.xlabel('Context Delay', size = fontsize)
-    plt.ylabel('Beta', size = fontsize)
+    plt.subplot2grid((2,2),(0,0))
+    sns.plt.plot(delays,learner_params, 'b-o', label = 'Learners', markersize = 10)
+    sns.plt.plot(delays,nonlearner_params, 'r-o', label = 'Non-Learners', markersize = 10)
+    plt.xlabel('Context Lag', size = fontsize)
+    plt.ylabel('Beta Weights', size = fontsize)
     pylab.legend(loc='best',prop={'size':20})
+    plt.tick_params(labelsize=15)
     
     plt.subplot2grid((2,2),(1,0), colspan = 1)
-    sns.plt.scatter(range(len(x)),x, c = [['b','r'][i] for i in label])
-    plt.ylabel('Accuracy')
-    plt.xlabel('Subject')
+    sns.plt.scatter(range(len(x)),x, c = [['r','b'][i] for i in label])
+    plt.ylabel('Accuracy', size = fontsize)
+    plt.xlabel('Subject Index', size = fontsize)
+    plt.xlim([-5,50])
+    plt.tick_params(labelsize=15)
     
+    plt.subplot2grid((2,2),(1,1), colspan = 1)
+    sns.plt.plot(k,k_error, '-o')
+    plt.ylabel('SSE', size = fontsize)
+    plt.xlabel('Number of Clusters (k)', size = fontsize)
+    plt.tick_params(labelsize=15)
 
+    plt.subplot2grid((2,2),(0,1))
     for window in [(0,850)]:
-        window_df = df.query('trial_count >= %s and trial_count < %s' % (window[0], window[1]))
+        window_df = df.query('trial_count >= %s and trials_since_switch < 27 and trial_count < %s' % (window[0], window[1]))
         plot_dict = {}
         for i in np.unique(window_df['id']):
             temp_df = window_df.query('id == "%s"' % i)
-            plot_dict[i] = [temp_df.query('trials_since_switch == %s' % i)['correct'].mean() for i in np.unique(temp_df['trials_since_switch'])]
+            plot_dict[i] = [temp_df.query('trials_since_switch == %s' % i)['correct'].mean() for i in np.unique(temp_df['trials_since_switch']) if np.sum(temp_df['trials_since_switch']==i)>5]
             plot_dict['trials_since_switch'] = list(range(max([len(arr) for arr in plot_dict.values()])))
-        plot_df = pd.DataFrame.from_dict(plot_dict, orient='index').transpose()  
+        subplot_df = pd.DataFrame.from_dict(plot_dict, orient='index').transpose()  
         
-        plot_df = pd.melt(plot_df, id_vars = 'trials_since_switch', var_name = 'id', value_name = 'percent_correct')
-        sns.lmplot(x = 'trials_since_switch', y = 'percent_correct', data = plot_df, size = 8,  fit_reg = False)
-        plt.title('Trial window: ' + str(window), size = 20)
+        subplot_df = pd.melt(subplot_df, id_vars = 'trials_since_switch', var_name = 'id', value_name = 'percent_correct')
+        plt.scatter(subplot_df['trials_since_switch'], subplot_df['percent_correct'], color = 'b', alpha = .5)        
+    group = window_df.groupby('trials_since_switch').mean()['correct']
+    plt.plot(group.index,group,'b-',lw = 4)
+
+    for window in [(0,850)]:
+        window_df = df_fail.query('trial_count >= %s and trials_since_switch < 27 and trial_count < %s' % (window[0], window[1]))
+        plot_dict = {}
+        for i in np.unique(window_df['id']):
+            temp_df = window_df.query('id == "%s"' % i)
+            plot_dict[i] = [temp_df.query('trials_since_switch == %s' % i)['correct'].mean() for i in np.unique(temp_df['trials_since_switch']) if np.sum(temp_df['trials_since_switch']==i)>5]
+            plot_dict['trials_since_switch'] = list(range(max([len(arr) for arr in plot_dict.values()])))
+        subplot_df = pd.DataFrame.from_dict(plot_dict, orient='index').transpose()  
         
+        subplot_df = pd.melt(subplot_df, id_vars = 'trials_since_switch', var_name = 'id', value_name = 'percent_correct')
+        plt.scatter(subplot_df['trials_since_switch'], subplot_df['percent_correct'], color = 'r', alpha = .5)        
+    group = window_df.groupby('trials_since_switch').mean()['correct']
+    plt.plot(group.index,group,'r-',lw = 4)
+    plt.xlim(-1,28) 
+    plt.tick_params(labelsize=15)
+    plt.ylabel('Percent Correct', size = fontsize)
+    plt.xlabel('Trials Since Objective TS Switch', size = fontsize)
     
     #********** Back to Model Plots **************************
     # RT for switch vs stay for different trial-by-trial context diff
-    p5 = plot_df.groupby(['subj_switch','context_diff']).mean().rt.unstack(level = 0).plot(marker = 'o',color = ['c','m'], figsize = figdims, fontsize = fontsize)     
-    p5 = p5.get_figure()
+    p6 = plot_df.groupby(['subj_switch','context_diff']).mean().rt.unstack(level = 0).plot(marker = 'o',color = ['c','m'], figsize = figdims, fontsize = fontsize)     
+    p6 = p5.get_figure()
     
     # Plot rt against bias2 model posterior
     sns.set_context('poster')
     subj_df = plot_df.query('rt > 100 & id < "%s"' %plot_ids[20])       
-    p6 = sns.lmplot(x='best_posterior',y='rt', hue = 'id', data = subj_df, order = 2, size = 6, col = 'id')
-    p6.set_xlabels("P(TS2)", size = fontsize)
-    p6.set_ylabels('Reaction time (ms)', size = fontsize)
+    p7 = sns.lmplot(x='best_posterior',y='rt', hue = 'id', data = subj_df, order = 2, size = 6, col = 'id')
+    p7.set_xlabels("P(TS2)", size = fontsize)
+    p7.set_ylabels('Reaction time (ms)', size = fontsize)
     
     # Plot rt against bias2 model certainty
     # Take out RT < 100 ms  
     sns.set_context('poster')
     subj_df = plot_df.query('rt > 100 & id < "%s"' %plot_ids[3])       
-    p7 = sns.lmplot(x ='bias2_certainty', y = 'rt', hue = 'id', col = 'id', size = 6, data = subj_df)   
-    p7.set_xlabels("Model Confidence", size = fontsize)
-    p7.set_ylabels('Reaction time (ms)', size = fontsize)
-    
-    p8 = sns.lmplot(x ='best_certainty', y = 'rt', hue = 'id', ci = None, legend = False, size = figdims[1], data = rt_df.query('rt>100'))  
-    plt.xlim(-.1,1.1)
+    p8 = sns.lmplot(x ='bias2_certainty', y = 'rt', hue = 'id', col = 'id', size = 6, data = subj_df)   
     p8.set_xlabels("Model Confidence", size = fontsize)
     p8.set_ylabels('Reaction time (ms)', size = fontsize)
+    
+    p9 = sns.lmplot(x ='best_certainty', y = 'rt', hue = 'id', ci = None, legend = False, size = figdims[1], data = rt_df.query('rt>100'))  
+    plt.xlim(-.1,1.1)
+    p9.set_xlabels("Model Confidence", size = fontsize)
+    p9.set_ylabels('Reaction time (ms)', size = fontsize)
+    
     
     # plot bias2 parameters
     params_df = pd.DataFrame()
@@ -333,7 +375,7 @@ if plot == True:
     params_df['eps'] = [bias2_fit_dict[x]['TS_eps'] for x in bias2_fit_dict if ('_fullRun' in x)]
     params_df = pd.melt(params_df, id_vars = ['id','learner'], value_vars = ['eps','r1','r2'], var_name = 'param', value_name = 'val')
 
-    p9 = plt.figure(figsize = figdims)
+    p10 = plt.figure(figsize = figdims)
     box_palette = sns.color_palette(['m','c'], desat = 1)
     sns.boxplot(x = 'param', y = 'val', hue = 'learner', hue_order = [1,0], data = params_df, palette = box_palette)
     sns.stripplot(x = 'param', y = 'val', hue = 'learner', hue_order = [1,0], data = params_df, jitter = True, edgecolor = "gray", palette = box_palette)
@@ -351,7 +393,7 @@ if plot == True:
     params_df['eps'] = [bias2_fit_dict[x]['TS_eps'] for x in bias1_fit_dict if ('_fullRun' in x)]
     params_df = pd.melt(params_df, id_vars = ['id','learner'], value_vars = ['eps','r1'], var_name = 'param', value_name = 'val')
 
-    p10 = plt.figure(figsize = figdims)
+    p11 = plt.figure(figsize = figdims)
     box_palette = sns.color_palette(['m','c'], desat = 1)
     sns.boxplot(x = 'param', y = 'val', hue = 'learner', hue_order = [1,0], data = params_df, palette = box_palette)
     sns.stripplot(x = 'param', y = 'val', hue = 'learner', hue_order = [1,0], data = params_df, jitter = True, edgecolor = "gray", palette = box_palette)
@@ -362,24 +404,25 @@ if plot == True:
     np.corrcoef(gtest_learn_df.rt,gtest_learn_df.bias2_posterior)
 
     #look at models
-    p11 = plt.figure(figsize = figdims)
+    p12 = plt.figure(figsize = figdims)
     plt.hold(True)
     for c in log_posteriors.columns[:-1]:
         sns.kdeplot(summary[c])
     
-    p12 = sns.heatmap(model_subj_compare)
-    p13 = sns.heatmap(df.filter(regex='choices|subj_ts').corr())
+    p13 = sns.heatmap(model_subj_compare)
+    p14 = sns.heatmap(model_subj_compare.filter(regex='bias|eoptimal|ignore|subj_ts').corr())
     
+
     if save == True:
         p1.savefig('../Plots/TS2%_vs_context.png', format = 'png', dpi = 300)
         p2.savefig('../Plots/Individual_subject_fits.png',format = 'png', dpi = 300)
-        p3.savefig('../Plots/TS_proportions.png', format = 'png', dpi = 300)
         p4.savefig('../Plots/RTs.png', format = 'png')
-        p5.savefig('../Plots/RT_across_context_diffs.png', format = 'png', dpi = 300)
-        p6.savefig('../Plots/rt_vs_posterior_3subj.png', format = 'png', dpi = 300)
-        p7.savefig('../Plots/rt_vs_confidence_3subj.png', format = 'png', dpi = 300)
-        p8.savefig('../Plots/rt_vs_confidence.png', format = 'png', dpi = 300)
-        p9.savefig('../Plots/bias2_param_value.png', format = 'png', dpi = 300)
-        p10.savefig('../Plots/bias1_param_value.png', format = 'png', dpi = 300)
-        p11.savefig('../Plots/model_comparison.png', format = 'png', dpi = 300)
+        p5.savefig('../Plots/Learner_vs_NonLearner.png', format = 'png', dpi = 300)
+        p6.savefig('../Plots/RT_across_context_diffs.png', format = 'png', dpi = 300)
+        p7.savefig('../Plots/rt_vs_posterior_3subj.png', format = 'png', dpi = 300)
+        p8.savefig('../Plots/rt_vs_confidence_3subj.png', format = 'png', dpi = 300)
+        p9.savefig('../Plots/rt_vs_confidence.png', format = 'png', dpi = 300)
+        p10.savefig('../Plots/bias2_param_value.png', format = 'png', dpi = 300)
+        p11.savefig('../Plots/bias1_param_value.png', format = 'png', dpi = 300)
+        p12.savefig('../Plots/model_comparison.png', format = 'png', dpi = 300)
         
