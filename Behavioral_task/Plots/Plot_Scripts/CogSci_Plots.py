@@ -23,7 +23,7 @@ warnings.simplefilter(action = "ignore", category = RuntimeWarning)
 # *********************************************
 # Set up defaults
 # *********************************************
-plot = False
+plot = True
 save = True
 
 # *********************************************
@@ -72,6 +72,8 @@ for i,row in df.iterrows():
     switch_sums.append(trials_since_switch)
 df['trials_since_switch'] = switch_sums
 
+df[['last_TS', 'bias2_last_choice']] = df[['subj_ts', 'bias2_choice']].shift(1)
+df.loc[0,['last_TS','bias2_last_choice']]=np.nan
 
 # *********************************************
 # Selection Criterion
@@ -100,9 +102,13 @@ df = df[select_rows]
 x = df.groupby('id')['correct'].mean()  
 k = range(1,10)
 k_error = []
-for k_i in k:  
-    c,label = scipy.cluster.vq.kmeans2(x,k_i)
-    k_error.append(np.sum(np.power([c[i] for i in label]-x,2)))
+k_track = []
+for _ in range(1000):
+    for k_i in k:  
+        c,label = scipy.cluster.vq.kmeans2(x,k_i)
+        k_error.append(np.sum(np.power([c[i] for i in label]-x,2)))
+        k_track.append(k_i)
+k_df = pd.DataFrame({'k': k_track, 'error': k_error})
 
 #exclude subjects based on percent correct
 x = df.groupby('id')['correct'].mean()    
@@ -116,8 +122,8 @@ select_rows = [i in select_ids for i in df.id]
 df_fail = df[fail_rows]
 df = df[select_rows]
 
-
-
+df.to_csv('../../Analysis/Analysis_Output/learners.csv')
+df_fail.to_csv('../../Analysis/Analysis_Output/nonlearners.csv')
 
 # *********************************************
 # Model Comparison
@@ -165,22 +171,35 @@ df['best_certainty'] = (abs(df['best_posterior']-.5))/.5
 # Behavioral Analysis
 # ********************************************* 
 #effect of last TS
-df[['last_TS', 'bias2_last_choice']] = df[['subj_ts', 'bias2_choice']].shift(1)
-df.loc[0,['last_TS','bias2_last_choice']]=np.nan
 formula = 'subj_ts ~ context'
 delays = list(range(26))
 for i in delays[1:]:
     formula += ' + context.shift(%s)' % i
-    
-res = smf.glm(formula = formula, data = df, family = sm.families.Binomial()).fit()
-res.summary()
-learner_params = res.params[1:]
-res = smf.glm(formula = formula, data = df_fail, family = sm.families.Binomial()).fit()
-res.summary()
-nonlearner_params = res.params[1:]
 
-    
-        
+##fit one model across group. Revisit with mixed models
+#res = smf.glm(formula = formula, data = df, family = sm.families.Binomial()).fit()
+#res.summary()
+#learner_params = res.params[1:]
+#res = smf.glm(formula = formula, data = df_fail, family = sm.families.Binomial()).fit()
+#res.summary()
+#nonlearner_params = res.params[1:]
+#
+#    
+learner_params = []
+for i in np.unique(df['id']):
+    res = smf.glm(formula = formula, data = df.query('id == "%s"' %i), family = sm.families.Binomial()).fit()
+    learner_params.append(res.pvalues[1:])
+learner_params = pd.DataFrame(learner_params)
+
+select_ids = abs(df_fail.groupby('id').subj_ts.mean()-.5)<.475
+select_ids = select_ids[select_ids]
+select_rows = [i in select_ids for i in df_fail.id]
+df_fail = df_fail[select_rows]
+nonlearner_params = []
+for i in np.unique(df_fail['id']):
+    res = smf.glm(formula = formula, data = df_fail.query('id == "%s"' %i), family = sm.families.Binomial()).fit()
+    nonlearner_params.append(res.pvalues[1:])
+nonlearner_params = pd.DataFrame(nonlearner_params)
 
 
   
@@ -205,7 +224,7 @@ if plot == True:
     plt.xticks(list(range(12)),contexts)
     plt.tick_params(labelsize=20)
     plt.xlabel('Stimulus Vertical Position', size = fontsize)
-    plt.ylabel('TS2 choice %', size = fontsize)
+    plt.ylabel('STS choice %', size = fontsize)
     pylab.legend(loc='best',prop={'size':20})
     for subj in plot_ids:
         subj_df = plot_df.query('id == "%s"' %subj)
@@ -246,9 +265,9 @@ if plot == True:
     # Plot rt against bias2 model certainty
     # Take out RT < 100 ms  
     sns.set_context('poster')
-    subj_df = plot_df.query('id < "%s"' %plot_ids[5])       
-    p3 = sns.lmplot(x ='bias2_certainty', y = 'rt', hue = 'id', col = 'id', size = 6, data = subj_df)   
-    p3.set_xlabels("Model Confidence", size = fontsize)
+    subj_df = plot_df.query('id < "%s"' %plot_ids[3])       
+    p3 = sns.lmplot(x ='bias2_certainty', y = 'rt', hue = 'id', col = 'id', size = 8, data = subj_df)   
+    p3.set_xlabels("Bias-2 Confidence", size = fontsize)
     p3.set_ylabels('Reaction time (ms)', size = fontsize)
     pylab.xlim(0,1)
 
@@ -264,12 +283,14 @@ if plot == True:
     p5.subplots_adjust(hspace=.3, wspace = .3)
     
     plt.subplot2grid((2,2),(0,0))
-    sns.plt.plot(delays,learner_params, 'b-o', label = 'Learners')
-    sns.plt.plot(delays,nonlearner_params, 'r-o', label = 'Non-Learners')
+    sns.plt.plot(delays,learner_params.mean(), 'b-o', label = 'Learners', lw = 3)
+    sns.plt.plot(delays,nonlearner_params.mean(),'r-o', label = 'Non-Learners', lw = 3)
     plt.xlabel('Context Lag', size = fontsize)
     plt.ylabel('Beta Weights', size = fontsize)
+    plt.xlim(-.5,25)
     pylab.legend(loc='best',prop={'size':20})
     plt.tick_params(labelsize=15)
+    
     
     plt.subplot2grid((2,2),(1,0), colspan = 1)
     sns.plt.scatter(range(len(x)),x, c = [['r','b'][i] for i in label])
@@ -279,7 +300,7 @@ if plot == True:
     plt.tick_params(labelsize=15)
     
     plt.subplot2grid((2,2),(1,1), colspan = 1)
-    sns.plt.plot(k,k_error, '-o')
+    plt.plot(k_df.groupby('k')['error'].mean(),'o-')
     plt.ylabel('SSE', size = fontsize)
     plt.xlabel('Number of Clusters (k)', size = fontsize)
     plt.tick_params(labelsize=15)
@@ -313,6 +334,7 @@ if plot == True:
     group = window_df.groupby('trials_since_switch').mean()['correct']
     plt.plot(group.index,group,'r-',lw = 4)
     plt.xlim(-1,28) 
+    plt.ylim(0,1.1)
     plt.tick_params(labelsize=15)
     plt.ylabel('Percent Correct', size = fontsize)
     plt.xlabel('Trials Since Objective TS Switch', size = fontsize)

@@ -42,7 +42,7 @@ def bar(x, y, title):
 def softmax(probs, inv_temp):
     return np.exp(probs*inv_temp)/sum(np.exp(probs*inv_temp))
 
-def calc_posterior(data,prior,likelihood_dist):
+def calc_posterior(data,prior,likelihood_dist, reduce = True):
     n = len(prior)
     likelihood = [dis.pdf(data) for dis in likelihood_dist]
     numer = np.array([likelihood[i] * prior[i] for i in range(n)])
@@ -51,7 +51,10 @@ def calc_posterior(data,prior,likelihood_dist):
     except TypeError:
         dinom = np.sum(numer)
     posterior = numer/dinom
-    return posterior
+    if reduce:
+        return posterior[1]
+    else:
+        return posterior
 
 def genSeq(l,p):
     seq = [1]

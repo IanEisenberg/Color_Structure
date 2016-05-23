@@ -9,15 +9,64 @@ Load up the data
 library(ggplot2)
 library(plyr)
 library(lme4)
+
+lagpad <- function(x, k,df) {
+    if (!is.vector(x)) 
+        stop('x must be a vector')
+    if (!is.numeric(x)) 
+        stop('x must be numeric')
+    if (!is.numeric(k))
+        stop('k must be numeric')
+    if (1 != length(k))
+        stop('k must be a single number')
+    vec = c(rep(NA, k), x)[1 : length(x)] 
+    vec[df$X<k]=NA
+    return(vec)
+}
 ```
 
 ```{r Load data}
-  gtest_df = read.csv('Analysis_Output/gtest_df.csv')
-  gtest_learn_df = read.csv('Analysis_Output/gtest_learn_df.csv')
-  gtest_df$id = factor(gtest_df$id)
-  gtest_learn_df$id = factor(gtest_learn_df$id)
+  learner = read.csv('Analysis_Output/learners.csv')
+  nonlearner = read.csv('Analysis_Output/nonlearners.csv')
 ```
 
+
+```{r}
+rs1 = glmer(subj_ts ~ context + 
+              last_TS + (last_TS + context + 1 | id), data = learner, family = binomial)
+summary(rs1) 
+
+rs2 = glmer(subj_ts ~ context + 
+              last_TS + (last_TS + context + 1 | id), data = nonlearner, family = binomial)
+summary(rs2) 
+
+rs3 = glmer(subj_ts ~ context + last_TS +
+              lagpad(context,1,learner) + 
+              lagpad(context,2,learner) + 
+              lagpad(context,3,learner) + 
+              lagpad(context,4,learner) + 
+              lagpad(context,5,learner) + 
+              (lagpad(context,1,learner)+ context + 1 | id),
+            data = learner, family = binomial)
+summary(rs3) 
+
+rs4 = glmer(subj_ts ~ context + 
+              lagpad(context,1,nonlearner) + 
+              lagpad(context,2,nonlearner) + 
+              lagpad(context,3,nonlearner) + 
+              lagpad(context,4,nonlearner) + 
+              lagpad(context,5,nonlearner) + 
+              (lagpad(context,1,nonlearner) +
+               + context + 1 | id),
+            data = nonlearner, family = binomial)
+summary(rs4) 
+```
+
+```{r}
+  learner$log_rt = log(learner$rt)
+  rs5 = lmer(log_rt ~ bias2_certainty + (1+bias2_certainty | id), data = learner)
+  summary(rs5)
+```
 
 ```{r}
   rt_df = gtest_learn_df

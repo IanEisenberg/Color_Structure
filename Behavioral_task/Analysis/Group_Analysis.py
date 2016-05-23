@@ -40,10 +40,11 @@ memory_fit_dict = pickle.load(open('Analysis_Output/memory_parameter_fits.p', 'r
 perseverance_fit_dict = pickle.load(open('Analysis_Output/perseverance_parameter_fits.p', 'rb'))
 permem_fit_dict = pickle.load(open('Analysis_Output/permem_parameter_fits.p', 'rb'))
 
+gtrain_df = pd.read_pickle('Analysis_Output/gtrain_df.pkl')
 gtrain_learn_df = pd.read_pickle('Analysis_Output/gtrain_learn_df.pkl')
-gtest_learn_df = pd.read_pickle('Analysis_Output/gtest_learn_df.pkl')
-gtest_conform_df = pd.read_pickle('Analysis_Output/gtest_conform_df.pkl')
 gtest_df = pd.read_pickle('Analysis_Output/gtest_df.pkl')
+gtest_conform_df = pd.read_pickle('Analysis_Output/gtest_conform_df.pkl')
+gtest_learn_df = pd.read_pickle('Analysis_Output/gtest_learn_df.pkl')
 gtrain_learn_df.id = gtrain_learn_df.id.astype('str').apply(lambda x: x.zfill(3))
 gtest_learn_df.id = gtest_learn_df.id.astype('str').apply(lambda x: x.zfill(3))
 
@@ -52,8 +53,9 @@ gtest_learn_df.id = gtest_learn_df.id.astype('str').apply(lambda x: x.zfill(3))
 # Select Dataset
 # ********************************************* 
 model = 'TS'
-df = gtest_df.copy()
-df.drop(['midline_posterior','midline_posterior_cross'], axis = 1, inplace = True)
+df = gtrain_df.copy()
+if 'midline_posterior' in df.columns:
+    df.drop(['midline_posterior','midline_posterior_cross'], axis = 1, inplace = True)
 
 # *********************************************
 # Additional Variables
@@ -116,7 +118,8 @@ select_rows = [i in select_ids for i in df.id]
 df_fail = df[fail_rows]
 df = df[select_rows]
 
-
+df.to_csv('../../Analysis/Analysis_Output/learners.csv')
+df_fail.to_csv('../../Analysis/Analysis_Output/nonlearners.csv')
 
 
 # *********************************************
@@ -164,6 +167,24 @@ df['best_certainty'] = (abs(df['best_posterior']-.5))/.5
 # *********************************************
 # Behavioral Analysis
 # ********************************************* 
+#train analysis
+if 'FB' in df.columns:
+    df.loc[:,'last_FB'] = df['FB'].shift()
+    df.loc[:,'last_choice'] = df['subj_ts'].shift()
+    df.loc[df.index == 0,['last_FB','last_choice']] = np.nan
+
+params = []
+pvals = []
+formula = 'subj_ts ~ context + last_choice * last_FB'
+delays = list(range(26))
+for i in delays[1:]:
+    formula += ' + context.shift(%s)' % i
+for i in np.unique(df['id']):
+    res = smf.glm(formula = formula, data = df.query('id == "%s"' %i), family = sm.families.Binomial()).fit()
+    params.append(res.params[1:])    
+    pvals.append(res.pvalues[1:])
+
+
 #effect of last TS
 df[['last_TS', 'bias2_last_choice']] = df[['subj_ts', 'bias2_choice']].shift(1)
 df.loc[0,['last_TS','bias2_last_choice']]=np.nan
@@ -172,13 +193,30 @@ delays = list(range(26))
 for i in delays[1:]:
     formula += ' + context.shift(%s)' % i
     
-res = smf.glm(formula = formula, data = df, family = sm.families.Binomial()).fit()
-res.summary()
-learner_params = res.params[1:]
-res = smf.glm(formula = formula, data = df_fail, family = sm.families.Binomial()).fit()
-res.summary()
-nonlearner_params = res.params[1:]
+##fit one model across group. Revisit with mixed models
+#res = smf.glm(formula = formula, data = df, family = sm.families.Binomial()).fit()
+#res.summary()
+#learner_params = res.params[1:]
+#res = smf.glm(formula = formula, data = df_fail, family = sm.families.Binomial()).fit()
+#res.summary()
+#nonlearner_params = res.params[1:]
+#
+#    
+learner_params = []
+for i in np.unique(df['id']):
+    res = smf.glm(formula = formula, data = df.query('id == "%s"' %i), family = sm.families.Binomial()).fit()
+    learner_params.append(res.params[1:])
+learner_params = pd.DataFrame(learner_params)
 
+select_ids = abs(df_fail.groupby('id').subj_ts.mean()-.5)<.475
+select_ids = select_ids[select_ids]
+select_rows = [i in select_ids for i in df_fail.id]
+df_fail = df_fail[select_rows]
+nonlearner_params = []
+for i in np.unique(df_fail['id']):
+    res = smf.glm(formula = formula, data = df_fail.query('id == "%s"' %i), family = sm.families.Binomial()).fit()
+    nonlearner_params.append(res.params[1:])
+nonlearner_params = pd.DataFrame(nonlearner_params)
     
 
 # *********************************************
@@ -360,7 +398,7 @@ if plot == True:
     p8.set_xlabels("Model Confidence", size = fontsize)
     p8.set_ylabels('Reaction time (ms)', size = fontsize)
     
-    p9 = sns.lmplot(x ='best_certainty', y = 'rt', hue = 'id', ci = None, legend = False, size = figdims[1], data = rt_df.query('rt>100'))  
+    p9 = sns.lmplot(x ='bias2_certainty', y = 'rt', hue = 'id', ci = None, legend = False, size = figdims[1], data = plot_df.query('rt>100'))  
     plt.xlim(-.1,1.1)
     p9.set_xlabels("Model Confidence", size = fontsize)
     p9.set_ylabels('Reaction time (ms)', size = fontsize)

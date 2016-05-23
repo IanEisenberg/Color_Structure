@@ -174,21 +174,17 @@ else:
         # deterministic feedback). Basically, after receiving FB, the ideal observer
         # knows exactly what task it is in and should act accordingly.
         observer_prior = [.5,.5]
-        observer_choices = []
+        posteriors = []
         for i,trial in train_dfa.iterrows():
             c = trial.context
+            posteriors.append(calc_posterior(c,observer_prior,ts_dis))
             ts = trial.ts
-            conf= calc_posterior(c,observer_prior,ts_dis)    
-            obs_choice = np.argmax(conf)
-            observer_choices.append(obs_choice)
             observer_prior = np.round([.9*(1-ts)+.1*ts,.9*ts+.1*(1-ts)],2)
-            
-        train_dfa['opt_choices'] = observer_choices
-        train_dfa['opt_switch'] = abs((train_dfa.opt_choices).diff())
-        train_dfa['conform_opt'] = np.equal(train_dfa.subj_ts, observer_choices)
+        train_dfa.loc[:,'optimal_posterior'] = posteriors
+
         
         # Optimal observer for train, without feedback     
-        no_fb = BiasPredModel(train_ts_dis, [.5,.5], r1 = train_recursive_p, r2 = train_recursive_p, TS_eps = 0, action_eps = action_eps)
+        no_fb = BiasPredModel(ts_dis, [.5,.5], r1 = .9, r2 = .9, TS_eps = 0, action_eps = 0)
         observer_choices = []
         posteriors = []
         for i,trial in train_dfa.iterrows():
@@ -196,9 +192,6 @@ else:
             posteriors.append(no_fb.calc_posterior(c)[1])
         posteriors = np.array(posteriors)
         train_dfa['no_fb_posterior'] = posteriors
-        train_dfa['opt_choices'] = (posteriors>.5).astype(int)
-        train_dfa['no_fb_switch'] = (train_dfa.no_fb_posterior>.5).diff()
-        train_dfa['conform_no_fb'] = np.equal(train_dfa.subj_ts, posteriors>.5)
         
         
         # **************TEST*********************
