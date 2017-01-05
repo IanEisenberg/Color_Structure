@@ -107,7 +107,7 @@ class MemoryModel:
         self.bias = [1-bias, bias]
         self.action_eps = action_eps
         
-    def calc_posterior(self, context, last_TS):
+    def calc_posterior(self, context, last_TS=None):
         """
         Calculate the posterior probability of different distribution hypotheses (TSs)
         given a context point. You can pass in multiple context points but this function
@@ -124,7 +124,6 @@ class MemoryModel:
             self.history.append(context)
             avg_context = np.average(self.history,weights = [self.k**i for i in range(len(self.history))][::-1])
             likelihood = np.array([dis.pdf(avg_context) for dis in ld])
-            likelihood = np.array([.6,.4])
             likelihood = likelihood/np.sum(likelihood,0)
             TS_probs = likelihood
             TS_probs*= self.bias

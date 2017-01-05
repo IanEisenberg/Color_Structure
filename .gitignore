@@ -1,5 +1,6 @@
 *.pyc
-RawData/
+Plots/
+Data/
 Log/
 Presentations_Posters/
 Papers/

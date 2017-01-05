@@ -30,39 +30,39 @@ save = True
 # ********************************************
 data_dir = os.path.expanduser('~')
 try:
-    bias2_fit_dict = pickle.load(open('Analysis_Output/bias2_parameter_fits.p', 'rb'))
+    bias2_fit_dict = pickle.load(open('Analysis_Output/bias2_parameter_fits.pkl', 'rb'))
 except:
     bias2_fit_dict = {}
 try:
-    bias1_fit_dict = pickle.load(open('Analysis_Output/bias1_parameter_fits.p', 'rb'))
+    bias1_fit_dict = pickle.load(open('Analysis_Output/bias1_parameter_fits.pkl', 'rb'))
 except:
     bias1_fit_dict = {}
 try:
-    eoptimal_fit_dict = pickle.load(open('Analysis_Output/eoptimal_parameter_fits.p', 'rb'))
+    eoptimal_fit_dict = pickle.load(open('Analysis_Output/eoptimal_parameter_fits.pkl', 'rb'))
 except:
     eoptimal_fit_dict = {}
 try:
-    ignore_fit_dict = pickle.load(open('Analysis_Output/ignore_parameter_fits.p', 'rb'))
+    ignore_fit_dict = pickle.load(open('Analysis_Output/ignore_parameter_fits.pkl', 'rb'))
 except:
     ignore_fit_dict = {}
 try:
-    midline_fit_dict = pickle.load(open('Analysis_Output/midline_parameter_fits.p', 'rb'))
+    midline_fit_dict = pickle.load(open('Analysis_Output/midline_parameter_fits.pkl', 'rb'))
 except:
     midline_fit_dict = {}
 try:
-    switch_fit_dict = pickle.load(open('Analysis_Output/switch_parameter_fits.p', 'rb'))
+    switch_fit_dict = pickle.load(open('Analysis_Output/switch_parameter_fits.pkl', 'rb'))
 except:
     switch_fit_dict = {}
 try:
-    memory_fit_dict = pickle.load(open('Analysis_Output/memory_parameter_fits.p', 'rb'))
+    memory_fit_dict = pickle.load(open('Analysis_Output/memory_parameter_fits.pkl', 'rb'))
 except:
     memory_fit_dict = {}
 try:
-    perseverance_fit_dict = pickle.load(open('Analysis_Output/perseverance_parameter_fits.p', 'rb'))
+    perseverance_fit_dict = pickle.load(open('Analysis_Output/perseverance_parameter_fits.pkl', 'rb'))
 except:
     perseverance_fit_dict = {}
 try:
-    permem_fit_dict = pickle.load(open('Analysis_Output/permem_parameter_fits.p', 'rb'))
+    permem_fit_dict = pickle.load(open('Analysis_Output/permem_parameter_fits.pkl', 'rb'))
 except:
     permem_fit_dict = {}
 
@@ -94,21 +94,21 @@ else:
         train_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', train_file).group(1)
         test_name = re.match(r'.*/RawData.([0-9][0-9][0-9].*).yaml', test_file).group(1)
         try:
-            train_dict = pickle.load(open('../Data/' + train_name + '.p', 'rb'))
+            train_dict = pickle.load(open('../Data/' + train_name + '.pkl', 'rb'))
             taskinfo, train_dfa = [train_dict.get(k) for k in ['taskinfo', 'dfa']]
 
-        except FileNotFoundError:
+        except IOError:
             train_taskinfo, train_dfa = load_data(train_file, train_name, mode='train')
             train_dict = {'taskinfo': train_taskinfo, 'dfa': train_dfa}
-            pickle.dump(train_dict, open('../Data/' + train_name + '.p','wb'))
+            pickle.dump(train_dict, open('../Data/' + train_name + '.pkl','wb'), protocol = 2)
 
         try:
-            test_dict = pickle.load(open('../Data/' + test_name + '.p','rb'))
+            test_dict = pickle.load(open('../Data/' + test_name + '.pkl','rb'))
             taskinfo, test_dfa = [test_dict.get(k) for k in ['taskinfo','dfa']]
-        except FileNotFoundError:
+        except IOError:
             taskinfo, test_dfa = load_data(test_file, test_name, mode='test')
             test_dict = {'taskinfo': taskinfo, 'dfa': test_dfa}
-            pickle.dump(test_dict, open('../Data/' + test_name + '.p','wb'))
+            pickle.dump(test_dict, open('../Data/' + test_name + '.pkl','wb'), protocol = 2)
 
     # *********************************************
     # Preliminary Setup
@@ -119,7 +119,7 @@ else:
         # *********************************************
         # Model fitting
         # *********************************************
-        df_midpoint = round(len(test_dfa)/2)
+        df_midpoint = int(len(test_dfa)/2)
         for model_type in ['TS', 'action']:
             print(model_type)
             if subj_name + '_' + model_type + '_first' not in bias2_fit_dict.keys():
@@ -314,22 +314,22 @@ else:
 # Save
 # ********************************************* 
 
-    pickle.dump(bias2_fit_dict,open('Analysis_Output/bias2_parameter_fits.p','wb'), protocol=2)
-    pickle.dump(bias1_fit_dict,open('Analysis_Output/bias1_parameter_fits.p','wb'), protocol=2)
-    pickle.dump(eoptimal_fit_dict,open('Analysis_Output/eoptimal_parameter_fits.p','wb'), protocol=2)
-    pickle.dump(ignore_fit_dict,open('Analysis_Output/ignore_parameter_fits.p','wb'), protocol=2)
-    pickle.dump(midline_fit_dict,open('Analysis_Output/midline_parameter_fits.p','wb'), protocol=2)
-    pickle.dump(switch_fit_dict,open('Analysis_Output/switch_parameter_fits.p','wb'), protocol=2)
-    pickle.dump(memory_fit_dict,open('Analysis_Output/memory_parameter_fits.p','wb'), protocol=2)
-    pickle.dump(perseverance_fit_dict,open('Analysis_Output/perseverance_parameter_fits.p','wb'), protocol=2)
-    pickle.dump(permem_fit_dict,open('Analysis_Output/permem_parameter_fits.p','wb'), protocol=2)
-    gtest_learn_df.to_pickle('Analysis_Output/gtest_learn_df.pkl')
-    gtest_conform_df.to_pickle('Analysis_Output/gtest_conform_df.pkl')
-    gtest_df.to_pickle('Analysis_Output/gtest_df.pkl')
-    gtrain_learn_df.to_pickle('Analysis_Output/gtrain_learn_df.pkl')
-    gtrain_conform_df.to_pickle('Analysis_Output/gtrain_conform_df.pkl')
-    gtrain_df.to_pickle('Analysis_Output/gtrain_df.pkl')
-    gtaskinfo.to_pickle = ('Analysis_Output_gtaskinfo.pkl')
+    pickle.dump(bias2_fit_dict,open('Analysis_Output/bias2_parameter_fits.pkl','wb'), protocol=2)
+    pickle.dump(bias1_fit_dict,open('Analysis_Output/bias1_parameter_fits.pkl','wb'), protocol=2)
+    pickle.dump(eoptimal_fit_dict,open('Analysis_Output/eoptimal_parameter_fits.pkl','wb'), protocol=2)
+    pickle.dump(ignore_fit_dict,open('Analysis_Output/ignore_parameter_fits.pkl','wb'), protocol=2)
+    pickle.dump(midline_fit_dict,open('Analysis_Output/midline_parameter_fits.pkl','wb'), protocol=2)
+    pickle.dump(switch_fit_dict,open('Analysis_Output/switch_parameter_fits.pkl','wb'), protocol=2)
+    pickle.dump(memory_fit_dict,open('Analysis_Output/memory_parameter_fits.pkl','wb'), protocol=2)
+    pickle.dump(perseverance_fit_dict,open('Analysis_Output/perseverance_parameter_fits.pkl','wb'), protocol=2)
+    pickle.dump(permem_fit_dict,open('Analysis_Output/permem_parameter_fits.pkl','wb'), protocol=2)
+    pickle.dump(gtest_learn_df, open('Analysis_Output/gtest_learn_df.pkl','wb'), protocol=2)
+    pickle.dump(gtest_conform_df, open('Analysis_Output/gtest_conform_df.pkl','wb'), protocol=2)
+    pickle.dump(gtest_df, open('Analysis_Output/gtest_df.pkl','wb'), protocol=2)
+    pickle.dump(gtrain_learn_df, open('Analysis_Output/gtrain_learn_df.pkl','wb'), protocol=2)
+    pickle.dump(gtrain_conform_df, open('Analysis_Output/gtrain_conform_df.pkl','wb'), protocol=2)
+    pickle.dump(gtrain_df, open('Analysis_Output/gtrain_df.pkl','wb'), protocol=2)
+    pickle.dump(gtaskinfo, open('Analysis_Output_gtaskinfo.pkl','wb'), protocol=2)
 
 
 

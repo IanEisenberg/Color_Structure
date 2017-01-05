@@ -323,7 +323,7 @@ def fit_memory_model(train_ts_dis, data, k = None, perseverance = None, print_ou
     if k == None:
         fit_params.add('k', value=1)
     else:
-        fit_params.add('k', value = k, vary = False)
+        fit_params.add('k', value = k, vary = False, min = 0)
     if perseverance == None:
         fit_params.add('perseverance', value=.5, min=0, max=1)
     else:
