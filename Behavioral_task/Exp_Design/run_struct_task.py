@@ -7,13 +7,13 @@ import smtplib
 import json
 import webbrowser
 from prob_context_task import probContextTask
-from make_config import makeConfigList, makePracticeConfigList
+from make_config import ConfigList
 from test_bot import test_bot
 import glob
 from Load_Data import load_data
 import os
-#set-up some variables
 
+#set-up some variables
 verbose=True
 fullscr= True
 subdata=[]
@@ -60,18 +60,17 @@ practice_config_file = '../Config_Files/Prob_Context_Practice_config.npy'
 try:
     practice=probContextTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'practice')
 except:
-    practice_config_file = makePracticeConfigList(taskname = trainname + '_Practice')
+    practice_config = ConfigList(taskname = trainname + '_Practice')
+    practice_config_file = practice_config.get_config(filey = practice_config_file)
     practice=probContextTask(practice_config_file,subject_code, fullscreen = fullscr, mode = 'practice')
     
-train_config_file = makeConfigList(taskname = trainname, iden = subject_code, exp_len = train_len, 
-                                   recursive_p = recursive_p, ts_order = ts_order)
-    
+train_config = ConfigList(taskname = trainname, subjid = subject_code, exp_len = train_len, rp = recursive_p)
+train_config.setup_stims(ts_order = ts_order)
+train_config_file = train_config.get_config()
 train=probContextTask(train_config_file,subject_code, fullscreen = fullscr)
 if bot_on == True:
     train.setBot(bot = test_bot(train_config_file, mode = bot_mode), mode = "full")
 train.writeToLog(train.toJSON(),loc = save_dir + 'Log/')
-
-
 
 #************************************
 # Start Practice

@@ -15,10 +15,10 @@ class probContextTask:
     """ class defining a probabilistic context task
     """
     
-    def __init__(self,config_file,subject_code,verbose=True, 
+    def __init__(self,config_file,subjid,verbose=True, 
                  fullscreen = False, mode = 'task'):
             
-        self.subject_code=subject_code
+        self.subjid=subjid
         self.win=[]
         self.window_dims=[800,600]
         self.textStim=[]
@@ -30,7 +30,6 @@ class probContextTask:
         self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         #looks up the hash of the most recent git push. Stored in log file
         self.gitHash = subprocess.check_output(['git','rev-parse','--short','HEAD'])[:-1]
-        self.trigger_times=[]
         self.config_file=config_file
         self.trialnum = 0
         self.track_response = []
@@ -48,9 +47,10 @@ class probContextTask:
             print(mode + ': cannot load config file')
             sys.exit()
                                                         
-        self.logfilename='%s_%s_%s.log'%(self.subject_code,self.taskname,self.timestamp)
-        self.datafilename='%s_%s_%s'%(self.subject_code,self.taskname,self.timestamp)
-
+        self.logfilename='%s_%s_%s.log'%(self.subjid,self.taskname,self.timestamp)
+        self.datafilename='%s_%s_%s'%(self.subjid,self.taskname,self.timestamp)
+        
+    
     def loadStimulusFileNP(self,filename):
         """ load a stimulus file in numpy format
         """
@@ -67,6 +67,10 @@ class probContextTask:
         if len(self.stimulusInfo)>0:
             self.loadedStimulusFile=filename
             
+    #**************************************************************************
+    # ******* Function to Save Data **************
+    #**************************************************************************
+    
     def toJSON(self):
         """ log the initial conditions for the task. Exclude the list of all
         trials (stimulusinfo), the bot, and taskinfo (self.__dict__ includes 
@@ -86,11 +90,15 @@ class probContextTask:
         data = {}
         data['taskinfo']=self.taskinfo
         data['configfile']=self.config_file
-        data['subcode']=self.subject_code
+        data['subcode']=self.subjid
         data['timestamp']=self.timestamp
         data['taskdata']=self.alldata
         f=open(str(loc) + self.datafilename + '.yaml','w')
         yaml.dump(data,f)
+    
+    #**************************************************************************
+    # ******* Display Functions **************
+    #**************************************************************************
     
     def setupWindow(self):
         """ set up the main window
@@ -118,29 +126,6 @@ class probContextTask:
         self.win.flip()
         return core.getTime()
 
-    def defineStims(self, stims = None):
-        """Defines two sets of stims for practice and the task.
-            Ratio variable is used due to the normalized units to make 
-            'square' squares
-        """
-        if stims:
-            self.stims = stims
-        else:
-            height = .2
-            ratio = self.win.size[1]/float(self.win.size[0])
-            if self.mode == 'practice':
-                self.stims = {self.stim_ids[0]: visual.Polygon(self.win,units = 'norm',radius = (height*ratio/2, height/2),edges = 3,fillColor = 'green'),
-                              self.stim_ids[1]: visual.Polygon(self.win, units = 'norm',radius = (height*ratio/2, height/2),edges = 3,fillColor = 'yellow'),
-                              self.stim_ids[2]: visual.Polygon(self.win, units = 'norm',radius = (height*ratio/2, height/2),edges = 5,fillColor = 'green'),
-                              self.stim_ids[3]: visual.Polygon(self.win, units = 'norm',radius = (height*ratio/2, height/2),edges = 5,fillColor = 'yellow')}
-
-            elif self.mode == 'task':
-                self.stims = {self.stim_ids[0]: visual.Rect(self.win,height*ratio, height,units = 'norm', fillColor = 'red'),
-                              self.stim_ids[1]: visual.Rect(self.win,height*ratio, height,units = 'norm',fillColor = 'blue'),
-                              self.stim_ids[2]: visual.Circle(self.win,units = 'norm',radius = (height*ratio/2, height/2),edges = 32,fillColor = 'red'),
-                              self.stim_ids[3]: visual.Circle(self.win,units = 'norm',radius = (height*ratio/2, height/2), edges = 32,fillColor = 'blue')}
-        
-            
     def clearWindow(self):
         """ clear the main window
         """
@@ -221,6 +206,28 @@ class probContextTask:
             tmp_stim.draw()
         self.win.flip()
         
+    def defineStims(self, stims = None):
+        """Defines two sets of stims for practice and the task.
+            Ratio variable is used due to the normalized units to make 
+            'square' squares
+        """
+        if stims:
+            self.stims = stims
+        else:
+            height = .2
+            ratio = self.win.size[1]/float(self.win.size[0])
+            if self.mode == 'practice':
+                self.stims = {self.stim_ids[0]: visual.Polygon(self.win,units = 'norm',radius = (height*ratio/2, height/2),edges = 3,fillColor = 'green'),
+                              self.stim_ids[1]: visual.Polygon(self.win, units = 'norm',radius = (height*ratio/2, height/2),edges = 3,fillColor = 'yellow'),
+                              self.stim_ids[2]: visual.Polygon(self.win, units = 'norm',radius = (height*ratio/2, height/2),edges = 5,fillColor = 'green'),
+                              self.stim_ids[3]: visual.Polygon(self.win, units = 'norm',radius = (height*ratio/2, height/2),edges = 5,fillColor = 'yellow')}
+
+            elif self.mode == 'task':
+                self.stims = {self.stim_ids[0]: visual.Rect(self.win,height*ratio, height,units = 'norm', fillColor = 'red'),
+                              self.stim_ids[1]: visual.Rect(self.win,height*ratio, height,units = 'norm',fillColor = 'blue'),
+                              self.stim_ids[2]: visual.Circle(self.win,units = 'norm',radius = (height*ratio/2, height/2),edges = 32,fillColor = 'red'),
+                              self.stim_ids[3]: visual.Circle(self.win,units = 'norm',radius = (height*ratio/2, height/2), edges = 32,fillColor = 'blue')}
+                              
     def presentStims(self, mode = 'practice'):
         """ Used during instructions to present possible stims
         """
@@ -255,6 +262,7 @@ class probContextTask:
         trialClock = core.Clock()
         self.trialnum += 1
         stim_i = trial['stim']
+        # if the bot isn't running, display the stimulus
         if self.botMode != 'short':
             self.stims[stim_i].setPos((0, trial['context']*.8))
             self.stims[stim_i].draw()
@@ -266,7 +274,7 @@ class probContextTask:
         trial['response']=[]
         trial['rt']=[]
         trial['FB'] = []
-        while trialClock.getTime() < (self.stimulusDuration):
+        while trialClock.getTime() < (trial['StimulusDuration']):
             key_response=event.getKeys(None,True)
             if self.bot:
                 bot_action = self.bot.choose(trial['stim'], trial['context'])
@@ -292,16 +300,14 @@ class probContextTask:
             for key,response_time in key_response:
                 if self.quit_key==key:
                     self.shutDownEarly()
-                elif self.trigger_key==key:
-                    self.trigger_times.append(response_time-self.startTime)
-                    continue
                 elif key in self.action_keys:
-                    trial['response'].append(key)
+                    choice = self.action_keys.index(key)
+                    trial['response'].append(choice)
                     trial['rt'].append(trialClock.getTime())
-                    if self.clearAfterResponse and trial['stimulusCleared']==0:
+                    # if the key press was the first one for the trial...
+                    if trial['stimulusCleared']==0:
                         self.clearWindow()
                         trial['stimulusCleared']=trialClock.getTime()
-                        choice = self.action_keys.index(key)
                         if choice == stim_i[trial['ts']]:
                             FB = trial['reward']
                         else:
