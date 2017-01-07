@@ -1,0 +1,15 @@
+*If subject isn't mentioned, experiment run was unremarkable.
+
+Pilot014 - Potentially not neurotypical. 
+026 - smelled like pot, abruptly started listening to music and not paying attention to
+the task. Told the subject to turn off music and pay attention - he did, but when checking
+on him later, I noticed that you wouldn't respond often. During the test phase, it
+seems like he was just selected answers as quickly as possible to get out.
+
+034 - accidentally quit 30 minutes into the training. Started a new training using the
+same config file with 15 minutes of training. That didn't actually shorten training and so
+I interrupted her after about 20 minutes. Thus there will be no RawData for 034, but 
+two log files - one for 034, and one for 034_second_run. For test there is a rawdata
+called 034.
+
+059 - Won't be here later. Probably can't scan
