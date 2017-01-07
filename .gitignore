@@ -1,7 +1,7 @@
 *.pyc
 Plots/
-Data/
-Log/
+**/Data/Log/*.log
+**/Data/RawData/*.yaml
 Presentations_Posters/
 Papers/
 twilio_info.txt

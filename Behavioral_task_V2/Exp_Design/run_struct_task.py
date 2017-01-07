@@ -37,7 +37,7 @@ test_on = True
 bot_on = False
 bot_mode = "ignore_base" #other for optimal
 home = os.getenv('HOME') 
-save_dir = home + '/Mega/IanE_RawData/Prob_Context_Task/' #cloud storage
+save_dir = '../Data' 
 trainname = 'Prob_Context'
 
 # set things up for practice, training and tests
@@ -45,8 +45,11 @@ try:
     f = open('IDs.txt','r')
     lines = f.readlines()
     f.close()
-    last_id = lines[-1][:-1]
-    subject_code = raw_input('Last subject: "%s". Input new subject code: ' % last_id);
+    try:
+        last_id = lines[-1][:-1]
+        subject_code = raw_input('Last subject: "%s". Input new subject code: ' % last_id);
+    except IndexError:
+        subject_code = raw_input('Input first subject code: ');
 except IOError:
     subject_code = raw_input('Input first subject code: ');
 f = open('IDs.txt', 'a')
@@ -64,10 +67,13 @@ test_len = int(round(test_mins*60/avg_test_trial_len/4)*4)
 recursive_p = .9
 
 # counterbalance ts_order (which ts is associated with top of screen)
-if int(subject_code)%2 == 0:
+try:
+    if int(subject_code)%2 == 0:
+        ts_order = [0,1]
+    else:
+        ts_order = [1,0]
+except ValueError:
     ts_order = [0,1]
-else:
-    ts_order = [1,0]
 
 # ****************************************************************************
 # set up config files

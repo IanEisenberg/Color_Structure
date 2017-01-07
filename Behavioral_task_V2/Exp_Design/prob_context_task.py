@@ -336,7 +336,7 @@ class probContextTask:
             trial['rt'].append(999)
             core.wait(trial['FBonset'])
             self.presentTextToWindow('Please Respond Faster')
-            core.wait(trial['Duration'])
+            core.wait(trial['FBDuration'])
             self.clearWindow()
         
         # log trial and add to data
@@ -373,7 +373,7 @@ class probContextTask:
         
         # clean up and save
         self.writeData()
-        if self.bot_on == False:
+        if self.bot == None:
             self.presentTextToWindow('Thank you. Please wait for the experimenter.')
             self.waitForKeypress(self.quit_key)
         self.closeWindow()
