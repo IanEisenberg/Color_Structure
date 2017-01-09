@@ -61,7 +61,8 @@ class ConfigList(object):
           'states': self.states,
           'rp': self.rp,
           'exp_len': self.exp_len,
-          'stim_ids': self.stim_ids
+          'stim_ids': self.stim_ids,
+          'ts_order': self.ts_order
         }
         
         to_save = self.trial_list
@@ -152,8 +153,8 @@ class ConfigList(object):
                 'StimulusDuration': stimulusDuration,
                 'ITI': ITI,
                 #option to change based on state and stim
-                'reward': 1,
-                'punishment': 0
+                'reward_amount': 1,
+                'punishment_amount': 0
             }]
 
             trial_count += 1

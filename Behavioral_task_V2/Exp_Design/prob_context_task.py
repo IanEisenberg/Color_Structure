@@ -283,9 +283,9 @@ class probContextTask:
                 choice = self.action_keys.index(bot_action[0])
                 trial['response'].append(choice)
                 if choice == stim_i[trial['ts']]:
-                    FB = trial['reward']
+                    FB = trial['reward_amount']
                 else:
-                    FB = trial['punishment']
+                    FB = trial['punishment_amount']
                 if trial['FBDuration'] != 0:
                     trial['FB'] = FB
                 if self.botMode == 'short':
@@ -311,9 +311,9 @@ class probContextTask:
                         self.clearWindow()
                         trial['stimulusCleared']=trialClock.getTime()
                         if choice == stim_i[trial['ts']]:
-                            FB = trial['reward']
+                            FB = trial['reward_amount']
                         else:
-                            FB = trial['punishment']
+                            FB = trial['punishment_amount']
                         #record points for bonus
                         self.pointtracker += FB
                         #If training, present FB to window
