@@ -5,13 +5,12 @@ Created on Fri Apr 24 16:22:54 2015
 @author: Ian
 """
 
-from scipy.stats import norm
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import pylab, lmfit
 import random as r
-from helper_classes import BiasPredModel, SwitchModel, MemoryModel
+from helper_classes import BiasPredModel, SwitchModel, MemoryModel, softmax
 
 def track_runs(iterable):
     """
@@ -38,9 +37,6 @@ def bar(x, y, title):
     plot = plt.bar(x,y,width = .5)
     plt.title(str(title))
     return plot
-
-def softmax(probs, inv_temp):
-    return np.exp(probs*inv_temp)/sum(np.exp(probs*inv_temp))
 
 def calc_posterior(data,prior,likelihood_dist, reduce = True):
     n = len(prior)
@@ -104,37 +100,16 @@ def simulateModel(model, ts_dis, model_name = 'model', l = 800, p = .9, mode = '
     seq['model'] = model_name
     return seq
           
-    
-def preproc_data(traindata, testdata, taskinfo):
-            """ Sets TS2 to always be associated with the 'top' of the screen (positive context values),
-            creates a log_rt column and outputs task statistics during training
-            :return: train_ts_dis, train_recursive_p, action_eps
-            """
-            #flip contexts if necessary
-            states = taskinfo['states']
-            tasksets = {val['ts']: {'c_mean': val['c_mean'], 'c_sd': val['c_sd']} for val in states.values()}
-            ts2_side = np.sign(tasksets[1]['c_mean'])
-            traindata['true_context'] = traindata['context']
-            testdata['true_context'] = testdata['context']            
-            traindata['context']*=ts2_side
-            testdata['context']*=ts2_side
-            #add log rt columns
-            traindata['log_rt'] = np.log(traindata.rt)
-            testdata['log_rt'] = np.log(testdata.rt)
-            # What was the mean contextual value for each taskset during this train run?
-            train_ts_means = list(traindata.groupby('ts').agg(np.mean).context)
-            # Same for standard deviation
-            train_ts_std = list(traindata.groupby('ts').agg(np.std).context)
-            train_ts_dis = [norm(m, s) for m, s in zip(train_ts_means, train_ts_std)]
-            train_recursive_p = 1 - traindata.switch.mean()
-            action_eps = 1-np.mean([testdata['response'][i] in testdata['stim'][i] for i in testdata.index])
-            return train_ts_dis, train_recursive_p, action_eps
 
 #*********************************************
 # Model fitting functions
 #*********************************************
+#def fit_model(data, printout = True, return_out = False, **args):
+    
+    
 
-def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, model_type = 'action', print_out = True, return_out = False):
+
+def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, model_type = 'action', verbose = True, return_out = False):
     """
     Function to fit parameters to the bias2 model (fit r1, r2 and epsilon).
     Model can either fit to TS choices or actions
@@ -167,14 +142,14 @@ def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, mo
     fit_params.add('r2', value=.5, min=0, max=1)
     fit_params.add('TS_eps', value=.1, min=0, max=1)
     out = lmfit.minimize(errfunc, fit_params, method = 'lbfgsb', kws={'df': data})
-    if print_out:
+    if verbose:
         lmfit.report_fit(out)
     if return_out:
         return out
     else:
         return out.params.valuesdict()
     
-def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, model_type = 'action', print_out = True, return_out = False):
+def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, model_type = 'action', verbose = True, return_out = False):
     """
     Function to fit parameters to the bias2 model (fit r and epsilon)
     """
@@ -205,14 +180,14 @@ def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, mo
     fit_params.add('rp', value=.5, min=0, max=1)
     fit_params.add('TS_eps', value = .1, min=0, max=1)
     out = lmfit.minimize(errfunc, fit_params, method = 'lbfgsb', kws={'df': data})
-    if print_out:
+    if verbose:
         lmfit.report_fit(out)
     if return_out:
         return out
     else:
         return out.params.valuesdict()
     
-def fit_static_model(train_ts_dis, data, r_value, init_prior = [.5,.5], action_eps = 0, model_type = 'action', print_out = True, return_out = False):
+def fit_static_model(train_ts_dis, data, rp, init_prior = [.5,.5], action_eps = 0, model_type = 'action', verbose = True, return_out = False):
     """
     Function to fit any model where recursive probabilities are fixed, like an
     optimal model (r1=r2=.9) or a base-rate neglect model (r1=r2=.5)
@@ -221,7 +196,7 @@ def fit_static_model(train_ts_dis, data, r_value, init_prior = [.5,.5], action_e
         eps = params['TS_eps']
 
         init_prior = [.5,.5]
-        model = BiasPredModel(train_ts_dis, init_prior, rp = r_value, TS_eps=eps, action_eps = action_eps)
+        model = BiasPredModel(train_ts_dis, init_prior, rp = rp, TS_eps=eps, action_eps = action_eps)
         model_likelihoods = []
         for i in df.index:
             c = df.context[i]
@@ -241,19 +216,19 @@ def fit_static_model(train_ts_dis, data, r_value, init_prior = [.5,.5], action_e
     fit_params = lmfit.Parameters()
     fit_params.add('TS_eps', value = .1, min=0, max=1)
     out = lmfit.minimize(errfunc, fit_params, method = 'lbfgsb', kws={'df': data})
-    if print_out:
+    if verbose:
         lmfit.report_fit(out)
     fit_params = out.params.valuesdict()
-    fit_params['rp'] = r_value
+    fit_params['rp'] = rp
     if return_out:
         return out
     else:
         return fit_params
 
-def fit_midline_model(data, print_out = True, return_out = False):
+def fit_midline_model(data, verbose = True, return_out = False):
     def midline_errfunc(params,df):
         eps = params['eps'].value
-        context_sgn = np.array([max(i,0) for i in df.context_sign])
+        context_sgn = np.array([max(i,0) for i in df.context.apply(np.sign)])
         choice = df.subj_ts
         #minimize
         return -np.sum(np.log(abs(abs(choice - (1-context_sgn))-eps)))
@@ -263,14 +238,14 @@ def fit_midline_model(data, print_out = True, return_out = False):
     fit_params = lmfit.Parameters()
     fit_params.add('eps', value = .1, min = 0, max = 1)
     out = lmfit.minimize(midline_errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
-    if print_out:
+    if verbose:
         lmfit.report_fit(out)
     if return_out:
         return out
     else:
         return out.params.valuesdict()
     
-def fit_switch_model(data, print_out = True, return_out = False):
+def fit_switch_model(data, verbose = True, return_out = False):
     def switch_errfunc(params,df):
         params = params.valuesdict()
         r1 = params['r1']
@@ -293,14 +268,14 @@ def fit_switch_model(data, print_out = True, return_out = False):
     fit_params.add('r2', value=.5, min=0, max=1)
     fit_params.add('eps', value = .1, min = 0, max = 1)
     out = lmfit.minimize(switch_errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
-    if print_out:
+    if verbose:
         lmfit.report_fit(out)
     if return_out:
         return out
     else:
         return out.params.valuesdict()
 
-def fit_memory_model(train_ts_dis, data, k = None, perseverance = None, print_out = True, return_out = False):
+def fit_memory_model(train_ts_dis, data, k = None, perseverance = None, verbose = True, return_out = False):
     def errfunc(params,df):
         params = params.valuesdict()
         k = params['k']
@@ -321,7 +296,7 @@ def fit_memory_model(train_ts_dis, data, k = None, perseverance = None, print_ou
     # Fit memory model
     fit_params = lmfit.Parameters()
     if k == None:
-        fit_params.add('k', value=1)
+        fit_params.add('k', value=1, min = 0)
     else:
         fit_params.add('k', value = k, vary = False, min = 0)
     if perseverance == None:
@@ -332,7 +307,7 @@ def fit_memory_model(train_ts_dis, data, k = None, perseverance = None, print_ou
     fit_params.add('TS_eps', value = .1, min = 0, max = 1)
     out = lmfit.minimize(errfunc,fit_params, method = 'lbfgsb', kws= {'df': data})
     fit_params = out.params.valuesdict()
-    if print_out:
+    if verbose:
         lmfit.report_fit(out)
     if return_out:
         return out

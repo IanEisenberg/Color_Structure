@@ -23,8 +23,7 @@ class BiasPredModel:
         self.prior = np.array(prior)
         self.likelihood_dist = likelihood_dist
         if rp:
-            self.r1 = rp
-            self.r2 = rp
+            self.r1 = self.r2 = rp
         else:
             self.r1 = r1
             self.r2 = r2
@@ -73,16 +72,20 @@ class BiasPredModel:
     
        
     def choose(self, mode = 'e-greedy', eps = None, inv_temp = 1):
+        n_choices = len(self.posterior)
         if eps == None:
             eps = self.TS_eps
         if mode == "e-greedy":
-            TS_probs = (1-eps)*self.posterior+eps/2
-            return np.random.choice(range(len(TS_probs)), p = TS_probs)
+            TS_probs = (1-eps)*self.posterior+eps/n_choices
+            return np.random.choice(range(n_choices), p = TS_probs)
         elif mode == 'prob_match':
-            return np.random.choice(range(len(self.posterior)), p = self.posterior)
+            return np.random.choice(range(n_choices), p = self.posterior)
         elif mode == "softmax":
             probs = softmax(self.posterior, inv_temp)
-            return np.random.choice(range(len(probs)), p = probs)
+            return np.random.choice(range(n_choices), p = probs)
+        elif mode == 'mixture':
+            probs = (1-eps)*softmax(self.posterior, inv_temp)+eps/n_choices
+            return np.random.choice(range(n_choices), p = probs)
         else:
             return np.argmax(self.posterior)
 
@@ -136,20 +139,22 @@ class MemoryModel:
             return TS_probs
            
     def choose(self, mode = 'e-greedy', eps = None, inv_temp = 1):
-        if np.isnan(self.posterior[0]):
-            return np.nan
+        n_choices = len(self.posterior)
         if eps == None:
             eps = self.TS_eps
         if mode == "e-greedy":
-            TS_probs = (1-eps)*self.TS_probs+eps/2
-            return np.random.choice(range(len(TS_probs)), p = TS_probs)
+            TS_probs = (1-eps)*self.posterior+eps/n_choices
+            return np.random.choice(range(n_choices), p = TS_probs)
         elif mode == 'prob_match':
-            return np.random.choice(range(len(self.TS_probs)), p = self.TS_probs)
+            return np.random.choice(range(n_choices), p = self.posterior)
         elif mode == "softmax":
             probs = softmax(self.posterior, inv_temp)
-            return np.random.choice(range(len(probs)), p = probs)
+            return np.random.choice(range(n_choices), p = probs)
+        elif mode == 'mixture':
+            probs = (1-eps)*softmax(self.posterior, inv_temp)+eps/n_choices
+            return np.random.choice(range(n_choices), p = probs)
         else:
-            return np.argmax(self.TS_probs)
+            return np.argmax(self.posterior)
             
             
 class SwitchModel:
@@ -176,8 +181,6 @@ class SwitchModel:
             return (1-eps)*self.trans_probs[:,last_choice]+eps/2
     
        
-
-            
 
 class DataGenerator:
     """
