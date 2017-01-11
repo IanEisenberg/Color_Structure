@@ -39,6 +39,7 @@ import ctypes
 GL = pyglet.gl
 import numpy as np
 
+#reference: http://stackoverflow.com/questions/15603931/using-numpy-arrays-and-ctypes-for-opengl-calls-in-pyglet
 self= dots
 colors = np.array([(0.0,0.0,1.0)]*(self.nDots/2) + [(1.0,0.0,0.0)]*(self.nDots/2)).astype(ctypes.c_float)
 colors_gl = colors.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
