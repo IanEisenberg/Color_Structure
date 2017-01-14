@@ -5,7 +5,7 @@ Created on Wed Jan 11 00:29:13 2017
 
 @author: ian
 """
-from psychopy import visual, core
+from psychopy import visual, core, event
 from psychopy.visual.dot import DotStim
 from psychopy.tools.attributetools import setAttribute
 import pyglet
@@ -84,16 +84,21 @@ class ColorDotStim(DotStim):
 def getDotStim(win, motion_coherence = .5, color_coherence = .5, direction = 0, colors = None):
     if colors == None:
         colors = [(1.0,0.0,0.0), (0.0,0.8,0.8)]
-    dots = ColorDotStim(win, color_coherence, nDots = 1000, dotSize = 4, signalDots = 'same', fieldShape = 'circle',
+    dots = ColorDotStim(win, color_coherence, nDots = 1000, dotSize = 3, signalDots = 'different', fieldShape = 'circle',
                           fieldSize = 15, speed = .05,  coherence = motion_coherence,  dir = direction,
                           color = colors, opacity = 1)
     return dots
 
+# example display of dot stim
+"""
 def display_stim(win, stim, n):
     for _ in range(n):
         stim.draw()
         win.flip()
-        core.wait(.015)
+        keys = event.getKeys(keyList=['s', 'l'])
+        if keys != []:
+            break
+    core.wait(.015)
         
 def play():
     win = visual.Window([1200,800], color = [-.8,-.8,-.8], allowGUI=False, fullscr=False, 
@@ -115,6 +120,4 @@ def play():
     return dots
 
 dots = play()
-
-    
-     
+"""
