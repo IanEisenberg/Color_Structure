@@ -17,13 +17,28 @@ class probContextTask:
     def __init__(self,config_file,subjid,save_dir,verbose=True, 
                  fullscreen = False, color_coherences = None, 
                  motion_coherences = None, mode = 'task'):
-                     
+        # set up some variables
+        self.stimulusInfo=[]
+        self.loadedStimulusFile=[]
+        self.startTime=[]
+        self.alldata=[]
+        self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        #looks up the hash of the most recent git push. Stored in log file
+        self.gitHash = subprocess.check_output(['git','rev-parse','--short','HEAD'])[:-1]
+        # load config file
+        self.config_file=config_file
+        try:
+            self.loadConfigFile(config_file)
+        except:
+            print(mode + ': cannot load config file')
+            sys.exit()
+            
         self.save_dir = save_dir  
         self.subjid=subjid
         # set up window
         self.win=[]
         self.window_dims=[800,600]
-        # set up stim
+        # set up stim variables
         if color_coherences == None:
             self.color_coherences = {'easy': .7, 'medium': .4, 'hard': .1}
         else:
@@ -32,36 +47,17 @@ class probContextTask:
             self.motion_coherences = {'easy': .7, 'medium': .4, 'hard': .1}
         else:
             self.motion_coherences = motion_coherences
-        self.tasksets = ['motionDirection','colorMajority']
+        
+        self.tasksets = ['motionDirection','colorIdentity']
         self.textStim=[]
-        self.stimulusInfo=[]
-        self.loadedStimulusFile=[]
-        self.startTime=[]
-        self.alldata=[]
-        self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        #looks up the hash of the most recent git push. Stored in log file
-        self.gitHash = subprocess.check_output(['git','rev-parse','--short','HEAD'])[:-1]
-        self.config_file=config_file
         self.trialnum = 0
         self.track_response = []
         self.fullscreen = fullscreen
         self.text_color = [1]*3
         self.pointtracker = 0
-        #intializes a bot variable that can be set by setBot
-        self.bot = None
-        self.botMode = None
         #Choose 'practice', 'task': determines stimulus set to use
         self.mode = mode
-        try:
-            self.loadConfigFile(config_file)
-            self.stim=getDotStim(color_coherence = color_coherences['medium'],
-                             motion_coherence = motion_coherences['medium'],
-                             direction = self.stim_motions[0],
-                             colors = self.stim_colors)
-        except:
-            print(mode + ': cannot load config file')
-            sys.exit()
-                                                        
+        # set up recording files
         self.logfilename='%s_%s_%s.log'%(self.subjid,self.taskname,self.timestamp)
         self.datafilename='%s_%s_%s.yaml'%(self.subjid,self.taskname,self.timestamp)
         # log initial state
@@ -183,14 +179,6 @@ class probContextTask:
     def shutDownEarly(self):
         self.closeWindow()
         sys.exit()
-        
-    def setBot(self, bot, mode = "full"):
-        """ sets up a bot to run the experiment
-            mode = 'full' displays the experiment like normal.
-            mode = 'short' doesn't display any images and just create data
-        """
-        self.bot = bot
-        self.botMode = mode
     
     def getPastAcc(self, time_win):
         """Returns the ratio of hits/trials in a predefined window
@@ -212,97 +200,119 @@ class probContextTask:
     def getPoints(self):
         return (self.pointtracker,self.trialnum)
         
-    def presentContexts(self):
-        """ Used during instructions to present possible stimulus positions
-        """
-        height = .05
-        ratio = self.win.size[1]/float(self.win.size[0])
-        tmp_stim = visual.Rect(self.win,height*ratio*5, height,units = 'norm',fillColor = 'yellow')
-        for context in self.context_means:
-            tmp_stim.setPos((0, context*.9))
-            tmp_stim.draw()
+    def defineStims(self, stim = None, cue = None):
+        if stim == None:
+            self.stim=getDotStim(self.win, color_coherence = self.color_coherences['medium'],
+                                 motion_coherence = self.motion_coherences['medium'],
+                                 direction = self.stim_motions[0],
+                                 colors = self.stim_colors)
+        else:
+            self.stim = stim
+        if cue == None:
+            height = .2
+            ratio = self.win.size[1]/float(self.win.size[0])
+            # set up cue
+            self.cue = visual.Polygon(self.win,units = 'norm',radius = (height*ratio/2, height/2),edges = 4,fillColor = 'green')
+        else:
+            self.cue = cue
+            
+    
+    def presentCue(self, context, duration):
+        self.cue.setPos((0, context*.8))
+        self.cue.draw()
         self.win.flip()
-        
-    def presentStims(self, stim, duration = .5, mode = 'practice'):
+        core.wait(duration)
+        self.clearWindow()
+    
+    def presentStim(self, stim, duration = .5, mode = 'practice'):
         """ Used during instructions to present possible stims
         """
         ms,md,cs,ci = [stim[k] for k in ['motionStrength','motionDirection','colorStrength','colorIdentity']]
         # convert two dimensions of color (Strength and direction) to one dimension, percentage of the first color
-        cc = abs(self.colorCoherences[cs]-ci)
+        cc = abs(self.color_coherences[cs]-stim['colors'].index(ci))
         if mode == 'practice':
             self.stim.setColorCoherence(cc)
-            self.stim.Coherence(self.motionCoherences['easy'])
+            self.stim.Coherence(self.motion_coherences['easy'])
             self.stim.setDir(stim.motions[stim.md])
         elif mode == 'task':
-            self.stim.setColorCoherence(self.colorCoherences[cs])
-            self.stim.Coherence(self.motionCoherences[ms])
+            self.stim.setColorCoherence(self.color_coherences[cs])
+            self.stim.Coherence(self.motion_coherences[ms])
         stim_clock = core.Clock()
         while stim_clock.getTime() < duration:
             self.stim.draw()
             self.win.flip()
-            keys = event.getKeys(None,True)
+            keys = event.getKeys(self.action_keys + ['q'],True)
             if len(keys) > 0:
                 break
         return keys
             
-    def getCorrectChoice(stim,ts):
+    def getCorrectChoice(self,stim,ts):
         # action keys are set up as the choices for ts1 followed by ts2
         # so the index for the correct choice must take that into account
-        correct_choice = stim[self.tasksets[ts]] + self.tasksets[ts]*2
+        ts_name = self.tasksets[ts]
+        if ts_name == 'motionDirection':
+            correct_choice = stim['motions'].index(stim[ts_name])
+        elif ts_name == 'colorIdentity':
+            correct_choice = stim['colors'].index(stim[ts_name])+2
         return correct_choice
         
     def presentTrial(self,trial):
         """
         This function presents a stimuli, waits for a response, tracks the
-        response and RT and presents appropriate feedback. If a bot was loaded
-        the bot interacts with the experiment through this function by supplying
-        'actions' and 'RTs'. This function also controls the timing of FB 
+        response and RT and presents appropriate feedback. This function also controls the timing of FB 
         presentation.
         """
         trialClock = core.Clock()
         self.trialnum += 1
+        context = trial['context']
         stim = trial['stim']
+        
+        print('Taskset: %s\nMotion: %s\nColor: %s\nCorrectChoice: %s\n' % 
+              (self.tasksets[trial['ts']], stim['motionDirection'], stim['colorIdentity'],
+               self.getCorrectChoice(stim,trial['ts'])))
         
         event.clearEvents()
         trial['actualOnsetTime']=core.getTime() - self.startTime
         trial['stimulusCleared']=0
-        trial['response']=[]
-        trial['rt']=[]
+        trial['response'] = 999
+        trial['rt'] = 999
         trial['FB'] = []
+        # present cue
+        self.presentCue(context, trial['cueDuration'])
+        core.wait(trial['CSI'])
         # present stimulus and get response
-        keys = self.presentStims(stim, trial['stimulusDuration'], mod = 'test')
+        keys = self.presentStim(stim, trial['stimulusDuration'], mode = 'test')
         trialClock.reset()
         # check for quit key
         if self.quit_key in keys:
             self.shutDownEarly()
-        choice = self.action_keys.index(keys[0])
-        trial['response'].append(choice)
-        # get feedback
-        correct_choice = getCorrectChoice(stim,trial['ts'])
-        if correct_choice == choice:
-            FB = trial['reward_amount']
-        else:
-            FB = trial['punishment_amount']
-         #record points for bonus
-        self.pointtracker += FB
-        #If training, present FB to window
-        if trial['displayFB'] == True:
-            trial['FB'] = FB
-            core.wait(trial['FBonset'])  
-            trial['actualFBOnsetTime'] = trialClock.getTime()-trial['stimulusCleared']
-            if FB == 1:
-                self.presentTextToWindow('+1 point')
+        for key,response_time in keys:
+            choice = self.action_keys.index(key)
+            trial['response'] = choice
+            trial['rt'] = trialClock.getTime()
+            # get feedback
+            correct_choice = self.getCorrectChoice(stim,trial['ts'])
+            if correct_choice == choice:
+                FB = trial['reward_amount']
             else:
-                self.presentTextToWindow('+' + str(FB) + ' points')
-            core.wait(trial['FBDuration'])
-            self.clearWindow()        
+                FB = trial['punishment_amount']
+             #record points for bonus
+            self.pointtracker += FB
+            #If training, present FB to window
+            if trial['displayFB'] == True:
+                trial['FB'] = FB
+                core.wait(trial['FBonset'])  
+                trial['actualFBOnsetTime'] = trialClock.getTime()-trial['stimulusCleared']
+                if FB == 1:
+                    self.presentTextToWindow('+1 point')
+                else:
+                    self.presentTextToWindow('+' + str(FB) + ' points')
+                core.wait(trial['FBDuration'])
+                self.clearWindow()        
         #If subject did not respond within the stimulus window clear the stim
         #and admonish the subject
-        if trial['stimulusCleared']==0:
-            self.clearWindow()
-            trial['stimulusCleared']=trialClock.getTime()
-            trial['response'].append(999)
-            trial['rt'].append(999)
+        if trial['rt']==999:
+            self.clearWindow()            
             core.wait(trial['FBonset'])
             self.presentTextToWindow('Please Respond Faster')
             core.wait(trial['FBDuration'])
@@ -319,32 +329,28 @@ class probContextTask:
         self.startTime = core.getTime()
         pause_time = 0
         for trial in self.stimulusInfo:
-            if not self.bot:
-                if trial == pause_trial:
-                    time1 = core.getTime()
-                    self.presentTextToWindow("Take a break! Press '5' when you're ready to continue.")
-                    self.waitForKeypress(self.trigger_key)
-                    self.clearWindow()
-                    pause_time = core.getTime() - time1
+            if trial == pause_trial:
+                time1 = core.getTime()
+                self.presentTextToWindow("Take a break! Press '5' when you're ready to continue.")
+                self.waitForKeypress(self.trigger_key)
+                self.clearWindow()
+                pause_time = core.getTime() - time1
             
-            #if botMode = short, don't wait for onset times
-            if self.botMode != 'short':
-                # wait for onset time
-                while core.getTime() < trial['onset'] + self.startTime + pause_time:
-                        key_response=event.getKeys(None,True)
-                        if len(key_response)==0:
-                            continue
-                        for key,response_time in key_response:
-                            if self.quit_key==key:
-                                self.shutDownEarly()
+            # wait for onset time
+            while core.getTime() < trial['onset'] + self.startTime + pause_time:
+                    key_response=event.getKeys(None,True)
+                    if len(key_response)==0:
+                        continue
+                    for key,response_time in key_response:
+                        if self.quit_key==key:
+                            self.shutDownEarly()
         
             self.presentTrial(trial)
         
         # clean up and save
         self.writeData()
-        if self.bot == None:
-            self.presentTextToWindow('Thank you. Please wait for the experimenter.')
-            self.waitForKeypress(self.quit_key)
+        self.presentTextToWindow('Thank you. Please wait for the experimenter.')
+        self.waitForKeypress(self.quit_key)
         self.closeWindow()
 
 

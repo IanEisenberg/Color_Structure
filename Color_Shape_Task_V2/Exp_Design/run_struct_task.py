@@ -38,7 +38,7 @@ bot_on = False
 bot_mode = "ignore_base" #other for optimal
 home = os.getenv('HOME') 
 save_dir = '../Data' 
-trainname = 'Dot_task'
+trainname = 'Prob_Context'
 
 # set things up for practice, training and tests
 try:

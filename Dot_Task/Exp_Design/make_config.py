@@ -67,8 +67,8 @@ class ConfigList(object):
           'exp_len': self.exp_len,
           'stim_ids': self.stim_ids,
           'ts_order': self.ts_order,
-          'stim_colors': self.colors,
-          'stim_motions': self.motions
+          'stim_colors': self.stim_colors,
+          'stim_motions': self.stim_motions
         }
         
         to_save = self.trial_list
@@ -95,9 +95,10 @@ class ConfigList(object):
         
     def setup_stims(self):
         stim_ids = []
-        for ms,md,cs,ci in list(itertools.product(*[[-1,0,1],[0,1], [-1,0,1],[0,1]])):
+        difficulties = ['easy', 'medium', 'hard']
+        for ms,md,cs,ci in itertools.product(*[difficulties,self.stim_motions, difficulties,self.stim_colors]):
             stim_ids.append({'motionStrength': ms, 'motionDirection': md, 'colorStrength': cs, 'colorIdentity': ci,
-                             'colors': self.colors, 'motions': self.motions})
+                             'colors': self.stim_colors, 'motions': self.stim_motions})
         self.stim_ids = stim_ids
         self.states = {i: {'ts': self.ts_order[i], 'dist_args': self.args[i]} for i in range(len(self.ts_order))}
         self.setup_trial_states()
@@ -129,13 +130,13 @@ class ConfigList(object):
         self.trial_states = trial_states
             
                     
-    def setup_trial_list(self, stimulusDuration=1.5, FBDuration=.5, FBonset=.5, ITI=.5, displayFB = True):
+    def setup_trial_list(self, cueDuration=1.5, stimulusDuration=5, FBDuration=.5, FBonset=.5, CSI=.5, ITI=.5, displayFB = True):
         if self.seed is not None:
             np.random.seed(self.seed)
         trial_list = []    
         trial_count = 1
         curr_onset = 2 #initial onset time
-        stims = r.sample(self.stim_ids*self.stim_repetitons,self.exp_len)   
+        stims = r.sample(self.stim_ids*self.stim_repetitions,self.exp_len)   
             
         #define bins. Will set context to center point of each bin
         bin_boundaries = np.linspace(-1,1,11)
@@ -155,10 +156,12 @@ class ConfigList(object):
                 'context': context_sample,
                 'stim': stims[trial],
                 'onset': curr_onset,
+                'cueDuration': cueDuration,
+                'stimulusDuration': stimulusDuration,
                 'FBDuration': FBDuration,
                 'FBonset': FBonset,
                 'displayFB': displayFB,
-                'stimulusDuration': stimulusDuration,
+                'CSI': CSI,
                 'ITI': ITI,
                 #option to change based on state and stim
                 'reward_amount': 1,
