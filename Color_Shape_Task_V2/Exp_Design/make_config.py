@@ -17,6 +17,7 @@ class ConfigList(object):
                  action_keys=None, distribution=norm, args=None, exp_len=200, ts_order=None, seed=None):
         self.seed = seed
         if self.seed is not None:
+            r.seed(self.seed)
             np.random.seed(self.seed)
         self.distribution = norm
         self.exp_len = exp_len

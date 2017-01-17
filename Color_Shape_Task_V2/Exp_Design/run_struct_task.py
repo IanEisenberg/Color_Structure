@@ -82,7 +82,9 @@ except ValueError:
 # practice
 practice_config_file = '../Config_Files/Prob_Context_Practice_config.json'
 if not os.path.exists(practice_config_file):
-    practice_config = ConfigList(taskname = trainname + '_Practice')
+    practice_config = ConfigList(taskname = trainname + '_Practice', exp_len = 120, seed = 1939)
+    # ensure the first 40 trials are TS1 and second 40 are TS2
+    practice_config.trial_states[0:40] = [0]*40; practice_config.trial_states[40:80] = [1]*40
     practice_config_file = practice_config.get_config(filey = practice_config_file)
 
 # train 
