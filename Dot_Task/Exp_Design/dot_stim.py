@@ -15,8 +15,8 @@ GL = pyglet.gl
 import numpy as np
 
 class ColorDotStim(DotStim):
-    def __init__(self, win, color_coherence, **kwargs):
-        self.color_coherence = color_coherence
+    def __init__(self, win, color_proportion, **kwargs):
+        self.color_proportion = color_proportion
         super(ColorDotStim, self).__init__(win = win, **kwargs)
         
     def draw(self, win=None):
@@ -52,7 +52,7 @@ class ColorDotStim(DotStim):
             # set colors
             color1 = np.append(self.color[0],self.opacity)
             color2 = np.append(self.color[1],self.opacity) 
-            n_color1 = int(self.nDots*self.color_coherence)
+            n_color1 = int(self.nDots*self.color_proportion)
             n_color2 = self.nDots - n_color1
             colors = np.array([color1 for _ in range(n_color1)] + [color2 for _ in range(n_color2)]).astype(ctypes.c_float)
             colors_gl = colors.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
@@ -63,6 +63,7 @@ class ColorDotStim(DotStim):
             GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
             GL.glDrawArrays(GL.GL_POINTS, 0, self.nDots)
             GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+            GL.glDisableClientState(GL.GL_COLOR_ARRAY)
         else:
             # we don't want to do the screen scaling twice so for each dot
             # subtract the screen centre
@@ -75,16 +76,16 @@ class ColorDotStim(DotStim):
             self.element.setDepth(initialDepth)
         GL.glPopMatrix()
 
-    def setColorCoherence(self, val, op='', log=None):
+    def setColorProportion(self, val, op='', log=None):
         """Usually you can use 'stim.attribute = value' syntax instead,
         but use this method if you need to suppress the log message
         """
-        setAttribute(self, 'color_coherence', val, log, op)
+        setAttribute(self, 'color_proportion', val, log, op)
     
-def getDotStim(win, motion_coherence = .5, color_coherence = .5, direction = 0, colors = None):
+def getDotStim(win, motion_coherence = .5, color_proportion = .5, direction = 0, colors = None):
     if colors == None:
         colors = [(1.0,0.0,0.0), (0.0,0.8,0.8)]
-    dots = ColorDotStim(win, color_coherence, nDots = 1000, dotSize = 3, signalDots = 'different', fieldShape = 'circle',
+    dots = ColorDotStim(win, color_proportion, nDots = 500, dotSize = 4, signalDots = 'different', fieldShape = 'circle',
                           fieldSize = 15, speed = .05,  coherence = motion_coherence,  dir = direction,
                           color = colors, opacity = 1)
     return dots
@@ -105,7 +106,7 @@ def play():
                                      monitor='testMonitor', units='deg')
     directions = [i%360 for i in range(720)]
     coherence = [(0.0+i)/(len(directions)-1) for i in range(len(directions))]
-    dots = getDotStim(win, motion_coherence = .5, color_coherence = 0)
+    dots = getDotStim(win, motion_coherence = .5, color_proportion = 0)
     
     display_stim(win,dots,50)
     for d,c in zip(directions,coherence):

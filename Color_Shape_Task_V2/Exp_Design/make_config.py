@@ -19,7 +19,7 @@ class ConfigList(object):
         if self.seed is not None:
             r.seed(self.seed)
             np.random.seed(self.seed)
-        self.distribution = norm
+        self.distribution = distribution
         self.exp_len = exp_len
         self.rp = rp # recursive probability
         self.subjid = subjid
@@ -29,11 +29,14 @@ class ConfigList(object):
             self.distribution_name = distribution.name
         except AttributeError:
             self.distribution_name = 'unknown'
+        self.action_keys = action_keys
         if action_keys == None:
             self.action_keys = ['d','f','j', 'k']
             r.shuffle(self.action_keys)
+        self.args = args
         if args == None:
             self.args = [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
+        self.ts_order = ts_order
         if ts_order == None:
             self.ts_order = [0,1]
             r.shuffle(self.ts_order)
@@ -45,7 +48,6 @@ class ConfigList(object):
         
         # setup
         self.setup_stims()
-        self.setup_trial_states()
     
     def get_config(self, save=True, filey=None):
         if self.trial_list==None:

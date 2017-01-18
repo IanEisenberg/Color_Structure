@@ -30,11 +30,13 @@ class ConfigList(object):
             self.distribution_name = distribution.name
         except AttributeError:
             self.distribution_name = 'unknown'
+        self.action_keys = action_keys
         if action_keys == None:
             self.action_keys = ['right','left','r', 'g']
-            r.shuffle(self.action_keys)
+        self.args = args
         if args == None:
             self.args = [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
+        self.ts_order = ts_order
         if ts_order == None:
             self.ts_order = [0,1]
             r.shuffle(self.ts_order)
@@ -48,7 +50,6 @@ class ConfigList(object):
         self.stim_motions = [0,180]
         # setup
         self.setup_stims()
-        self.setup_trial_states()
     
     def get_config(self, save=True, filey=None):
         if self.trial_list==None:
@@ -171,7 +172,7 @@ class ConfigList(object):
             trial_list += [trial_dict]
 
             trial_count += 1
-            curr_onset += stimulusDuration+FBDuration+FBonset+ITI+r.random()*.5
+            curr_onset += cueDuration+CSI+stimulusDuration+FBDuration+FBonset+ITI+r.random()*.5
         self.trial_list = trial_list
        
 

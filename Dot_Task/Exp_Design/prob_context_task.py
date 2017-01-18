@@ -15,7 +15,7 @@ class probContextTask:
     """
     
     def __init__(self,config_file,subjid,save_dir,verbose=True, 
-                 fullscreen = False, color_coherences = None, 
+                 fullscreen = False, color_proportions = None, 
                  motion_coherences = None, mode = 'task'):
         # set up some variables
         self.stimulusInfo=[]
@@ -39,12 +39,12 @@ class probContextTask:
         self.win=[]
         self.window_dims=[800,600]
         # set up stim variables
-        if color_coherences == None:
-            self.color_coherences = {'easy': .7, 'medium': .4, 'hard': .1}
+        if color_proportions == None:
+            self.color_proportions = {'easy': .8, 'medium': .7, 'hard': .55}
         else:
-            self.color_coherences = color_coherences
+            self.color_proportions = color_proportions
         if motion_coherences == None:
-            self.motion_coherences = {'easy': .7, 'medium': .4, 'hard': .1}
+            self.motion_coherences = {'easy': .5, 'medium': .2, 'hard': .05}
         else:
             self.motion_coherences = motion_coherences
         
@@ -202,7 +202,7 @@ class probContextTask:
         
     def defineStims(self, stim = None, cue = None):
         if stim == None:
-            self.stim=getDotStim(self.win, color_coherence = self.color_coherences['medium'],
+            self.stim=getDotStim(self.win, color_proportion = self.color_proportions['medium'],
                                  motion_coherence = self.motion_coherences['medium'],
                                  direction = self.stim_motions[0],
                                  colors = self.stim_colors)
@@ -212,7 +212,7 @@ class probContextTask:
             height = .2
             ratio = self.win.size[1]/float(self.win.size[0])
             # set up cue
-            self.cue = visual.Polygon(self.win,units = 'norm',radius = (height*ratio/2, height/2),edges = 4,fillColor = 'green')
+            self.cue = visual.Circle(self.win,units = 'norm',radius = (height*ratio/2, height/2),fillColor = 'white')
         else:
             self.cue = cue
             
@@ -222,21 +222,22 @@ class probContextTask:
         self.cue.draw()
         self.win.flip()
         core.wait(duration)
-        self.clearWindow()
-    
+        self.win.flip()
+        
     def presentStim(self, stim, duration = .5, mode = 'practice'):
         """ Used during instructions to present possible stims
         """
         ms,md,cs,ci = [stim[k] for k in ['motionStrength','motionDirection','colorStrength','colorIdentity']]
         # convert two dimensions of color (Strength and direction) to one dimension, percentage of the first color
-        cc = abs(self.color_coherences[cs]-stim['colors'].index(ci))
+        cc = abs(self.color_proportions[cs]-stim['colors'].index(ci))
         if mode == 'practice':
-            self.stim.setColorCoherence(cc)
-            self.stim.Coherence(self.motion_coherences['easy'])
-            self.stim.setDir(stim.motions[stim.md])
+            self.stim.setColorProportion(cc)
+            self.stim.setFieldCoherence(self.motion_coherences['easy'])
+            self.stim.setDir(md)
         elif mode == 'task':
-            self.stim.setColorCoherence(self.color_coherences[cs])
-            self.stim.Coherence(self.motion_coherences[ms])
+            self.stim.setColorProportion(cc)
+            self.stim.setFieldCoherence(self.motion_coherences[ms])
+            self.stim.setDir(md)
         stim_clock = core.Clock()
         while stim_clock.getTime() < duration:
             self.stim.draw()
@@ -244,6 +245,8 @@ class probContextTask:
             keys = event.getKeys(self.action_keys + ['q'],True)
             if len(keys) > 0:
                 break
+        self.win.flip()
+        self.win.flip()
         return keys
             
     def getCorrectChoice(self,stim,ts):
@@ -267,11 +270,11 @@ class probContextTask:
         context = trial['context']
         stim = trial['stim']
         
-        print('Taskset: %s\nMotion: %s\nColor: %s\nCorrectChoice: %s\n' % 
-              (self.tasksets[trial['ts']], stim['motionDirection'], stim['colorIdentity'],
+        print('Taskset: %s\nMotion: %s, Strength: %s\nColor: %s, Strength: %s\nCorrectChoice: %s\n' % 
+              (self.tasksets[trial['ts']], stim['motionDirection'], stim['motionStrength'], stim['colorIdentity'],stim['colorStrength'],
                self.getCorrectChoice(stim,trial['ts'])))
         
-        event.clearEvents()
+        
         trial['actualOnsetTime']=core.getTime() - self.startTime
         trial['stimulusCleared']=0
         trial['response'] = 999
@@ -281,13 +284,15 @@ class probContextTask:
         self.presentCue(context, trial['cueDuration'])
         core.wait(trial['CSI'])
         # present stimulus and get response
-        keys = self.presentStim(stim, trial['stimulusDuration'], mode = 'test')
+        event.clearEvents()
+        keys = self.presentStim(stim, trial['stimulusDuration'], mode = 'task')
         trialClock.reset()
-        # check for quit key
-        if self.quit_key in keys:
-            self.shutDownEarly()
         for key,response_time in keys:
+            # check for quit key
+            if key == self.quit_key:
+                self.shutDownEarly()
             choice = self.action_keys.index(key)
+            print('Choice: %s' % choice)
             trial['response'] = choice
             trial['rt'] = trialClock.getTime()
             # get feedback
