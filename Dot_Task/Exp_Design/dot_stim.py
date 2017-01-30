@@ -1,10 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jan 11 00:29:13 2017
-
-@author: ian
-"""
 from psychopy import visual, core, event
 from psychopy.visual.dot import DotStim
 from psychopy.tools.attributetools import setAttribute
@@ -81,7 +74,146 @@ class ColorDotStim(DotStim):
         but use this method if you need to suppress the log message
         """
         setAttribute(self, 'color_proportion', val, log, op)
-    
+
+        
+class ColorDensityStim(DotStim):
+    def __init__(self, win, color_proportion, outer_proportion, **kwargs):
+        self.color_proportion = color_proportion
+        self.outer_proportion = outer_proportion
+        super(ColorDensityStim, self).__init__(win = win, **kwargs)
+        
+    def _newDotsXY(self, nDots):
+        """Returns a uniform spread of dots, according to the
+        fieldShape and fieldSize
+
+        usage::
+
+            dots = self._newDots(nDots)
+
+        """
+        outer_nDots = int(nDots*self.outer_proportion)
+        # make more dots than we need and only use those within the circle
+        if self.fieldShape == 'circle':
+            inner_dots = []
+            while len(inner_dots)==0:
+                # repeat until we have enough; fetch twice as many as needed
+                new = np.random.uniform(-1, 1, [nDots * 2, 2])
+                inCircle = (np.hypot(new[:, 0], new[:, 1]) < 1)
+                if sum(inCircle) >= nDots:
+                    inner_dots = new[inCircle, :][:nDots, :] * 0.5
+            outer_dots = []
+            while len(outer_dots)==0:
+                # repeat until we have enough; fetch twice as many as needed
+                new = np.random.uniform(-2**.5, 2**.5, [outer_nDots * 4, 2])
+                inCircle = np.logical_and(np.hypot(new[:, 0], new[:, 1]) > 1,
+                            np.hypot(new[:, 0], new[:, 1]) < 2**.5)
+                if sum(inCircle) >= outer_nDots:
+                    outer_dots = new[inCircle, :][:outer_nDots, :] * 0.5
+            dots = np.vstack([inner_dots,outer_dots])
+            return dots
+        else:
+            return np.random.uniform(-0.5, 0.5, [nDots, 2])
+            
+    def _update_dotsXY(self):
+        """The user shouldn't call this - its gets done within draw().
+        """
+
+        # Find dead dots, update positions, get new positions for
+        # dead and out-of-bounds
+        # renew dead dots
+        outer_nDots = int(self.nDots*self.outer_proportion)
+        # make more dots than we need and only use those within the circle
+        if self.fieldShape == 'circle':
+            inner_dots = []
+            while len(inner_dots)==0:
+                # repeat until we have enough; fetch twice as many as needed
+                new = np.random.uniform(-1, 1, [self.nDots * 2, 2])
+                inCircle = (np.hypot(new[:, 0], new[:, 1]) < 1)
+                if sum(inCircle) >= self.nDots:
+                    inner_dots = new[inCircle, :][:self.nDots, :] * 0.5
+            outer_dots = []
+            while len(outer_dots)==0:
+                # repeat until we have enough; fetch twice as many as needed
+                new = np.random.uniform(-2**.5, 2**.5, [outer_nDots * 4, 2])
+                inCircle = np.logical_and(np.hypot(new[:, 0], new[:, 1]) > 1,
+                            np.hypot(new[:, 0], new[:, 1]) < 2**.5)
+                if sum(inCircle) >= outer_nDots:
+                    outer_dots = new[inCircle, :][:outer_nDots, :] * 0.5
+            dots = np.vstack([inner_dots,outer_dots])
+            
+        self._verticesBase = dots
+
+        # update the pixel XY coordinates in pixels (using _BaseVisual class)
+        self._updateVertices()
+        
+    def draw(self, win=None):
+        """Draw the stimulus in its relevant window. You must call
+        this method after every MyWin.flip() if you want the
+        stimulus to appear on that frame and then update the screen again.
+        """
+        if win is None:
+            win = self.win
+        self._selectWindow(win)
+
+        self._update_dotsXY()
+
+        GL.glPushMatrix()  # push before drawing, pop after
+
+        # draw the dots
+        if self.element is None:
+            win.setScale('pix')
+            GL.glPointSize(self.dotSize)
+            
+            # load Null textures into multitexteureARB - they modulate with
+            # glColor
+            GL.glActiveTexture(GL.GL_TEXTURE0)
+            GL.glEnable(GL.GL_TEXTURE_2D)
+            GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
+            GL.glActiveTexture(GL.GL_TEXTURE1)
+            GL.glEnable(GL.GL_TEXTURE_2D)
+            GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
+
+            CPCD = ctypes.POINTER(ctypes.c_double)
+            GL.glVertexPointer(2, GL.GL_DOUBLE, 0,
+                               self.verticesPix.ctypes.data_as(CPCD))
+            # set colors
+            color1 = np.append(self.color[0],self.opacity)
+            color2 = np.append(self.color[1],self.opacity) 
+            total_dots = int(self.nDots*(1+self.outer_proportion))
+            n_color1 = int(total_dots*self.color_proportion)
+            n_color2 = total_dots - n_color1
+            colors = np.array([color1 for _ in range(n_color1)] + [color2 for _ in range(n_color2)]).astype(ctypes.c_float)
+            np.random.shuffle(colors)
+            colors_gl = colors.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+            GL.glColorPointer(4, GL.GL_FLOAT,0, colors_gl)
+            GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+            
+            #back to default code
+            GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+            GL.glDrawArrays(GL.GL_POINTS, 0, total_dots)
+            GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+            GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+        else:
+            # we don't want to do the screen scaling twice so for each dot
+            # subtract the screen centre
+            initialDepth = self.element.depth
+            for pointN in range(0, total_dots):
+                _p = self.verticesPix[pointN, :] + self.fieldPos
+                self.element.setPos(_p)
+                self.element.draw()
+            # reset depth before going to next frame
+            self.element.setDepth(initialDepth)
+        GL.glPopMatrix()
+
+    def setColorProportion(self, val, op='', log=None):
+        """Usually you can use 'stim.attribute = value' syntax instead,
+        but use this method if you need to suppress the log message
+        """
+        setAttribute(self, 'color_proportion', val, log, op)   
+        
+        
+        
+        
 def getDotStim(win, motion_coherence = .5, color_proportion = .5, direction = 0, colors = None):
     if colors == None:
         colors = [(1.0,0.0,0.0), (0.0,0.8,0.8)]
@@ -89,6 +221,36 @@ def getDotStim(win, motion_coherence = .5, color_proportion = .5, direction = 0,
                           fieldSize = 15, speed = .05,  coherence = motion_coherence,  dir = direction,
                           color = colors, opacity = 1)
     return dots
+
+def getDensityStim(win,  color_proportion = .5, outer_proportion = 1.8, colors = None):
+    if colors == None:
+        colors = [(1.0,0.0,0.0), (0.0,0.8,0.8)]
+    dots = ColorDensityStim(win, color_proportion, nDots = 1000, dotSize = 4, signalDots = 'different', fieldShape = 'circle',
+                          fieldSize = 15, outer_proportion = outer_proportion, 
+                          color = colors, opacity = 1)
+    return dots
+    
+    
+    
+    
+def display_stim(win, stim, n):
+    for _ in range(n):
+        stim.draw()
+        win.flip()
+        keys = event.getKeys(keyList=['s', 'l'])
+        if keys != []:
+            break
+    core.wait(.015)
+    
+win = visual.Window([1200,800], color = [-.8,-.8,-.8], allowGUI=False, fullscr=False, 
+                                     monitor='testMonitor', units='deg')    
+outer_proportion = np.random.rand()*.5+.75
+a = getDensityStim(win, outer_proportion = outer_proportion )
+display_stim(win,a,100)
+win.close()
+print(outer_proportion)
+
+
 
 # example display of dot stim
 """
@@ -119,6 +281,5 @@ def play():
     
     win.close()
     return dots
-
 dots = play()
 """
