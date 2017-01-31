@@ -77,9 +77,10 @@ class ColorDotStim(DotStim):
 
         
 class ColorDensityStim(DotStim):
-    def __init__(self, win, color_proportion, outer_proportion, **kwargs):
+    def __init__(self, win, color_proportion, outer_proportion, outer_opacity, **kwargs):
         self.color_proportion = color_proportion
         self.outer_proportion = outer_proportion
+        self.outer_opacity = outer_opacity
         super(ColorDensityStim, self).__init__(win = win, **kwargs)
         
     def _newDotsXY(self, nDots):
@@ -177,13 +178,17 @@ class ColorDensityStim(DotStim):
             GL.glVertexPointer(2, GL.GL_DOUBLE, 0,
                                self.verticesPix.ctypes.data_as(CPCD))
             # set colors
-            color1 = np.append(self.color[0],self.opacity)
-            color2 = np.append(self.color[1],self.opacity) 
+            color1 = self.color[0]
+            color2 = self.color[1]
             total_dots = int(self.nDots*(1+self.outer_proportion))
             n_color1 = int(total_dots*self.color_proportion)
             n_color2 = total_dots - n_color1
-            colors = np.array([color1 for _ in range(n_color1)] + [color2 for _ in range(n_color2)]).astype(ctypes.c_float)
+            colors = np.array([color1 for _ in range(n_color1)] 
+                               + [color2 for _ in range(n_color2)])
             np.random.shuffle(colors)
+            # add opacities:
+            opacity = [self.opacity]*self.nDots+[self.outer_opacity]*(total_dots-self.nDots)
+            colors = np.array([np.append(c,opacity[i]) for i,c in enumerate(colors)]).astype(ctypes.c_float)
             colors_gl = colors.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
             GL.glColorPointer(4, GL.GL_FLOAT,0, colors_gl)
             GL.glEnableClientState(GL.GL_COLOR_ARRAY)
@@ -222,12 +227,15 @@ def getDotStim(win, motion_coherence = .5, color_proportion = .5, direction = 0,
                           color = colors, opacity = 1)
     return dots
 
-def getDensityStim(win,  color_proportion = .5, outer_proportion = 1.8, colors = None):
+def getDensityStim(win, color_proportion=.5, outer_proportion=1.8, 
+                   opacity=1, outer_opacity=1, colors = None):
     if colors == None:
         colors = [(1.0,0.0,0.0), (0.0,0.8,0.8)]
-    dots = ColorDensityStim(win, color_proportion, nDots = 1000, dotSize = 4, signalDots = 'different', fieldShape = 'circle',
-                          fieldSize = 15, outer_proportion = outer_proportion, 
-                          color = colors, opacity = 1)
+    dots = ColorDensityStim(win, color_proportion, nDots = 1000, dotSize = 4, 
+                            signalDots = 'different', fieldShape = 'circle',
+                            fieldSize = 15, color = colors, opacity = opacity,
+                            outer_proportion = outer_proportion, 
+                            outer_opacity = outer_opacity)
     return dots
     
     
@@ -240,15 +248,13 @@ def display_stim(win, stim, n):
         keys = event.getKeys(keyList=['s', 'l'])
         if keys != []:
             break
-    core.wait(.015)
+        core.wait(.05)
     
 win = visual.Window([1200,800], color = [-.8,-.8,-.8], allowGUI=False, fullscr=False, 
                                      monitor='testMonitor', units='deg')    
-outer_proportion = np.random.rand()*.5+.75
-a = getDensityStim(win, outer_proportion = outer_proportion )
-display_stim(win,a,100)
+a = getDensityStim(win, outer_proportion=.6, opacity=.7)
+display_stim(win,a,50)
 win.close()
-print(outer_proportion)
 
 
 
