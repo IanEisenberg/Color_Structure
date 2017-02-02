@@ -358,18 +358,3 @@ def getTwoColorStim(win, color_proportions=[.5,.5],
                         fieldShape='circle',fieldSize=15)
     return dots
         
-def display_stim(win, stim, n):
-    for _ in range(n):
-        stim.draw()
-        win.flip()
-        keys = event.getKeys(keyList=['s', 'l'])
-        if keys != []:
-            break
-        core.wait(.05)
-    
-win = visual.Window([1200,800], color = [-.8,-.8,-.8], allowGUI=False, fullscr=False, 
-                                     monitor='testMonitor', units='deg')    
-a = getTwoColorStim(win, color_proportions = [0,0])
-display_stim(win,a,50)
-win.close()
-      
