@@ -19,7 +19,7 @@ from psychopy.tools.coordinatetools import pol2cart
 import numpy as np
 from numpy import random
 
-"""
+
 class RadialOpticFlow(object):
     def __init__(self, win, maxSpeed, baseColors, radius, **kwargs):
         default_dict = {'nElements': 1000, 'sizes': .005}
@@ -92,7 +92,7 @@ def get_win(screen=0,fullscr=True):
     
 win = get_win(fullscr=True)
 colors = np.array([[0,0,1],[0,1,0]])
-stim = OpticFlow(win,.03, colors, 3, sizes = .008)
+stim = RadialOpticFlow(win,.03, colors, 1, sizes = .008, nElements = 4000)
 color_proportion = 0
 while True:
     keys=event.getKeys()
@@ -109,8 +109,7 @@ while True:
         stim.updateTrialAttributes(dir = 'out')
     stim.draw()
 win.close()
-    
-"""
+
    
 class OpticFlow(object):
     def __init__(self, win, speed, baseColors, **kwargs):
@@ -129,7 +128,7 @@ class OpticFlow(object):
         self.win.units = 'norm'
         # trial attributes
         self.dir = 'out'
-        self.coherence = .5
+        self.coherence = 1
         self.color_proportion = 1
         
         # set up dots in 3d space
@@ -214,7 +213,7 @@ def get_win(screen=0,fullscr=True):
     
 win = get_win(fullscr=True)
 colors = np.array([[0,0,1],[0,1,0]])
-stim = OpticFlow(win,.02, colors, sizes = .008, nElements = 1500)
+stim = OpticFlow(win,.1, colors, sizes = .008, nElements = 60000)
 color_proportion = 0
 while True:
     keys=event.getKeys()
