@@ -29,7 +29,7 @@ def send_message(msg):
 # ****************************************************************************
 
 verbose=True
-fullscr= False
+fullscr= True
 subdata=[]
 practice_on = True
 train_on = True
