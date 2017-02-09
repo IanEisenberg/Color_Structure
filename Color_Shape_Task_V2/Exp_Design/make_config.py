@@ -11,7 +11,7 @@ import numpy as np
 from os import path
 import random as r
 from scipy.stats import norm
-
+from scipy.stats import beta
 
 class ConfigList(object):
     """ 
@@ -24,7 +24,7 @@ class ConfigList(object):
         action_keys (string list) -- customize action keys,
                 None for default ['d','f','j','k']
         distribution (propability distribution)-- distribution pattern e.g. norm
-        args (list of dictionary) -- set arguments, None for default 
+        args (list of dictionary) -- set arguments for distribution, None for default 
                 [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
         exp_len (int)-- time of experiment (defualt 200)
         ts_order (list) -- set custom task set order, None for random selection
@@ -54,7 +54,10 @@ class ConfigList(object):
             r.shuffle(self.action_keys)
         self.args = args
         if args == None:
-            self.args = [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
+            if distribution == norm:
+                self.args = [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
+            if distribution == beta:
+                self.args = [{'alpha':1, 'beta': 3}, {'alpha':3, 'beta': 1}]
         self.ts_order = ts_order
         if ts_order == None:
             self.ts_order = [0,1]
