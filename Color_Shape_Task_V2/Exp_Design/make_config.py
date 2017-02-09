@@ -32,7 +32,7 @@ class ConfigList(object):
     ----------------------------------------------- 
     """
     def __init__(self, taskname='taskname', subjid='000', rp=.9,
-                 action_keys=None, distribution=norm, args=None, exp_len=200,
+                 action_keys=None, distribution=beta, args=None, exp_len=200, #dist changed to beta
                      ts_order=None, seed=None):
         self.seed = seed
         if self.seed is not None:
@@ -57,7 +57,7 @@ class ConfigList(object):
             if distribution == norm:
                 self.args = [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
             if distribution == beta:
-                self.args = [{'alpha':1, 'beta': 3}, {'alpha':3, 'beta': 1}]
+                self.args = [{'a':1, 'b': 3}, {'a':3, 'b': 1}]
         self.ts_order = ts_order
         if ts_order == None:
             self.ts_order = [0,1]
@@ -137,7 +137,7 @@ class ConfigList(object):
 
     def setup_stims(self):
         """
-        sets up stimulus
+        sets up stimulus (id, order, distribution states, trial states)
         """
         self.stim_ids = [(0,2),(0,3),(1,2),(1,3)]
         self.states = {i: {'ts': self.ts_order[i], 'dist_args': self.args[i]} 
