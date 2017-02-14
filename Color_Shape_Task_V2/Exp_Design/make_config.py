@@ -18,13 +18,14 @@ class ConfigList(object):
     This class sets confugurations for a probabilistic task set
     ----------------------------------------------
     Initial Parametes: 
-        taskname (string): name of task
+        taskname (string) -- name of task
         subjid (string) -- id of subject
         rp (double) -- propability of repeatingthe same task (default 0.9)
         action_keys (string list) -- customize action keys,
                 None for default ['d','f','j','k']
         distribution (propability distribution)-- distribution pattern e.g. norm
-        args (list of dictionary) -- set arguments for distribution, None for default 
+        args (list of dictionary) -- set arguments for distribution, 
+            default 
                 [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
         exp_len (int)-- time of experiment (defualt 200)
         ts_order (list) -- set custom task set order, None for random selection
@@ -32,7 +33,7 @@ class ConfigList(object):
     ----------------------------------------------- 
     """
     def __init__(self, taskname='taskname', subjid='000', rp=.9,
-                 action_keys=None, distribution=beta, args=None, exp_len=200, #dist changed to beta
+                 action_keys=None, distribution=norm, args=None, exp_len=200, 
                      ts_order=None, seed=None):
         self.seed = seed
         if self.seed is not None:
@@ -57,7 +58,8 @@ class ConfigList(object):
             if distribution == norm:
                 self.args = [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
             if distribution == beta:
-                self.args = [{'a':1, 'b': 3}, {'a':3, 'b': 1}]
+                self.args = [{'a':2, 'b': 3, 'loc':-1, 'scale':2},
+                             {'a':3, 'b': 2, 'loc':-1, 'scale':2}]
         self.ts_order = ts_order
         if ts_order == None:
             self.ts_order = [0,1]
@@ -198,7 +200,7 @@ class ConfigList(object):
         for trial in range(self.exp_len):
             state = self.states[self.trial_states[trial]]
             dist = self.distribution(**state['dist_args'])
-            #select shap position from distribution and fix them to one of 11 points
+            #select snap position from distribution and fix them to one of 11 points
             binned = -1.1 + np.digitize([dist.rvs()],bin_boundaries)*.2
             context_sample = round(max(-1, min(1, binned[0])),2)
 

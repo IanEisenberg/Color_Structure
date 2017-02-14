@@ -11,7 +11,18 @@ import subprocess
 
 
 class probContextTask:
-    """ class defining a probabilistic context task
+    """ 
+    class defining a probabilistic context task
+    ----------------------
+    Initlial Parameters:
+        config_file (string)-- path to config file (.json) 
+        save_dir (string) -- save directory path
+        verbose (boolean) -- (default True)
+        fullscreen (boolean) -- set True for full screen (default False)
+        mode (string) -- set mode (defalt 'task')
+                        'task'-> no feedback
+                        'practice' -> with feedback
+    ----------------------
     """
     
     def __init__(self,config_file,subjid,save_dir,verbose=True, 
@@ -82,6 +93,12 @@ class probContextTask:
         return json.dumps(init_dict)
     
     def writeToLog(self,msg):
+        """
+        write message to log
+        ------------------
+        Parameter:
+            msg (string) -- message
+        """
         f=open(os.path.join(self.save_dir,'Log',self.logfilename),'a')
         f.write(msg)
         f.write('\n')
