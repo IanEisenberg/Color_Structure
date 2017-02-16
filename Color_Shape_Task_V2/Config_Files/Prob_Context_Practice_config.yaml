@@ -7,10 +7,10 @@
   rp: 0.9
   states:
     0:
-      dist_args: &id001 {loc: -0.3, scale: 0.37}
+      dist_args: &id001 {a: 21, b: 20}
       ts: 0
     1:
-      dist_args: &id006 {loc: 0.3, scale: 0.37}
+      dist_args: &id006 {a: 20, b: 21}
       ts: 1
   stim_ids:
   - &id004 !!python/tuple [0, 2]
@@ -24,7 +24,7 @@
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 2
@@ -32,14 +32,14 @@
   reward_amount: 1
   state: 0
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 1
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 5.386686407586721
@@ -47,14 +47,14 @@
   reward_amount: 1
   state: 0
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 2
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 8.639922562250936
@@ -62,14 +62,14 @@
   reward_amount: 1
   state: 0
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 3
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 11.663968443760155
@@ -77,14 +77,14 @@
   reward_amount: 1
   state: 0
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 4
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 15.058112598441662
@@ -92,14 +92,14 @@
   reward_amount: 1
   state: 0
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 5
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.7
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 18.30587379801183
@@ -107,14 +107,14 @@
   reward_amount: 1
   state: 0
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 6
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.3
+  context: 0.7
   displayFB: true
   distribution_args: *id001
   onset: 21.69517896418691
@@ -122,14 +122,14 @@
   reward_amount: 1
   state: 0
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 7
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 24.858542388058986
@@ -137,14 +137,14 @@
   reward_amount: 1
   state: 0
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 8
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 28.073404557989825
@@ -152,14 +152,14 @@
   reward_amount: 1
   state: 0
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 9
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 31.078948438490208
@@ -167,14 +167,14 @@
   reward_amount: 1
   state: 0
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 10
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.5
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 34.4553841897717
@@ -182,14 +182,14 @@
   reward_amount: 1
   state: 0
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 11
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 37.9108695352637
@@ -197,248 +197,8 @@
   reward_amount: 1
   state: 0
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 12
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -0.3
-  displayFB: true
-  distribution_args: *id001
-  onset: 40.988386683163206
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id003
-  task_distributions: norm
-  trial_count: 13
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 0.1
-  displayFB: true
-  distribution_args: *id001
-  onset: 44.19547571540908
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id005
-  task_distributions: norm
-  trial_count: 14
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 0.1
-  displayFB: true
-  distribution_args: *id001
-  onset: 47.574066807998754
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id002
-  task_distributions: norm
-  trial_count: 15
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -0.7
-  displayFB: true
-  distribution_args: *id001
-  onset: 50.960867023015716
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id003
-  task_distributions: norm
-  trial_count: 16
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -0.5
-  displayFB: true
-  distribution_args: *id001
-  onset: 54.236843224731416
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id004
-  task_distributions: norm
-  trial_count: 17
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -0.5
-  displayFB: true
-  distribution_args: *id001
-  onset: 57.43935572804892
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id002
-  task_distributions: norm
-  trial_count: 18
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -0.3
-  displayFB: true
-  distribution_args: *id001
-  onset: 60.62324582641611
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id004
-  task_distributions: norm
-  trial_count: 19
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -0.1
-  displayFB: true
-  distribution_args: *id001
-  onset: 64.04515345339591
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id002
-  task_distributions: norm
-  trial_count: 20
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -0.3
-  displayFB: true
-  distribution_args: *id001
-  onset: 67.09319926504016
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id004
-  task_distributions: norm
-  trial_count: 21
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -1.0
-  displayFB: true
-  distribution_args: *id001
-  onset: 70.4839571025434
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id004
-  task_distributions: norm
-  trial_count: 22
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -0.3
-  displayFB: true
-  distribution_args: *id001
-  onset: 73.55402794593712
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id002
-  task_distributions: norm
-  trial_count: 23
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -1.0
-  displayFB: true
-  distribution_args: *id001
-  onset: 76.6006195437542
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id003
-  task_distributions: norm
-  trial_count: 24
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -0.3
-  displayFB: true
-  distribution_args: *id001
-  onset: 79.60828364166314
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id005
-  task_distributions: norm
-  trial_count: 25
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -0.5
-  displayFB: true
-  distribution_args: *id001
-  onset: 82.8568297237918
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id003
-  task_distributions: norm
-  trial_count: 26
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -0.3
-  displayFB: true
-  distribution_args: *id001
-  onset: 86.03018478427244
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id002
-  task_distributions: norm
-  trial_count: 27
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 0.1
-  displayFB: true
-  distribution_args: *id001
-  onset: 89.32797970726273
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id003
-  task_distributions: norm
-  trial_count: 28
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
@@ -447,19 +207,259 @@
   context: 0.3
   displayFB: true
   distribution_args: *id001
+  onset: 40.988386683163206
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id003
+  task_distributions: beta
+  trial_count: 13
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 44.19547571540908
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id005
+  task_distributions: beta
+  trial_count: 14
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 47.574066807998754
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id002
+  task_distributions: beta
+  trial_count: 15
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 50.960867023015716
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id003
+  task_distributions: beta
+  trial_count: 16
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 54.236843224731416
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id004
+  task_distributions: beta
+  trial_count: 17
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 57.43935572804892
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id002
+  task_distributions: beta
+  trial_count: 18
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 60.62324582641611
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id004
+  task_distributions: beta
+  trial_count: 19
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 64.04515345339591
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id002
+  task_distributions: beta
+  trial_count: 20
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.3
+  displayFB: true
+  distribution_args: *id001
+  onset: 67.09319926504016
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id004
+  task_distributions: beta
+  trial_count: 21
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 70.4839571025434
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id004
+  task_distributions: beta
+  trial_count: 22
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 73.55402794593712
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id002
+  task_distributions: beta
+  trial_count: 23
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 76.6006195437542
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id003
+  task_distributions: beta
+  trial_count: 24
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 79.60828364166314
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id005
+  task_distributions: beta
+  trial_count: 25
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 82.8568297237918
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id003
+  task_distributions: beta
+  trial_count: 26
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 86.03018478427244
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id002
+  task_distributions: beta
+  trial_count: 27
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 89.32797970726273
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id003
+  task_distributions: beta
+  trial_count: 28
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
   onset: 92.52506565635849
   punishment_amount: 0
   reward_amount: 1
   state: 0
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 29
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 95.87569058758291
@@ -467,14 +467,14 @@
   reward_amount: 1
   state: 0
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 30
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 99.28146312208428
@@ -482,14 +482,14 @@
   reward_amount: 1
   state: 0
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 31
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 102.50590933052501
@@ -497,14 +497,14 @@
   reward_amount: 1
   state: 0
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 32
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 105.95062495905479
@@ -512,14 +512,14 @@
   reward_amount: 1
   state: 0
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 33
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.3
   displayFB: true
   distribution_args: *id001
   onset: 109.3852135636261
@@ -527,14 +527,14 @@
   reward_amount: 1
   state: 0
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 34
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 112.48885257283783
@@ -542,14 +542,14 @@
   reward_amount: 1
   state: 0
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 35
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.3
   displayFB: true
   distribution_args: *id001
   onset: 115.54826868200314
@@ -557,14 +557,14 @@
   reward_amount: 1
   state: 0
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 36
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.7
+  context: 0.3
   displayFB: true
   distribution_args: *id001
   onset: 118.97317740999748
@@ -572,14 +572,14 @@
   reward_amount: 1
   state: 0
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 37
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.7
   displayFB: true
   distribution_args: *id001
   onset: 122.22358553591424
@@ -587,14 +587,14 @@
   reward_amount: 1
   state: 0
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 38
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -1.0
+  context: 0.7
   displayFB: true
   distribution_args: *id001
   onset: 125.68886755112221
@@ -602,14 +602,14 @@
   reward_amount: 1
   state: 0
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 39
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.9
+  context: 0.7
   displayFB: true
   distribution_args: *id001
   onset: 128.7347696993842
@@ -617,14 +617,14 @@
   reward_amount: 1
   state: 0
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 40
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 131.8271826892312
@@ -632,7 +632,7 @@
   reward_amount: 1
   state: 1
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 41
   ts: 1
 - FBDuration: 0.5
@@ -647,14 +647,14 @@
   reward_amount: 1
   state: 1
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 42
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 138.27051455112644
@@ -662,14 +662,14 @@
   reward_amount: 1
   state: 1
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 43
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.3
+  context: 0.3
   displayFB: true
   distribution_args: *id006
   onset: 141.50151112369483
@@ -677,14 +677,14 @@
   reward_amount: 1
   state: 1
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 44
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 144.92646823469494
@@ -692,14 +692,14 @@
   reward_amount: 1
   state: 1
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 45
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 148.2892637448208
@@ -707,14 +707,14 @@
   reward_amount: 1
   state: 1
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 46
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 151.33405239285898
@@ -722,14 +722,14 @@
   reward_amount: 1
   state: 1
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 47
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 154.53148679433238
@@ -737,14 +737,14 @@
   reward_amount: 1
   state: 1
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 48
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 157.731719237413
@@ -752,7 +752,7 @@
   reward_amount: 1
   state: 1
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 49
   ts: 1
 - FBDuration: 0.5
@@ -767,14 +767,14 @@
   reward_amount: 1
   state: 1
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 50
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 164.28430362024497
@@ -782,14 +782,14 @@
   reward_amount: 1
   state: 1
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 51
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 167.67020557196676
@@ -797,14 +797,14 @@
   reward_amount: 1
   state: 1
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 52
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 170.8880561131178
@@ -812,7 +812,7 @@
   reward_amount: 1
   state: 1
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 53
   ts: 1
 - FBDuration: 0.5
@@ -827,7 +827,7 @@
   reward_amount: 1
   state: 1
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 54
   ts: 1
 - FBDuration: 0.5
@@ -842,7 +842,7 @@
   reward_amount: 1
   state: 1
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 55
   ts: 1
 - FBDuration: 0.5
@@ -857,14 +857,14 @@
   reward_amount: 1
   state: 1
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 56
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 183.9503050566484
@@ -872,14 +872,14 @@
   reward_amount: 1
   state: 1
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 57
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 187.22748700328015
@@ -887,7 +887,7 @@
   reward_amount: 1
   state: 1
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 58
   ts: 1
 - FBDuration: 0.5
@@ -902,14 +902,14 @@
   reward_amount: 1
   state: 1
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 59
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.5
+  context: 0.3
   displayFB: true
   distribution_args: *id006
   onset: 193.7054850253623
@@ -917,7 +917,7 @@
   reward_amount: 1
   state: 1
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 60
   ts: 1
 - FBDuration: 0.5
@@ -932,113 +932,8 @@
   reward_amount: 1
   state: 1
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 61
-  ts: 1
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 0.3
-  displayFB: true
-  distribution_args: *id006
-  onset: 200.4468128065904
-  punishment_amount: 0
-  reward_amount: 1
-  state: 1
-  stim: *id004
-  task_distributions: norm
-  trial_count: 62
-  ts: 1
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 0.9
-  displayFB: true
-  distribution_args: *id006
-  onset: 203.7473058722077
-  punishment_amount: 0
-  reward_amount: 1
-  state: 1
-  stim: *id004
-  task_distributions: norm
-  trial_count: 63
-  ts: 1
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 0.9
-  displayFB: true
-  distribution_args: *id006
-  onset: 207.02733739133384
-  punishment_amount: 0
-  reward_amount: 1
-  state: 1
-  stim: *id004
-  task_distributions: norm
-  trial_count: 64
-  ts: 1
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 0.3
-  displayFB: true
-  distribution_args: *id006
-  onset: 210.0863140007842
-  punishment_amount: 0
-  reward_amount: 1
-  state: 1
-  stim: *id003
-  task_distributions: norm
-  trial_count: 65
-  ts: 1
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 0.7
-  displayFB: true
-  distribution_args: *id006
-  onset: 213.33472867438158
-  punishment_amount: 0
-  reward_amount: 1
-  state: 1
-  stim: *id003
-  task_distributions: norm
-  trial_count: 66
-  ts: 1
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 0.3
-  displayFB: true
-  distribution_args: *id006
-  onset: 216.62299688556206
-  punishment_amount: 0
-  reward_amount: 1
-  state: 1
-  stim: *id005
-  task_distributions: norm
-  trial_count: 67
-  ts: 1
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 0.3
-  displayFB: true
-  distribution_args: *id006
-  onset: 220.04813211461092
-  punishment_amount: 0
-  reward_amount: 1
-  state: 1
-  stim: *id002
-  task_distributions: norm
-  trial_count: 68
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
@@ -1047,19 +942,124 @@
   context: 0.5
   displayFB: true
   distribution_args: *id006
+  onset: 200.4468128065904
+  punishment_amount: 0
+  reward_amount: 1
+  state: 1
+  stim: *id004
+  task_distributions: beta
+  trial_count: 62
+  ts: 1
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id006
+  onset: 203.7473058722077
+  punishment_amount: 0
+  reward_amount: 1
+  state: 1
+  stim: *id004
+  task_distributions: beta
+  trial_count: 63
+  ts: 1
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id006
+  onset: 207.02733739133384
+  punishment_amount: 0
+  reward_amount: 1
+  state: 1
+  stim: *id004
+  task_distributions: beta
+  trial_count: 64
+  ts: 1
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id006
+  onset: 210.0863140007842
+  punishment_amount: 0
+  reward_amount: 1
+  state: 1
+  stim: *id003
+  task_distributions: beta
+  trial_count: 65
+  ts: 1
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id006
+  onset: 213.33472867438158
+  punishment_amount: 0
+  reward_amount: 1
+  state: 1
+  stim: *id003
+  task_distributions: beta
+  trial_count: 66
+  ts: 1
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id006
+  onset: 216.62299688556206
+  punishment_amount: 0
+  reward_amount: 1
+  state: 1
+  stim: *id005
+  task_distributions: beta
+  trial_count: 67
+  ts: 1
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id006
+  onset: 220.04813211461092
+  punishment_amount: 0
+  reward_amount: 1
+  state: 1
+  stim: *id002
+  task_distributions: beta
+  trial_count: 68
+  ts: 1
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.7
+  displayFB: true
+  distribution_args: *id006
   onset: 223.52572806445252
   punishment_amount: 0
   reward_amount: 1
   state: 1
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 69
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 226.58496150783589
@@ -1067,7 +1067,7 @@
   reward_amount: 1
   state: 1
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 70
   ts: 1
 - FBDuration: 0.5
@@ -1082,14 +1082,14 @@
   reward_amount: 1
   state: 1
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 71
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 232.86305586448614
@@ -1097,14 +1097,14 @@
   reward_amount: 1
   state: 1
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 72
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 235.9447099977846
@@ -1112,14 +1112,14 @@
   reward_amount: 1
   state: 1
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 73
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 1.0
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 239.41514947346005
@@ -1127,14 +1127,14 @@
   reward_amount: 1
   state: 1
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 74
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 242.67216099678674
@@ -1142,14 +1142,14 @@
   reward_amount: 1
   state: 1
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 75
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.1
+  context: 0.7
   displayFB: true
   distribution_args: *id006
   onset: 245.67406748727836
@@ -1157,14 +1157,14 @@
   reward_amount: 1
   state: 1
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 76
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 248.94103852443249
@@ -1172,14 +1172,14 @@
   reward_amount: 1
   state: 1
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 77
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.1
+  context: 0.7
   displayFB: true
   distribution_args: *id006
   onset: 252.16647930851315
@@ -1187,14 +1187,14 @@
   reward_amount: 1
   state: 1
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 78
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.5
+  context: 0.7
   displayFB: true
   distribution_args: *id006
   onset: 255.3329912745374
@@ -1202,14 +1202,14 @@
   reward_amount: 1
   state: 1
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 79
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 258.77924812800705
@@ -1217,14 +1217,14 @@
   reward_amount: 1
   state: 1
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 80
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 261.9218552131089
@@ -1232,14 +1232,14 @@
   reward_amount: 1
   state: 0
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 81
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.3
+  context: 0.3
   displayFB: true
   distribution_args: *id001
   onset: 265.1361277992803
@@ -1247,14 +1247,14 @@
   reward_amount: 1
   state: 0
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 82
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.5
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 268.51507294492933
@@ -1262,14 +1262,14 @@
   reward_amount: 1
   state: 0
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 83
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.5
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 271.6690877852602
@@ -1277,14 +1277,14 @@
   reward_amount: 1
   state: 0
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 84
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 275.07065418917324
@@ -1292,14 +1292,14 @@
   reward_amount: 1
   state: 0
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 85
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.7
   displayFB: true
   distribution_args: *id001
   onset: 278.47394860252166
@@ -1307,14 +1307,14 @@
   reward_amount: 1
   state: 0
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 86
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.7
+  context: 0.3
   displayFB: true
   distribution_args: *id001
   onset: 281.4871810090132
@@ -1322,14 +1322,14 @@
   reward_amount: 1
   state: 0
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 87
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.5
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 284.74234608635624
@@ -1337,14 +1337,14 @@
   reward_amount: 1
   state: 0
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 88
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 287.9911422250862
@@ -1352,14 +1352,14 @@
   reward_amount: 1
   state: 0
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 89
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 291.3895969455357
@@ -1367,14 +1367,14 @@
   reward_amount: 1
   state: 0
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 90
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 294.4698424770236
@@ -1382,14 +1382,14 @@
   reward_amount: 1
   state: 0
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 91
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 297.9347376534938
@@ -1397,14 +1397,14 @@
   reward_amount: 1
   state: 0
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 92
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 301.15781656012126
@@ -1412,14 +1412,14 @@
   reward_amount: 1
   state: 0
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 93
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 304.37866077122504
@@ -1427,14 +1427,14 @@
   reward_amount: 1
   state: 1
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 94
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 307.85613359857996
@@ -1442,14 +1442,14 @@
   reward_amount: 1
   state: 1
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 95
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 310.90876939828865
@@ -1457,14 +1457,14 @@
   reward_amount: 1
   state: 1
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 96
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.3
+  context: 0.3
   displayFB: true
   distribution_args: *id006
   onset: 314.03408163036636
@@ -1472,14 +1472,14 @@
   reward_amount: 1
   state: 1
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 97
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 1.0
+  context: 0.3
   displayFB: true
   distribution_args: *id006
   onset: 317.4657816572119
@@ -1487,14 +1487,14 @@
   reward_amount: 1
   state: 1
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 98
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 320.59448856677903
@@ -1502,14 +1502,14 @@
   reward_amount: 1
   state: 1
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 99
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.5
+  context: 0.7
   displayFB: true
   distribution_args: *id006
   onset: 323.8743247880449
@@ -1517,14 +1517,14 @@
   reward_amount: 1
   state: 1
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 100
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 327.32330620285506
@@ -1532,14 +1532,14 @@
   reward_amount: 1
   state: 0
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 101
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.7
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 330.5140622408419
@@ -1547,14 +1547,14 @@
   reward_amount: 1
   state: 0
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 102
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.3
+  context: 0.5
   displayFB: true
   distribution_args: *id001
   onset: 333.91619686130684
@@ -1562,14 +1562,14 @@
   reward_amount: 1
   state: 0
   stim: *id003
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 103
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: -0.7
+  context: 0.7
   displayFB: true
   distribution_args: *id001
   onset: 337.0939593696755
@@ -1577,143 +1577,8 @@
   reward_amount: 1
   state: 0
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 104
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 1.0
-  displayFB: true
-  distribution_args: *id006
-  onset: 340.1078487047394
-  punishment_amount: 0
-  reward_amount: 1
-  state: 1
-  stim: *id002
-  task_distributions: norm
-  trial_count: 105
-  ts: 1
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -0.1
-  displayFB: true
-  distribution_args: *id006
-  onset: 343.39702989655154
-  punishment_amount: 0
-  reward_amount: 1
-  state: 1
-  stim: *id004
-  task_distributions: norm
-  trial_count: 106
-  ts: 1
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 0.9
-  displayFB: true
-  distribution_args: *id006
-  onset: 346.87400776570547
-  punishment_amount: 0
-  reward_amount: 1
-  state: 1
-  stim: *id002
-  task_distributions: norm
-  trial_count: 107
-  ts: 1
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 0.7
-  displayFB: true
-  distribution_args: *id006
-  onset: 350.00276699063966
-  punishment_amount: 0
-  reward_amount: 1
-  state: 1
-  stim: *id004
-  task_distributions: norm
-  trial_count: 108
-  ts: 1
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 0.9
-  displayFB: true
-  distribution_args: *id006
-  onset: 353.19386961626975
-  punishment_amount: 0
-  reward_amount: 1
-  state: 1
-  stim: *id005
-  task_distributions: norm
-  trial_count: 109
-  ts: 1
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 0.3
-  displayFB: true
-  distribution_args: *id006
-  onset: 356.4569727519041
-  punishment_amount: 0
-  reward_amount: 1
-  state: 1
-  stim: *id005
-  task_distributions: norm
-  trial_count: 110
-  ts: 1
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -0.3
-  displayFB: true
-  distribution_args: *id001
-  onset: 359.93897574881555
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id002
-  task_distributions: norm
-  trial_count: 111
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: 0.3
-  displayFB: true
-  distribution_args: *id001
-  onset: 362.9834572152093
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id002
-  task_distributions: norm
-  trial_count: 112
-  ts: 0
-- FBDuration: 0.5
-  FBonset: 0.5
-  ITI: 0.5
-  StimulusDuration: 1.5
-  context: -0.1
-  displayFB: true
-  distribution_args: *id001
-  onset: 366.44100263796355
-  punishment_amount: 0
-  reward_amount: 1
-  state: 0
-  stim: *id003
-  task_distributions: norm
-  trial_count: 113
   ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
@@ -1722,14 +1587,134 @@
   context: 0.5
   displayFB: true
   distribution_args: *id006
-  onset: 369.5977816693577
+  onset: 340.1078487047394
   punishment_amount: 0
   reward_amount: 1
   state: 1
-  stim: *id003
-  task_distributions: norm
-  trial_count: 114
+  stim: *id002
+  task_distributions: beta
+  trial_count: 105
   ts: 1
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id006
+  onset: 343.39702989655154
+  punishment_amount: 0
+  reward_amount: 1
+  state: 1
+  stim: *id004
+  task_distributions: beta
+  trial_count: 106
+  ts: 1
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id006
+  onset: 346.87400776570547
+  punishment_amount: 0
+  reward_amount: 1
+  state: 1
+  stim: *id002
+  task_distributions: beta
+  trial_count: 107
+  ts: 1
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id006
+  onset: 350.00276699063966
+  punishment_amount: 0
+  reward_amount: 1
+  state: 1
+  stim: *id004
+  task_distributions: beta
+  trial_count: 108
+  ts: 1
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id006
+  onset: 353.19386961626975
+  punishment_amount: 0
+  reward_amount: 1
+  state: 1
+  stim: *id005
+  task_distributions: beta
+  trial_count: 109
+  ts: 1
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.7
+  displayFB: true
+  distribution_args: *id006
+  onset: 356.4569727519041
+  punishment_amount: 0
+  reward_amount: 1
+  state: 1
+  stim: *id005
+  task_distributions: beta
+  trial_count: 110
+  ts: 1
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 359.93897574881555
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id002
+  task_distributions: beta
+  trial_count: 111
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 362.9834572152093
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id002
+  task_distributions: beta
+  trial_count: 112
+  ts: 0
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id001
+  onset: 366.44100263796355
+  punishment_amount: 0
+  reward_amount: 1
+  state: 0
+  stim: *id003
+  task_distributions: beta
+  trial_count: 113
+  ts: 0
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
@@ -1737,19 +1722,34 @@
   context: 0.3
   displayFB: true
   distribution_args: *id006
+  onset: 369.5977816693577
+  punishment_amount: 0
+  reward_amount: 1
+  state: 1
+  stim: *id003
+  task_distributions: beta
+  trial_count: 114
+  ts: 1
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 0.5
+  StimulusDuration: 1.5
+  context: 0.5
+  displayFB: true
+  distribution_args: *id006
   onset: 372.6165605137133
   punishment_amount: 0
   reward_amount: 1
   state: 1
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 115
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 376.1011955247965
@@ -1757,14 +1757,14 @@
   reward_amount: 1
   state: 1
   stim: *id005
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 116
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 379.4555556813324
@@ -1772,14 +1772,14 @@
   reward_amount: 1
   state: 1
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 117
   ts: 1
 - FBDuration: 0.5
   FBonset: 0.5
   ITI: 0.5
   StimulusDuration: 1.5
-  context: 0.1
+  context: 0.5
   displayFB: true
   distribution_args: *id006
   onset: 382.6584468575347
@@ -1787,7 +1787,7 @@
   reward_amount: 1
   state: 1
   stim: *id004
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 118
   ts: 1
 - FBDuration: 0.5
@@ -1802,7 +1802,7 @@
   reward_amount: 1
   state: 1
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 119
   ts: 1
 - FBDuration: 0.5
@@ -1817,6 +1817,6 @@
   reward_amount: 1
   state: 1
   stim: *id002
-  task_distributions: norm
+  task_distributions: beta
   trial_count: 120
   ts: 1

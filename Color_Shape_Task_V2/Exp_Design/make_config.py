@@ -21,15 +21,14 @@ class ConfigList(object):
         taskname (string) -- name of task
         subjid (string) -- id of subject
         rp (double) -- propability of repeatingthe same task (default 0.9)
-        action_keys (string list) -- customize action keys,
-                None for default ['d','f','j','k']
-        distribution (propability distribution)-- distribution pattern e.g. norm
+        action_keys (string list) -- customize action keys (default ['d','f','j','k'])
+        distribution (propability distribution)-- distribution pattern (default norm)
         args (list of dictionary) -- set arguments for distribution, 
-            default 
-                [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
-        exp_len (int)-- time of experiment (defualt 200)
-        ts_order (list) -- set custom task set order, None for random selection
-        seed (int) -- set seed,  None to disable
+            (default [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}])
+        exp_len (int)-- time of experiment (default 200)
+        ts_order (list) -- set custom task set order, None for random selection 
+                    (default random)
+        seed (int) -- set seed,  (defualt None)
     ----------------------------------------------- 
     """
     def __init__(self, taskname='taskname', subjid='000', rp=.9,

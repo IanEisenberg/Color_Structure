@@ -10,6 +10,8 @@ from test_bot import test_bot
 import glob
 import os
 from twilio.rest import TwilioRestClient
+from scipy.stats import beta
+import util
 
 # ****************************************************************************
 # Helper Function
@@ -78,24 +80,28 @@ except ValueError:
 # ****************************************************************************
 # set up config files
 # ****************************************************************************
-
+# set distributions for beta plot
+beta_args = util.setBeta()
 # practice
 practice_config_file = '../Config_Files/Prob_Context_Practice_config.yaml'
 if not os.path.exists(practice_config_file):
-    practice_config = ConfigList(taskname = trainname + '_Practice', exp_len = 120, seed = 1939)
+    practice_config = ConfigList(taskname = trainname + '_Practice', 
+                                 distribution = beta, args = beta_args, exp_len = 120, seed = 1939)
     # ensure the first 40 trials are TS1 and second 40 are TS2
     practice_config.trial_states[0:40] = [0]*40; practice_config.trial_states[40:80] = [1]*40
     practice_config_file = practice_config.get_config(filey = practice_config_file)
 
 # train 
 if train_on:
-    train_config = ConfigList(taskname = trainname, subjid = subject_code, exp_len = train_len, ts_order = ts_order, rp = recursive_p)
+    train_config = ConfigList(taskname = trainname, subjid = subject_code,
+                              rp = recursive_p, distribution = beta, args =beta_args,
+                              exp_len = train_len, ts_order = ts_order)
     train_config_file = train_config.get_config()
 else:
     train_config_file = glob.glob('../Config_Files/*Context_' +subject_code +'*yaml')[-1]
     
 test_config = ConfigList()
-test_config.load_config_settings(train_config_file, taskname=train_config.taskname+'_test', exp_len=test_len)
+test_config.load_config_settings(train_config_file,taskname=train_config.taskname+'_test', exp_len=test_len)
 test_config.setup_trial_list(displayFB = False)
 test_config_file = test_config.get_config()
 
