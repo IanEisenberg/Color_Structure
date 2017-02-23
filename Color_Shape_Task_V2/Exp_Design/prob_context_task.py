@@ -98,6 +98,7 @@ class probContextTask:
         ------------------
         Parameter:
             msg (string) -- message
+        ------------------
         """
         f=open(os.path.join(self.save_dir,'Log',self.logfilename),'a')
         f.write(msg)
