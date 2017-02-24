@@ -11,13 +11,13 @@ class test_bot:
     """class defining a test bot based on a psych task
     """
     
-    def __init__(self, config_file, mode = "one-shot"):
+    def __init__(self, config_file, dist=norm, mode = "one-shot"):
         config_file = yaml.load(open(config_file,'r'))
         self.taskinfo = config_file[0]
         for k in self.taskinfo.iterkeys():
                     self.__dict__[k]=self.taskinfo[k]
         #shadegenerators for each state
-        self.state_dis = [norm(**state['dist_args']) for state in self.taskinfo['states'].values()] 
+        self.state_dis = [dist(**state['dist_args']) for state in self.taskinfo['states'].values()] 
         self.TS_prior = [.5,.5]
         self.posterior = [.5, .5]
         self.mode = mode

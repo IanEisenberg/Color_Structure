@@ -6,6 +6,7 @@ from psychopy import core, event
 import webbrowser
 from prob_context_task import probContextTask
 from make_config import ConfigList
+from scipy.stats import norm
 from test_bot import test_bot
 import glob
 import os
@@ -29,12 +30,12 @@ def send_message(msg):
 # ****************************************************************************
 
 verbose=True
-fullscr= True
+fullscr= False
 subdata=[]
 practice_on = True
 train_on = True
 test_on = True
-bot_on = False
+bot_on = True
 bot_mode = "ignore_base" #other for optimal
 home = os.getenv('HOME') 
 save_dir = '../Data' 
@@ -106,8 +107,8 @@ test=probContextTask(test_config_file,subject_code, save_dir=save_dir, fullscree
 
 # setup bot if on
 if bot_on == True:
-    train.setBot(bot = test_bot(train_config_file, mode = bot_mode), mode = "full")
-    test.setBot(bot = test_bot(test_config_file, mode = bot_mode), mode = "full")
+    train.setBot(bot = test_bot(train_config_file, dist=norm, mode = bot_mode), mode = "full")
+    test.setBot(bot = test_bot(test_config_file, dist=norm, mode = bot_mode), mode = "full")
 
 
 # ****************************************************************************
