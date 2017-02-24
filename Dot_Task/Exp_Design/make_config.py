@@ -46,8 +46,15 @@ class ConfigList(object):
         self.trial_states = None
         self.trial_list = None
         # stim attributes
-        self.stim_colors = [(1.0,0.0,0.0), (0.0,0.8,0.8)]
-        self.stim_motions = [0,180]
+        self.stim_colors = np.array([[1,0,0],[0,0,1]])
+        self.stim_motions = ['in','out']
+        # from easy to hard
+        # each tuple determines the amount of change needed for that difficulty
+        # level. There are two changes for each difficulty level which determine
+        # which part of the color space the trial is on
+        self.color_difficulties = [[(0,.2),(.8,1)], [(0,.15),(.85,1)], [(0,.1),(.9,1)]]
+        # motion coherence
+        self.motion_difficulties = [.8,.5,.2]
         # setup
         self.setup_stims()
     
@@ -68,10 +75,9 @@ class ConfigList(object):
           'exp_len': self.exp_len,
           'stim_ids': self.stim_ids,
           'ts_order': self.ts_order,
-          'stim_colors': self.stim_colors,
+          'stim_colors': self.stim_colors.tolist(),
           'stim_motions': self.stim_motions
         }
-        
         to_save = self.trial_list
         to_save.insert(0,initial_params)
         if save==True:
@@ -90,16 +96,28 @@ class ConfigList(object):
         configuration = config_file[0]
         self.__dict__.update(configuration)
         self.__dict__.update(kwargs)
+        self.stim_colors = np.array([np.array(x) for x in self.stim_colors])
         # setup
         self.setup_stims()
         self.setup_trial_states()
         
     def setup_stims(self):
         stim_ids = []
-        difficulties = ['easy', 'medium', 'hard']
-        for ms,md,cs,ci in itertools.product(*[difficulties,self.stim_motions, difficulties,self.stim_colors]):
-            stim_ids.append({'motionStrength': ms, 'motionDirection': md, 'colorStrength': cs, 'colorIdentity': ci,
-                             'colors': self.stim_colors, 'motions': self.stim_motions})
+        for motion_difficulty in self.motion_difficulties:
+            for direction in self.stim_motions:
+                for color_difficulty in self.color_difficulties:
+                    for color_space in color_difficulty:
+                        colors = [self.stim_colors[0]*color_space[0] + 
+                                self.stim_colors[1]*(1-color_space[0]),
+                                self.stim_colors[0]*color_space[1] + 
+                                self.stim_colors[1]*(1-color_space[1])]
+                        np.random.shuffle(colors)
+                        stim_ids.append({'motionStrength': motion_difficulty, 
+                                         'motionDirection': direction, 
+                                         'colorStrength': color_space, 
+                                         'colorStart': list(colors[0]),
+                                         'colorEnd': list(colors[1])})
+
         self.stim_ids = stim_ids
         self.states = {i: {'ts': self.ts_order[i], 'dist_args': self.args[i]} for i in range(len(self.ts_order))}
         self.setup_trial_states()

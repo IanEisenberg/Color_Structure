@@ -20,7 +20,7 @@ import numpy as np
 from numpy import random
    
 class OpticFlow(object):
-    def __init__(self, win, speed, baseColors, **kwargs):
+    def __init__(self, win, speed, color, **kwargs):
         # arguments passed to ElementArray
         default_dict = {'nElements': 1000, 'sizes': .005}
         for key in default_dict:
@@ -31,14 +31,12 @@ class OpticFlow(object):
         self.__dict__.update(kwargs)
         # OpticFlow specific arguments
         self.speed = speed
-        self.baseColors = np.array(baseColors)
         self.win = win
         self.win.units = 'norm'
         # trial attributes
         self.dir = 'out'
         self.coherence = .5
-        self.color_proportion = 1
-        
+        self.color = color
         # set up dots in 3d space
         # set up transformation matrices
         self.T = np.array([0,0,speed])
@@ -63,20 +61,19 @@ class OpticFlow(object):
         projection[:,0]*=aspect_ratio
         self.dots.xys = projection[:,0:2]
         
-    def updateTrialAttributes(self,dir=None,coherence=None,color_proportion=None):
-        if dir:
+    def updateTrialAttributes(self,dir=None,coherence=None,color=None):
+        if dir != None:
             assert dir in ['in','out']
             self.dir = dir
             if dir == 'in':
                 self.T[2] = -self.speed
             elif dir == 'out':
                 self.T[2] = self.speed
-        if coherence:
+        if coherence != None:
             assert 0 <= coherence <= 1
             self.coherence = coherence
-        if color_proportion:
-            assert 0 <= color_proportion <= 1
-            self.color_proportion = color_proportion
+        if color != None:
+            self.dots.setColors(color)
         
     def updateDotsPosition(self):
         dot_coherence = np.zeros([self.nElements])
@@ -109,18 +106,9 @@ class OpticFlow(object):
         offscreen = self.dots3d[:,0:2] > [xlim[1],ylim[1]]
         adjustment = (offscreen * [xlim[1]-xlim[0], ylim[1]-ylim[0]])[offscreen]
         self.dots3d[:,0:2][offscreen] = self.dots3d[:,0:2][offscreen] - adjustment
-
-        
         self.project2screen()
-
-    def updateDotsColor(self):
-        color = self.baseColors[0]*self.color_proportion \
-                + self.baseColors[1]*(1-self.color_proportion)
-        colors = color.reshape(1,3).repeat(self.nElements,0)
-        self.dots.setColors(colors)
         
     def draw(self):
-        self.updateDotsColor()
         self.updateDotsPosition()
         self.dots.draw()
         self.win.flip()
@@ -129,10 +117,11 @@ class OpticFlow(object):
 def get_win(screen=0,fullscr=True):
     return  visual.Window([1024,768], color=[-1,-1,-1], allowGUI=False, fullscr=fullscr, 
                                      monitor='testMonitor', units='norm',  screen=screen) 
-    
+
+"""
 win = get_win(fullscr=True)
-colors = np.array([[0,0,1],[0,1,0]])
-stim = OpticFlow(win,.1, colors, sizes = .008, nElements = 6000)
+colors = np.array([[0,0,1],[1,0,0]])
+stim = OpticFlow(win,.1, color = colors[0], sizes = .008, nElements = 6000)
 color_proportion = 0
 while True:
     keys=event.getKeys()
@@ -140,16 +129,20 @@ while True:
         break
     if keys != []:
         keys=event.waitKeys()
-            
-    stim.updateTrialAttributes(color_proportion = np.sin(color_proportion)*.5+.5)
+        
     color_proportion+=.02
+    bounded_proportion = np.sin(color_proportion)*.5+.5
+    color = colors[0]*bounded_proportion \
+                + colors[1]*(1-bounded_proportion)
+    stim.updateTrialAttributes(color = color)
+    
     if color_proportion%6 > 3:
         stim.updateTrialAttributes(dir = 'in')
     else:
         stim.updateTrialAttributes(dir = 'out')
     stim.draw()
 win.close()      
-        
+      """  
 
 """
 

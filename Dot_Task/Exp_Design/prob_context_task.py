@@ -7,16 +7,16 @@ import sys,os
 import json
 import yaml
 import datetime
+import numpy as np
 import subprocess
-from dot_stim import getDotStim
+from flowstim import OpticFlow
 
 class probContextTask:
     """ class defining a probabilistic context task
     """
     
     def __init__(self,config_file,subjid,save_dir,verbose=True, 
-                 fullscreen = False, color_proportions = None, 
-                 motion_coherences = None, mode = 'task'):
+                 fullscreen = False, mode = 'task'):
         # set up some variables
         self.stimulusInfo=[]
         self.loadedStimulusFile=[]
@@ -38,15 +38,6 @@ class probContextTask:
         # set up window
         self.win=[]
         self.window_dims=[800,600]
-        # set up stim variables
-        if color_proportions == None:
-            self.color_proportions = {'easy': .8, 'medium': .7, 'hard': .55}
-        else:
-            self.color_proportions = color_proportions
-        if motion_coherences == None:
-            self.motion_coherences = {'easy': .5, 'medium': .2, 'hard': .05}
-        else:
-            self.motion_coherences = motion_coherences
         
         self.tasksets = ['motionDirection','colorIdentity']
         self.textStim=[]
@@ -89,7 +80,7 @@ class probContextTask:
         all of the same information as taskinfo)
         """
         init_dict = {k:self.__dict__[k] for k in self.__dict__.iterkeys() if k 
-                    not in ('clock', 'stimulusInfo', 'alldata', 'bot', 'taskinfo')}
+                    not in ('clock', 'stimulusInfo', 'alldata', 'bot', 'taskinfo','win')}
         return json.dumps(init_dict)
     
     def writeToLog(self,msg):
@@ -129,7 +120,7 @@ class probContextTask:
         
         if not self.textStim:
             self.textStim=visual.TextStim(self.win, text=text,font='BiauKai',
-                                height=1,color=self.text_color, colorSpace=u'rgb',
+                                height=.2,color=self.text_color, colorSpace=u'rgb',
                                 opacity=1,depth=0.0,
                                 alignHoriz='center',wrapWidth=50)
             self.textStim.setAutoDraw(True) #automatically draw every frame
@@ -202,10 +193,9 @@ class probContextTask:
         
     def defineStims(self, stim = None, cue = None):
         if stim == None:
-            self.stim=getDotStim(self.win, color_proportion = self.color_proportions['medium'],
-                                 motion_coherence = self.motion_coherences['medium'],
-                                 direction = self.stim_motions[0],
-                                 colors = self.stim_colors)
+            self.stim=OpticFlow(self.win, speed=.05,
+                                color=[0,0,0], nElements = 600,
+                                sizes=.08)
         else:
             self.stim = stim
         if cue == None:
@@ -215,7 +205,6 @@ class probContextTask:
             self.cue = visual.Circle(self.win,units = 'norm',radius = (height*ratio/2, height/2),fillColor = 'white')
         else:
             self.cue = cue
-            
     
     def presentCue(self, context, duration):
         self.cue.setPos((0, context*.8))
@@ -227,19 +216,21 @@ class probContextTask:
     def presentStim(self, stim, duration = .5, mode = 'practice'):
         """ Used during instructions to present possible stims
         """
-        ms,md,cs,ci = [stim[k] for k in ['motionStrength','motionDirection','colorStrength','colorIdentity']]
-        # convert two dimensions of color (Strength and direction) to one dimension, percentage of the first color
-        cc = abs(self.color_proportions[cs]-stim['colors'].index(ci))
+        ms,md,cs,ce = [stim[k] for k in ['motionStrength','motionDirection','colorStart','colorEnd']]
+        cs = np.array(cs)
+        ce = np.array(ce)
         if mode == 'practice':
-            self.stim.setColorProportion(cc)
-            self.stim.setFieldCoherence(self.motion_coherences['easy'])
-            self.stim.setDir(md)
+            self.stim.updateTrialAttributes(dir=md,coherence=1,color=cs)
+
         elif mode == 'task':
-            self.stim.setColorProportion(cc)
-            self.stim.setFieldCoherence(self.motion_coherences[ms])
-            self.stim.setDir(md)
+            self.stim.updateTrialAttributes(dir=md,coherence=ms,color=cs)
+            
         stim_clock = core.Clock()
         while stim_clock.getTime() < duration:
+            # smoothly move color over the duration
+            percent_complete = stim_clock.getTime()/duration
+            color = cs*(1-percent_complete) + ce*percent_complete
+            self.stim.updateTrialAttributes(color=color)
             self.stim.draw()
             self.win.flip()
             keys = event.getKeys(self.action_keys + ['q'],True)
@@ -254,9 +245,10 @@ class probContextTask:
         # so the index for the correct choice must take that into account
         ts_name = self.tasksets[ts]
         if ts_name == 'motionDirection':
-            correct_choice = stim['motions'].index(stim[ts_name])
+            correct_choice = self.stim_motions.index(stim['motionDirection'])
         elif ts_name == 'colorIdentity':
-            correct_choice = stim['colors'].index(stim[ts_name])+2
+            color_direction = stim['colorStrength'][0]<stim['colorStrength'][1]
+            correct_choice = color_direction+2
         return correct_choice
         
     def presentTrial(self,trial):
@@ -271,7 +263,7 @@ class probContextTask:
         stim = trial['stim']
         
         print('Taskset: %s\nMotion: %s, Strength: %s\nColor: %s, Strength: %s\nCorrectChoice: %s\n' % 
-              (self.tasksets[trial['ts']], stim['motionDirection'], stim['motionStrength'], stim['colorIdentity'],stim['colorStrength'],
+              (self.tasksets[trial['ts']], stim['motionDirection'], stim['motionStrength'], stim['colorStart'],stim['colorEnd'],
                self.getCorrectChoice(stim,trial['ts'])))
         
         

@@ -84,7 +84,7 @@ test_config.setup_trial_list(displayFB = False)
 test_config_file = test_config.get_config()
 
 # setup tasks
-train=probContextTask(train_config_file,subject_code, save_dir=save_dir, fullscreen = False)
+train=probContextTask(train_config_file,subject_code, save_dir=save_dir, fullscreen = fullscr)
 train.setupWindow()
 train.defineStims()
 train.run_task()
