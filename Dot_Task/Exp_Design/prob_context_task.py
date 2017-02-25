@@ -108,7 +108,7 @@ class probContextTask:
         """ set up the main window
         """
         self.win = visual.Window(self.window_dims, allowGUI=False, fullscr=self.fullscreen, 
-                                 monitor='testMonitor', units='deg')                        
+                                 monitor='testMonitor', units='norm')                        
         self.win.setColor([-1,-1,-1],'rgb')
         self.win.flip()
         self.win.flip()
@@ -194,8 +194,8 @@ class probContextTask:
     def defineStims(self, stim = None, cue = None):
         if stim == None:
             self.stim=OpticFlow(self.win, speed=.05,
-                                color=[0,0,0], nElements = 600,
-                                sizes=.08)
+                                color=[0,0,0], nElements = 1500,
+                                sizes=.01)
         else:
             self.stim = stim
         if cue == None:
@@ -232,7 +232,6 @@ class probContextTask:
             color = cs*(1-percent_complete) + ce*percent_complete
             self.stim.updateTrialAttributes(color=color)
             self.stim.draw()
-            self.win.flip()
             keys = event.getKeys(self.action_keys + ['q'],True)
             if len(keys) > 0:
                 break
@@ -247,7 +246,7 @@ class probContextTask:
         if ts_name == 'motionDirection':
             correct_choice = self.stim_motions.index(stim['motionDirection'])
         elif ts_name == 'colorIdentity':
-            color_direction = stim['colorStrength'][0]<stim['colorStrength'][1]
+            color_direction = bool(stim['colorDirection']+1) #convert from -1,1 to 0,1
             correct_choice = color_direction+2
         return correct_choice
         
@@ -262,8 +261,11 @@ class probContextTask:
         context = trial['context']
         stim = trial['stim']
         
-        print('Taskset: %s\nMotion: %s, Strength: %s\nColor: %s, Strength: %s\nCorrectChoice: %s\n' % 
-              (self.tasksets[trial['ts']], stim['motionDirection'], stim['motionStrength'], stim['colorStart'],stim['colorEnd'],
+        print('Taskset: %s\nMotion: %s, Strength: %s\nColorDirection: %s, ColorStrength: %s\n \
+              colorStart: %s, colorEnd: %s\nCorrectChoice: %s\n' % 
+              (self.tasksets[trial['ts']], stim['motionDirection'], stim['motionStrength'], 
+               stim['colorDirection'],stim['colorStrength'],
+               stim['colorStart'],stim['colorEnd'],
                self.getCorrectChoice(stim,trial['ts'])))
         
         

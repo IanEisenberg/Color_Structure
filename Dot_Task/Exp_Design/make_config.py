@@ -49,12 +49,13 @@ class ConfigList(object):
         self.stim_colors = np.array([[1,0,0],[0,0,1]])
         self.stim_motions = ['in','out']
         # from easy to hard
-        # each tuple determines the amount of change needed for that difficulty
-        # level. There are two changes for each difficulty level which determine
-        # which part of the color space the trial is on
-        self.color_difficulties = [[(0,.2),(.8,1)], [(0,.15),(.85,1)], [(0,.1),(.9,1)]]
+        # each tuple defines a starting color proportion, and the change in color proportion
+        # each difficulty level has two tuples, for different sides of the
+        # color space.
+        self.color_difficulties = [[(.2,.2),(.8,.2)], [(.2,.15),(.8,.15)], [(.2,.1),(.8,.1)]]
         # motion coherence
         self.motion_difficulties = [.8,.5,.2]
+        self.motion_difficulties = [1,1,1]
         # setup
         self.setup_stims()
     
@@ -107,14 +108,17 @@ class ConfigList(object):
             for direction in self.stim_motions:
                 for color_difficulty in self.color_difficulties:
                     for color_space in color_difficulty:
-                        colors = [self.stim_colors[0]*color_space[0] + 
-                                self.stim_colors[1]*(1-color_space[0]),
-                                self.stim_colors[0]*color_space[1] + 
-                                self.stim_colors[1]*(1-color_space[1])]
-                        np.random.shuffle(colors)
+                        color1_start = color_space[0]
+                        color_direction = np.random.choice([-1,1])
+                        color1_end = color_space[0]+color_space[1]*color_direction
+                        colors = [self.stim_colors[0]*color1_start + 
+                                self.stim_colors[1]*(1-color1_start),
+                                self.stim_colors[0]*color1_end + 
+                                self.stim_colors[1]*(1-color1_end)]
                         stim_ids.append({'motionStrength': motion_difficulty, 
                                          'motionDirection': direction, 
-                                         'colorStrength': color_space, 
+                                         'colorStrength': color_space[1],
+                                         'colorDirection': color_direction,
                                          'colorStart': list(colors[0]),
                                          'colorEnd': list(colors[1])})
 
