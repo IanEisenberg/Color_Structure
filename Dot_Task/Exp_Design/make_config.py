@@ -55,7 +55,6 @@ class ConfigList(object):
         self.color_difficulties = [[(.2,.2),(.8,.2)], [(.2,.15),(.8,.15)], [(.2,.1),(.8,.1)]]
         # motion coherence
         self.motion_difficulties = [.8,.5,.2]
-        self.motion_difficulties = [1,1,1]
         # setup
         self.setup_stims()
     

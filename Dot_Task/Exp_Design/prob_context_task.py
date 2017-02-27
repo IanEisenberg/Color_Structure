@@ -107,9 +107,10 @@ class probContextTask:
     def setupWindow(self):
         """ set up the main window
         """
-        self.win = visual.Window(self.window_dims, allowGUI=False, fullscr=self.fullscreen, 
-                                 monitor='testMonitor', units='norm')                        
-        self.win.setColor([-1,-1,-1],'rgb')
+        self.win = visual.Window(self.window_dims, allowGUI=False, 
+                                 fullscr=self.fullscreen, monitor='testMonitor', 
+                                 units='norm', allowStencil=True,
+                                 color=[-1,-1,-1])                        
         self.win.flip()
         self.win.flip()
         
@@ -120,7 +121,7 @@ class probContextTask:
         
         if not self.textStim:
             self.textStim=visual.TextStim(self.win, text=text,font='BiauKai',
-                                height=.2,color=self.text_color, colorSpace=u'rgb',
+                                height=.15,color=self.text_color, colorSpace=u'rgb',
                                 opacity=1,depth=0.0,
                                 alignHoriz='center',wrapWidth=50)
             self.textStim.setAutoDraw(True) #automatically draw every frame
@@ -193,16 +194,18 @@ class probContextTask:
         
     def defineStims(self, stim = None, cue = None):
         if stim == None:
-            self.stim=OpticFlow(self.win, speed=.05,
-                                color=[0,0,0], nElements = 1500,
+            self.stim=OpticFlow(self.win, speed=.1,
+                                color=[0,0,0], nElements = 3000,
                                 sizes=.01)
         else:
             self.stim = stim
         if cue == None:
-            height = .2
+            height = .1
             ratio = self.win.size[1]/float(self.win.size[0])
             # set up cue
-            self.cue = visual.Circle(self.win,units = 'norm',radius = (height*ratio/2, height/2),fillColor = 'white')
+            self.cue = visual.Circle(self.win,units = 'norm',
+                                     radius = (height*ratio, height),
+                                     fillColor = 'white', edges = 120)
         else:
             self.cue = cue
     

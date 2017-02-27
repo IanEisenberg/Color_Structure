@@ -33,9 +33,12 @@ class OpticFlow(object):
         self.win = win
         self.win.units = 'norm'
         # define aperture
-        self.aperture = visual.Aperture(self.win, size = 2, units='norm')
-        ratio = .4
-        self.aperture.vertices[:,0]*=ratio
+        aperture_size = 1.5
+        aperture_vertices = visual.Aperture(self.win, size=aperture_size, units='norm').vertices
+        ratio = float(self.win.size[1])/self.win.size[0]
+        aperture_vertices[:,0]*=ratio
+        self.aperture = visual.Aperture(self.win, size=aperture_size, units='norm', shape = aperture_vertices)
+        self.aperture.disable()
         # trial attributes
         self.dir = 'out'
         self.coherence = 1
@@ -113,6 +116,7 @@ class OpticFlow(object):
         self.aperture.enable()
         self.updateDotsPosition()
         self.dots.draw()
+        self.aperture.disable()
         self.win.flip()
 
 
@@ -121,10 +125,10 @@ def get_win(screen=0,fullscr=True):
                                      monitor='testMonitor', units='norm',  screen=screen,
                                      allowStencil=True) 
 
-
-win = get_win(fullscr=False)
+"""
+win = get_win(fullscr=True)
 colors = np.array([[0,0,1],[1,0,0]])
-stim = OpticFlow(win,.1, color = colors[0], sizes = .008, nElements = 600)
+stim = OpticFlow(win,.1, color = colors[0], sizes = .01, nElements = 6000)
 color_proportion = 0
 while True:
     keys=event.getKeys()
@@ -145,5 +149,5 @@ while True:
         stim.updateTrialAttributes(dir = 'out')
     stim.draw()
 win.close()      
-
+"""
 
