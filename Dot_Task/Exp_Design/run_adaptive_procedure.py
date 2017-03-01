@@ -2,10 +2,10 @@
 runprobContextTask
 """
 
-from psychopy import core, event
+from psychopy import event
 import webbrowser
-from prob_context_task import probContextTask
-from make_config import ProbContextConfig
+from threshold_procedure import adaptiveThreshold
+from make_config import ThresholdConfig
 import glob
 import os
 from twilio.rest import TwilioRestClient
@@ -31,11 +31,12 @@ verbose=True
 message_on = False
 fullscr= True
 subdata=[]
-train_on = True
-test_on = True
+motion_on = True
+color_on = False
 home = os.getenv('HOME') 
 save_dir = '../Data' 
-trainname = 'Dot_task'
+motionname = 'adaptive_motion'
+colorname = 'adaptive_color'
 
 """
 # set things up for practice, training and tests
@@ -57,7 +58,6 @@ f.close()
 subject_code = 'test'
 # set up task variables
 stim_repetitions = 5
-recursive_p = .9
 
 # counterbalance ts_order (which ts is associated with top of screen)
 try:
@@ -72,27 +72,25 @@ except ValueError:
 # set up config files
 # ****************************************************************************
 # train 
-if train_on:
-    train_config = ProbContextConfig(taskname = trainname, subjid = subject_code, stim_repetitions = stim_repetitions, ts_order = ts_order, rp = recursive_p)
-    train_config_file = train_config.get_config()
-else:
-    train_config_file = glob.glob('../Config_Files/*Context_' +subject_code +'*yaml')[-1]
-    
-test_config = ProbContextConfig()
-test_config.load_config_settings(train_config_file, taskname=train_config.taskname+'_test', stim_repetitions = stim_repetitions)
-test_config.setup_trial_list(displayFB = False)
-test_config_file = test_config.get_config()
-
-# setup tasks
-train=probContextTask(train_config_file,subject_code, save_dir=save_dir, fullscreen = fullscr)
-train.setupWindow()
-train.defineStims()
-train.run_task()
 
 
+if motion_on:
+    motion_config = ThresholdConfig(taskname=motionname, subjid=subject_code, 
+                                        stim_repetitions=stim_repetitions,
+                                        ts='motion',)
+    motion_config_file = motion_config.get_config()
+    motion_task=adaptiveThreshold(motion_config_file,subject_code, 
+                                  save_dir=save_dir, fullscreen = fullscr)
+
+if color_on:
+    color_config = ThresholdConfig(taskname=colorname, subjid=subject_code, 
+                                        stim_repetitions=stim_repetitions, 
+                                        ts='color')
+    color_config_file = color_config.get_config()  
+    color_task=adaptiveThreshold(color_config_file,subject_code, 
+                                  save_dir=save_dir, fullscreen = fullscr)
 
 
-test=probContextTask(test_config_file,subject_code, save_dir=save_dir, fullscreen = fullscr)
 
 
 # ****************************************************************************
@@ -103,11 +101,11 @@ test=probContextTask(test_config_file,subject_code, save_dir=save_dir, fullscree
 # Start training
 # ****************************************************************************
 
-if train_on:
+if motion_on:
     # prepare to start
-    train.setupWindow()
-    train.defineStims()
-    train.presentTextToWindow(
+    motion_task.setupWindow()
+    motion_task.defineStims()
+    motion_task.presentTextToWindow(
         """
         We will now start the training phase of the experiment.
         
@@ -121,67 +119,50 @@ if train_on:
         
         Please wait for the experimenter.
         """)
-    resp,time=train.waitForKeypress(train.trigger_key)
-    train.checkRespForQuitKey(resp)
+    resp,time=motion_task.waitForKeypress(motion_task.trigger_key)
+    motion_task.checkRespForQuitKey(resp)
     event.clearEvents()
 
-    pause_trial = train.stimulusInfo[len(train.stimulusInfo)/2]
-    train.run_task(pause_trial=pause_trial)    
+    pause_trial = motion_task.stimulusInfo[len(motion_task.stimulusInfo)/2]
+    motion_task.run_task(pause_trial=pause_trial)    
     
     #************************************
     # Send text about train performance
     #************************************
     if message_on == False:   
-        send_message('Training done')
+        send_message('Motion done')
         
 
-        
-# ****************************************************************************
-# Start test
-# ****************************************************************************
-        
-if test_on:
+
+if color_on:
     # prepare to start
-    test.setupWindow()
-    test.defineStims()
-    test.presentTextToWindow(
+    color_task.setupWindow()
+    color_task.defineStims()
+    color_task.presentTextToWindow(
         """
-        In this next part the feedback will be invisible. You
-        are still earning points, though, and these points are
-        used to determine your bonus.
+        We will now start the training phase of the experiment.
         
-        Do your best to respond to the shapes as you learned to
-        in the last section.
+        Remember, following this training phase will be a test phase with no
+        feedback (you won't see points). Use this training to learn when
+        you have to respond to the identity or color of the shape without
+        needing to use the points.
+        
+        There will be one break half way through. As soon
+        as you press '5' the experiment will start so get ready!
         
         Please wait for the experimenter.
         """)
-                        
-    resp,time=test.waitForKeypress(test.trigger_key)
-    test.checkRespForQuitKey(resp)
+    resp,time=color_task.waitForKeypress(color_task.trigger_key)
+    color_task.checkRespForQuitKey(resp)
     event.clearEvents()
-        
-    pause_trial = test.stimulusInfo[len(test.stimulusInfo)/2]
-    test.run_task(pause_trial = pause_trial)
-        
+
+    pause_trial = color_task.stimulusInfo[len(color_task.stimulusInfo)/2]
+    color_task.run_task(pause_trial=pause_trial)    
+    
     #************************************
-    # Send text about test performance
+    # Send text about train performance
     #************************************
     if message_on == False:   
-        send_message('Testing Done')
-       
-#************************************
-# Determine payment
-#************************************
-points,trials = test.getPoints()
-performance = (float(points)/trials-.25)/.75
-pay_bonus = round(performance*5)
-print('Participant ' + subject_code + ' won ' + str(points) + ' points out of ' + str(trials) + ' trials. Bonus: $' + str(pay_bonus))
-
-#open post-task questionnaire
-webbrowser.open_new('https://stanforduniversity.qualtrics.com/SE/?SID=SV_9KzEWE7l4xuORIF')
-
-
-
-
+        send_message('color done')
 
 

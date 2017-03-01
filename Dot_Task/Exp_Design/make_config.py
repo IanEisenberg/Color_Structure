@@ -13,7 +13,7 @@ import random as r
 from scipy.stats import norm
 import yaml
 
-class ConfigList(object): 
+class ProbContextConfig(object): 
     def __init__(self, taskname='taskname', subjid='000', rp=.9,
                  action_keys=None, distribution=norm, args=None, stim_repetitions=5, ts_order=None, seed=None):
         self.seed = seed
@@ -24,7 +24,6 @@ class ConfigList(object):
         self.exp_len = int(stim_repetitions*36)
         self.rp = rp # recursive probability
         self.subjid = subjid
-        self.ts_order = ts_order
         self.taskname = taskname
         try:
             self.distribution_name = distribution.name
@@ -38,8 +37,11 @@ class ConfigList(object):
             self.args = [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
         self.ts_order = ts_order
         if ts_order == None:
-            self.ts_order = [0,1]
+            self.ts_order = ['motion','color']
             r.shuffle(self.ts_order)
+        else:
+            assert (set(['motion','color']) == set(self.ts_order)), \
+                'Tasksets not recognized. Must be "motion" and "color"'
         self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         self.loc = '../Config_Files/'
         self.states = None
@@ -197,3 +199,132 @@ class ConfigList(object):
         self.trial_list = trial_list
        
 
+class ThresholdConfig(object): 
+    def __init__(self, taskname='taskname', subjid='000', action_keys=None,  
+                 stim_repetitions=5, ts='motion', seed=None):
+        self.seed = seed
+        if self.seed is not None:
+            np.random.seed(self.seed)
+        self.distribution = norm
+        self.stim_repetitions = stim_repetitions
+        self.exp_len = int(stim_repetitions*36)
+        self.subjid = subjid
+        # set task set
+        assert ts in ['color','motion']
+        self.ts = ts
+        self.taskname = taskname
+        self.action_keys = action_keys
+        if action_keys == None:
+            self.action_keys = ['right','left','r', 'g']
+        self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        self.loc = '../Config_Files/'
+        self.states = None
+        self.trial_states = None
+        self.trial_list = None
+        # stim attributes
+        self.stim_colors = np.array([[1,0,0],[0,0,1]])
+        self.stim_motions = ['in','out']
+        # from easy to hard
+        # each tuple defines a starting color proportion, and the change in color proportion
+        # each difficulty level has two tuples, for different sides of the
+        # color space.
+        self.color_difficulties = [[(.3,.3),(.7,.3)], [(.3,.2),(.7,.2)], [(.3,.1),(.7,.1)]]
+        # motion coherence
+        self.motion_difficulties = [.8,.5,.2]
+        self.motion_difficulties = [1,1,1]
+        # setup
+        self.setup_stims()
+    
+    def get_config(self, save=True, filey=None):
+        if self.trial_list==None:
+            self.setup_trial_list()
+        
+        initial_params = {
+          'clearAfterResponse': 1,
+          'quit_key': 'q',
+          'responseWindow': 1.0,
+          'taskname': self.taskname,
+          'id': self.subjid,
+          'trigger_key': '5',
+          'action_keys': self.action_keys,
+          'exp_len': self.exp_len,
+          'stim_ids': self.stim_ids,
+          'ts': self.ts,
+          'stim_colors': self.stim_colors.tolist(),
+          'stim_motions': self.stim_motions
+        }
+        to_save = self.trial_list
+        to_save.insert(0,initial_params)
+        if save==True:
+            filename = self.taskname + '_' + self.subjid + '_config_' + self.timestamp + '.yaml'
+            if filey == None:
+                filey = path.join(self.loc,filename)
+            yaml.dump(to_save, open(filey,'w'))
+            return filey
+        else:
+            return to_save
+      
+    def load_config_settings(self, filename, **kwargs):
+        if not path.exists(filename):
+            raise BaseException('Config file not found')
+        config_file = yaml.load(open(filename,'r'))
+        configuration = config_file[0]
+        self.__dict__.update(configuration)
+        self.__dict__.update(kwargs)
+        self.stim_colors = np.array([np.array(x) for x in self.stim_colors])
+        # setup
+        self.setup_stims()
+        
+    def setup_stims(self):
+        stim_ids = []
+        for motion_difficulty in self.motion_difficulties:
+            for direction in self.stim_motions:
+                for color_difficulty in self.color_difficulties:
+                    for color_space in color_difficulty:
+                        color1_start = color_space[0]
+                        color_direction = np.random.choice([-1,1])
+                        color1_end = color_space[0]+color_space[1]*color_direction
+                        colors = [self.stim_colors[0]*color1_start + 
+                                self.stim_colors[1]*(1-color1_start),
+                                self.stim_colors[0]*color1_end + 
+                                self.stim_colors[1]*(1-color1_end)]
+                        stim_ids.append({'motionStrength': motion_difficulty, 
+                                         'motionDirection': direction, 
+                                         'colorStrength': color_space[1],
+                                         'colorDirection': color_direction,
+                                         'colorStart': list(colors[0]),
+                                         'colorEnd': list(colors[1])})
+
+        self.stim_ids = stim_ids
+  
+                    
+    def setup_trial_list(self, stimulusDuration=5, FBDuration=.5, FBonset=.5, ITI=.5, displayFB = True):
+        if self.seed is not None:
+            np.random.seed(self.seed)
+        trial_list = []    
+        trial_count = 1
+        curr_onset = 2 #initial onset time
+        stims = r.sample(self.stim_ids*self.stim_repetitions,self.exp_len)   
+        
+        for trial in range(self.exp_len):
+            trial_dict = {
+                'trial_count': trial_count,
+                'ts': self.ts,
+                'stim': stims[trial],
+                'onset': curr_onset,
+                'stimulusDuration': stimulusDuration,
+                'FBDuration': FBDuration,
+                'FBonset': FBonset,
+                'displayFB': displayFB,
+                'ITI': ITI,
+                #option to change based on state and stim
+                'reward_amount': 1,
+                'punishment_amount': 0
+            }
+
+            trial_list += [trial_dict]
+
+            trial_count += 1
+            curr_onset += stimulusDuration+FBDuration+FBonset+ITI+r.random()*.5
+        self.trial_list = trial_list
+       

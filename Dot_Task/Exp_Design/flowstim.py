@@ -25,7 +25,7 @@ class OpticFlow(object):
         for key in default_dict:
             if key not in kwargs.keys():
                 kwargs[key]=default_dict[key]
-        self.dots = visual.ElementArrayStim(win, elementTex=None, 
+        self.dots = visual.ElementArrayStim(win, elementTex=None,
                                        elementMask='circle', **kwargs)
         self.__dict__.update(kwargs)
         # OpticFlow specific arguments
@@ -125,10 +125,10 @@ def get_win(screen=0,fullscr=True):
                                      monitor='testMonitor', units='norm',  screen=screen,
                                      allowStencil=True) 
 
-"""
+'''
 win = get_win(fullscr=True)
 colors = np.array([[0,0,1],[1,0,0]])
-stim = OpticFlow(win,.1, color = colors[0], sizes = .01, nElements = 6000)
+stim = OpticFlow(win,0, color = colors[0], sizes = [.015,.02], nElements = 6000)
 color_proportion = 0
 while True:
     keys=event.getKeys()
@@ -149,5 +149,4 @@ while True:
         stim.updateTrialAttributes(dir = 'out')
     stim.draw()
 win.close()      
-"""
-
+'''

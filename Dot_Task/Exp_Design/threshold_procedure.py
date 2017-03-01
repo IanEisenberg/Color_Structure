@@ -11,7 +11,7 @@ import numpy as np
 import subprocess
 from flowstim import OpticFlow
 
-class probContextTask:
+class adaptiveThreshold:
     """ class defining a probabilistic context task
     """
     
@@ -38,6 +38,7 @@ class probContextTask:
         # set up window
         self.win=[]
         self.window_dims=[800,600]
+        
         self.textStim=[]
         self.trialnum = 0
         self.track_response = []
@@ -190,31 +191,15 @@ class probContextTask:
     def getPoints(self):
         return (self.pointtracker,self.trialnum)
         
-    def defineStims(self, stim = None, cue = None):
-        ratio = self.win.size[1]/float(self.win.size[0])
-        stim_height = .02
-        cue_height = .1
+    def defineStims(self, stim = None):
+        height = .05
         ratio = self.win.size[1]/float(self.win.size[0])
         if stim == None:
-            self.stim=OpticFlow(self.win, speed=.1,
+            self.stim=OpticFlow(self.win, speed=0,
                                 color=[0,0,0], nElements = 3000,
-                                sizes=[stim_height*ratio, stim_height])
+                                sizes=[height*ratio, height])
         else:
-            self.stim = stim
-        if cue == None:
-            # set up cue
-            self.cue = visual.Circle(self.win,units = 'norm',
-                                     radius = (cue_height*ratio, cue_height),
-                                     fillColor = 'white', edges = 120)
-        else:
-            self.cue = cue
-    
-    def presentCue(self, context, duration):
-        self.cue.setPos((0, context*.8))
-        self.cue.draw()
-        self.win.flip()
-        core.wait(duration)
-        self.win.flip()
+            self.stim = stim 
         
     def presentStim(self, stim, duration = .5, mode = 'practice'):
         """ Used during instructions to present possible stims
@@ -260,7 +245,6 @@ class probContextTask:
         """
         trialClock = core.Clock()
         self.trialnum += 1
-        context = trial['context']
         stim = trial['stim']
         
         print('Taskset: %s\nMotion: %s, Strength: %s\nColorDirection: %s, ColorStrength: %s \
@@ -276,9 +260,6 @@ class probContextTask:
         trial['response'] = 999
         trial['rt'] = 999
         trial['FB'] = []
-        # present cue
-        self.presentCue(context, trial['cueDuration'])
-        core.wait(trial['CSI'])
         # present stimulus and get response
         event.clearEvents()
         keys = self.presentStim(stim, trial['stimulusDuration'], mode = 'task')
