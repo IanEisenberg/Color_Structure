@@ -34,8 +34,8 @@ def send_message(msg):
 verbose=True
 fullscr= False
 subdata=[]
-practice_on = True
-train_on = True
+practice_on = False
+train_on = False
 test_on = True
 bot_on = True
 bot_mode = "ignore_base" #other for optimal
@@ -68,6 +68,8 @@ avg_train_trial_len = avg_test_trial_len + 1 #factor in FB
 train_len = int(round(train_mins*60/avg_train_trial_len/4)*4)
 test_len = int(round(test_mins*60/avg_test_trial_len/4)*4)
 recursive_p = .9
+distribution = beta
+beta_args = util.setBeta()
 
 # counterbalance ts_order (which ts is associated with top of screen)
 try:
@@ -81,26 +83,26 @@ except ValueError:
 # ****************************************************************************
 # set up config files
 # ****************************************************************************
-# set distributions for beta plot
-beta_args = util.setBeta()
-# practice
+
+# practice configuration
 practice_config_file = '../Config_Files/Prob_Context_Practice_config.yaml'
 if not os.path.exists(practice_config_file):
     practice_config = ConfigList(taskname = trainname + '_Practice', 
-                                 distribution = beta, args = beta_args, exp_len = 120, seed = 1939)
+                                 distribution = distribution, args = beta_args, exp_len = 120, seed = 1939)
     # ensure the first 40 trials are TS1 and second 40 are TS2
     practice_config.trial_states[0:40] = [0]*40; practice_config.trial_states[40:80] = [1]*40
     practice_config_file = practice_config.get_config(filey = practice_config_file)
 
-# train 
+# train configuration
 if train_on:
     train_config = ConfigList(taskname = trainname, subjid = subject_code,
-                              rp = recursive_p, distribution = beta, args =beta_args,
+                              rp = recursive_p, distribution = distribution, args =beta_args,
                               exp_len = train_len, ts_order = ts_order)
     train_config_file = train_config.get_config()
 else:
     train_config_file = glob.glob('../Config_Files/*Context_' +subject_code +'*yaml')[-1]
-    
+
+#test configuration  (load configuration form training)
 test_config = ConfigList()
 test_config.load_config_settings(train_config_file,taskname=train_config.taskname+'_test', exp_len=test_len)
 test_config.setup_trial_list(displayFB = False)
@@ -113,8 +115,8 @@ test=probContextTask(test_config_file,subject_code, save_dir=save_dir, fullscree
 
 # setup bot if on
 if bot_on == True:
-    train.setBot(bot = test_bot(train_config_file, dist=norm, mode = bot_mode), mode = "full")
-    test.setBot(bot = test_bot(test_config_file, dist=norm, mode = bot_mode), mode = "full")
+    train.setBot(bot = test_bot(train_config_file, dist=distribution, mode = bot_mode), mode = "full")
+    test.setBot(bot = test_bot(test_config_file, dist=distribution, mode = bot_mode), mode = "full")
 
 
 # ****************************************************************************

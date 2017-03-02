@@ -18,14 +18,14 @@ class ConfigList(object):
     This class sets confugurations for a probabilistic task set
     ----------------------------------------------
     Initial Parametes: 
-        taskname (string) -- name of task
-        subjid (string) -- id of subject
+        taskname (string) -- name of task (default 'taskname')
+        subjid (string) -- id of subject (default 000)
         rp (double) -- propability of repeatingthe same task (default 0.9)
         action_keys (string list) -- customize action keys (default ['d','f','j','k'])
         distribution (propability distribution)-- distribution pattern (default norm)
         args (list of dictionary) -- set arguments for distribution, 
             (default [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}])
-        exp_len (int)-- time of experiment (default 200)
+        exp_len (int)-- length of experiment (default 200)
         ts_order (list) -- set custom task set order, None for random selection 
                     (default random)
         seed (int) -- set seed,  (defualt None)

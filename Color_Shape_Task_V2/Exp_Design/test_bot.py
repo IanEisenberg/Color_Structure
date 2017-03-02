@@ -8,9 +8,15 @@ from scipy.stats import norm
 import yaml
 
 class test_bot:
-    """class defining a test bot based on a psych task
     """
-    
+    class defining a test bot based on a psych task
+    -----------------------------------------------
+    Initial Parametes: 
+        config_file (string) -- path to config list file
+        dist (propability distribution)-- distribution pattern (default norm)
+        mode (string)) -- set mode of bot to one-shot or ignore-base (default "one-shot")
+    ----------------------------------------------- 
+    """   
     def __init__(self, config_file, dist=norm, mode = "one-shot"):
         config_file = yaml.load(open(config_file,'r'))
         self.taskinfo = config_file[0]
