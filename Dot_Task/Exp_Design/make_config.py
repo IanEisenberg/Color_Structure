@@ -14,7 +14,8 @@ import yaml
     
 class ProbContextConfig(object): 
     def __init__(self, taskname='taskname', subjid='000', rp=.9,
-                 action_keys=None, distribution=norm, args=None, stim_repetitions=5, ts_order=None, seed=None):
+                 action_keys=None, distribution=norm, args=None, 
+                 stim_repetitions=5, ts_order=None, seed=None):
         self.seed = seed
         if self.seed is not None:
             np.random.seed(self.seed)
@@ -30,7 +31,7 @@ class ProbContextConfig(object):
             self.distribution_name = 'unknown'
         self.action_keys = action_keys
         if action_keys == None:
-            self.action_keys = ['right','left','r', 'g']
+            self.action_keys = ['down','up','z', 'x']
         self.args = args
         if args == None:
             self.args = [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
@@ -50,15 +51,15 @@ class ProbContextConfig(object):
         # colors in LAB space
         self.stim_colors = np.array([[60,128,60],[60,-128,60]])
         self.stim_motions = ['in','out']
+        self.color_starts = [.2,.8]
         # from easy to hard
         # each tuple defines a starting color proportion, and the change in color proportion
         # each difficulty level has two tuples, for different sides of the
         # color space.
-        self.color_difficulties = [[(.2,.2),(.8,.2)],
-                                   [(.2,.15),(.8,.15)],
-                                   [(.2,.1),(.8,.1)]]
-        # motion coherence
-        self.motion_difficulties = [.8,.5,.2]
+        self.color_difficulties = [.2,.15,.1]
+        # motion speeds
+        self.base_speed = .06
+        self.motion_difficulties = [.05,.02,.01]
         # setup
         self.setup_stims()
     
@@ -110,17 +111,24 @@ class ProbContextConfig(object):
         for motion_difficulty in self.motion_difficulties:
             for direction in self.stim_motions:
                 for color_difficulty in self.color_difficulties:
-                    for color_space in color_difficulty:
-                        color1_start = color_space[0]
+                    for color_space in self.color_starts:
+                        # set color change
+                        color1_start = color_space
                         color_direction = np.random.choice([-1,1])
-                        color1_end = color_space[0]+color_space[1]*color_direction
+                        color1_end = color1_start+color_direction*color_difficulty
                         colors = [self.stim_colors[0]*color1_start + 
                                 self.stim_colors[1]*(1-color1_start),
                                 self.stim_colors[0]*color1_end + 
                                 self.stim_colors[1]*(1-color1_end)]
-                        stim_ids.append({'motionStrength': motion_difficulty, 
-                                         'motionDirection': direction, 
-                                         'colorStrength': color_space[1],
+                        # set speed change
+                        speed_direction = np.random.choice([-1,1])
+                        speed_end = self.base_speed+motion_difficulty*speed_direction
+                        stim_ids.append({'motionDirection': direction, 
+                                         'speedStrength': motion_difficulty,
+                                         'speedDirection': speed_direction,
+                                         'speedStart': self.base_speed,
+                                         'speedEnd': speed_end,
+                                         'colorStrength': color_difficulty,
                                          'colorDirection': color_direction,
                                          'colorStart': list(colors[0]),
                                          'colorEnd': list(colors[1])})
@@ -217,25 +225,25 @@ class ThresholdConfig(object):
         self.taskname = taskname
         self.action_keys = action_keys
         if action_keys == None:
-            self.action_keys = ['right','left','r', 'g']
+            self.action_keys = ['down','up','z','x']
         self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         self.loc = '../Config_Files/'
         self.states = None
         self.trial_states = None
         self.trial_list = None
         # stim attributes
-        # colors in lab space
+        # colors in LAB space
         self.stim_colors = np.array([[60,128,60],[60,-128,60]])
         self.stim_motions = ['in','out']
+        self.color_starts = [.2,.8]
         # from easy to hard
         # each tuple defines a starting color proportion, and the change in color proportion
         # each difficulty level has two tuples, for different sides of the
         # color space.
-        self.color_difficulties = [[(.3,.3),(.7,.3)], 
-                                   [(.3,.2),(.7,.2)], 
-                                   [(.3,.1),(.7,.1)]]
-        # motion coherence
-        self.motion_difficulties = [.8,.5,.2]
+        self.color_difficulties = [.2,.15,.1]
+        # motion speeds
+        self.base_speed = .06
+        self.motion_difficulties = [.05,.02,.01]
         # setup
         self.setup_stims()
     
@@ -284,17 +292,24 @@ class ThresholdConfig(object):
         for motion_difficulty in self.motion_difficulties:
             for direction in self.stim_motions:
                 for color_difficulty in self.color_difficulties:
-                    for color_space in color_difficulty:
-                        color1_start = color_space[0]
+                    for color_space in self.color_starts:
+                        # set color change
+                        color1_start = color_space
                         color_direction = np.random.choice([-1,1])
-                        color1_end = color_space[0]+color_space[1]*color_direction
+                        color1_end = color1_start+color_direction*color_difficulty
                         colors = [self.stim_colors[0]*color1_start + 
                                 self.stim_colors[1]*(1-color1_start),
                                 self.stim_colors[0]*color1_end + 
                                 self.stim_colors[1]*(1-color1_end)]
-                        stim_ids.append({'motionStrength': motion_difficulty, 
-                                         'motionDirection': direction, 
-                                         'colorStrength': color_space[1],
+                        # set speed change
+                        speed_direction = np.random.choice([-1,1])
+                        speed_end = self.base_speed+motion_difficulty*speed_direction
+                        stim_ids.append({'motionDirection': direction,
+                                         'speedStrength': motion_difficulty,
+                                         'speedDirection': speed_direction,
+                                         'speedStart': self.base_speed,
+                                         'speedEnd': speed_end,
+                                         'colorStrength': color_difficulty,
                                          'colorDirection': color_direction,
                                          'colorStart': list(colors[0]),
                                          'colorEnd': list(colors[1])})

@@ -220,39 +220,47 @@ class probContextTask:
     def presentStim(self, stim, duration = .5, mode = 'practice'):
         """ Used during instructions to present possible stims
         """
-        ms,md,cs,ce = [stim[k] for k in ['motionStrength','motionDirection','colorStart','colorEnd']]
+        ss,se,cs,ce,md = [stim[k] for k in ['speedStart','speedEnd',
+                       'colorStart','colorEnd','motionDirection']]
         cs = np.array(cs)
         ce = np.array(ce)
         if mode == 'practice':
-            self.stim.updateTrialAttributes(dir=md,coherence=1,color=cs)
+            self.stim.updateTrialAttributes(dir=md,color=cs,speed=ss)
 
         elif mode == 'task':
-            self.stim.updateTrialAttributes(dir=md,coherence=ms,color=cs)
+            self.stim.updateTrialAttributes(dir=md,color=cs,speed=ss)
             
         stim_clock = core.Clock()
+        recorded_keys = []
         while stim_clock.getTime() < duration:
-            # smoothly move color over the duration
             percent_complete = stim_clock.getTime()/duration
+            # smoothly move color over the duration
             color = cs*(1-percent_complete) + ce*percent_complete
+            # change speed
+            speed = ss*(1-percent_complete) + se*percent_complete
             # convert to rgb
             color = pixel_lab2rgb(color)
-            self.stim.updateTrialAttributes(color=color)
+            self.stim.updateTrialAttributes(color=color, speed=speed)
             self.stim.draw()
-            keys = event.getKeys(self.action_keys + ['q'],True)
-            if len(keys) > 0:
-                break
+            keys = event.getKeys(self.action_keys + [self.quit_key],True)
+            for key,response_time in keys:
+                # check for quit key
+                if key == self.quit_key:
+                    self.shutDownEarly()
+                recorded_keys+=keys
         self.win.flip()
         self.win.flip()
-        return keys
+        return recorded_keys
             
     def getCorrectChoice(self,stim,ts):
         # action keys are set up as the choices for ts1 followed by ts2
         # so the index for the correct choice must take that into account
         if ts == 'motion':
-            correct_choice = self.stim_motions.index(stim['motionDirection'])
+            correct_choice = int(bool(stim['speedDirection']+1))
         elif ts == 'color':
-            color_direction = bool(stim['colorDirection']+1) #convert from -1,1 to 0,1
-            correct_choice = color_direction+2
+            # correct choice is based on whether the color became "more extreme"
+            # i.e. more green/red
+            correct_choice = abs(stim['colorStart'][1])>abs(stim['colorEnd'][1])+2
         return correct_choice
         
     def presentTrial(self,trial):

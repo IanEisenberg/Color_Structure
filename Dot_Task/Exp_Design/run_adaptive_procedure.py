@@ -29,7 +29,7 @@ def send_message(msg):
 
 verbose=True
 message_on = False
-fullscr= False
+fullscr= True
 subdata=[]
 motion_on = True
 color_on = False

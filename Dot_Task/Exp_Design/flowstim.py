@@ -64,7 +64,7 @@ class OpticFlow(object):
             projection[:,dim]/=(np.abs(limits).sum()/2*self.f/self.fieldlimits[2][1])
         self.dots.xys = projection[:,0:2]
         
-    def updateTrialAttributes(self,dir=None,coherence=None,color=None):
+    def updateTrialAttributes(self,dir=None,coherence=None,color=None,speed=None):
         if dir != None:
             assert dir in ['in','out']
             self.dir = dir
@@ -77,6 +77,9 @@ class OpticFlow(object):
             self.coherence = coherence
         if color != None:
             self.dots.setColors(color)
+        if speed != None:
+            self.speed = speed
+            self.T = [0,0,speed]
         
     def updateDotsPosition(self):
         dot_coherence = np.zeros([self.nElements])
