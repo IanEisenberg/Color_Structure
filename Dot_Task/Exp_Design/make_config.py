@@ -6,13 +6,12 @@ Created on Thu Nov 20 16:13:45 2014
 """
 
 import datetime
-import itertools
 import numpy as np
 from os import path
 import random as r
 from scipy.stats import norm
 import yaml
-
+    
 class ProbContextConfig(object): 
     def __init__(self, taskname='taskname', subjid='000', rp=.9,
                  action_keys=None, distribution=norm, args=None, stim_repetitions=5, ts_order=None, seed=None):
@@ -48,13 +47,16 @@ class ProbContextConfig(object):
         self.trial_states = None
         self.trial_list = None
         # stim attributes
-        self.stim_colors = np.array([[1,0,0],[0,0,1]])
+        # colors in LAB space
+        self.stim_colors = np.array([[60,128,60],[60,-128,60]])
         self.stim_motions = ['in','out']
         # from easy to hard
         # each tuple defines a starting color proportion, and the change in color proportion
         # each difficulty level has two tuples, for different sides of the
         # color space.
-        self.color_difficulties = [[(.2,.2),(.8,.2)], [(.2,.15),(.8,.15)], [(.2,.1),(.8,.1)]]
+        self.color_difficulties = [[(.2,.2),(.8,.2)],
+                                   [(.2,.15),(.8,.15)],
+                                   [(.2,.1),(.8,.1)]]
         # motion coherence
         self.motion_difficulties = [.8,.5,.2]
         # setup
@@ -222,16 +224,18 @@ class ThresholdConfig(object):
         self.trial_states = None
         self.trial_list = None
         # stim attributes
-        self.stim_colors = np.array([[1,0,0],[0,0,1]])
+        # colors in lab space
+        self.stim_colors = np.array([[60,128,60],[60,-128,60]])
         self.stim_motions = ['in','out']
         # from easy to hard
         # each tuple defines a starting color proportion, and the change in color proportion
         # each difficulty level has two tuples, for different sides of the
         # color space.
-        self.color_difficulties = [[(.3,.3),(.7,.3)], [(.3,.2),(.7,.2)], [(.3,.1),(.7,.1)]]
+        self.color_difficulties = [[(.3,.3),(.7,.3)], 
+                                   [(.3,.2),(.7,.2)], 
+                                   [(.3,.1),(.7,.1)]]
         # motion coherence
         self.motion_difficulties = [.8,.5,.2]
-        self.motion_difficulties = [1,1,1]
         # setup
         self.setup_stims()
     

@@ -17,7 +17,7 @@ See also the elementArrayStim demo.
 from psychopy import visual, event
 import numpy as np
 from numpy import random
-
+    
 class OpticFlow(object):
     def __init__(self, win, speed, color, aperture = None, **kwargs):
         # arguments passed to ElementArray
@@ -46,7 +46,6 @@ class OpticFlow(object):
         # set up dots in 3d space
         # set up transformation matrices
         self.T = np.array([0,0,speed])
-        self.R = np.array([0,0,0])
         # set up viewer's focal length and limits of scenece
         self.f = .5
         self.fieldlimits = [[-10,10], [-10,10], [self.f,4]] # x,y,z, min/max

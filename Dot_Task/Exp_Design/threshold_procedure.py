@@ -2,14 +2,16 @@
 generic task using psychopy
 """
 
-from psychopy import visual, core, event
-import sys,os
-import json
-import yaml
 import datetime
+import json
 import numpy as np
+from psychopy import visual, core, event
 import subprocess
+import sys,os
+import yaml
+
 from flowstim import OpticFlow
+from utils import pixel_lab2rgb
 
 class adaptiveThreshold:
     """ class defining a probabilistic context task
@@ -192,10 +194,10 @@ class adaptiveThreshold:
         return (self.pointtracker,self.trialnum)
         
     def defineStims(self, stim = None):
-        height = .05
+        height = .02
         ratio = self.win.size[1]/float(self.win.size[0])
         if stim == None:
-            self.stim=OpticFlow(self.win, speed=0,
+            self.stim=OpticFlow(self.win, speed=.02,
                                 color=[0,0,0], nElements = 3000,
                                 sizes=[height*ratio, height])
         else:
@@ -218,6 +220,8 @@ class adaptiveThreshold:
             # smoothly move color over the duration
             percent_complete = stim_clock.getTime()/duration
             color = cs*(1-percent_complete) + ce*percent_complete
+            # convert to rgb
+            color = pixel_lab2rgb(color)
             self.stim.updateTrialAttributes(color=color)
             self.stim.draw()
             keys = event.getKeys(self.action_keys + ['q'],True)

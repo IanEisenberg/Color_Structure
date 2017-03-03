@@ -29,7 +29,7 @@ def send_message(msg):
 
 verbose=True
 message_on = False
-fullscr= True
+fullscr= False
 subdata=[]
 motion_on = True
 color_on = False
@@ -107,17 +107,7 @@ if motion_on:
     motion_task.defineStims()
     motion_task.presentTextToWindow(
         """
-        We will now start the training phase of the experiment.
-        
-        Remember, following this training phase will be a test phase with no
-        feedback (you won't see points). Use this training to learn when
-        you have to respond to the identity or color of the shape without
-        needing to use the points.
-        
-        There will be one break half way through. As soon
-        as you press '5' the experiment will start so get ready!
-        
-        Please wait for the experimenter.
+        Motion
         """)
     resp,time=motion_task.waitForKeypress(motion_task.trigger_key)
     motion_task.checkRespForQuitKey(resp)
@@ -140,17 +130,7 @@ if color_on:
     color_task.defineStims()
     color_task.presentTextToWindow(
         """
-        We will now start the training phase of the experiment.
-        
-        Remember, following this training phase will be a test phase with no
-        feedback (you won't see points). Use this training to learn when
-        you have to respond to the identity or color of the shape without
-        needing to use the points.
-        
-        There will be one break half way through. As soon
-        as you press '5' the experiment will start so get ready!
-        
-        Please wait for the experimenter.
+        Color
         """)
     resp,time=color_task.waitForKeypress(color_task.trigger_key)
     color_task.checkRespForQuitKey(resp)

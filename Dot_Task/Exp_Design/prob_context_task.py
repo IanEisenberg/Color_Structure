@@ -1,15 +1,16 @@
 """
 generic task using psychopy
 """
-
-from psychopy import visual, core, event
-import sys,os
-import json
-import yaml
 import datetime
+import json
 import numpy as np
+from psychopy import visual, core, event
 import subprocess
+import sys,os
+import yaml
+
 from flowstim import OpticFlow
+from utils import pixel_lab2rgb
 
 class probContextTask:
     """ class defining a probabilistic context task
@@ -233,6 +234,8 @@ class probContextTask:
             # smoothly move color over the duration
             percent_complete = stim_clock.getTime()/duration
             color = cs*(1-percent_complete) + ce*percent_complete
+            # convert to rgb
+            color = pixel_lab2rgb(color)
             self.stim.updateTrialAttributes(color=color)
             self.stim.draw()
             keys = event.getKeys(self.action_keys + ['q'],True)
