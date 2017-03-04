@@ -29,7 +29,7 @@ def send_message(msg):
 
 verbose=True
 message_on = False
-fullscr= True
+fullscr= False
 subdata=[]
 motion_on = True
 color_on = False
@@ -105,10 +105,7 @@ if motion_on:
     # prepare to start
     motion_task.setupWindow()
     motion_task.defineStims()
-    motion_task.presentTextToWindow(
-        """
-        Motion
-        """)
+    motion_task.presentTextToWindow("Motion")
     resp,time=motion_task.waitForKeypress(motion_task.trigger_key)
     motion_task.checkRespForQuitKey(resp)
     event.clearEvents()

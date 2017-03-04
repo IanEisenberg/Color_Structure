@@ -217,7 +217,8 @@ class probContextTask:
         core.wait(duration)
         self.win.flip()
         
-    def presentStim(self, stim, duration = .5, mode = 'practice'):
+    def presentStim(self, stim, duration=.5, response_window=1,
+                    mode = 'practice', clock=True):
         """ Used during instructions to present possible stims
         """
         ss,se,cs,ce,md = [stim[k] for k in ['speedStart','speedEnd',
@@ -232,17 +233,22 @@ class probContextTask:
             
         stim_clock = core.Clock()
         recorded_keys = []
-        while stim_clock.getTime() < duration:
-            percent_complete = stim_clock.getTime()/duration
-            # smoothly move color over the duration
-            color = cs*(1-percent_complete) + ce*percent_complete
-            # change speed
-            speed = ss*(1-percent_complete) + se*percent_complete
-            # convert to rgb
-            color = pixel_lab2rgb(color)
-            self.stim.updateTrialAttributes(color=color, speed=speed)
-            self.stim.draw()
-            keys = event.getKeys(self.action_keys + [self.quit_key],True)
+        while stim_clock.getTime() < duration+response_window:
+            if stim_clock.getTime() < duration:
+                percent_complete = stim_clock.getTime()/duration
+                # smoothly move color over the duration
+                color = cs*(1-percent_complete) + ce*percent_complete
+                # change speed
+                speed = ss*(1-percent_complete) + se*percent_complete
+                # convert to rgb
+                color = pixel_lab2rgb(color)
+                self.stim.updateTrialAttributes(color=color, speed=speed)
+                self.stim.draw()
+            elif 0<(stim_clock.getTime()-duration)<.05:
+                self.win.flip()
+                self.win.flip()
+            keys = event.getKeys(self.action_keys + [self.quit_key],
+                                 timeStamped=clock)
             for key,response_time in keys:
                 # check for quit key
                 if key == self.quit_key:
@@ -261,7 +267,7 @@ class probContextTask:
             # correct choice is based on whether the color became "more extreme"
             # i.e. more green/red
             correct_choice = abs(stim['colorStart'][1])>abs(stim['colorEnd'][1])+2
-        return correct_choice
+        return self.action_keys[correct_choice]
         
     def presentTrial(self,trial):
         """
@@ -292,16 +298,18 @@ class probContextTask:
         core.wait(trial['CSI'])
         # present stimulus and get response
         event.clearEvents()
-        keys = self.presentStim(stim, trial['stimulusDuration'], mode = 'task')
         trialClock.reset()
-        for key,response_time in keys:
-            # check for quit key
-            if key == self.quit_key:
-                self.shutDownEarly()
-            choice = self.action_keys.index(key)
+        keys = self.presentStim(stim, trial['stimulusDuration'], 
+                                trial['responseWindow'], mode = 'task',
+                                clock=trialClock)
+        if len(keys)>0:
+            choice = keys[0][0]
             print('Choice: %s' % choice)
             trial['response'] = choice
-            trial['rt'] = trialClock.getTime()
+            trial['rt'] = keys[0][1]
+            # record any responses after the first
+            trial['secondary_responses']=[i[0] for i in keys[1:]]
+            trial['secondary_rts']=[i[1] for i in keys[1:]]
             # get feedback
             correct_choice = self.getCorrectChoice(stim,trial['ts'])
             if correct_choice == choice:
@@ -320,7 +328,7 @@ class probContextTask:
                 else:
                     self.presentTextToWindow('+' + str(FB) + ' points')
                 core.wait(trial['FBDuration'])
-                self.clearWindow()        
+                self.clearWindow()              
         #If subject did not respond within the stimulus window clear the stim
         #and admonish the subject
         if trial['rt']==999:

@@ -317,7 +317,8 @@ class ThresholdConfig(object):
         self.stim_ids = stim_ids
   
                     
-    def setup_trial_list(self, stimulusDuration=5, FBDuration=.5, FBonset=.5, ITI=.5, displayFB = True):
+    def setup_trial_list(self, stimulusDuration=2, responseWindow=1,
+                         FBDuration=.5, FBonset=.5, ITI=.5, displayFB = True):
         if self.seed is not None:
             np.random.seed(self.seed)
         trial_list = []    
@@ -332,6 +333,7 @@ class ThresholdConfig(object):
                 'stim': stims[trial],
                 'onset': curr_onset,
                 'stimulusDuration': stimulusDuration,
+                'responseWindow': responseWindow,
                 'FBDuration': FBDuration,
                 'FBonset': FBonset,
                 'displayFB': displayFB,
@@ -344,6 +346,7 @@ class ThresholdConfig(object):
             trial_list += [trial_dict]
 
             trial_count += 1
-            curr_onset += stimulusDuration+FBDuration+FBonset+ITI+r.random()*.5
+            curr_onset += stimulusDuration+responseWindow\
+                          +FBDuration+FBonset+ITI+r.random()*.5
         self.trial_list = trial_list
        
