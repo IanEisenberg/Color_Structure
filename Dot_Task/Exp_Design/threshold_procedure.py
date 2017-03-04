@@ -54,6 +54,8 @@ class adaptiveThreshold:
         self.datafilename='%s_%s_%s.yaml'%(self.subjid,self.taskname,self.timestamp)
         # log initial state
         self.writeToLog(self.toJSON())
+        # convert colors to array to be more useable
+        self.stim_colors = np.array(self.stim_colors)
     
     def loadConfigFile(self,filename):
         """ load a config file from yaml
@@ -203,19 +205,33 @@ class adaptiveThreshold:
         else:
             self.stim = stim 
     
-    def getStimAttributes(self,stim):
-        self.motion_difficulties = [.05,.02,.01]
-        self.color_difficulties = [.2,.15,.1]
-        ss, sd, cs, cd, md = [stim[k] for k in ['speedStrength','speedDirection',
-                       'colorStrength','colorDirection','motionDirection']]
+    def getTrialAttributes(self,stim):
+        ss, sd, cs, cd, md, color = [stim[k] for k in 
+                                     ['speedStrength','speedDirection',
+                                      'colorStrength','colorDirection',
+                                      'motionDirection', 'colorSpace']]
+        # transform word difficulties into numbers
+        ss = self.motion_difficulties[ss]
+        cs = self.color_difficulties[cs]
+        # create start and end points
+        speed_start = self.base_speed
+        speed_end = self.base_speed + ss*sd
         
+        color1_start = color
+        color1_end = color1_start+cd*cs
+        colors = [self.stim_colors[0]*color1_start + 
+                self.stim_colors[1]*(1-color1_start),
+                self.stim_colors[0]*color1_end + 
+                self.stim_colors[1]*(1-color1_end)]
+        color_start,color_end = colors
+        return [speed_start, speed_end, color_start, color_end, md]
+                                      
         
-    def presentStim(self, stim, duration=.5, response_window=1,
+    def presentStim(self, trial_attributes, duration=.5, response_window=1,
                     mode = 'practice', clock=True):
         """ Used during instructions to present possible stims
         """
-        ss,se,cs,ce,md = [stim[k] for k in ['speedStart','speedEnd',
-                       'colorStart','colorEnd','motionDirection']]
+        ss,se,cs,ce,md = trial_attributes
         cs = np.array(cs)
         ce = np.array(ce)
         if mode == 'practice':
@@ -251,15 +267,16 @@ class adaptiveThreshold:
         self.win.flip()
         return recorded_keys
             
-    def getCorrectChoice(self,stim,ts):
+    def getCorrectChoice(self,trial_attributes,ts):
+        ss,se,cs,ce,md = trial_attributes
         # action keys are set up as the choices for ts1 followed by ts2
         # so the index for the correct choice must take that into account
         if ts == 'motion':
-            correct_choice = int(bool(stim['speedDirection']+1))
+            correct_choice = int(se>ss)
         elif ts == 'color':
             # correct choice is based on whether the color became "more extreme"
             # i.e. more green/red
-            correct_choice = abs(stim['colorStart'][1])>abs(stim['colorEnd'][1])+2
+            correct_choice = int(abs(cs[1])>abs(ce[1]))+2
         return self.action_keys[correct_choice]
         
     def presentTrial(self,trial):
@@ -271,13 +288,13 @@ class adaptiveThreshold:
         trialClock = core.Clock()
         self.trialnum += 1
         stim = trial['stim']
-        
+        trial_attributes = self.getTrialAttributes(stim)
+        print('*'*40)
         print('Taskset: %s\nSpeed: %s, Strength: %s\nColorDirection: %s, ColorStrength: %s \
-              \ncolorStart: %s\ncolorEnd: %s\nCorrectChoice: %s\n' % 
+              \nCorrectChoice: %s' % 
               (trial['ts'], stim['speedDirection'], stim['speedStrength'], 
                stim['colorDirection'],stim['colorStrength'],
-               np.round(stim['colorStart'],2),np.round(stim['colorEnd'],2),
-               self.getCorrectChoice(stim,trial['ts'])))
+               self.getCorrectChoice(trial_attributes,trial['ts'])))
         
         
         trial['actualOnsetTime']=core.getTime() - self.startTime
@@ -288,7 +305,7 @@ class adaptiveThreshold:
         # present stimulus and get response
         event.clearEvents()
         trialClock.reset()
-        keys = self.presentStim(stim, trial['stimulusDuration'], 
+        keys = self.presentStim(trial_attributes, trial['stimulusDuration'], 
                                 trial['responseWindow'], mode = 'task',
                                 clock=trialClock)
         if len(keys)>0:
@@ -300,7 +317,7 @@ class adaptiveThreshold:
             trial['secondary_responses']=[i[0] for i in keys[1:]]
             trial['secondary_rts']=[i[1] for i in keys[1:]]
             # get feedback
-            correct_choice = self.getCorrectChoice(stim,trial['ts'])
+            correct_choice = self.getCorrectChoice(trial_attributes,trial['ts'])
             if correct_choice == choice:
                 FB = trial['reward_amount']
             else:

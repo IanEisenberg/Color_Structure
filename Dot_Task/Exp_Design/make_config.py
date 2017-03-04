@@ -240,10 +240,10 @@ class ThresholdConfig(object):
         # each tuple defines a starting color proportion, and the change in color proportion
         # each difficulty level has two tuples, for different sides of the
         # color space.
-        self.color_difficulties = [.2,.15,.1]
+        self.color_difficulties = {'easy':.2,'medium':.15,'hard':.1}
         # motion speeds
         self.base_speed = .06
-        self.motion_difficulties = [.05,.02,.01]
+        self.motion_difficulties = {'easy':.05,'medium':.03,'hard':.01}
         # setup
         self.setup_stims()
     
@@ -263,7 +263,10 @@ class ThresholdConfig(object):
           'stim_ids': self.stim_ids,
           'ts': self.ts,
           'stim_colors': self.stim_colors.tolist(),
-          'stim_motions': self.stim_motions
+          'stim_motions': self.stim_motions,
+          'color_difficulties': self.color_difficulties,
+          'motion_difficulties': self.motion_difficulties,
+          'base_speed': self.base_speed
         }
         to_save = self.trial_list
         to_save.insert(0,initial_params)
@@ -289,30 +292,20 @@ class ThresholdConfig(object):
         
     def setup_stims(self):
         stim_ids = []
-        for motion_difficulty in self.motion_difficulties:
+        for motion_difficulty in self.motion_difficulties.keys():
             for direction in self.stim_motions:
-                for color_difficulty in self.color_difficulties:
+                for color_difficulty in self.color_difficulties.keys():
                     for color_space in self.color_starts:
                         # set color change
-                        color1_start = color_space
                         color_direction = np.random.choice([-1,1])
-                        color1_end = color1_start+color_direction*color_difficulty
-                        colors = [self.stim_colors[0]*color1_start + 
-                                self.stim_colors[1]*(1-color1_start),
-                                self.stim_colors[0]*color1_end + 
-                                self.stim_colors[1]*(1-color1_end)]
                         # set speed change
                         speed_direction = np.random.choice([-1,1])
-                        speed_end = self.base_speed+motion_difficulty*speed_direction
                         stim_ids.append({'motionDirection': direction,
+                                         'colorSpace': color_space,
                                          'speedStrength': motion_difficulty,
                                          'speedDirection': speed_direction,
-                                         'speedStart': self.base_speed,
-                                         'speedEnd': speed_end,
                                          'colorStrength': color_difficulty,
-                                         'colorDirection': color_direction,
-                                         'colorStart': list(colors[0]),
-                                         'colorEnd': list(colors[1])})
+                                         'colorDirection': color_direction})
 
         self.stim_ids = stim_ids
   
