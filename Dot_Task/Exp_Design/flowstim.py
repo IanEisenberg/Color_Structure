@@ -19,7 +19,7 @@ import numpy as np
 from numpy import random
     
 class OpticFlow(object):
-    def __init__(self, win, speed, color, aperture = None, **kwargs):
+    def __init__(self, win, speed, color,  **kwargs):
         # arguments passed to ElementArray
         default_dict = {'nElements': 1000, 'sizes': .005}
         for key in default_dict:
@@ -32,13 +32,6 @@ class OpticFlow(object):
         self.speed = speed
         self.win = win
         self.win.units = 'norm'
-        # define aperture
-        aperture_size = 1.5
-        aperture_vertices = visual.Aperture(self.win, size=aperture_size, units='norm').vertices
-        ratio = float(self.win.size[1])/self.win.size[0]
-        aperture_vertices[:,0]*=ratio
-        self.aperture = visual.Aperture(self.win, size=aperture_size, units='norm', shape = aperture_vertices)
-        self.aperture.disable()
         # trial attributes
         self.dir = 'out'
         self.coherence = 1
@@ -72,12 +65,12 @@ class OpticFlow(object):
                 self.T[2] = -self.speed
             elif dir == 'out':
                 self.T[2] = self.speed
-        if coherence != None:
+        if coherence is not None:
             assert 0 <= coherence <= 1
             self.coherence = coherence
-        if color != None:
+        if color is not None:
             self.dots.setColors(color)
-        if speed != None:
+        if speed is not None:
             self.speed = speed
             self.T = [0,0,speed]
         
@@ -115,10 +108,8 @@ class OpticFlow(object):
         self.project2screen()
         
     def draw(self):
-        self.aperture.enable()
         self.updateDotsPosition()
         self.dots.draw()
-        self.aperture.disable()
         self.win.flip()
 
 

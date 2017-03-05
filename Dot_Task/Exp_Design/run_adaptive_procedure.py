@@ -4,7 +4,7 @@ runprobContextTask
 
 from psychopy import event
 import webbrowser
-from threshold_procedure import adaptiveThreshold
+from adaptive_procedure import adaptiveThreshold
 from make_config import ThresholdConfig
 import glob
 import os
@@ -29,7 +29,7 @@ def send_message(msg):
 
 verbose=True
 message_on = False
-fullscr= False
+fullscr= True
 subdata=[]
 motion_on = True
 color_on = False

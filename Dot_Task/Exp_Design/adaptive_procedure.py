@@ -6,6 +6,7 @@ import datetime
 import json
 import numpy as np
 from psychopy import visual, core, event
+from psychopy.data import QuestHandler, StairHandler
 import subprocess
 import sys,os
 import yaml
@@ -40,6 +41,7 @@ class adaptiveThreshold:
         # set up window
         self.win=[]
         self.window_dims=[800,600]
+        self.aperture=None
         
         self.textStim=[]
         self.trialnum = 0
@@ -56,6 +58,7 @@ class adaptiveThreshold:
         self.writeToLog(self.toJSON())
         # convert colors to array to be more useable
         self.stim_colors = np.array(self.stim_colors)
+        self.defineTrackers()
     
     def loadConfigFile(self,filename):
         """ load a config file from yaml
@@ -107,30 +110,41 @@ class adaptiveThreshold:
     # ******* Display Functions **************
     #**************************************************************************
     
-    def setupWindow(self):
+    def setupWindow(self, aperture=True):
         """ set up the main window
         """
         self.win = visual.Window(self.window_dims, allowGUI=False, 
                                  fullscr=self.fullscreen, monitor='testMonitor', 
                                  units='norm', allowStencil=True,
-                                 color=[-1,-1,-1])                        
+                                 color=[-1,-1,-1])   
+        if aperture==True:
+            # define aperture
+            aperture_size = 1.5
+            aperture_vertices = visual.Aperture(self.win, size=aperture_size, units='norm').vertices
+            ratio = float(self.win.size[1])/self.win.size[0]
+            aperture_vertices[:,0]*=ratio
+            self.aperture = visual.Aperture(self.win, size=aperture_size, units='norm', shape = aperture_vertices)
+            self.aperture.disable()
+                     
         self.win.flip()
         self.win.flip()
         
-    def presentTextToWindow(self,text):
+        
+    def presentTextToWindow(self,text,size=.15):
         """ present a text message to the screen
         return:  time of completion
         """
         
         if not self.textStim:
             self.textStim=visual.TextStim(self.win, text=text,font='BiauKai',
-                                height=.15,color=self.text_color, colorSpace=u'rgb',
+                                height=size,color=self.text_color, colorSpace=u'rgb',
                                 opacity=1,depth=0.0,
                                 alignHoriz='center',wrapWidth=50)
-            self.textStim.setAutoDraw(True) #automatically draw every frame
         else:
             self.textStim.setText(text)
+            self.textStim.setHeight(size)
             self.textStim.setColor(self.text_color)
+        self.textStim.draw()
         self.win.flip()
         return core.getTime()
 
@@ -205,6 +219,20 @@ class adaptiveThreshold:
         else:
             self.stim = stim 
     
+    def defineTrackers(self):
+        trackers = {}
+        if self.ts == "motion":
+            difficulties = self.motion_difficulties
+            maxVal = self.base_speed
+        elif self.ts == "color":
+            difficulties = self.color_difficulties
+            maxVal = self.color_starts[0]
+        for key,val in difficulties.items():
+            trackers[key] = StairHandler(startVal=val, minVal=0, maxVal=maxVal,
+                                        stepSizes=maxVal/10.0, nReversals=20)
+        self.trackers = trackers
+        
+        
     def getTrialAttributes(self,stim):
         ss, sd, cs, cd, md, color = [stim[k] for k in 
                                      ['speedStrength','speedDirection',
@@ -242,6 +270,7 @@ class adaptiveThreshold:
             
         stim_clock = core.Clock()
         recorded_keys = []
+        if self.aperture: self.aperture.enable()
         while stim_clock.getTime() < duration+response_window:
             if stim_clock.getTime() < duration:
                 percent_complete = stim_clock.getTime()/duration
@@ -263,6 +292,7 @@ class adaptiveThreshold:
                 if key == self.quit_key:
                     self.shutDownEarly()
                 recorded_keys+=keys
+        if self.aperture: self.aperture.disable()
         self.win.flip()
         self.win.flip()
         return recorded_keys
@@ -289,10 +319,24 @@ class adaptiveThreshold:
         self.trialnum += 1
         stim = trial['stim']
         trial_attributes = self.getTrialAttributes(stim)
+        # update difficulties based on adaptive tracker
+        if self.ts == "motion":
+            strength = stim["speedStrength"]
+            difficulties = self.motion_difficulties
+        elif self.ts == "color":
+            strength = stim["colorStrength"]
+            difficulties = self.color_difficulties
+        tracker = self.trackers[strength]
+        decision_var = tracker.next()
+        difficulties[strength] = decision_var
+        
+                
         print('*'*40)
-        print('Taskset: %s\nSpeed: %s, Strength: %s\nColorDirection: %s, ColorStrength: %s \
+        print('Taskset: %s, choice value: %s\nSpeed: %s, Strength: %s \
+              \nColorDirection: %s, ColorStrength: %s \
               \nCorrectChoice: %s' % 
-              (trial['ts'], stim['speedDirection'], stim['speedStrength'], 
+              (trial['ts'], decision_var, 
+               stim['speedDirection'], stim['speedStrength'], 
                stim['colorDirection'],stim['colorStrength'],
                self.getCorrectChoice(trial_attributes,trial['ts'])))
         
@@ -320,8 +364,10 @@ class adaptiveThreshold:
             correct_choice = self.getCorrectChoice(trial_attributes,trial['ts'])
             if correct_choice == choice:
                 FB = trial['reward_amount']
+                tracker.addResponse(1)
             else:
                 FB = trial['punishment_amount']
+                tracker.addResponse(0)
              #record points for bonus
             self.pointtracker += FB
             #If training, present FB to window
@@ -360,7 +406,7 @@ class adaptiveThreshold:
                 self.presentTextToWindow("Take a break! Press '5' when you're ready to continue.")
                 self.waitForKeypress(self.trigger_key)
                 self.clearWindow()
-                pause_time = core.getTime() - time1
+                pause_time = core.getTime() - time
             
             # wait for onset time
             while core.getTime() < trial['onset'] + self.startTime + pause_time:
@@ -370,12 +416,12 @@ class adaptiveThreshold:
                     for key,response_time in key_response:
                         if self.quit_key==key:
                             self.shutDownEarly()
-        
             self.presentTrial(trial)
         
         # clean up and save
         self.writeData()
-        self.presentTextToWindow('Thank you. Please wait for the experimenter.')
+        self.presentTextToWindow('Thank you. Please wait for the experimenter',
+                                 size=.05)
         self.waitForKeypress(self.quit_key)
         self.closeWindow()
 

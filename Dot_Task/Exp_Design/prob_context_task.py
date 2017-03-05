@@ -113,23 +113,24 @@ class probContextTask:
         self.win.flip()
         self.win.flip()
         
-    def presentTextToWindow(self,text):
+    def presentTextToWindow(self,text,size=.15):
         """ present a text message to the screen
         return:  time of completion
         """
         
         if not self.textStim:
             self.textStim=visual.TextStim(self.win, text=text,font='BiauKai',
-                                height=.15,color=self.text_color, colorSpace=u'rgb',
+                                height=size,color=self.text_color, colorSpace=u'rgb',
                                 opacity=1,depth=0.0,
                                 alignHoriz='center',wrapWidth=50)
-            self.textStim.setAutoDraw(True) #automatically draw every frame
         else:
             self.textStim.setText(text)
+            self.textStim.setHeight(size)
             self.textStim.setColor(self.text_color)
+        self.textStim.draw()
         self.win.flip()
         return core.getTime()
-
+        
     def clearWindow(self):
         """ clear the main window
         """

@@ -233,7 +233,7 @@ class ThresholdConfig(object):
         self.trial_list = None
         # stim attributes
         # colors in LAB space
-        self.stim_colors = np.array([[60,128,60],[60,-128,60]])
+        self.stim_colors = np.array([[75,128,75],[75,-128,75]])
         self.stim_motions = ['in','out']
         self.color_starts = [.2,.8]
         # from easy to hard
@@ -243,7 +243,7 @@ class ThresholdConfig(object):
         self.color_difficulties = {'easy':.2,'medium':.15,'hard':.1}
         # motion speeds
         self.base_speed = .06
-        self.motion_difficulties = {'easy':.05,'medium':.03,'hard':.01}
+        self.motion_difficulties = {'easy':.02,'medium':.01,'hard':.005}
         # setup
         self.setup_stims()
     
