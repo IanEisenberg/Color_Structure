@@ -219,7 +219,7 @@ class adaptiveThreshold:
         else:
             self.stim = stim 
     
-    def defineTrackers(self):
+    def defineTrackers(self, method='quest'):
         trackers = {}
         if self.ts == "motion":
             difficulties = self.motion_difficulties
@@ -227,9 +227,30 @@ class adaptiveThreshold:
         elif self.ts == "color":
             difficulties = self.color_difficulties
             maxVal = self.color_starts[0]
-        for key,val in difficulties.items():
-            trackers[key] = StairHandler(startVal=val, minVal=0, maxVal=maxVal,
-                                        stepSizes=maxVal/10.0, nReversals=20)
+        if method=='basic':
+            step_lookup = {'easy':5,
+                           'medium': 3,
+                           'hard': 2}
+            for key,val in difficulties.items():
+                nDown = step_lookup[key]
+                trackers[key] = StairHandler(startVal=val, minVal=0, 
+                                            maxVal=maxVal,
+                                            stepSizes=maxVal/10.0, 
+                                            stepType='lin',
+                                            nDown=nDown,
+                                            nReversals=20)
+        elif method=='quest':
+            step_lookup = {'easy': .9,
+                           'medium': .8,
+                           'hard': .7}
+            for key,val in difficulties.items():
+                trackers[key] = StairHandler(pThreshold=.82,
+                                            nTrials = self.exp_len/len(difficulties),
+                                            startVal=val, startValSd=maxVal/2,
+                                            minVal=0, 
+                                            maxVal=maxVal,
+                                            gamma=.01,
+                                            beta=3.5)
         self.trackers = trackers
         
         
@@ -402,7 +423,7 @@ class adaptiveThreshold:
         pause_time = 0
         for trial in self.stimulusInfo:
             if trial == pause_trial:
-                time1 = core.getTime()
+                time = core.getTime()
                 self.presentTextToWindow("Take a break! Press '5' when you're ready to continue.")
                 self.waitForKeypress(self.trigger_key)
                 self.clearWindow()

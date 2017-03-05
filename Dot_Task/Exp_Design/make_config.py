@@ -217,7 +217,6 @@ class ThresholdConfig(object):
             np.random.seed(self.seed)
         self.distribution = norm
         self.stim_repetitions = stim_repetitions
-        self.exp_len = int(stim_repetitions*36)
         self.subjid = subjid
         # set task set
         assert ts in ['color','motion']
@@ -242,8 +241,12 @@ class ThresholdConfig(object):
         # color space.
         self.color_difficulties = {'easy':.2,'medium':.15,'hard':.1}
         # motion speeds
-        self.base_speed = .06
+        self.base_speed = .15
         self.motion_difficulties = {'easy':.02,'medium':.01,'hard':.005}
+        # calculate exp len
+        num_stims = len(self.color_difficulties)*len(self.motion_difficulties)\
+                    *len(self.stim_colors)*len(self.stim_motions)
+        self.exp_len = int(stim_repetitions*num_stims)
         # setup
         self.setup_stims()
     

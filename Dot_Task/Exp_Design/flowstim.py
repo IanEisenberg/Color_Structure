@@ -61,10 +61,6 @@ class OpticFlow(object):
         if dir != None:
             assert dir in ['in','out']
             self.dir = dir
-            if dir == 'in':
-                self.T[2] = -self.speed
-            elif dir == 'out':
-                self.T[2] = self.speed
         if coherence is not None:
             assert 0 <= coherence <= 1
             self.coherence = coherence
@@ -72,7 +68,12 @@ class OpticFlow(object):
             self.dots.setColors(color)
         if speed is not None:
             self.speed = speed
-            self.T = [0,0,speed]
+        # appropriately update transformation matrix when needed
+        if dir is not None or speed is not None:
+            if self.dir == 'in':
+                self.T[2] = -self.speed
+            elif self.dir == 'out':
+                self.T[2] = self.speed
         
     def updateDotsPosition(self):
         dot_coherence = np.zeros([self.nElements])
