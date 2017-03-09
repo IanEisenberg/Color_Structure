@@ -84,8 +84,10 @@ class ConfigList(object):
             raise BaseException('Config file not found')
         config_file = yaml.load(open(filename,'r'))
         configuration = config_file[0]
-        self.__dict__.update(configuration)
-        self.__dict__.update(kwargs)
+        for k,v in configuration.items():
+            self.__dict__[k] = v
+        for k,v in kwargs.items():
+            self.__dict__[k] = v  
         # setup
         self.setup_stims()
         self.setup_trial_states()
