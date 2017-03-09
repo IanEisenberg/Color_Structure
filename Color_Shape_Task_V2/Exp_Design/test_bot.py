@@ -5,6 +5,7 @@ Define a bot to run temp_struct_task
 
 import numpy as np
 from scipy.stats import norm
+from scipy.stats import beta
 import yaml
 
 class test_bot:

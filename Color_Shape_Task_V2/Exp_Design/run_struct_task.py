@@ -34,10 +34,10 @@ def send_message(msg):
 verbose=True
 fullscr= False
 subdata=[]
-practice_on = False
-train_on = False
+practice_on = True
+train_on = True
 test_on = True
-bot_on = True
+bot_on = False
 bot_mode = "ignore_base" #other for optimal
 home = os.getenv('HOME') 
 save_dir = '../Data' 

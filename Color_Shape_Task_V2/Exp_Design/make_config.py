@@ -56,7 +56,7 @@ class ConfigList(object):
         if args == None:
             if distribution == norm:
                 self.args = [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
-            if distribution == beta:
+            elif distribution == beta:
                 self.args = [{'a':2, 'b': 3, 'loc':-1, 'scale':2},
                              {'a':3, 'b': 2, 'loc':-1, 'scale':2}]
         self.ts_order = ts_order
@@ -95,7 +95,7 @@ class ConfigList(object):
           'quit_key': 'q',
           'responseWindow': 1.0,
           'taskname': self.taskname,
-          'id': self.subjid,
+          'subjid': self.subjid,
           'trigger_key': '5',
           'action_keys': self.action_keys,
           'states': self.states,
@@ -129,8 +129,10 @@ class ConfigList(object):
             raise BaseException('Config file not found')
         config_file = yaml.load(open(filename,'r'))
         configuration = config_file[0]
-        self.__dict__.update(configuration)
-        self.__dict__.update(kwargs)
+        for k,v in configuration.items():
+            self.__dict__[k] = v
+        for k,v in kwargs.items():
+            self.__dict__[k] = v
         # setup
         self.setup_stims()
         self.setup_trial_states()
