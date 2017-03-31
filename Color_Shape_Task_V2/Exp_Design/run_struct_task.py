@@ -7,11 +7,11 @@ import webbrowser
 from prob_context_task import probContextTask
 from make_config import ConfigList
 from scipy.stats import norm
+from scipy.stats import beta
 from test_bot import test_bot
 import glob
 import os
 from twilio.rest import TwilioRestClient
-from scipy.stats import beta
 import util
 
 # ****************************************************************************

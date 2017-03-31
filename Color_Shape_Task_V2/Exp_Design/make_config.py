@@ -133,10 +133,15 @@ class ConfigList(object):
             self.__dict__[k] = v
         for k,v in kwargs.items():
             self.__dict__[k] = v
+        dist_string = config_file[1]['task_distributions']
+        if dist_string == "beta":
+            self.distribution = beta
+            self.distribution_name = dist_string
+        #if dist_string == norm  (do nothing)
+        self.args = [self.states[i]['dist_args'] for i in range(len(self.states))]   
         # setup
         self.setup_stims()
         self.setup_trial_states()
-    
 
     def setup_stims(self):
         """
@@ -200,6 +205,7 @@ class ConfigList(object):
         
         for trial in range(self.exp_len):
             state = self.states[self.trial_states[trial]]
+            #print(state['dist_args'], state['dist_args'] is None)
             dist = self.distribution(**state['dist_args'])
             #select snap position from distribution and fix them to one of 11 points
             binned = -1.1 + np.digitize([dist.rvs()],bin_boundaries)*.2
