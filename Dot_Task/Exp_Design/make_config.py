@@ -21,7 +21,7 @@ class ProbContextConfig(object):
             np.random.seed(self.seed)
         self.distribution = norm
         self.stim_repetitions = stim_repetitions
-        self.exp_len = int(stim_repetitions*36)
+        self.exp_len = int(stim_repetitions*144)
         self.rp = rp # recursive probability
         self.subjid = subjid
         self.taskname = taskname
@@ -244,10 +244,10 @@ class ThresholdConfig(object):
         self.color_difficulties = {'easy':.2,'medium':.15,'hard':.1}
         # motion speeds
         self.base_speed = .15
-        self.motion_difficulties = {'easy':.02,'medium':.01,'hard':.005}
+        self.motion_difficulties = {'easy':.05,'medium':.025,'hard':.0125}
         # calculate exp len
         num_stims = len(self.color_difficulties)*len(self.motion_difficulties)\
-                    *len(self.stim_colors)*len(self.stim_motions)
+                    *len(self.stim_colors)*len(self.stim_motions)*4
         self.exp_len = int(stim_repetitions*num_stims)
         # setup
         self.setup_stims()
@@ -303,16 +303,14 @@ class ThresholdConfig(object):
             for direction in self.stim_motions:
                 for color_difficulty in self.color_difficulties.keys():
                     for color_space in self.color_starts:
-                        # set color change
-                        color_direction = np.random.choice([-1,1])
-                        # set speed change
-                        speed_direction = np.random.choice([-1,1])
-                        stim_ids.append({'motionDirection': direction,
-                                         'colorSpace': color_space,
-                                         'speedStrength': motion_difficulty,
-                                         'speedDirection': speed_direction,
-                                         'colorStrength': color_difficulty,
-                                         'colorDirection': color_direction})
+                        for color_direction in [-1,1]:
+                            for speed_direction in [-1,1]:
+                                stim_ids.append({'motionDirection': direction,
+                                                 'colorSpace': color_space,
+                                                 'speedStrength': motion_difficulty,
+                                                 'speedDirection': speed_direction,
+                                                 'colorStrength': color_difficulty,
+                                                 'colorDirection': color_direction})
 
         self.stim_ids = stim_ids
   
