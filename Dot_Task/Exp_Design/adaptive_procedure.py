@@ -1,10 +1,12 @@
 """
 generic task using psychopy
 """
+
 import datetime
 import json
 import numpy as np
 from psychopy import visual, core, event
+from psychopy.data import QuestHandler, StairHandler
 import subprocess
 import sys,os
 import yaml
@@ -12,7 +14,7 @@ import yaml
 from flowstim import OpticFlow
 from utils import pixel_lab2rgb
 
-class probContextTask:
+class adaptiveThreshold:
     """ class defining a probabilistic context task
     """
     
@@ -39,6 +41,8 @@ class probContextTask:
         # set up window
         self.win=[]
         self.window_dims=[800,600]
+        self.aperture=None
+        
         self.textStim=[]
         self.trialnum = 0
         self.track_response = []
@@ -52,6 +56,9 @@ class probContextTask:
         self.datafilename='%s_%s_%s.yaml'%(self.subjid,self.taskname,self.timestamp)
         # log initial state
         self.writeToLog(self.toJSON())
+        # convert colors to array to be more useable
+        self.stim_colors = np.array(self.stim_colors)
+        self.defineTrackers()
     
     def loadConfigFile(self,filename):
         """ load a config file from yaml
@@ -103,15 +110,25 @@ class probContextTask:
     # ******* Display Functions **************
     #**************************************************************************
     
-    def setupWindow(self):
+    def setupWindow(self, aperture=True):
         """ set up the main window
         """
         self.win = visual.Window(self.window_dims, allowGUI=False, 
                                  fullscr=self.fullscreen, monitor='testMonitor', 
                                  units='norm', allowStencil=True,
-                                 color=[-1,-1,-1])                        
+                                 color=[-1,-1,-1])   
+        if aperture==True:
+            # define aperture
+            aperture_size = 1.5
+            aperture_vertices = visual.Aperture(self.win, size=aperture_size, units='norm').vertices
+            ratio = float(self.win.size[1])/self.win.size[0]
+            aperture_vertices[:,0]*=ratio
+            self.aperture = visual.Aperture(self.win, size=aperture_size, units='norm', shape = aperture_vertices)
+            self.aperture.disable()
+                     
         self.win.flip()
         self.win.flip()
+        
         
     def presentTextToWindow(self,text,size=.15):
         """ present a text message to the screen
@@ -130,7 +147,7 @@ class probContextTask:
         self.textStim.draw()
         self.win.flip()
         return core.getTime()
-        
+
     def clearWindow(self):
         """ clear the main window
         """
@@ -192,38 +209,78 @@ class probContextTask:
     def getPoints(self):
         return (self.pointtracker,self.trialnum)
         
-    def defineStims(self, stim = None, cue = None):
-        ratio = self.win.size[1]/float(self.win.size[0])
-        stim_height = .02
-        cue_height = .1
+    def defineStims(self, stim = None):
+        height = .02
         ratio = self.win.size[1]/float(self.win.size[0])
         if stim == None:
-            self.stim=OpticFlow(self.win, speed=.1,
+            self.stim=OpticFlow(self.win, speed=.02,
                                 color=[0,0,0], nElements = 3000,
-                                sizes=[stim_height*ratio, stim_height])
+                                sizes=[height*ratio, height])
         else:
-            self.stim = stim
-        if cue == None:
-            # set up cue
-            self.cue = visual.Circle(self.win,units = 'norm',
-                                     radius = (cue_height*ratio, cue_height),
-                                     fillColor = 'white', edges = 120)
-        else:
-            self.cue = cue
+            self.stim = stim 
     
-    def presentCue(self, context, duration):
-        self.cue.setPos((0, context*.8))
-        self.cue.draw()
-        self.win.flip()
-        core.wait(duration)
-        self.win.flip()
+    def defineTrackers(self, method='quest'):
+        trackers = {}
+        if self.ts == "motion":
+            difficulties = self.motion_difficulties
+            maxVal = self.base_speed
+        elif self.ts == "color":
+            difficulties = self.color_difficulties
+            maxVal = self.color_starts[0]
+        if method=='basic':
+            step_lookup = {'easy':5,
+                           'medium': 3,
+                           'hard': 2}
+            for key,val in difficulties.items():
+                nDown = step_lookup[key]
+                trackers[key] = StairHandler(startVal=val, minVal=0, 
+                                            maxVal=maxVal,
+                                            stepSizes=maxVal/10.0, 
+                                            stepType='lin',
+                                            nDown=nDown,
+                                            nReversals=20)
+        elif method=='quest':
+            step_lookup = {'easy': .9,
+                           'medium': .8,
+                           'hard': .7}
+            for key,val in difficulties.items():
+                trackers[key] = StairHandler(pThreshold=.82,
+                                            nTrials = self.exp_len/len(difficulties),
+                                            startVal=val, startValSd=maxVal/2,
+                                            minVal=0, 
+                                            maxVal=maxVal,
+                                            gamma=.01,
+                                            beta=3.5)
+        self.trackers = trackers
         
-    def presentStim(self, stim, duration=.5, response_window=1,
+        
+    def getTrialAttributes(self,stim):
+        ss, sd, cs, cd, md, color = [stim[k] for k in 
+                                     ['speedStrength','speedDirection',
+                                      'colorStrength','colorDirection',
+                                      'motionDirection', 'colorSpace']]
+        # transform word difficulties into numbers
+        ss = self.motion_difficulties[ss]
+        cs = self.color_difficulties[cs]
+        # create start and end points
+        speed_start = self.base_speed
+        speed_end = self.base_speed + ss*sd
+        
+        color1_start = color
+        color1_end = color1_start+cd*cs
+        colors = [self.stim_colors[0]*color1_start + 
+                self.stim_colors[1]*(1-color1_start),
+                self.stim_colors[0]*color1_end + 
+                self.stim_colors[1]*(1-color1_end)]
+        color_start,color_end = colors
+        return [speed_start, speed_end, color_start, color_end, md]
+                                      
+        
+    def presentStim(self, trial_attributes, duration=.5, response_window=1,
                     mode = 'practice', clock=True):
         """ Used during instructions to present possible stims
         """
-        ss,se,cs,ce,md = [stim[k] for k in ['speedStart','speedEnd',
-                       'colorStart','colorEnd','motionDirection']]
+        ss,se,cs,ce,md = trial_attributes
         cs = np.array(cs)
         ce = np.array(ce)
         if mode == 'practice':
@@ -234,6 +291,7 @@ class probContextTask:
             
         stim_clock = core.Clock()
         recorded_keys = []
+        if self.aperture: self.aperture.enable()
         while stim_clock.getTime() < duration+response_window:
             if stim_clock.getTime() < duration:
                 percent_complete = stim_clock.getTime()/duration
@@ -255,19 +313,21 @@ class probContextTask:
                 if key == self.quit_key:
                     self.shutDownEarly()
                 recorded_keys+=keys
+        if self.aperture: self.aperture.disable()
         self.win.flip()
         self.win.flip()
         return recorded_keys
             
-    def getCorrectChoice(self,stim,ts):
+    def getCorrectChoice(self,trial_attributes,ts):
+        ss,se,cs,ce,md = trial_attributes
         # action keys are set up as the choices for ts1 followed by ts2
         # so the index for the correct choice must take that into account
         if ts == 'motion':
-            correct_choice = int(bool(stim['speedDirection']+1))
+            correct_choice = int(se>ss)
         elif ts == 'color':
             # correct choice is based on whether the color became "more extreme"
             # i.e. more green/red
-            correct_choice = abs(stim['colorStart'][1])>abs(stim['colorEnd'][1])+2
+            correct_choice = int(abs(cs[1])>abs(ce[1]))+2
         return self.action_keys[correct_choice]
         
     def presentTrial(self,trial):
@@ -278,15 +338,28 @@ class probContextTask:
         """
         trialClock = core.Clock()
         self.trialnum += 1
-        context = trial['context']
         stim = trial['stim']
+        trial_attributes = self.getTrialAttributes(stim)
+        # update difficulties based on adaptive tracker
+        if self.ts == "motion":
+            strength = stim["speedStrength"]
+            difficulties = self.motion_difficulties
+        elif self.ts == "color":
+            strength = stim["colorStrength"]
+            difficulties = self.color_difficulties
+        tracker = self.trackers[strength]
+        decision_var = tracker.next()
+        difficulties[strength] = decision_var
         
-        print('Taskset: %s\nMotion: %s, Strength: %s\nColorDirection: %s, ColorStrength: %s \
-              \ncolorStart: %s\ncolorEnd: %s\nCorrectChoice: %s\n' % 
-              (trial['ts'], stim['motionDirection'], stim['motionStrength'], 
+                
+        print('*'*40)
+        print('Taskset: %s, choice value: %s\nSpeed: %s, Strength: %s \
+              \nColorDirection: %s, ColorStrength: %s \
+              \nCorrectChoice: %s' % 
+              (trial['ts'], decision_var, 
+               stim['speedDirection'], stim['speedStrength'], 
                stim['colorDirection'],stim['colorStrength'],
-               np.round(stim['colorStart'],2),np.round(stim['colorEnd'],2),
-               self.getCorrectChoice(stim,trial['ts'])))
+               self.getCorrectChoice(trial_attributes,trial['ts'])))
         
         
         trial['actualOnsetTime']=core.getTime() - self.startTime
@@ -294,13 +367,10 @@ class probContextTask:
         trial['response'] = 999
         trial['rt'] = 999
         trial['FB'] = []
-        # present cue
-        self.presentCue(context, trial['cueDuration'])
-        core.wait(trial['CSI'])
         # present stimulus and get response
         event.clearEvents()
         trialClock.reset()
-        keys = self.presentStim(stim, trial['stimulusDuration'], 
+        keys = self.presentStim(trial_attributes, trial['stimulusDuration'], 
                                 trial['responseWindow'], mode = 'task',
                                 clock=trialClock)
         if len(keys)>0:
@@ -312,11 +382,13 @@ class probContextTask:
             trial['secondary_responses']=[i[0] for i in keys[1:]]
             trial['secondary_rts']=[i[1] for i in keys[1:]]
             # get feedback
-            correct_choice = self.getCorrectChoice(stim,trial['ts'])
+            correct_choice = self.getCorrectChoice(trial_attributes,trial['ts'])
             if correct_choice == choice:
                 FB = trial['reward_amount']
+                tracker.addResponse(1)
             else:
                 FB = trial['punishment_amount']
+                tracker.addResponse(0)
              #record points for bonus
             self.pointtracker += FB
             #If training, present FB to window
@@ -329,7 +401,7 @@ class probContextTask:
                 else:
                     self.presentTextToWindow('+' + str(FB) + ' points')
                 core.wait(trial['FBDuration'])
-                self.clearWindow()              
+                self.clearWindow()        
         #If subject did not respond within the stimulus window clear the stim
         #and admonish the subject
         if trial['rt']==999:
@@ -351,11 +423,11 @@ class probContextTask:
         pause_time = 0
         for trial in self.stimulusInfo:
             if trial == pause_trial:
-                time1 = core.getTime()
+                time = core.getTime()
                 self.presentTextToWindow("Take a break! Press '5' when you're ready to continue.")
                 self.waitForKeypress(self.trigger_key)
                 self.clearWindow()
-                pause_time = core.getTime() - time1
+                pause_time = core.getTime() - time
             
             # wait for onset time
             while core.getTime() < trial['onset'] + self.startTime + pause_time:
@@ -365,12 +437,12 @@ class probContextTask:
                     for key,response_time in key_response:
                         if self.quit_key==key:
                             self.shutDownEarly()
-        
             self.presentTrial(trial)
         
         # clean up and save
         self.writeData()
-        self.presentTextToWindow('Thank you. Please wait for the experimenter.')
+        self.presentTextToWindow('Thank you. Please wait for the experimenter',
+                                 size=.05)
         self.waitForKeypress(self.quit_key)
         self.closeWindow()
 

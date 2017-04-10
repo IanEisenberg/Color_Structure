@@ -132,6 +132,7 @@ class ConfigList(object):
         for k,v in configuration.items():
             self.__dict__[k] = v
         for k,v in kwargs.items():
+
             self.__dict__[k] = v
         dist_string = config_file[1]['task_distributions']
         if dist_string == "beta":

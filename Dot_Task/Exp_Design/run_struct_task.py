@@ -5,7 +5,7 @@ runprobContextTask
 from psychopy import core, event
 import webbrowser
 from prob_context_task import probContextTask
-from make_config import ConfigList
+from make_config import ProbContextConfig
 import glob
 import os
 from twilio.rest import TwilioRestClient
@@ -73,18 +73,18 @@ except ValueError:
 # ****************************************************************************
 # train 
 if train_on:
-    train_config = ConfigList(taskname = trainname, subjid = subject_code, stim_repetitions = stim_repetitions, ts_order = ts_order, rp = recursive_p)
+    train_config = ProbContextConfig(taskname = trainname, subjid = subject_code, stim_repetitions = stim_repetitions, ts_order = ts_order, rp = recursive_p)
     train_config_file = train_config.get_config()
 else:
     train_config_file = glob.glob('../Config_Files/*Context_' +subject_code +'*yaml')[-1]
     
-test_config = ConfigList()
+test_config = ProbContextConfig()
 test_config.load_config_settings(train_config_file, taskname=train_config.taskname+'_test', stim_repetitions = stim_repetitions)
 test_config.setup_trial_list(displayFB = False)
 test_config_file = test_config.get_config()
 
 # setup tasks
-train=probContextTask(train_config_file,subject_code, save_dir=save_dir, fullscreen = False)
+train=probContextTask(train_config_file,subject_code, save_dir=save_dir, fullscreen = fullscr)
 train.setupWindow()
 train.defineStims()
 train.run_task()
