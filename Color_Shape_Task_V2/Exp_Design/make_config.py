@@ -11,10 +11,29 @@ import numpy as np
 from os import path
 import random as r
 from scipy.stats import norm
+from scipy.stats import beta
 
 class ConfigList(object):
+    """ 
+    This class sets confugurations for a probabilistic task set
+    ----------------------------------------------
+    Initial Parametes: 
+        taskname (string) -- name of task (default 'taskname')
+        subjid (string) -- id of subject (default 000)
+        rp (double) -- propability of repeatingthe same task (default 0.9)
+        action_keys (string list) -- customize action keys (default ['d','f','j','k'])
+        distribution (propability distribution)-- distribution pattern (default norm)
+        args (list of dictionary) -- set arguments for distribution, 
+            (default [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}])
+        exp_len (int)-- length of experiment (default 200)
+        ts_order (list) -- set custom task set order, None for random selection 
+                    (default random)
+        seed (int) -- set seed,  (defualt None)
+    ----------------------------------------------- 
+    """
     def __init__(self, taskname='taskname', subjid='000', rp=.9,
-                 action_keys=None, distribution=norm, args=None, exp_len=200, ts_order=None, seed=None):
+                 action_keys=None, distribution=norm, args=None, exp_len=200, 
+                     ts_order=None, seed=None):
         self.seed = seed
         if self.seed is not None:
             r.seed(self.seed)
@@ -31,11 +50,15 @@ class ConfigList(object):
             self.distribution_name = 'unknown'
         self.action_keys = action_keys
         if action_keys == None:
-            self.action_keys = ['d','f','j', 'k']
+            self.action_keys = ['d','f','j','k']
             r.shuffle(self.action_keys)
         self.args = args
         if args == None:
-            self.args = [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
+            if distribution == norm:
+                self.args = [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
+            elif distribution == beta:
+                self.args = [{'a':2, 'b': 3, 'loc':-1, 'scale':2},
+                             {'a':3, 'b': 2, 'loc':-1, 'scale':2}]
         self.ts_order = ts_order
         if ts_order == None:
             self.ts_order = [0,1]
@@ -49,7 +72,21 @@ class ConfigList(object):
         # setup
         self.setup_stims()
     
+
     def get_config(self, save=True, filey=None):
+        """
+        returns the configuration of task set if save = false.
+        returns the file path if save = true
+        --------------------------------------
+        Parameters:
+            save (boolean) -- True to save to file
+            filey (path) -- specify save file path
+                            None for default
+        Returns:
+            filepath (if save = true)
+            configuration (if save = false)
+        -----------------------------------
+        """
         if self.trial_list==None:
             self.setup_trial_list()
         
@@ -58,7 +95,7 @@ class ConfigList(object):
           'quit_key': 'q',
           'responseWindow': 1.0,
           'taskname': self.taskname,
-          'id': self.subjid,
+          'subjid': self.subjid,
           'trigger_key': '5',
           'action_keys': self.action_keys,
           'states': self.states,
@@ -78,8 +115,16 @@ class ConfigList(object):
             return filey
         else:
             return to_save
-      
+               
     def load_config_settings(self, filename, **kwargs):
+        """
+        load configurations from a file.
+        --------------------------------------
+        Parameters:
+            filename (string) -- file name (assumes that file is valid)
+            **kwargs (key word argument)
+        ----------------------------------- 
+        """
         if not path.exists(filename):
             raise BaseException('Config file not found')
         config_file = yaml.load(open(filename,'r'))
@@ -87,14 +132,25 @@ class ConfigList(object):
         for k,v in configuration.items():
             self.__dict__[k] = v
         for k,v in kwargs.items():
-            self.__dict__[k] = v  
+
+            self.__dict__[k] = v
+        dist_string = config_file[1]['task_distributions']
+        if dist_string == "beta":
+            self.distribution = beta
+            self.distribution_name = dist_string
+        #if dist_string == norm  (do nothing)
+        self.args = [self.states[i]['dist_args'] for i in range(len(self.states))]   
         # setup
         self.setup_stims()
         self.setup_trial_states()
-        
+
     def setup_stims(self):
+        """
+        sets up stimulus (id, order, distribution states, trial states)
+        """
         self.stim_ids = [(0,2),(0,3),(1,2),(1,3)]
-        self.states = {i: {'ts': self.ts_order[i], 'dist_args': self.args[i]} for i in range(len(self.ts_order))}
+        self.states = {i: {'ts': self.ts_order[i], 'dist_args': self.args[i]} 
+                       for i in range(len(self.ts_order))}
         self.setup_trial_states()
   
     def setup_trial_states(self):
@@ -124,7 +180,19 @@ class ConfigList(object):
         self.trial_states = trial_states
             
                     
-    def setup_trial_list(self, stimulusDuration=1.5, FBDuration=.5, FBonset=.5, ITI=.5, displayFB = True):
+    def setup_trial_list(self, stimulusDuration=1.5, FBDuration=.5, 
+                         FBonset=.5, ITI=.5, displayFB = True):
+        """
+        Sets up trails and appeding configurations to trial_list            ***incomplete
+        --------------------------------------
+        Parameters:
+            stimulusDuration (double)-- stimulus duration (default 1.5)
+            FBDuration (double) -- Feedback display duration (deafult .5)
+            FBonset (double) -- Delay of feedback (default .5)
+            ITI (double) -- ***incomplete*** (default .5)
+            displayFB (boolean) -- enable/disable feedback (default true)      
+        ----------------------------------- 
+        """
         if self.seed is not None:
             np.random.seed(self.seed)
         trial_list = []    
@@ -138,7 +206,9 @@ class ConfigList(object):
         
         for trial in range(self.exp_len):
             state = self.states[self.trial_states[trial]]
+            #print(state['dist_args'], state['dist_args'] is None)
             dist = self.distribution(**state['dist_args'])
+            #select snap position from distribution and fix them to one of 11 points
             binned = -1.1 + np.digitize([dist.rvs()],bin_boundaries)*.2
             context_sample = round(max(-1, min(1, binned[0])),2)
 
