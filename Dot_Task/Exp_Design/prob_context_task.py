@@ -281,12 +281,14 @@ class probContextTask:
         context = trial['context']
         stim = trial['stim']
         
-        print('Taskset: %s\nMotion: %s, Strength: %s\nColorDirection: %s, ColorStrength: %s \
-              \ncolorStart: %s\ncolorEnd: %s\nCorrectChoice: %s\n' % 
-              (trial['ts'], stim['motionDirection'], stim['motionStrength'], 
+        print('*'*40)
+        print('Taskset: %s, choice value: %s\nSpeed: %s, Strength: %s \
+              \nColorDirection: %s, ColorStrength: %s \
+              \nCorrectChoice: %s' % 
+              (trial['ts'], decision_var, 
+               stim['speedDirection'], stim['speedStrength'], 
                stim['colorDirection'],stim['colorStrength'],
-               np.round(stim['colorStart'],2),np.round(stim['colorEnd'],2),
-               self.getCorrectChoice(stim,trial['ts'])))
+               self.getCorrectChoice(trial_attributes,trial['ts'])))
         
         
         trial['actualOnsetTime']=core.getTime() - self.startTime
@@ -300,8 +302,7 @@ class probContextTask:
         # present stimulus and get response
         event.clearEvents()
         trialClock.reset()
-        keys = self.presentStim(stim, trial['stimulusDuration'], 
-                                trial['responseWindow'], mode = 'task',
+        keys = self.presentStim(stim, trial['stimulusDuration'], mode = 'task',
                                 clock=trialClock)
         if len(keys)>0:
             choice = keys[0][0]

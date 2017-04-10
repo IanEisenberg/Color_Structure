@@ -57,16 +57,15 @@ f.close()
 """
 subject_code = 'test'
 # set up task variables
-stim_repetitions = 5
+stim_repetitions = 1
 
 # counterbalance ts_order (which ts is associated with top of screen)
+ts_order = ['motion','color']
 try:
-    if int(subject_code)%2 == 0:
-        ts_order = [0,1]
-    else:
-        ts_order = [1,0]
+    if int(subject_code)%2 == 1:
+        ts_order = ['color','motion']
 except ValueError:
-    ts_order = [0,1]
+    pass
 
 # ****************************************************************************
 # set up config files

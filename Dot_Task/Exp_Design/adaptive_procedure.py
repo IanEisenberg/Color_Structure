@@ -244,8 +244,9 @@ class adaptiveThreshold:
                            'medium': .8,
                            'hard': .7}
             for key,val in difficulties.items():
-                trackers[key] = StairHandler(pThreshold=.82,
-                                            nTrials = self.exp_len/len(difficulties),
+                threshold = step_lookup[key]
+                trackers[key] = QuestHandler(pThreshold=threshold,
+                                            nTrials = self.exp_len,
                                             startVal=val, startValSd=maxVal/2,
                                             minVal=0, 
                                             maxVal=maxVal,
@@ -350,7 +351,8 @@ class adaptiveThreshold:
         tracker = self.trackers[strength]
         decision_var = tracker.next()
         difficulties[strength] = decision_var
-        
+        trial['decision_var'] = decision_var
+
                 
         print('*'*40)
         print('Taskset: %s, choice value: %s\nSpeed: %s, Strength: %s \
@@ -389,7 +391,8 @@ class adaptiveThreshold:
             else:
                 FB = trial['punishment_amount']
                 tracker.addResponse(0)
-             #record points for bonus
+            print('FB: %s' % FB)
+            #record points for bonus
             self.pointtracker += FB
             #If training, present FB to window
             if trial['displayFB'] == True:
@@ -424,9 +427,10 @@ class adaptiveThreshold:
         for trial in self.stimulusInfo:
             if trial == pause_trial:
                 time = core.getTime()
-                self.presentTextToWindow("Take a break! Press '5' when you're ready to continue.")
+                self.presentTextToWindow("Take a break! Press '5' when you're ready to continue.", size = .1)
                 self.waitForKeypress(self.trigger_key)
                 self.clearWindow()
+                self.aperture.enable()
                 pause_time = core.getTime() - time
             
             # wait for onset time
