@@ -181,7 +181,7 @@ class ConfigList(object):
             
                     
     def setup_trial_list(self, stimulusDuration=1.5, FBDuration=.5, 
-                         FBonset=.5, ITI=.5, displayFB = True):
+                         FBonset=.5, base_ITI=.5, displayFB = True):
         """
         Sets up trails and appeding configurations to trial_list            ***incomplete
         --------------------------------------
@@ -205,6 +205,8 @@ class ConfigList(object):
         
         
         for trial in range(self.exp_len):
+            #add random amount to ITI
+            ITI = base_ITI + r.random()*.5
             state = self.states[self.trial_states[trial]]
             #print(state['dist_args'], state['dist_args'] is None)
             dist = self.distribution(**state['dist_args'])
@@ -233,7 +235,7 @@ class ConfigList(object):
             }]
 
             trial_count += 1
-            curr_onset += stimulusDuration+FBDuration+FBonset+ITI+r.random()*.5
+            curr_onset += stimulusDuration+FBDuration+FBonset+ITI
         self.trial_list = trial_list
        
 

@@ -52,13 +52,17 @@ def calc_posterior(data,prior,likelihood_dist, reduce = True):
     else:
         return posterior
 
-def genSeq(l,p):
+def genSeq(n,p):
+    """
+    Generates a sequence of binary values of length n such that the values 
+    switch with probability 1-p
+    """
     seq = [1]
     while abs(np.mean(seq)-.5) > .1:
         curr_state = round(r.random())
         state_reps = 0
         seq = []
-        for _ in range(l-1):
+        for _ in range(n-1):
             seq.append(curr_state)
             if r.random() > p or state_reps > 25:
                 curr_state = 1-curr_state
@@ -67,19 +71,22 @@ def genSeq(l,p):
                 state_reps += 1
     return seq
                 
-def seqStats(l,p,reps):
+def seqStats(n,p,reps):
+    """ 
+    simulate multiple sequences and calculate gross statistics
+    """
     seqs=[]
     for _ in range(reps):
-        tmp = genSeq(l,p)
+        tmp = genSeq(n,p)
         for i in track_runs(tmp):
             seqs.append(i[0])
     return (np.mean(seqs), np.std(seqs))
 
-def genExperimentSeq(l, p, ts_dis):
+def genExperimentSeq(n, p, ts_dis):
     """Generates an experiment seq
     """
     bin_boundaries = np.linspace(-1,1,11)
-    seq = genSeq(l,p)
+    seq = genSeq(n,p)
     context = []
     for s in seq:
         binned = -1.1 + np.digitize([ts_dis[s].rvs()],bin_boundaries)*.2
@@ -88,8 +95,8 @@ def genExperimentSeq(l, p, ts_dis):
     df = pd.DataFrame({'context': pd.Series(context), 'ts': pd.Series(seq)})
     return df
 
-def simulateModel(model, ts_dis, model_name = 'model', l = 800, p = .9, mode = 'e-greedy'):
-    seq = genExperimentSeq(l,p,ts_dis)
+def simulateModel(model, ts_dis, model_name = 'model', n = 800, p = .9, mode = 'e-greedy'):
+    seq = genExperimentSeq(n,p,ts_dis)
     posteriors = []
     choices = []
     for c in seq['context']:

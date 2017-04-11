@@ -33,6 +33,7 @@ def load_data(datafile, name, mode = 'train'):
     responses = [x[0] for x in df.response.values]
     df.loc[:,'rt'] = rts
     df.loc[:,'response'] = responses
+    
     #Remove missed trials:
     df = df[df.rt != 999]
     df = df.reset_index(drop=True)
@@ -40,8 +41,9 @@ def load_data(datafile, name, mode = 'train'):
     
 
     #Create a separate analysis dataframe
-    drop_cols = ['FBonset', 'FBDuration', 'actualFBOnsetTime', 'actualOnsetTime', 'onset', 
-                        'reward_amount', 'punishment_amount','stimulusCleared']
+    drop_cols = ['FBonset', 'FBDuration', 'actualFBOnsetTime', 
+                 'actualOnsetTime', 'onset', 'displayFB',
+                 'reward_amount', 'punishment_amount','stimulusCleared']
     dfa = df.drop(set(drop_cols) & set(df.columns),1)
 
     dfa['rep_resp'] = dfa.response.shift(1) == dfa.response

@@ -6,8 +6,7 @@ from psychopy import core, event
 import webbrowser
 from prob_context_task import probContextTask
 from make_config import ConfigList
-from scipy.stats import norm
-from scipy.stats import beta
+from scipy.stats import norm, beta
 from test_bot import test_bot
 import glob
 import os
@@ -31,12 +30,13 @@ def send_message(msg):
 # set-up variables
 # ****************************************************************************
 
-verbose=True
-fullscr= False
+verbose = True
+msg_on = False
+fullscr = False
 subdata=[]
-practice_on = True
+practice_on = False
 train_on = True
-test_on = True
+test_on = False
 bot_on = False
 bot_mode = "ignore_base" #other for optimal
 home = os.getenv('HOME') 
@@ -60,7 +60,7 @@ f.write(subject_code + '\n')
 f.close()
 
 # set up task variables
-train_mins = 45 #train_length in minutes
+train_mins = .5 #train_length in minutes
 test_mins = 30 #test_length in minutes
 avg_test_trial_len = 2.25 #in seconds
 avg_train_trial_len = avg_test_trial_len + 1 #factor in FB
@@ -343,7 +343,7 @@ if train_on:
     #************************************
     # Send text about train performance
     #************************************
-    if bot_on == False:   
+    if msg_on == True:   
         send_message('Training done')
         
 
@@ -379,7 +379,7 @@ if test_on:
     #************************************
     # Send text about test performance
     #************************************
-    if bot_on == False:   
+    if msg_on == True:   
         send_message('Testing Done')
        
 #************************************

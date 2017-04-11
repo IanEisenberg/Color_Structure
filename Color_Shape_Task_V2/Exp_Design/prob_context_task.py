@@ -322,8 +322,8 @@ class probContextTask:
                     self.shutDownEarly()
                 elif key in self.action_keys:
                     choice = self.action_keys.index(key)
-                    trial['response'].append(choice)
-                    trial['rt'].append(trialClock.getTime())
+                    trial['response'].append(choice)[0]
+                    trial['rt'].append(trialClock.getTime())[0]
                     # if the key press was the first one for the trial...
                     if trial['stimulusCleared']==0:
                         self.clearWindow()
