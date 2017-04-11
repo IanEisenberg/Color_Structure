@@ -213,8 +213,8 @@ class adaptiveThreshold:
         height = .02
         ratio = self.win.size[1]/float(self.win.size[0])
         if stim == None:
-            self.stim=OpticFlow(self.win, speed=.02,
-                                color=[0,0,0], nElements = 3000,
+            self.stim=OpticFlow(self.win, speed=self.base_speed,
+                                color=[0,0,0], nElements = 6000,
                                 sizes=[height*ratio, height])
         else:
             self.stim = stim 
@@ -315,8 +315,7 @@ class adaptiveThreshold:
                     self.shutDownEarly()
                 recorded_keys+=keys
         if self.aperture: self.aperture.disable()
-        self.win.flip()
-        self.win.flip()
+        self.win.flip(clearBuffer=True)
         return recorded_keys
             
     def getCorrectChoice(self,trial_attributes,ts):

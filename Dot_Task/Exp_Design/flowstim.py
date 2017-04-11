@@ -27,6 +27,7 @@ class OpticFlow(object):
                 kwargs[key]=default_dict[key]
         self.dots = visual.ElementArrayStim(win, elementTex=None,
                                        elementMask='circle', **kwargs)
+        self.base_dot_size = self.dots.sizes
         self.__dict__.update(kwargs)
         # OpticFlow specific arguments
         self.speed = speed
@@ -108,6 +109,13 @@ class OpticFlow(object):
         self.dots3d[:,0:2][offscreen] = self.dots3d[:,0:2][offscreen] - adjustment
         self.project2screen()
         
+        # change dots opacities. Right at the back they should transition from 
+        # to full brightness
+        percent_full = np.minimum(np.abs((self.fieldlimits[2][1]-self.dots3d[:,2])/.4),1)
+        self.dots.opacities = percent_full
+        # change dot size
+        # self.dots.sizes = np.multiply(self.base_dot_size,percent_full[:,np.newaxis])
+        
     def draw(self):
         self.updateDotsPosition()
         self.dots.draw()
@@ -119,10 +127,11 @@ def get_win(screen=0,fullscr=True):
                                      monitor='testMonitor', units='norm',  screen=screen,
                                      allowStencil=True) 
 
-'''
+
+"""
 win = get_win(fullscr=True)
 colors = np.array([[0,0,1],[1,0,0]])
-stim = OpticFlow(win,0, color = colors[0], sizes = [.015,.02], nElements = 6000)
+stim = OpticFlow(win,.05, color = colors[0], sizes = [.015,.02], nElements = 6000)
 color_proportion = 0
 while True:
     keys=event.getKeys()
@@ -143,4 +152,4 @@ while True:
         stim.updateTrialAttributes(dir = 'out')
     stim.draw()
 win.close()      
-'''
+"""
