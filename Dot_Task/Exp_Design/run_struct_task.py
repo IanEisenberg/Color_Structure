@@ -2,12 +2,13 @@
 runprobContextTask
 """
 
-from psychopy import core, event
 import webbrowser
-from prob_context_task import probContextTask
 from make_config import ProbContextConfig
 import glob
 import os
+from prob_context_task import probContextTask
+from psychopy import core, event
+from utils import get_difficulties
 from twilio.rest import TwilioRestClient
 
 # ****************************************************************************
@@ -29,7 +30,7 @@ def send_message(msg):
 
 verbose=True
 message_on = False
-fullscr= True
+fullscr= False
 subdata=[]
 train_on = True
 test_on = True
@@ -71,14 +72,22 @@ except ValueError:
 # ****************************************************************************
 # set up config files
 # ****************************************************************************
+# load motion_difficulties and color_difficulties from adaptive tasks
+motion_difficulties, color_difficulties = get_difficulties(subject_code)
+
 # train 
 if train_on:
-    train_config = ProbContextConfig(taskname = trainname, subjid = subject_code, stim_repetitions = stim_repetitions, ts_order = ts_order, rp = recursive_p)
+    train_config = ProbContextConfig(taskname = trainname, 
+                                     subjid = subject_code, 
+                                     stim_repetitions = stim_repetitions, 
+                                     ts_order = ts_order, rp = recursive_p,
+                                     motion_difficulties = motion_difficulties,
+                                     color_difficulties = color_difficulties)
     train_config_file = train_config.get_config()
 else:
     train_config_file = glob.glob('../Config_Files/*Context_' +subject_code +'*yaml')[-1]
     
-test_config = ProbContextConfig()
+test_config = ProbContextConfig(motion_difficulties, color_difficulties)
 test_config.load_config_settings(train_config_file, taskname=train_config.taskname+'_test', stim_repetitions = stim_repetitions)
 test_config.setup_trial_list(displayFB = False)
 test_config_file = test_config.get_config()
@@ -131,7 +140,7 @@ if train_on:
     #************************************
     # Send text about train performance
     #************************************
-    if message_on == False:   
+    if message_on == True:   
         send_message('Training done')
         
 
@@ -166,7 +175,7 @@ if test_on:
     #************************************
     # Send text about test performance
     #************************************
-    if message_on == False:   
+    if message_on == True:   
         send_message('Testing Done')
        
 #************************************

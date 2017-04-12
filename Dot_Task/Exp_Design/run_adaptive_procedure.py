@@ -104,7 +104,7 @@ if motion_on:
     # prepare to start
     motion_task.setupWindow()
     motion_task.defineStims()
-    motion_task.presentTextToWindow("Motion")
+    motion_task.presentTextToWindow("""Motion""")
     resp,time=motion_task.waitForKeypress(motion_task.trigger_key)
     motion_task.checkRespForQuitKey(resp)
     event.clearEvents()
@@ -115,7 +115,7 @@ if motion_on:
     #************************************
     # Send text about train performance
     #************************************
-    if message_on == False:   
+    if message_on == True:   
         send_message('Motion done')
         
 
@@ -124,10 +124,7 @@ if color_on:
     # prepare to start
     color_task.setupWindow()
     color_task.defineStims()
-    color_task.presentTextToWindow(
-        """
-        Color
-        """)
+    color_task.presentTextToWindow("""Color""")
     resp,time=color_task.waitForKeypress(color_task.trigger_key)
     color_task.checkRespForQuitKey(resp)
     event.clearEvents()
@@ -138,7 +135,7 @@ if color_on:
     #************************************
     # Send text about train performance
     #************************************
-    if message_on == False:   
+    if message_on == True:   
         send_message('color done')
 
 

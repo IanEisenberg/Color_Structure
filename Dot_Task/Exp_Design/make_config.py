@@ -13,15 +13,16 @@ from scipy.stats import norm
 import yaml
     
 class ProbContextConfig(object): 
-    def __init__(self, taskname='taskname', subjid='000', rp=.9,
+    def __init__(self, color_difficulties, motion_difficulties,
+                 taskname='taskname', subjid='000', rp=.9,
                  action_keys=None, distribution=norm, args=None, 
-                 stim_repetitions=5, ts_order=None, seed=None):
+                 stim_repetitions=5, ts_order=None, 
+                 seed=None):
         self.seed = seed
         if self.seed is not None:
             np.random.seed(self.seed)
         self.distribution = norm
         self.stim_repetitions = stim_repetitions
-        self.exp_len = int(stim_repetitions*144)
         self.rp = rp # recursive probability
         self.subjid = subjid
         self.taskname = taskname
@@ -47,19 +48,19 @@ class ProbContextConfig(object):
         self.states = None
         self.trial_states = None
         self.trial_list = None
-        # stim attributes
+        # stim attributes. Difficulties are a dictionary passed to the constructor
         # colors in LAB space
-        self.stim_colors = np.array([[60,128,60],[60,-128,60]])
+        self.stim_colors = np.array([[75,128,75],[75,-128,75]])
         self.stim_motions = ['in','out']
         self.color_starts = [.2,.8]
-        # from easy to hard
-        # each tuple defines a starting color proportion, and the change in color proportion
-        # each difficulty level has two tuples, for different sides of the
-        # color space.
-        self.color_difficulties = [.2,.15,.1]
+        self.color_difficulties = color_difficulties
         # motion speeds
-        self.base_speed = .06
-        self.motion_difficulties = [.05,.02,.01]
+        self.base_speed = .05
+        self.motion_difficulties = motion_difficulties
+        # calculate exp len
+        num_stims = len(self.color_difficulties)*len(self.motion_difficulties)\
+                    *len(self.stim_colors)*len(self.stim_motions)*4
+        self.exp_len = int(stim_repetitions*num_stims)
         # setup
         self.setup_stims()
     
@@ -81,7 +82,10 @@ class ProbContextConfig(object):
           'stim_ids': self.stim_ids,
           'ts_order': self.ts_order,
           'stim_colors': self.stim_colors.tolist(),
-          'stim_motions': self.stim_motions
+          'stim_motions': self.stim_motions,
+          'color_difficulties': self.color_difficulties,
+          'motion_difficulties': self.motion_difficulties,
+          'base_speed': self.base_speed
         }
         to_save = self.trial_list
         to_save.insert(0,initial_params)
@@ -110,30 +114,18 @@ class ProbContextConfig(object):
         
     def setup_stims(self):
         stim_ids = []
-        for motion_difficulty in self.motion_difficulties:
+        for motion_difficulty in self.motion_difficulties.keys():
             for direction in self.stim_motions:
-                for color_difficulty in self.color_difficulties:
+                for color_difficulty in self.color_difficulties.keys():
                     for color_space in self.color_starts:
-                        # set color change
-                        color1_start = color_space
-                        color_direction = np.random.choice([-1,1])
-                        color1_end = color1_start+color_direction*color_difficulty
-                        colors = [self.stim_colors[0]*color1_start + 
-                                self.stim_colors[1]*(1-color1_start),
-                                self.stim_colors[0]*color1_end + 
-                                self.stim_colors[1]*(1-color1_end)]
-                        # set speed change
-                        speed_direction = np.random.choice([-1,1])
-                        speed_end = self.base_speed+motion_difficulty*speed_direction
-                        stim_ids.append({'motionDirection': direction, 
-                                         'speedStrength': motion_difficulty,
-                                         'speedDirection': speed_direction,
-                                         'speedStart': self.base_speed,
-                                         'speedEnd': speed_end,
-                                         'colorStrength': color_difficulty,
-                                         'colorDirection': color_direction,
-                                         'colorStart': list(colors[0]),
-                                         'colorEnd': list(colors[1])})
+                        for color_direction in [-1,1]:
+                            for speed_direction in [-1,1]:
+                                stim_ids.append({'motionDirection': direction,
+                                                 'colorSpace': color_space,
+                                                 'speedStrength': motion_difficulty,
+                                                 'speedDirection': speed_direction,
+                                                 'colorStrength': color_difficulty,
+                                                 'colorDirection': color_direction})
 
         self.stim_ids = stim_ids
         self.states = {i: {'ts': self.ts_order[i], 'dist_args': self.args[i]} for i in range(len(self.ts_order))}
@@ -165,8 +157,9 @@ class ProbContextConfig(object):
                     state_reps += 1
         self.trial_states = trial_states
             
-                    
-    def setup_trial_list(self, cueDuration=1.5, stimulusDuration=5, FBDuration=.5, FBonset=.5, CSI=.5, ITI=.5, displayFB = True):
+    def setup_trial_list(self, cueDuration=1.5, CSI=.5, stimulusDuration=2, 
+                         responseWindow=1, FBDuration=.5, FBonset=.5, 
+                         base_ITI=.5, displayFB = True):
         if self.seed is not None:
             np.random.seed(self.seed)
         trial_list = []    
@@ -177,6 +170,8 @@ class ProbContextConfig(object):
         #define bins. Will set context to center point of each bin
         bin_boundaries = np.linspace(-1,1,11)
         
+        # define ITI
+        ITI = base_ITI + r.random()*.5
         
         for trial in range(self.exp_len):
             state = self.states[self.trial_states[trial]]
@@ -207,7 +202,8 @@ class ProbContextConfig(object):
             trial_list += [trial_dict]
 
             trial_count += 1
-            curr_onset += cueDuration+CSI+stimulusDuration+FBDuration+FBonset+ITI+r.random()*.5
+            curr_onset += cueDuration+CSI+stimulusDuration+responseWindow\
+                            +FBDuration+FBonset+ITI
         self.trial_list = trial_list
        
 
@@ -243,7 +239,7 @@ class ThresholdConfig(object):
         # color space.
         self.color_difficulties = {'easy':.2,'medium':.15,'hard':.1}
         # motion speeds
-        self.base_speed = .15
+        self.base_speed = .05
         self.motion_difficulties = {'easy':.05,'medium':.025,'hard':.0125}
         # calculate exp len
         num_stims = len(self.color_difficulties)*len(self.motion_difficulties)\
@@ -316,14 +312,16 @@ class ThresholdConfig(object):
   
                     
     def setup_trial_list(self, stimulusDuration=2, responseWindow=1,
-                         FBDuration=.5, FBonset=.5, ITI=.5, displayFB = True):
+                         FBDuration=.5, FBonset=.5, base_ITI=.5, 
+                         displayFB = True):
         if self.seed is not None:
             np.random.seed(self.seed)
         trial_list = []    
         trial_count = 1
         curr_onset = 2 #initial onset time
         stims = r.sample(self.stim_ids*self.stim_repetitions,self.exp_len)   
-        
+        # set ITI
+        ITI = base_ITI + r.random()*.5
         for trial in range(self.exp_len):
             trial_dict = {
                 'trial_count': trial_count,
@@ -345,6 +343,6 @@ class ThresholdConfig(object):
 
             trial_count += 1
             curr_onset += stimulusDuration+responseWindow\
-                          +FBDuration+FBonset+ITI+r.random()*.5
+                          +FBDuration+FBonset+ITI
         self.trial_list = trial_list
        
