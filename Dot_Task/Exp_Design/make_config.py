@@ -55,7 +55,7 @@ class ProbContextConfig(object):
         self.color_starts = [.2,.8]
         self.color_difficulties = color_difficulties
         # motion speeds
-        self.base_speed = .05
+        self.base_speed = .1
         self.motion_difficulties = motion_difficulties
         # calculate exp len
         num_stims = len(self.color_difficulties)*len(self.motion_difficulties)\
@@ -159,7 +159,7 @@ class ProbContextConfig(object):
             
     def setup_trial_list(self, cueDuration=1.5, CSI=.5, stimulusDuration=2, 
                          responseWindow=1, FBDuration=.5, FBonset=.5, 
-                         base_ITI=.5, displayFB = True):
+                         base_ITI=1, displayFB = True):
         if self.seed is not None:
             np.random.seed(self.seed)
         trial_list = []    
@@ -239,7 +239,7 @@ class ThresholdConfig(object):
         # color space.
         self.color_difficulties = {'easy':.2,'medium':.15,'hard':.1}
         # motion speeds
-        self.base_speed = .05
+        self.base_speed = .1
         self.motion_difficulties = {'easy':.05,'medium':.025,'hard':.0125}
         # calculate exp len
         num_stims = len(self.color_difficulties)*len(self.motion_difficulties)\
@@ -312,7 +312,7 @@ class ThresholdConfig(object):
   
                     
     def setup_trial_list(self, stimulusDuration=2, responseWindow=1,
-                         FBDuration=.5, FBonset=.5, base_ITI=.5, 
+                         FBDuration=.5, FBonset=.5, base_ITI=1, 
                          displayFB = True):
         if self.seed is not None:
             np.random.seed(self.seed)

@@ -2,11 +2,10 @@
 runprobContextTask
 """
 
-from psychopy import event
-import webbrowser
 from adaptive_procedure import adaptiveThreshold
 from make_config import ThresholdConfig
-import glob
+import numpy as np
+from psychopy import event
 import os
 from twilio.rest import TwilioRestClient
 
@@ -33,6 +32,7 @@ fullscr= True
 subdata=[]
 motion_on = True
 color_on = False
+n_pauses=2
 home = os.getenv('HOME') 
 save_dir = '../Data' 
 motionname = 'adaptive_motion'
@@ -57,7 +57,7 @@ f.close()
 """
 subject_code = 'test'
 # set up task variables
-stim_repetitions = 1
+stim_repetitions = 2
 
 # counterbalance ts_order (which ts is associated with top of screen)
 ts_order = ['motion','color']
@@ -108,9 +108,9 @@ if motion_on:
     resp,time=motion_task.waitForKeypress(motion_task.trigger_key)
     motion_task.checkRespForQuitKey(resp)
     event.clearEvents()
-
-    pause_trial = motion_task.stimulusInfo[len(motion_task.stimulusInfo)/2]
-    motion_task.run_task(pause_trial=pause_trial)    
+    
+    pause_trials = np.round(np.linspace(0,motion_task.exp_len,n_pauses+2))[1:-1]
+    motion_task.run_task(pause_trials=pause_trials)    
     
     #************************************
     # Send text about train performance
@@ -129,8 +129,8 @@ if color_on:
     color_task.checkRespForQuitKey(resp)
     event.clearEvents()
 
-    pause_trial = color_task.stimulusInfo[len(color_task.stimulusInfo)/2]
-    color_task.run_task(pause_trial=pause_trial)    
+    pause_trials = np.round(np.linspace(0,color_task.exp_len,n_pauses+2))[1:-1]
+    color_task.run_task(pause_trials=pause_trials)    
     
     #************************************
     # Send text about train performance

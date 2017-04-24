@@ -250,7 +250,7 @@ class adaptiveThreshold:
                 trackers[key] = QuestHandler(pThreshold=threshold,
                                             nTrials = self.exp_len,
                                             startVal=val, startValSd=maxVal/2,
-                                            minVal=0, 
+                                            minVal=0.0001, 
                                             maxVal=maxVal,
                                             gamma=.01,
                                             beta=3.5)
@@ -286,6 +286,8 @@ class adaptiveThreshold:
         ss,se,cs,ce,md = trial_attributes
         cs = np.array(cs)
         ce = np.array(ce)
+        # reset dot position
+        self.stim.setupDots()
         if mode == 'practice':
             self.stim.updateTrialAttributes(dir=md,color=cs,speed=ss)
 
@@ -341,7 +343,6 @@ class adaptiveThreshold:
         trialClock = core.Clock()
         self.trialnum += 1
         stim = trial['stim']
-        trial_attributes = self.getTrialAttributes(stim)
         # update difficulties based on adaptive tracker
         if self.ts == "motion":
             strength = stim["speedStrength"]
@@ -353,9 +354,10 @@ class adaptiveThreshold:
         decision_var = tracker.next()
         difficulties[strength] = decision_var
         trial['decision_var'] = decision_var
-
-                
+        # get stim attributes
+        trial_attributes = self.getTrialAttributes(stim)
         print('*'*40)
+        print('Speed Change: ', trial_attributes[0:2]) 
         print('Taskset: %s, choice value: %s\nSpeed: %s, Strength: %s \
               \nColorDirection: %s, ColorStrength: %s \
               \nCorrectChoice: %s' % 
@@ -422,11 +424,12 @@ class adaptiveThreshold:
         self.alldata.append(trial)
         return trial
             
-    def run_task(self, pause_trial = None):
+    def run_task(self, pause_trials = None):
         self.startTime = core.getTime()
         pause_time = 0
+        if pause_trials is None: pause_trials = []
         for trial in self.stimulusInfo:
-            if trial == pause_trial:
+            if trial['trial_count'] in pause_trials:
                 time = core.getTime()
                 self.presentTextToWindow("Take a break! Press '5' when you're ready to continue.", size = .1)
                 self.waitForKeypress(self.trigger_key)
