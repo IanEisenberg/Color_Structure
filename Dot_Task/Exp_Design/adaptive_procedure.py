@@ -221,7 +221,7 @@ class adaptiveThreshold:
         ratio = self.win.size[1]/float(self.win.size[0])
         if stim == None:
             self.stim=OpticFlow(self.win, speed=self.base_speed,
-                                color=[0,0,0], nElements = 4000,
+                                color=[0,0,0], nElements = 8000,
                                 sizes=[height*ratio, height])
         else:
             self.stim = stim 
