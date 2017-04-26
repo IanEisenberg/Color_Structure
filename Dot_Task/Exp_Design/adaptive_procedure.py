@@ -237,8 +237,7 @@ class adaptiveThreshold:
             maxVal = self.color_starts[0]
         if method=='basic':
             step_lookup = {'easy':5,
-                           'medium': 3,
-                           'hard': 2}
+                           'hard': 3}
             for key,val in difficulties.items():
                 nDown = step_lookup[key]
                 trackers[key] = StairHandler(startVal=val, minVal=0, 
@@ -250,8 +249,7 @@ class adaptiveThreshold:
                                             staircase=trackers.get(key,None))
         elif method=='quest':
             quest_lookup = {'easy': .85,
-                           'medium': .75,
-                           'hard': .65}
+                           'hard': .7}
             for key,val in difficulties.items():
                 threshold = quest_lookup[key]
                 trackers[key] = QuestHandler(pThreshold=threshold,

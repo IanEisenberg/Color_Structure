@@ -236,10 +236,10 @@ class ThresholdConfig(object):
         # each tuple defines a starting color proportion, and the change in color proportion
         # each difficulty level has two tuples, for different sides of the
         # color space.
-        self.color_difficulties = {'easy':.15,'medium':.1,'hard':.05}
+        self.color_difficulties = {'easy':.15,'hard':.05}
         # motion speeds
         self.base_speed = .1
-        self.motion_difficulties = {'easy':.05,'medium':.025,'hard':.0125}
+        self.motion_difficulties = {'easy':.05, 'hard':.02}
         # calculate exp len
         num_stims = len(self.color_difficulties)*len(self.motion_difficulties)\
                     *len(self.stim_colors)*len(self.stim_motions)*4
