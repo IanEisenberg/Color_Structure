@@ -19,7 +19,7 @@ def get_difficulties(subject_code):
         color_difficulties = {k:v.mean() for k,v in color_data['trackers'].items()}
     except IndexError:
         color_difficulties = {}
-        return motion_difficulties, color_difficulties
+    return motion_difficulties, color_difficulties
 
 def get_trackers(subject_code):
     try:
@@ -34,7 +34,7 @@ def get_trackers(subject_code):
         color_trackers = color_data['trackers']
     except IndexError:
         color_trackers = {}
-        return motion_trackers, color_trackers
+    return motion_trackers, color_trackers
 
 def pixel_lab2rgb(lst):
     lst = [float(x) for x in lst]

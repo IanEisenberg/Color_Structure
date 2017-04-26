@@ -52,7 +52,7 @@ class ProbContextConfig(object):
         # colors in LAB space
         self.stim_colors = np.array([[75,128,75],[75,-128,75]])
         self.stim_motions = ['in','out']
-        self.color_starts = [.2,.8]
+        self.color_starts = [.15,.85]
         self.color_difficulties = color_difficulties
         # motion speeds
         self.base_speed = .1
@@ -170,10 +170,9 @@ class ProbContextConfig(object):
         #define bins. Will set context to center point of each bin
         bin_boundaries = np.linspace(-1,1,11)
         
-        # define ITI
-        ITI = base_ITI + r.random()*.5
-        
         for trial in range(self.exp_len):
+            # define ITI
+            ITI = base_ITI + r.random()*.5
             state = self.states[self.trial_states[trial]]
             dist = self.distribution(**state['dist_args'])
             binned = -1.1 + np.digitize([dist.rvs()],bin_boundaries)*.2
@@ -232,12 +231,12 @@ class ThresholdConfig(object):
         # colors in LAB space
         self.stim_colors = np.array([[75,128,75],[75,-128,75]])
         self.stim_motions = ['in','out']
-        self.color_starts = [.2,.8]
+        self.color_starts = [.15,.85]
         # from easy to hard
         # each tuple defines a starting color proportion, and the change in color proportion
         # each difficulty level has two tuples, for different sides of the
         # color space.
-        self.color_difficulties = {'easy':.2,'medium':.15,'hard':.1}
+        self.color_difficulties = {'easy':.15,'medium':.1,'hard':.05}
         # motion speeds
         self.base_speed = .1
         self.motion_difficulties = {'easy':.05,'medium':.025,'hard':.0125}
@@ -271,6 +270,7 @@ class ThresholdConfig(object):
           'stim_motions': self.stim_motions,
           'color_difficulties': self.color_difficulties,
           'motion_difficulties': self.motion_difficulties,
+          'color_starts': self.color_starts,
           'base_speed': self.base_speed
         }
         to_save = self.trial_list
@@ -324,9 +324,9 @@ class ThresholdConfig(object):
         trial_count = 1
         curr_onset = 2 #initial onset time
         stims = r.sample(self.stim_ids*self.stim_repetitions,self.exp_len)   
-        # set ITI
-        ITI = base_ITI + r.random()*.5
         for trial in range(self.exp_len):
+            # set ITI
+            ITI = base_ITI + r.random()*.5
             trial_dict = {
                 'trial_count': trial_count,
                 'ts': self.ts,

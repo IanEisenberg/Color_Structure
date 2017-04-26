@@ -153,9 +153,11 @@ class adaptiveThreshold:
         self.win.flip()
         return core.getTime()
 
-    def clearWindow(self):
+    def clearWindow(self, fixation=False):
         """ clear the main window
         """
+        if fixation==True:
+            self.fixation.draw()
         if self.textStim:
             self.textStim.setText('')
             self.win.flip()
@@ -223,6 +225,8 @@ class adaptiveThreshold:
                                 sizes=[height*ratio, height])
         else:
             self.stim = stim 
+        # define fixation
+        self.fixation = self.stim.fixation
     
     def defineTrackers(self, trackers, method='quest'):
         if self.ts == "motion":
@@ -372,7 +376,6 @@ class adaptiveThreshold:
         
         
         trial['actualOnsetTime']=core.getTime() - self.startTime
-        trial['stimulusCleared']=0
         trial['response'] = 999
         trial['rt'] = 999
         trial['FB'] = 999
@@ -407,13 +410,13 @@ class adaptiveThreshold:
             if trial['displayFB'] == True:
                 trial['FB'] = FB
                 core.wait(trial['FBonset'])  
-                trial['actualFBOnsetTime'] = trialClock.getTime()-trial['stimulusCleared']
+                trial['actualFBOnsetTime'] = trialClock.getTime()
                 if FB == 1:
-                    self.presentTextToWindow('+1 point')
+                    self.presentTextToWindow('correct')
                 else:
-                    self.presentTextToWindow('+' + str(FB) + ' points')
+                    self.presentTextToWindow('incorrect')
                 core.wait(trial['FBDuration'])
-                self.clearWindow()        
+                self.clearWindow(fixation=True)        
         # If subject did not respond within the stimulus window clear the stim
         # and admonish the subject
         if trial['rt']==999:
@@ -422,7 +425,7 @@ class adaptiveThreshold:
             core.wait(trial['FBonset'])
             self.presentTextToWindow('Please Respond Faster')
             core.wait(trial['FBDuration'])
-            self.clearWindow()
+            self.clearWindow(fixation=True)
         
         # log trial and add to data
         self.writeToLog(json.dumps(trial))
