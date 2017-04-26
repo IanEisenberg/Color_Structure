@@ -20,7 +20,7 @@ class adaptiveThreshold:
     """
     
     def __init__(self,config_file,subjid,save_dir,verbose=True, 
-                 fullscreen = False, mode = 'task'):
+                 fullscreen = False, mode = 'task', trackers = None):
         # set up some variables
         self.stimulusInfo=[]
         self.loadedStimulusFile=[]
@@ -59,7 +59,10 @@ class adaptiveThreshold:
         self.writeToLog(self.toJSON())
         # convert colors to array to be more useable
         self.stim_colors = np.array(self.stim_colors)
-        self.defineTrackers()
+        # setup trackers
+        if trackers is None:
+            trackers = {}
+        self.defineTrackers(trackers)
     
     def loadConfigFile(self,filename):
         """ load a config file from yaml
@@ -221,8 +224,7 @@ class adaptiveThreshold:
         else:
             self.stim = stim 
     
-    def defineTrackers(self, method='quest'):
-        trackers = {}
+    def defineTrackers(self, trackers, method='quest'):
         if self.ts == "motion":
             difficulties = self.motion_difficulties
             maxVal = self.base_speed
@@ -240,20 +242,22 @@ class adaptiveThreshold:
                                             stepSizes=maxVal/10.0, 
                                             stepType='lin',
                                             nDown=nDown,
-                                            nReversals=20)
+                                            nReversals=20,
+                                            staircase=trackers.get(key,None))
         elif method=='quest':
-            step_lookup = {'easy': .85,
+            quest_lookup = {'easy': .85,
                            'medium': .75,
                            'hard': .65}
             for key,val in difficulties.items():
-                threshold = step_lookup[key]
+                threshold = quest_lookup[key]
                 trackers[key] = QuestHandler(pThreshold=threshold,
                                             nTrials = self.exp_len,
                                             startVal=val, startValSd=maxVal/2,
                                             minVal=0.0001, 
                                             maxVal=maxVal,
                                             gamma=.01,
-                                            beta=3.5)
+                                            beta=3.5,
+                                            staircase=trackers.get(key,None))
         self.trackers = trackers
         
         
@@ -413,6 +417,7 @@ class adaptiveThreshold:
         # If subject did not respond within the stimulus window clear the stim
         # and admonish the subject
         if trial['rt']==999:
+            tracker.addResponse(0)
             self.clearWindow()            
             core.wait(trial['FBonset'])
             self.presentTextToWindow('Please Respond Faster')

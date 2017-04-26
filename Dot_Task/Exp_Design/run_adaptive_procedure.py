@@ -8,6 +8,7 @@ import numpy as np
 from psychopy import event
 import os
 from twilio.rest import TwilioRestClient
+from utils import get_trackers
 
 # ****************************************************************************
 # Helper Function
@@ -32,11 +33,15 @@ fullscr= True
 subdata=[]
 motion_on = True
 color_on = False
-n_pauses=2
 home = os.getenv('HOME') 
 save_dir = '../Data' 
 motionname = 'adaptive_motion'
 colorname = 'adaptive_color'
+# set up task variables
+subject_code = 'test1'
+stim_repetitions = 2
+exp_len = 20
+n_pauses=1
 
 """
 # set things up for practice, training and tests
@@ -55,9 +60,7 @@ f = open('IDs.txt', 'a')
 f.write(subject_code + '\n')
 f.close()
 """
-subject_code = 'test'
-# set up task variables
-stim_repetitions = 2
+
 
 # counterbalance ts_order (which ts is associated with top of screen)
 ts_order = ['motion','color']
@@ -70,24 +73,26 @@ except ValueError:
 # ****************************************************************************
 # set up config files
 # ****************************************************************************
-# train 
-
+# load motion_difficulties and color_difficulties from adaptive tasks
+motion_trackers,color_trackers = get_trackers(subject_code)
 
 if motion_on:
     motion_config = ThresholdConfig(taskname=motionname, subjid=subject_code, 
                                         stim_repetitions=stim_repetitions,
-                                        ts='motion',)
+                                        ts='motion',exp_len=exp_len)
     motion_config_file = motion_config.get_config()
     motion_task=adaptiveThreshold(motion_config_file,subject_code, 
-                                  save_dir=save_dir, fullscreen = fullscr)
+                                  save_dir=save_dir, fullscreen=fullscr,
+                                  trackers=motion_trackers)
 
 if color_on:
     color_config = ThresholdConfig(taskname=colorname, subjid=subject_code, 
                                         stim_repetitions=stim_repetitions, 
-                                        ts='color')
+                                        ts='color',exp_len=exp_len)
     color_config_file = color_config.get_config()  
     color_task=adaptiveThreshold(color_config_file,subject_code, 
-                                  save_dir=save_dir, fullscreen = fullscr)
+                                  save_dir=save_dir, fullscreen=fullscr,
+                                  trackers=color_trackers)
 
 
 

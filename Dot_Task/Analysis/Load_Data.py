@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
-def load_data(datafile, name, mode = 'train'):
+def load_data(datafile, mode = 'train'):
     """
     Load a temporal structure task data file. Cleans up the raw data (returns
     the first action/rt, removes trials without a response). Returns the global

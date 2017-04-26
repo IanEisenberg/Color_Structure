@@ -8,8 +8,8 @@ import glob
 import os
 from prob_context_task import probContextTask
 from psychopy import core, event
-from utils import get_difficulties
 from twilio.rest import TwilioRestClient
+from utils import get_difficulties
 
 # ****************************************************************************
 # Helper Function
