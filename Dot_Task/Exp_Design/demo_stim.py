@@ -1,4 +1,5 @@
 from flowstim import OpticFlow
+from hsluv import hsluv_to_rgb
 import numpy as np
 from psychopy import visual, event, core
 from utils import pixel_lab2rgb
@@ -30,7 +31,7 @@ def presentTextToWindow(win, text,size=.15):
     event.waitKeys()
         
 # window, apeture, and stim setup           
-win = get_win(fullscr=True)
+win = get_win(screen=1, fullscr=True)
 aperture = define_aperture(win)
 aperture.enable()
 # potential color spaces
@@ -39,7 +40,6 @@ colors = np.array([[75,0,128],[75,0,-128]])
 # stim parameters
 base_speed=.1
 stim = OpticFlow(win,base_speed, color = colors[0], sizes = [.015,.02], nElements = 8000)
-color_proportion = 0
 
 
 
@@ -47,21 +47,25 @@ color_proportion = 0
 # DEMO Color Spectrum
 # *************************************************************************
 presentTextToWindow(win,'Color Spectrum')
-spectrum_stim = visual.Rect(win,units = 'norm', width = .4, height= .3)
+spectrum_stim = visual.Rect(win,units = 'norm', width = .6, height= .5)
+color_direction=1
+color_proportion = .02
 while True:
     keys=event.getKeys()
     if 'q' in keys:
         break
-    color_proportion+=.01
-    bounded_proportion = np.sin(color_proportion)*.5+.5
-    color = colors[0]*bounded_proportion \
-                + colors[1]*(1-bounded_proportion)
+    color_proportion+=(.005*color_direction)
+    if color_proportion > .99 or color_proportion < .01:
+        color_direction*=-1    
+    color = colors[0]*color_proportion \
+                + colors[1]*(1-color_proportion)
     color = pixel_lab2rgb(color)
     spectrum_stim.setFillColor(color)
     spectrum_stim.setLineColor(color)
     spectrum_stim.draw()
     win.flip()
-    
+win.close()
+ 
 # *************************************************************************
 # DEMO Different Conditions In/Out + Color Space
 # *************************************************************************
@@ -138,10 +142,10 @@ for dir,color_proportion, se in presentation_order:
 # *************************************************************************
 # DEMO Color changes
 # *************************************************************************
-
 presentTextToWindow(win,'Color Demo')
 # duration per episode
 duration = 3
+stim.updateTrialAttributes(speed=base_speed)
 presentation_order = [('in',.15, .25),
                       ('in',.15, .05),
                       ('out',.85, .95),
