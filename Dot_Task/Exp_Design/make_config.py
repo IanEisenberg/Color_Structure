@@ -17,7 +17,7 @@ class ProbContextConfig(object):
                  taskname='taskname', subjid='000', rp=.9,
                  action_keys=None, distribution=norm, args=None, 
                  stim_repetitions=5, ts_order=None, 
-                 seed=None):
+                 seed=None, exp_len=None):
         self.seed = seed
         if self.seed is not None:
             np.random.seed(self.seed)
@@ -60,7 +60,11 @@ class ProbContextConfig(object):
         # calculate exp len
         num_stims = len(self.color_difficulties)*len(self.motion_difficulties)\
                     *len(self.stim_colors)*len(self.stim_motions)*4
-        self.exp_len = int(stim_repetitions*num_stims)
+        if exp_len is None:
+            self.exp_len = int(stim_repetitions*num_stims)
+        else:
+            assert exp_len < int(stim_repetitions*num_stims)
+            self.exp_len=exp_len
         # setup
         self.setup_stims()
     
