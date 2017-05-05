@@ -2,6 +2,7 @@
 generic task using psychopy
 """
 
+import cPickle
 import datetime
 import json
 import numpy as np
@@ -19,7 +20,7 @@ class adaptiveThreshold:
     """
     
     def __init__(self,config_file,subjid,save_dir,verbose=True, 
-                 fullscreen = False, mode = 'task'):
+                 fullscreen = False, mode = 'task', trackers = None):
         # set up some variables
         self.stimulusInfo=[]
         self.loadedStimulusFile=[]
@@ -53,12 +54,15 @@ class adaptiveThreshold:
         self.mode = mode
         # set up recording files
         self.logfilename='%s_%s_%s.log'%(self.subjid,self.taskname,self.timestamp)
-        self.datafilename='%s_%s_%s.yaml'%(self.subjid,self.taskname,self.timestamp)
+        self.datafilename='%s_%s_%s.pkl'%(self.subjid,self.taskname,self.timestamp)
         # log initial state
         self.writeToLog(self.toJSON())
         # convert colors to array to be more useable
         self.stim_colors = np.array(self.stim_colors)
-        self.defineTrackers()
+        # setup trackers
+        if trackers is None:
+            trackers = {}
+        self.defineTrackers(trackers)
     
     def loadConfigFile(self,filename):
         """ load a config file from yaml
@@ -103,8 +107,9 @@ class adaptiveThreshold:
         data['subcode']=self.subjid
         data['timestamp']=self.timestamp
         data['taskdata']=self.alldata
+        data['trackers'] = self.trackers
         f=open(save_loc,'w')
-        yaml.dump(data,f)
+        cPickle.dump(data,f)
     
     #**************************************************************************
     # ******* Display Functions **************
@@ -148,9 +153,11 @@ class adaptiveThreshold:
         self.win.flip()
         return core.getTime()
 
-    def clearWindow(self):
+    def clearWindow(self, fixation=False):
         """ clear the main window
         """
+        if fixation==True:
+            self.fixation.draw()
         if self.textStim:
             self.textStim.setText('')
             self.win.flip()
@@ -213,14 +220,15 @@ class adaptiveThreshold:
         height = .02
         ratio = self.win.size[1]/float(self.win.size[0])
         if stim == None:
-            self.stim=OpticFlow(self.win, speed=.02,
-                                color=[0,0,0], nElements = 3000,
+            self.stim=OpticFlow(self.win, speed=self.base_speed,
+                                color=[0,0,0], nElements = 8000,
                                 sizes=[height*ratio, height])
         else:
             self.stim = stim 
+        # define fixation
+        self.fixation = self.stim.fixation
     
-    def defineTrackers(self, method='quest'):
-        trackers = {}
+    def defineTrackers(self, trackers, method='quest'):
         if self.ts == "motion":
             difficulties = self.motion_difficulties
             maxVal = self.base_speed
@@ -229,8 +237,7 @@ class adaptiveThreshold:
             maxVal = self.color_starts[0]
         if method=='basic':
             step_lookup = {'easy':5,
-                           'medium': 3,
-                           'hard': 2}
+                           'hard': 3}
             for key,val in difficulties.items():
                 nDown = step_lookup[key]
                 trackers[key] = StairHandler(startVal=val, minVal=0, 
@@ -238,19 +245,21 @@ class adaptiveThreshold:
                                             stepSizes=maxVal/10.0, 
                                             stepType='lin',
                                             nDown=nDown,
-                                            nReversals=20)
+                                            nReversals=20,
+                                            staircase=trackers.get(key,None))
         elif method=='quest':
-            step_lookup = {'easy': .9,
-                           'medium': .8,
+            quest_lookup = {'easy': .85,
                            'hard': .7}
             for key,val in difficulties.items():
-                trackers[key] = StairHandler(pThreshold=.82,
-                                            nTrials = self.exp_len/len(difficulties),
+                threshold = quest_lookup[key]
+                trackers[key] = QuestHandler(pThreshold=threshold,
+                                            nTrials = self.exp_len,
                                             startVal=val, startValSd=maxVal/2,
-                                            minVal=0, 
+                                            minVal=0.0001, 
                                             maxVal=maxVal,
                                             gamma=.01,
-                                            beta=3.5)
+                                            beta=3.5,
+                                            staircase=trackers.get(key,None))
         self.trackers = trackers
         
         
@@ -283,6 +292,8 @@ class adaptiveThreshold:
         ss,se,cs,ce,md = trial_attributes
         cs = np.array(cs)
         ce = np.array(ce)
+        # reset dot position
+        self.stim.setupDots()
         if mode == 'practice':
             self.stim.updateTrialAttributes(dir=md,color=cs,speed=ss)
 
@@ -314,8 +325,7 @@ class adaptiveThreshold:
                     self.shutDownEarly()
                 recorded_keys+=keys
         if self.aperture: self.aperture.disable()
-        self.win.flip()
-        self.win.flip()
+        self.win.flip(clearBuffer=True)
         return recorded_keys
             
     def getCorrectChoice(self,trial_attributes,ts):
@@ -339,7 +349,6 @@ class adaptiveThreshold:
         trialClock = core.Clock()
         self.trialnum += 1
         stim = trial['stim']
-        trial_attributes = self.getTrialAttributes(stim)
         # update difficulties based on adaptive tracker
         if self.ts == "motion":
             strength = stim["speedStrength"]
@@ -350,9 +359,11 @@ class adaptiveThreshold:
         tracker = self.trackers[strength]
         decision_var = tracker.next()
         difficulties[strength] = decision_var
-        
-                
+        trial['decision_var'] = decision_var
+        # get stim attributes
+        trial_attributes = self.getTrialAttributes(stim)
         print('*'*40)
+        print('Speed Change: ', trial_attributes[0:2]) 
         print('Taskset: %s, choice value: %s\nSpeed: %s, Strength: %s \
               \nColorDirection: %s, ColorStrength: %s \
               \nCorrectChoice: %s' % 
@@ -363,10 +374,9 @@ class adaptiveThreshold:
         
         
         trial['actualOnsetTime']=core.getTime() - self.startTime
-        trial['stimulusCleared']=0
         trial['response'] = 999
         trial['rt'] = 999
-        trial['FB'] = []
+        trial['FB'] = 999
         # present stimulus and get response
         event.clearEvents()
         trialClock.reset()
@@ -376,12 +386,13 @@ class adaptiveThreshold:
         if len(keys)>0:
             choice = keys[0][0]
             print('Choice: %s' % choice)
+            # record response
             trial['response'] = choice
             trial['rt'] = keys[0][1]
             # record any responses after the first
             trial['secondary_responses']=[i[0] for i in keys[1:]]
             trial['secondary_rts']=[i[1] for i in keys[1:]]
-            # get feedback
+            # get feedback and update tracker
             correct_choice = self.getCorrectChoice(trial_attributes,trial['ts'])
             if correct_choice == choice:
                 FB = trial['reward_amount']
@@ -389,45 +400,48 @@ class adaptiveThreshold:
             else:
                 FB = trial['punishment_amount']
                 tracker.addResponse(0)
-             #record points for bonus
+            # add current tracker estimate
+            trial['quest_estimate'] = tracker.mean()
+            # record points for bonus
             self.pointtracker += FB
-            #If training, present FB to window
+            # Present FB to window
             if trial['displayFB'] == True:
                 trial['FB'] = FB
                 core.wait(trial['FBonset'])  
-                trial['actualFBOnsetTime'] = trialClock.getTime()-trial['stimulusCleared']
+                trial['actualFBOnsetTime'] = trialClock.getTime()
                 if FB == 1:
-                    self.presentTextToWindow('+1 point')
+                    self.presentTextToWindow('correct')
                 else:
-                    self.presentTextToWindow('+' + str(FB) + ' points')
+                    self.presentTextToWindow('incorrect')
                 core.wait(trial['FBDuration'])
-                self.clearWindow()        
-        #If subject did not respond within the stimulus window clear the stim
-        #and admonish the subject
+                self.clearWindow(fixation=True)        
+        # If subject did not respond within the stimulus window clear the stim
+        # and admonish the subject
         if trial['rt']==999:
+            tracker.addResponse(0)
             self.clearWindow()            
             core.wait(trial['FBonset'])
             self.presentTextToWindow('Please Respond Faster')
             core.wait(trial['FBDuration'])
-            self.clearWindow()
+            self.clearWindow(fixation=True)
         
         # log trial and add to data
         self.writeToLog(json.dumps(trial))
         self.alldata.append(trial)
         return trial
             
-        
-
-    def run_task(self, pause_trial = None):
+    def run_task(self, pause_trials = None):
         self.startTime = core.getTime()
         pause_time = 0
+        if pause_trials is None: pause_trials = []
         for trial in self.stimulusInfo:
-            if trial == pause_trial:
+            if trial['trial_count'] in pause_trials:
                 time = core.getTime()
-                self.presentTextToWindow("Take a break! Press '5' when you're ready to continue.")
+                self.presentTextToWindow("Take a break! Press '5' when you're ready to continue.", size = .1)
                 self.waitForKeypress(self.trigger_key)
                 self.clearWindow()
-                pause_time = core.getTime() - time
+                self.aperture.enable()
+                pause_time += core.getTime() - time
             
             # wait for onset time
             while core.getTime() < trial['onset'] + self.startTime + pause_time:
@@ -438,7 +452,7 @@ class adaptiveThreshold:
                         if self.quit_key==key:
                             self.shutDownEarly()
             self.presentTrial(trial)
-        
+                
         # clean up and save
         self.writeData()
         self.presentTextToWindow('Thank you. Please wait for the experimenter',

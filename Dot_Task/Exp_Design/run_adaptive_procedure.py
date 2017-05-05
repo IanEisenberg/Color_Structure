@@ -2,13 +2,13 @@
 runprobContextTask
 """
 
-from psychopy import event
-import webbrowser
 from adaptive_procedure import adaptiveThreshold
 from make_config import ThresholdConfig
-import glob
+import numpy as np
+from psychopy import event
 import os
 from twilio.rest import TwilioRestClient
+from utils import get_trackers
 
 # ****************************************************************************
 # Helper Function
@@ -32,11 +32,16 @@ message_on = False
 fullscr= True
 subdata=[]
 motion_on = True
-color_on = False
+color_on = True
 home = os.getenv('HOME') 
 save_dir = '../Data' 
 motionname = 'adaptive_motion'
 colorname = 'adaptive_color'
+# set up task variables
+subject_code = 'test1'
+stim_repetitions = 2
+exp_len = None
+n_pauses=3
 
 """
 # set things up for practice, training and tests
@@ -55,40 +60,39 @@ f = open('IDs.txt', 'a')
 f.write(subject_code + '\n')
 f.close()
 """
-subject_code = 'test'
-# set up task variables
-stim_repetitions = 5
+
 
 # counterbalance ts_order (which ts is associated with top of screen)
+ts_order = ['motion','color']
 try:
-    if int(subject_code)%2 == 0:
-        ts_order = [0,1]
-    else:
-        ts_order = [1,0]
+    if int(subject_code)%2 == 1:
+        ts_order = ['color','motion']
 except ValueError:
-    ts_order = [0,1]
+    pass
 
 # ****************************************************************************
 # set up config files
 # ****************************************************************************
-# train 
-
+# load motion_difficulties and color_difficulties from adaptive tasks
+motion_trackers,color_trackers = get_trackers(subject_code)
 
 if motion_on:
     motion_config = ThresholdConfig(taskname=motionname, subjid=subject_code, 
                                         stim_repetitions=stim_repetitions,
-                                        ts='motion',)
+                                        ts='motion',exp_len=exp_len)
     motion_config_file = motion_config.get_config()
     motion_task=adaptiveThreshold(motion_config_file,subject_code, 
-                                  save_dir=save_dir, fullscreen = fullscr)
+                                  save_dir=save_dir, fullscreen=fullscr,
+                                  trackers=motion_trackers)
 
 if color_on:
     color_config = ThresholdConfig(taskname=colorname, subjid=subject_code, 
                                         stim_repetitions=stim_repetitions, 
-                                        ts='color')
+                                        ts='color',exp_len=exp_len)
     color_config_file = color_config.get_config()  
     color_task=adaptiveThreshold(color_config_file,subject_code, 
-                                  save_dir=save_dir, fullscreen = fullscr)
+                                  save_dir=save_dir, fullscreen=fullscr,
+                                  trackers=color_trackers)
 
 
 
@@ -105,18 +109,18 @@ if motion_on:
     # prepare to start
     motion_task.setupWindow()
     motion_task.defineStims()
-    motion_task.presentTextToWindow("Motion")
+    motion_task.presentTextToWindow("""Motion""")
     resp,time=motion_task.waitForKeypress(motion_task.trigger_key)
     motion_task.checkRespForQuitKey(resp)
     event.clearEvents()
-
-    pause_trial = motion_task.stimulusInfo[len(motion_task.stimulusInfo)/2]
-    motion_task.run_task(pause_trial=pause_trial)    
+    
+    pause_trials = np.round(np.linspace(0,motion_task.exp_len,n_pauses+2))[1:-1]
+    motion_task.run_task(pause_trials=pause_trials)    
     
     #************************************
     # Send text about train performance
     #************************************
-    if message_on == False:   
+    if message_on == True:   
         send_message('Motion done')
         
 
@@ -125,21 +129,18 @@ if color_on:
     # prepare to start
     color_task.setupWindow()
     color_task.defineStims()
-    color_task.presentTextToWindow(
-        """
-        Color
-        """)
+    color_task.presentTextToWindow("""Color""")
     resp,time=color_task.waitForKeypress(color_task.trigger_key)
     color_task.checkRespForQuitKey(resp)
     event.clearEvents()
 
-    pause_trial = color_task.stimulusInfo[len(color_task.stimulusInfo)/2]
-    color_task.run_task(pause_trial=pause_trial)    
+    pause_trials = np.round(np.linspace(0,color_task.exp_len,n_pauses+2))[1:-1]
+    color_task.run_task(pause_trials=pause_trials)    
     
     #************************************
     # Send text about train performance
     #************************************
-    if message_on == False:   
+    if message_on == True:   
         send_message('color done')
 
 
