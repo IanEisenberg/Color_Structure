@@ -231,35 +231,43 @@ class adaptiveThreshold:
     def defineTrackers(self, trackers, method='quest'):
         if self.ts == "motion":
             difficulties = self.motion_difficulties
+            pedestals = self.stim_motions
             maxVal = self.base_speed
         elif self.ts == "color":
             difficulties = self.color_difficulties
+            pedestals = self.color_starts
             maxVal = self.color_starts[0]
         if method=='basic':
             step_lookup = {'easy':5,
                            'hard': 3}
-            for key,val in difficulties.items():
-                nDown = step_lookup[key]
-                trackers[key] = StairHandler(startVal=val, minVal=0, 
-                                            maxVal=maxVal,
-                                            stepSizes=maxVal/10.0, 
-                                            stepType='lin',
-                                            nDown=nDown,
-                                            nReversals=20,
-                                            staircase=trackers.get(key,None))
+            for difficulty,val in difficulties.items():
+                for pedestal in pedestals:
+                    key = (pedestal,difficulty)
+                    nDown = step_lookup[difficulty]
+                    trackers[key] = StairHandler(startVal=val, minVal=0, 
+                                                maxVal=maxVal,
+                                                stepSizes=maxVal/10.0, 
+                                                stepType='lin',
+                                                nDown=nDown,
+                                                nReversals=20,
+                                                staircase=trackers.get(key,None))
         elif method=='quest':
             quest_lookup = {'easy': .85,
                            'hard': .7}
-            for key,val in difficulties.items():
-                threshold = quest_lookup[key]
-                trackers[key] = QuestHandler(pThreshold=threshold,
-                                            nTrials = self.exp_len,
-                                            startVal=val, startValSd=maxVal/2,
-                                            minVal=0.0001, 
-                                            maxVal=maxVal,
-                                            gamma=.01,
-                                            beta=3.5,
-                                            staircase=trackers.get(key,None))
+            for difficulty,val in difficulties.items():
+                for pedestal in pedestals:
+                    key = (pedestal,difficulty)
+                    threshold = quest_lookup[difficulty]
+                    trackers[key] = QuestHandler(pThreshold=threshold,
+                                                nTrials = self.exp_len,
+                                                startVal=val, startValSd=maxVal/2,
+                                                minVal=0.0001, 
+                                                maxVal=maxVal,
+                                                gamma=.01,
+                                                grain=maxVal/400.0,
+                                                range=maxVal*2,
+                                                beta=3.5,
+                                                staircase=trackers.get(key,None))
         self.trackers = trackers
         
         
@@ -352,18 +360,21 @@ class adaptiveThreshold:
         # update difficulties based on adaptive tracker
         if self.ts == "motion":
             strength = stim["speedStrength"]
+            pedestal = stim["motionDirection"]
             difficulties = self.motion_difficulties
         elif self.ts == "color":
             strength = stim["colorStrength"]
+            pedestal = stim["colorSpace"]
             difficulties = self.color_difficulties
-        tracker = self.trackers[strength]
+        tracker_key = (pedestal,strength)
+        tracker = self.trackers[tracker_key]
         decision_var = tracker.next()
         difficulties[strength] = decision_var
         trial['decision_var'] = decision_var
         # get stim attributes
         trial_attributes = self.getTrialAttributes(stim)
         print('*'*40)
-        print('Speed Change: ', trial_attributes[0:2]) 
+        print('Tracker: %s' % str(tracker_key), 'Best Guess: %s' % tracker.mean()) 
         print('Taskset: %s, choice value: %s\nSpeed: %s, Strength: %s \
               \nColorDirection: %s, ColorStrength: %s \
               \nCorrectChoice: %s' % 

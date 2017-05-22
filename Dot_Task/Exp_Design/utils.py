@@ -4,17 +4,19 @@ from matplotlib import pyplot as plt
 import numpy as np
 # convert from LAB to RGB space
 from skimage.color import lab2rgb
-
-
+import os
 def get_difficulties(subject_code):
+    file_dir = os.path.dirname(__file__)
     try:
-        motion_file = glob('../Data/RawData/*%s*motion*' % subject_code)[-1]
+        motion_file = glob(os.path.join(file_dir,'..','Data','RawData',
+                                        '*%s*motion*' % subject_code))[-1]
         motion_data = cPickle.load(open(motion_file,'r'))
         motion_difficulties = {k:v.mean() for k,v in motion_data['trackers'].items()}
     except IndexError:
         motion_difficulties = {}
     try:
-        color_file = glob('../Data/RawData/*%s*color*' % subject_code)[-1]
+        color_file = glob(os.path.join(file_dir,'..','Data','RawData',
+                                       '*%s*color*' % subject_code))[-1]
         color_data = cPickle.load(open(color_file,'r'))
         color_difficulties = {k:v.mean() for k,v in color_data['trackers'].items()}
     except IndexError:
@@ -22,14 +24,17 @@ def get_difficulties(subject_code):
     return motion_difficulties, color_difficulties
 
 def get_trackers(subject_code):
+    file_dir = os.path.dirname(__file__)
     try:
-        motion_file = glob('../Data/RawData/*%s*motion*' % subject_code)[-1]
+        motion_file = glob(os.path.join(file_dir,'..','Data','RawData',
+                                        '*%s*motion*' % subject_code))[-1]
         motion_data = cPickle.load(open(motion_file,'r'))
         motion_trackers = motion_data['trackers']
     except IndexError:
         motion_trackers = {}
     try:
-        color_file = glob('../Data/RawData/*%s*color*' % subject_code)[-1]
+        color_file = glob(os.path.join(file_dir,'..','Data','RawData',
+                                       '*%s*color*' % subject_code))[-1]
         color_data = cPickle.load(open(color_file,'r'))
         color_trackers = color_data['trackers']
     except IndexError:
@@ -40,10 +45,10 @@ def pixel_lab2rgb(lst):
     lst = [float(x) for x in lst]
     return lab2rgb([[(lst)]]).flatten()
             
-from psychopy.data import _baseFunctionFit     
-def plot_weibull(x,y, chance = .5):
-    beta = 3.5
-    
+from psychopy.data import _baseFunctionFit   
+
+def fit_weibull(xx,yy, beta=3.5):
+    _chance=.5
     class FitWeibull(_baseFunctionFit):
         """Fit a Weibull function (either 2AFC or YN)
         of the form::
@@ -64,17 +69,20 @@ def plot_weibull(x,y, chance = .5):
         @staticmethod
         def _eval(xx, alpha):
             xx = np.asarray(xx)
-            yy = chance + (1.0 - chance) * (1 - np.exp(-(xx / alpha)**beta))
+            yy = _chance + (1.0 - _chance) * (1 - np.exp(-(xx / alpha)**beta))
             return yy
     
         @staticmethod
         def _inverse(yy, alpha):
-            xx = alpha * (-np.log((1.0 - yy) / (1 - chance))) ** (1.0 / beta)
+            xx = alpha * (-np.log((1.0 - yy) / (1 - _chance))) ** (1.0 / beta)
             return xx
-        
-    alpha = FitWeibull(x,y).params[0]
+    fit = FitWeibull(xx,yy)
+    return fit
+    
+def plot_weibull(alpha, beta=3.5, chance = .5):
     x = np.linspace(0,alpha*3,100)
     y = chance + (1.0-chance)*(1-np.exp( -(x/alpha)**(beta) ))
     plt.plot(x,y)
+    return alpha
     
 

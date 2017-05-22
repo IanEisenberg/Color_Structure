@@ -32,16 +32,16 @@ message_on = False
 fullscr= True
 subdata=[]
 motion_on = True
-color_on = True
+color_on = False
 home = os.getenv('HOME') 
 save_dir = '../Data' 
 motionname = 'adaptive_motion'
 colorname = 'adaptive_color'
 # set up task variables
-subject_code = 'test1'
-stim_repetitions = 2
+subject_code = 'IE2'
+stim_repetitions = 4
 exp_len = None
-n_pauses=3
+n_pauses=1
 
 """
 # set things up for practice, training and tests
