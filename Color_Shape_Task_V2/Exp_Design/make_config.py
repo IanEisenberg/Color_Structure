@@ -98,6 +98,7 @@ class ConfigList(object):
           'subjid': self.subjid,
           'trigger_key': '5',
           'action_keys': self.action_keys,
+          'task_distribution': self.distribution_name,
           'states': self.states,
           'rp': self.rp,
           'exp_len': self.exp_len,
@@ -134,7 +135,7 @@ class ConfigList(object):
         for k,v in kwargs.items():
 
             self.__dict__[k] = v
-        dist_string = config_file[1]['task_distributions']
+        dist_string = config_file[0]['task_distribution']
         if dist_string == "beta":
             self.distribution = beta
             self.distribution_name = dist_string

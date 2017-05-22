@@ -116,7 +116,8 @@ def simulateModel(model, ts_dis, model_name = 'model', n = 800, p = .9, mode = '
     
 
 
-def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, model_type = 'action', verbose = True, return_out = False):
+def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, 
+                    model_type = 'action', verbose = True, return_out = False):
     """
     Function to fit parameters to the bias2 model (fit r1, r2 and epsilon).
     Model can either fit to TS choices or actions
@@ -127,7 +128,8 @@ def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, mo
         eps = params['TS_eps']
     
         init_prior = [.5,.5]
-        model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, TS_eps=eps, action_eps = action_eps)
+        model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, 
+                              TS_eps=eps, action_eps = action_eps)
         model_likelihoods = []
         for i in df.index:
             c = df.context[i]
@@ -156,7 +158,8 @@ def fit_bias2_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, mo
     else:
         return out.params.valuesdict()
     
-def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, model_type = 'action', verbose = True, return_out = False):
+def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, 
+                    model_type = 'action', verbose = True, return_out = False):
     """
     Function to fit parameters to the bias2 model (fit r and epsilon)
     """
@@ -166,7 +169,8 @@ def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, mo
         eps = params['TS_eps']
 
         init_prior = [.5,.5]
-        model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, TS_eps=eps, action_eps = action_eps)
+        model = BiasPredModel(train_ts_dis, init_prior, r1=r1, r2=r2, 
+                              TS_eps=eps, action_eps = action_eps)
         model_likelihoods = []
         for i in df.index:
             c = df.context[i]
@@ -194,7 +198,9 @@ def fit_bias1_model(train_ts_dis, data, init_prior = [.5,.5], action_eps = 0, mo
     else:
         return out.params.valuesdict()
     
-def fit_static_model(train_ts_dis, data, rp, init_prior = [.5,.5], action_eps = 0, model_type = 'action', verbose = True, return_out = False):
+def fit_static_model(train_ts_dis, data, rp, init_prior = [.5,.5], 
+                     action_eps = 0, model_type = 'action', verbose = True, 
+                     return_out = False):
     """
     Function to fit any model where recursive probabilities are fixed, like an
     optimal model (r1=r2=.9) or a base-rate neglect model (r1=r2=.5)

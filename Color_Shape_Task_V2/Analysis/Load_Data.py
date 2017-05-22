@@ -8,9 +8,9 @@ Created on Tue Dec  9 14:22:54 2014
 import yaml
 import numpy as np
 import pandas as pd
-from scipy.stats import norm
+from scipy.stats import norm, beta
 
-def load_data(datafile, name, mode = 'train'):
+def load_data(datafile, name):
     """
     Load a temporal structure task data file. Cleans up the raw data (returns
     the first action/rt, removes trials without a response). Returns the global
@@ -60,11 +60,16 @@ def load_data(datafile, name, mode = 'train'):
     
     return (taskinfo, df,dfa)
 
-def preproc_data(traindata, testdata, taskinfo, dist = norm):
+def preproc_data(traindata, testdata, taskinfo, dist = "norm"):
             """ Sets TS2 to always be associated with the 'top' of the screen (positive context values),
             creates a log_rt column and outputs task statistics during training
             :return: train_ts_dis, train_recursive_p, action_eps
             """
+            if dist=="norm":
+                dist=norm
+            elif dist=="beta":
+                dist=beta
+            
             #flip contexts if necessary
             states = taskinfo['states']
             ts_dists = {s['ts']: dist(**s['dist_args']) for s in states.values()}

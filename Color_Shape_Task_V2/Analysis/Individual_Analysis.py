@@ -9,9 +9,10 @@ from helper_classes import BiasPredModel, SwitchModel, MemoryModel
 from helper_functions import fit_bias2_model, fit_bias1_model, fit_static_model, \
     fit_switch_model, fit_midline_model, fit_memory_model, calc_posterior, gen_bias_TS_posteriors, \
     gen_memory_TS_posteriors
+from os.path import join
 import pickle, glob, re
 import pandas as pd
-from scipy.stats import norm
+from scipy.stats import norm, beta
 import warnings
 
 # Suppress runtimewarning due to pandas bug
@@ -26,7 +27,7 @@ def get_data(filey):
         info = pickle.load(open('../Data/' + file_name + '.pkl', 'rb'))
         taskinfo, dfa = [info.get(k) for k in ['taskinfo', 'dfa']]
     except IOError:
-        taskinfo, df, dfa = load_data(filey, file_name, mode='train')
+        taskinfo, df, dfa = load_data(filey, file_name)
         info = {'taskinfo': taskinfo, 'dfa': dfa}
         pickle.dump(info, open('../Data/' + file_name + '.pkl','wb'), protocol = 2)
     return taskinfo,  dfa
@@ -36,13 +37,18 @@ def get_model_dicts(filey):
         model_dicts = pickle.load(open(filey,'r'))
     except IOError:
         model_dicts = {}
-        model_names = ['bias2','bias1','eoptimal','ignore','midline','switch','memory','perseverance','permem']
+        model_names = ['bias2','bias1','eoptimal','ignore','midline','switch',
+                       'memory','perseverance','permem']
         # set up dictionaries to hold fitted parameters for each subject
-        fitting_functions = [fit_bias2_model, fit_bias1_model, fit_static_model, fit_static_model, fit_midline_model, fit_switch_model, fit_memory_model, fit_memory_model, fit_memory_model]
+        fitting_functions = [fit_bias2_model, fit_bias1_model, 
+                             fit_static_model, fit_static_model, 
+                             fit_midline_model, fit_switch_model, 
+                             fit_memory_model, fit_memory_model, 
+                             fit_memory_model]
         for name, fun in zip(model_names,fitting_functions):
             model = {'fitting_fun': fun}
             try:
-                model['fit_dict'] = pickle.load(open('Analysis_Output/' + name + '_parameter_fits.pkl', 'rb'))
+                model['fit_dict'] = pickle.load(open(join('Analysis_Output', name+'_parameter_fits.pkl'), 'rb'))
             except:
                 model['fit_dict'] = {}
             model_dicts[name] = model    
@@ -77,7 +83,12 @@ def fit_test_models(ts_distributions, rp, action_eps, test, model_dicts, verbose
                     fit_dict[subj_name + '_' + model_type + '_first'] = fun(ts_distributions, test.iloc[0:df_midpoint], verbose = verbose, **args)
                     fit_dict[subj_name + '_' + model_type + '_second'] = fun(ts_distributions, test.iloc[0:df_midpoint], verbose = verbose, **args)
 
-
+def get_ts_distributions(dist, states):
+    if dist == "norm":
+        ts_dis = [norm(**states[s]['dist_args']) for s in [0,1]]
+    elif dist == "beta":
+        ts_dis = [beta(**states[s]['dist_args']) for s in [0,1]]
+    return ts_dis
 
 # *********************************************
 # Set up defaults
@@ -117,8 +128,12 @@ else:
         # *********************************************
         # Preliminary Setup
         # *********************************************
-        ts_dis = [norm(**taskinfo['states'][s]['dist_args']) for s in [0,1]]
-        train_ts_dis,train_recursive_p,action_eps = preproc_data(train_dfa,test_dfa,taskinfo)        
+        dist = taskinfo['task_distribution']
+        ts_dis = get_ts_distributions(dist, taskinfo['states'])
+        train_ts_dis,train_recursive_p,action_eps = preproc_data(train_dfa,
+                                                                 test_dfa,
+                                                                 taskinfo,
+                                                                 dist)        
         
         # *********************************************
         # Model fitting
