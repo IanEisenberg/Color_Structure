@@ -1,0 +1,914 @@
+- action_keys: [down, up, z, x]
+  base_speed: 0.1
+  clearAfterResponse: 1
+  color_difficulties: {easy: 0.15, hard: 0.05}
+  color_starts: [0.15, 0.85]
+  exp_len: 64
+  id: IE_difficulty_pedestal
+  motion_difficulties: {easy: 0.03, hard: 0.015}
+  quit_key: q
+  responseWindow: 1.0
+  stim_colors:
+  - [75, 128, 75]
+  - [75, -128, 75]
+  stim_ids:
+  - &id007 {colorDirection: -1, colorSpace: 0.15, colorStrength: hard, motionDirection: in,
+    speedDirection: -1, speedStrength: hard}
+  - &id029 {colorDirection: -1, colorSpace: 0.15, colorStrength: hard, motionDirection: in,
+    speedDirection: 1, speedStrength: hard}
+  - &id024 {colorDirection: 1, colorSpace: 0.15, colorStrength: hard, motionDirection: in,
+    speedDirection: -1, speedStrength: hard}
+  - &id055 {colorDirection: 1, colorSpace: 0.15, colorStrength: hard, motionDirection: in,
+    speedDirection: 1, speedStrength: hard}
+  - &id056 {colorDirection: -1, colorSpace: 0.85, colorStrength: hard, motionDirection: in,
+    speedDirection: -1, speedStrength: hard}
+  - &id051 {colorDirection: -1, colorSpace: 0.85, colorStrength: hard, motionDirection: in,
+    speedDirection: 1, speedStrength: hard}
+  - &id012 {colorDirection: 1, colorSpace: 0.85, colorStrength: hard, motionDirection: in,
+    speedDirection: -1, speedStrength: hard}
+  - &id054 {colorDirection: 1, colorSpace: 0.85, colorStrength: hard, motionDirection: in,
+    speedDirection: 1, speedStrength: hard}
+  - &id034 {colorDirection: -1, colorSpace: 0.15, colorStrength: easy, motionDirection: in,
+    speedDirection: -1, speedStrength: hard}
+  - &id053 {colorDirection: -1, colorSpace: 0.15, colorStrength: easy, motionDirection: in,
+    speedDirection: 1, speedStrength: hard}
+  - &id060 {colorDirection: 1, colorSpace: 0.15, colorStrength: easy, motionDirection: in,
+    speedDirection: -1, speedStrength: hard}
+  - &id011 {colorDirection: 1, colorSpace: 0.15, colorStrength: easy, motionDirection: in,
+    speedDirection: 1, speedStrength: hard}
+  - &id030 {colorDirection: -1, colorSpace: 0.85, colorStrength: easy, motionDirection: in,
+    speedDirection: -1, speedStrength: hard}
+  - &id020 {colorDirection: -1, colorSpace: 0.85, colorStrength: easy, motionDirection: in,
+    speedDirection: 1, speedStrength: hard}
+  - &id014 {colorDirection: 1, colorSpace: 0.85, colorStrength: easy, motionDirection: in,
+    speedDirection: -1, speedStrength: hard}
+  - &id016 {colorDirection: 1, colorSpace: 0.85, colorStrength: easy, motionDirection: in,
+    speedDirection: 1, speedStrength: hard}
+  - &id032 {colorDirection: -1, colorSpace: 0.15, colorStrength: hard, motionDirection: out,
+    speedDirection: -1, speedStrength: hard}
+  - &id057 {colorDirection: -1, colorSpace: 0.15, colorStrength: hard, motionDirection: out,
+    speedDirection: 1, speedStrength: hard}
+  - &id047 {colorDirection: 1, colorSpace: 0.15, colorStrength: hard, motionDirection: out,
+    speedDirection: -1, speedStrength: hard}
+  - &id031 {colorDirection: 1, colorSpace: 0.15, colorStrength: hard, motionDirection: out,
+    speedDirection: 1, speedStrength: hard}
+  - &id063 {colorDirection: -1, colorSpace: 0.85, colorStrength: hard, motionDirection: out,
+    speedDirection: -1, speedStrength: hard}
+  - &id002 {colorDirection: -1, colorSpace: 0.85, colorStrength: hard, motionDirection: out,
+    speedDirection: 1, speedStrength: hard}
+  - &id004 {colorDirection: 1, colorSpace: 0.85, colorStrength: hard, motionDirection: out,
+    speedDirection: -1, speedStrength: hard}
+  - &id039 {colorDirection: 1, colorSpace: 0.85, colorStrength: hard, motionDirection: out,
+    speedDirection: 1, speedStrength: hard}
+  - &id041 {colorDirection: -1, colorSpace: 0.15, colorStrength: easy, motionDirection: out,
+    speedDirection: -1, speedStrength: hard}
+  - &id061 {colorDirection: -1, colorSpace: 0.15, colorStrength: easy, motionDirection: out,
+    speedDirection: 1, speedStrength: hard}
+  - &id052 {colorDirection: 1, colorSpace: 0.15, colorStrength: easy, motionDirection: out,
+    speedDirection: -1, speedStrength: hard}
+  - &id025 {colorDirection: 1, colorSpace: 0.15, colorStrength: easy, motionDirection: out,
+    speedDirection: 1, speedStrength: hard}
+  - &id006 {colorDirection: -1, colorSpace: 0.85, colorStrength: easy, motionDirection: out,
+    speedDirection: -1, speedStrength: hard}
+  - &id019 {colorDirection: -1, colorSpace: 0.85, colorStrength: easy, motionDirection: out,
+    speedDirection: 1, speedStrength: hard}
+  - &id037 {colorDirection: 1, colorSpace: 0.85, colorStrength: easy, motionDirection: out,
+    speedDirection: -1, speedStrength: hard}
+  - &id005 {colorDirection: 1, colorSpace: 0.85, colorStrength: easy, motionDirection: out,
+    speedDirection: 1, speedStrength: hard}
+  - &id028 {colorDirection: -1, colorSpace: 0.15, colorStrength: hard, motionDirection: in,
+    speedDirection: -1, speedStrength: easy}
+  - &id008 {colorDirection: -1, colorSpace: 0.15, colorStrength: hard, motionDirection: in,
+    speedDirection: 1, speedStrength: easy}
+  - &id046 {colorDirection: 1, colorSpace: 0.15, colorStrength: hard, motionDirection: in,
+    speedDirection: -1, speedStrength: easy}
+  - &id036 {colorDirection: 1, colorSpace: 0.15, colorStrength: hard, motionDirection: in,
+    speedDirection: 1, speedStrength: easy}
+  - &id009 {colorDirection: -1, colorSpace: 0.85, colorStrength: hard, motionDirection: in,
+    speedDirection: -1, speedStrength: easy}
+  - &id059 {colorDirection: -1, colorSpace: 0.85, colorStrength: hard, motionDirection: in,
+    speedDirection: 1, speedStrength: easy}
+  - &id021 {colorDirection: 1, colorSpace: 0.85, colorStrength: hard, motionDirection: in,
+    speedDirection: -1, speedStrength: easy}
+  - &id044 {colorDirection: 1, colorSpace: 0.85, colorStrength: hard, motionDirection: in,
+    speedDirection: 1, speedStrength: easy}
+  - &id064 {colorDirection: -1, colorSpace: 0.15, colorStrength: easy, motionDirection: in,
+    speedDirection: -1, speedStrength: easy}
+  - &id045 {colorDirection: -1, colorSpace: 0.15, colorStrength: easy, motionDirection: in,
+    speedDirection: 1, speedStrength: easy}
+  - &id015 {colorDirection: 1, colorSpace: 0.15, colorStrength: easy, motionDirection: in,
+    speedDirection: -1, speedStrength: easy}
+  - &id001 {colorDirection: 1, colorSpace: 0.15, colorStrength: easy, motionDirection: in,
+    speedDirection: 1, speedStrength: easy}
+  - &id018 {colorDirection: -1, colorSpace: 0.85, colorStrength: easy, motionDirection: in,
+    speedDirection: -1, speedStrength: easy}
+  - &id026 {colorDirection: -1, colorSpace: 0.85, colorStrength: easy, motionDirection: in,
+    speedDirection: 1, speedStrength: easy}
+  - &id050 {colorDirection: 1, colorSpace: 0.85, colorStrength: easy, motionDirection: in,
+    speedDirection: -1, speedStrength: easy}
+  - &id003 {colorDirection: 1, colorSpace: 0.85, colorStrength: easy, motionDirection: in,
+    speedDirection: 1, speedStrength: easy}
+  - &id043 {colorDirection: -1, colorSpace: 0.15, colorStrength: hard, motionDirection: out,
+    speedDirection: -1, speedStrength: easy}
+  - &id022 {colorDirection: -1, colorSpace: 0.15, colorStrength: hard, motionDirection: out,
+    speedDirection: 1, speedStrength: easy}
+  - &id062 {colorDirection: 1, colorSpace: 0.15, colorStrength: hard, motionDirection: out,
+    speedDirection: -1, speedStrength: easy}
+  - &id042 {colorDirection: 1, colorSpace: 0.15, colorStrength: hard, motionDirection: out,
+    speedDirection: 1, speedStrength: easy}
+  - &id027 {colorDirection: -1, colorSpace: 0.85, colorStrength: hard, motionDirection: out,
+    speedDirection: -1, speedStrength: easy}
+  - &id038 {colorDirection: -1, colorSpace: 0.85, colorStrength: hard, motionDirection: out,
+    speedDirection: 1, speedStrength: easy}
+  - &id013 {colorDirection: 1, colorSpace: 0.85, colorStrength: hard, motionDirection: out,
+    speedDirection: -1, speedStrength: easy}
+  - &id049 {colorDirection: 1, colorSpace: 0.85, colorStrength: hard, motionDirection: out,
+    speedDirection: 1, speedStrength: easy}
+  - &id023 {colorDirection: -1, colorSpace: 0.15, colorStrength: easy, motionDirection: out,
+    speedDirection: -1, speedStrength: easy}
+  - &id040 {colorDirection: -1, colorSpace: 0.15, colorStrength: easy, motionDirection: out,
+    speedDirection: 1, speedStrength: easy}
+  - &id017 {colorDirection: 1, colorSpace: 0.15, colorStrength: easy, motionDirection: out,
+    speedDirection: -1, speedStrength: easy}
+  - &id033 {colorDirection: 1, colorSpace: 0.15, colorStrength: easy, motionDirection: out,
+    speedDirection: 1, speedStrength: easy}
+  - &id048 {colorDirection: -1, colorSpace: 0.85, colorStrength: easy, motionDirection: out,
+    speedDirection: -1, speedStrength: easy}
+  - &id058 {colorDirection: -1, colorSpace: 0.85, colorStrength: easy, motionDirection: out,
+    speedDirection: 1, speedStrength: easy}
+  - &id035 {colorDirection: 1, colorSpace: 0.85, colorStrength: easy, motionDirection: out,
+    speedDirection: -1, speedStrength: easy}
+  - &id010 {colorDirection: 1, colorSpace: 0.85, colorStrength: easy, motionDirection: out,
+    speedDirection: 1, speedStrength: easy}
+  stim_motions: [in, out]
+  taskname: adaptive_motion
+  trigger_key: '5'
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.3288663267005152
+  displayFB: true
+  onset: 2
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id001
+  stimulusDuration: 2
+  trial_count: 1
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.2089621774594301
+  displayFB: true
+  onset: 7.328866326700515
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id002
+  stimulusDuration: 2
+  trial_count: 2
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.2571679453384896
+  displayFB: true
+  onset: 12.537828504159945
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id003
+  stimulusDuration: 2
+  trial_count: 3
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.6828106888885528
+  displayFB: true
+  onset: 17.794996449498434
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id004
+  stimulusDuration: 2
+  trial_count: 4
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.9584284007084523
+  displayFB: true
+  onset: 23.477807138386986
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id005
+  stimulusDuration: 2
+  trial_count: 5
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.6547670097816554
+  displayFB: true
+  onset: 29.43623553909544
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id006
+  stimulusDuration: 2
+  trial_count: 6
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.79332675592575
+  displayFB: true
+  onset: 35.09100254887709
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id007
+  stimulusDuration: 2
+  trial_count: 7
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.0845366071230331
+  displayFB: true
+  onset: 40.88432930480284
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id008
+  stimulusDuration: 2
+  trial_count: 8
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.908754602118333
+  displayFB: true
+  onset: 45.968865911925874
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id009
+  stimulusDuration: 2
+  trial_count: 9
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.4633664982003882
+  displayFB: true
+  onset: 51.87762051404421
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id010
+  stimulusDuration: 2
+  trial_count: 10
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.2971625506907851
+  displayFB: true
+  onset: 57.3409870122446
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id011
+  stimulusDuration: 2
+  trial_count: 11
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.8641018580390922
+  displayFB: true
+  onset: 62.63814956293538
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id012
+  stimulusDuration: 2
+  trial_count: 12
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.4423512943030143
+  displayFB: true
+  onset: 68.50225142097447
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id013
+  stimulusDuration: 2
+  trial_count: 13
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.5533146014993569
+  displayFB: true
+  onset: 73.94460271527748
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id014
+  stimulusDuration: 2
+  trial_count: 14
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.6254858100159044
+  displayFB: true
+  onset: 79.49791731677684
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id015
+  stimulusDuration: 2
+  trial_count: 15
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.0224323415797958
+  displayFB: true
+  onset: 85.12340312679274
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id016
+  stimulusDuration: 2
+  trial_count: 16
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.348996938810587
+  displayFB: true
+  onset: 90.14583546837254
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id017
+  stimulusDuration: 2
+  trial_count: 17
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.3559242095986455
+  displayFB: true
+  onset: 95.49483240718313
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id018
+  stimulusDuration: 2
+  trial_count: 18
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.3210597615811142
+  displayFB: true
+  onset: 100.85075661678177
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id019
+  stimulusDuration: 2
+  trial_count: 19
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.9830688629316655
+  displayFB: true
+  onset: 106.17181637836288
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id020
+  stimulusDuration: 2
+  trial_count: 20
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.4743194378795454
+  displayFB: true
+  onset: 112.15488524129454
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id021
+  stimulusDuration: 2
+  trial_count: 21
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.6621787854429975
+  displayFB: true
+  onset: 117.62920467917408
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id022
+  stimulusDuration: 2
+  trial_count: 22
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.9831143140817593
+  displayFB: true
+  onset: 123.29138346461708
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id023
+  stimulusDuration: 2
+  trial_count: 23
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.7720415515602244
+  displayFB: true
+  onset: 129.27449777869884
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id024
+  stimulusDuration: 2
+  trial_count: 24
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.6607657182831246
+  displayFB: true
+  onset: 135.04653933025907
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id025
+  stimulusDuration: 2
+  trial_count: 25
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.7610676764536195
+  displayFB: true
+  onset: 140.7073050485422
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id026
+  stimulusDuration: 2
+  trial_count: 26
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.1277332507606799
+  displayFB: true
+  onset: 146.46837272499582
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id027
+  stimulusDuration: 2
+  trial_count: 27
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.818641278428513
+  displayFB: true
+  onset: 151.5961059757565
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id028
+  stimulusDuration: 2
+  trial_count: 28
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.8193987988195173
+  displayFB: true
+  onset: 157.41474725418502
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id029
+  stimulusDuration: 2
+  trial_count: 29
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.8514704165572047
+  displayFB: true
+  onset: 163.23414605300454
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id030
+  stimulusDuration: 2
+  trial_count: 30
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.3846568852033627
+  displayFB: true
+  onset: 169.08561646956173
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id031
+  stimulusDuration: 2
+  trial_count: 31
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.8590332988032814
+  displayFB: true
+  onset: 174.47027335476508
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id032
+  stimulusDuration: 2
+  trial_count: 32
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.374223255143269
+  displayFB: true
+  onset: 180.32930665356835
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id033
+  stimulusDuration: 2
+  trial_count: 33
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.9507442830223902
+  displayFB: true
+  onset: 185.70352990871163
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id034
+  stimulusDuration: 2
+  trial_count: 34
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.6505886923734803
+  displayFB: true
+  onset: 191.65427419173403
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id035
+  stimulusDuration: 2
+  trial_count: 35
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.7241182861583448
+  displayFB: true
+  onset: 197.3048628841075
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id036
+  stimulusDuration: 2
+  trial_count: 36
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.99028299641186
+  displayFB: true
+  onset: 203.02898117026587
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id037
+  stimulusDuration: 2
+  trial_count: 37
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.5585320012283308
+  displayFB: true
+  onset: 209.01926416667771
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id038
+  stimulusDuration: 2
+  trial_count: 38
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.1660992444507179
+  displayFB: true
+  onset: 214.57779616790606
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id039
+  stimulusDuration: 2
+  trial_count: 39
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.2887086518860427
+  displayFB: true
+  onset: 219.74389541235678
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id040
+  stimulusDuration: 2
+  trial_count: 40
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.4149755909804655
+  displayFB: true
+  onset: 225.03260406424283
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id041
+  stimulusDuration: 2
+  trial_count: 41
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.6452388131588804
+  displayFB: true
+  onset: 230.4475796552233
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id042
+  stimulusDuration: 2
+  trial_count: 42
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.3513035009467391
+  displayFB: true
+  onset: 236.09281846838218
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id043
+  stimulusDuration: 2
+  trial_count: 43
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.139389578705833
+  displayFB: true
+  onset: 241.4441219693289
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id044
+  stimulusDuration: 2
+  trial_count: 44
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.346847024093925
+  displayFB: true
+  onset: 246.58351154803475
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id045
+  stimulusDuration: 2
+  trial_count: 45
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.0622189459344331
+  displayFB: true
+  onset: 251.93035857212868
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id046
+  stimulusDuration: 2
+  trial_count: 46
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.1665373232115348
+  displayFB: true
+  onset: 256.9925775180631
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id047
+  stimulusDuration: 2
+  trial_count: 47
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.5647962813106684
+  displayFB: true
+  onset: 262.15911484127463
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id048
+  stimulusDuration: 2
+  trial_count: 48
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.6665735329955083
+  displayFB: true
+  onset: 267.7239111225853
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id049
+  stimulusDuration: 2
+  trial_count: 49
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.7004859918957465
+  displayFB: true
+  onset: 273.39048465558085
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id050
+  stimulusDuration: 2
+  trial_count: 50
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.5705023899941515
+  displayFB: true
+  onset: 279.0909706474766
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id051
+  stimulusDuration: 2
+  trial_count: 51
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.0979042457999442
+  displayFB: true
+  onset: 284.6614730374707
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id052
+  stimulusDuration: 2
+  trial_count: 52
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.2074501508608244
+  displayFB: true
+  onset: 289.7593772832707
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id053
+  stimulusDuration: 2
+  trial_count: 53
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.3880457718129184
+  displayFB: true
+  onset: 294.9668274341315
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id054
+  stimulusDuration: 2
+  trial_count: 54
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.7676823666826138
+  displayFB: true
+  onset: 300.35487320594444
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id055
+  stimulusDuration: 2
+  trial_count: 55
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.7795804564457014
+  displayFB: true
+  onset: 306.12255557262705
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id056
+  stimulusDuration: 2
+  trial_count: 56
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.670083747185319
+  displayFB: true
+  onset: 311.9021360290728
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id057
+  stimulusDuration: 2
+  trial_count: 57
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.4180271305024346
+  displayFB: true
+  onset: 317.5722197762581
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id058
+  stimulusDuration: 2
+  trial_count: 58
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.2195747585368797
+  displayFB: true
+  onset: 322.99024690676055
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id059
+  stimulusDuration: 2
+  trial_count: 59
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.91922222321449
+  displayFB: true
+  onset: 328.20982166529745
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id060
+  stimulusDuration: 2
+  trial_count: 60
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.7474128749718219
+  displayFB: true
+  onset: 334.12904388851194
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id061
+  stimulusDuration: 2
+  trial_count: 61
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.9035908176473648
+  displayFB: true
+  onset: 339.87645676348376
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id062
+  stimulusDuration: 2
+  trial_count: 62
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.641573078287551
+  displayFB: true
+  onset: 345.7800475811311
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id063
+  stimulusDuration: 2
+  trial_count: 63
+  ts: motion
+- FBDuration: 0.5
+  FBonset: 0.5
+  ITI: 1.8238693929559586
+  displayFB: true
+  onset: 351.42162065941864
+  punishment_amount: 0
+  responseWindow: 1
+  reward_amount: 1
+  stim: *id064
+  stimulusDuration: 2
+  trial_count: 64
+  ts: motion

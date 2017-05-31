@@ -243,7 +243,7 @@ class ThresholdConfig(object):
         self.color_difficulties = {'easy':.15,'hard':.05}
         # motion speeds
         self.base_speed = .1
-        self.motion_difficulties = {'easy':.05, 'hard':.02}
+        self.motion_difficulties = {'easy':.03, 'hard':.015}
         # calculate exp len
         num_stims = len(self.color_difficulties)*len(self.motion_difficulties)\
                     *len(self.stim_colors)*len(self.stim_motions)*4
@@ -330,7 +330,7 @@ class ThresholdConfig(object):
         stims = r.sample(self.stim_ids*self.stim_repetitions,self.exp_len)   
         for trial in range(self.exp_len):
             # set ITI
-            ITI = base_ITI + r.random()*.5
+            ITI = base_ITI + r.random()
             trial_dict = {
                 'trial_count': trial_count,
                 'ts': self.ts,
