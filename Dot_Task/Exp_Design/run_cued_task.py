@@ -17,9 +17,9 @@ from utils import get_difficulties
 # ****************************************************************************
 def send_message(msg):
     accountSid = 'AC0055c137ee1b1c3896f6c47389e487dc'
-    twilioClient = TwilioRestClient(accountSid, authToken)
     twilio_info = open('../../twilio_info.txt','r')
     authToken = twilio_info.readline()
+    twilioClient = TwilioRestClient(accountSid, authToken)
     myTwilioNumber = twilio_info.readline()
     destCellPhone = twilio_info.readline() 
     myMessage = twilioClient.messages.create(body = msg, from_=myTwilioNumber, to=destCellPhone)

@@ -38,7 +38,7 @@ save_dir = '../Data'
 motionname = 'adaptive_motion'
 colorname = 'adaptive_color'
 # set up task variables
-subject_code = 'test1'
+subject_code = 'IE'
 stim_repetitions = 2
 exp_len = None
 n_pauses=3
