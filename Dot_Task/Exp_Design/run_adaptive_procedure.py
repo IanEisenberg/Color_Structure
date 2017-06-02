@@ -7,7 +7,7 @@ from make_config import ThresholdConfig
 import numpy as np
 from psychopy import event
 import os
-from twilio.rest import TwilioRestClient
+from twilio.rest import Client
 from utils import get_trackers
 
 # ****************************************************************************
@@ -15,7 +15,7 @@ from utils import get_trackers
 # ****************************************************************************
 def send_message(msg):
     accountSid = 'AC0055c137ee1b1c3896f6c47389e487dc'
-    twilioClient = TwilioRestClient(accountSid, authToken)
+    twilioClient = Client(accountSid, authToken)
     twilio_info = open('../../twilio_info.txt','r')
     authToken = twilio_info.readline()
     myTwilioNumber = twilio_info.readline()
@@ -38,7 +38,7 @@ save_dir = '../Data'
 motionname = 'adaptive_motion'
 colorname = 'adaptive_color'
 # set up task variables
-subject_code = 'IE2'
+subject_code = 'IE22'
 stim_repetitions = 4
 exp_len = None
 n_pauses=1

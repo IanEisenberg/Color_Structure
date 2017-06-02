@@ -9,7 +9,7 @@ import numpy as np
 import os
 from prob_context_task import probContextTask
 from psychopy import event
-from twilio.rest import TwilioRestClient
+from twilio.rest import Client
 from utils import get_difficulties
 
 # ****************************************************************************
@@ -17,7 +17,7 @@ from utils import get_difficulties
 # ****************************************************************************
 def send_message(msg):
     accountSid = 'AC0055c137ee1b1c3896f6c47389e487dc'
-    twilioClient = TwilioRestClient(accountSid, authToken)
+    twilioClient = Client(accountSid, authToken)
     twilio_info = open('../../twilio_info.txt','r')
     authToken = twilio_info.readline()
     myTwilioNumber = twilio_info.readline()

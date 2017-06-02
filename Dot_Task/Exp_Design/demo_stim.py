@@ -31,7 +31,7 @@ def presentTextToWindow(win, text,size=.15):
     event.waitKeys()
         
 # window, apeture, and stim setup           
-win = get_win(screen=1, fullscr=True)
+win = get_win(fullscr=False)
 aperture = define_aperture(win)
 aperture.enable()
 # potential color spaces
@@ -64,7 +64,6 @@ while True:
     spectrum_stim.setLineColor(color)
     spectrum_stim.draw()
     win.flip()
-win.close()
  
 # *************************************************************************
 # DEMO Different Conditions In/Out + Color Space
