@@ -20,6 +20,7 @@ def send_message(msg):
     twilioClient = Client(accountSid, authToken)
     twilio_info = open('../../twilio_info.txt','r')
     authToken = twilio_info.readline()
+    twilioClient = TwilioRestClient(accountSid, authToken)
     myTwilioNumber = twilio_info.readline()
     destCellPhone = twilio_info.readline() 
     myMessage = twilioClient.messages.create(body = msg, from_=myTwilioNumber, to=destCellPhone)
