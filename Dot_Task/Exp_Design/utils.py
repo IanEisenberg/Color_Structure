@@ -2,9 +2,12 @@ import cPickle
 from glob import glob
 from matplotlib import pyplot as plt
 import numpy as np
+from psychopy import monitors
+
 # convert from LAB to RGB space
 from skimage.color import lab2rgb
 import os
+
 def get_difficulties(subject_code):
     file_dir = os.path.dirname(__file__)
     try:
@@ -40,6 +43,13 @@ def get_trackers(subject_code):
     except IndexError:
         color_trackers = {}
     return motion_trackers, color_trackers
+
+def get_monitor(distance=30, width=30):  
+    monitor = monitors.Monitor('test')
+    monitor.setDistance(60)
+    monitor.setSizePix([2560,1440])
+    monitor.setWidth(60)
+    return monitor
 
 def pixel_lab2rgb(lst):
     lst = [float(x) for x in lst]

@@ -33,7 +33,7 @@ class OpticFlow(object):
             mask[:,80:]=0
             x = np.linspace(-np.pi, np.pi, 201)
             mask = np.vstack([np.cos(x)]*201)
-        self.dots = visual.ElementArrayStim(win, elementTex=None,
+        self.dots = visual.ElementArrayStim(win, elementTex=None,units = 'deg',
                                        elementMask=mask, **kwargs)
         self.base_dot_size = self.dots.sizes
         self.__dict__.update(kwargs)
@@ -76,7 +76,7 @@ class OpticFlow(object):
         projection = np.divide(self.dots3d*self.f,self.dots3d[:,2:3])[:,:2]
         # for normed units
         for dim, limits in enumerate(self.fieldlimits[0:2]):
-            projection[:,dim]/=(np.abs(limits).sum()/2*self.f/self.fieldlimits[2][1])
+            projection[:,dim]*=12
         self.dots.xys = projection[:,0:2]
         
     def updateTrialAttributes(self,dir=None,coherence=None,
@@ -93,7 +93,7 @@ class OpticFlow(object):
             self.speed = speed
         # orientation of elements, only important for bar stim
         if ori is not None:
-            self.dots.oris = ori
+            self.dots.oris = ori            
         # appropriately update transformation matrix when needed
         if dir is not None or speed is not None:
             if self.dir == 'in':

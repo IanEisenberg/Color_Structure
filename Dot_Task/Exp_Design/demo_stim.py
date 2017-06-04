@@ -1,23 +1,25 @@
 from flowstim import OpticFlow
 from hsluv import hsluv_to_rgb
 import numpy as np
-from psychopy import visual, event, core
-from utils import pixel_lab2rgb
+from psychopy import visual, event, core, monitors
 
+from utils import pixel_lab2rgb, get_monitor
+
+monitor = get_monitor()
 def get_win(screen=0,fullscr=True):       
     return  visual.Window([1200,1200], color=[-1,-1,-1], allowGUI=False, fullscr=fullscr, 
-                                     monitor='testMonitor', units='norm',  screen=screen,
+                                     monitor=monitor, units='deg',  screen=screen,
                                      allowStencil=True) 
 def define_aperture(win):
      # define aperture
-    aperture_size = 1.5
-    aperture_vertices = visual.Aperture(win, size=aperture_size, units='norm').vertices
-    ratio = float(win.size[1])/win.size[0]
-    aperture_vertices[:,0]*=ratio
-    aperture = visual.Aperture(win, size=aperture_size, units='norm', shape = aperture_vertices)
+    aperture_size = 20
+    aperture_vertices = visual.Aperture(win, size=aperture_size).vertices
+    #ratio = float(win.size[1])/win.size[0]
+    #aperture_vertices[:,0]*=ratio
+    aperture = visual.Aperture(win, size=aperture_size, shape = aperture_vertices)
     return aperture
 
-def presentTextToWindow(win, text,size=.15):
+def presentTextToWindow(win, text,size=.1):
     """ present a text message to the screen
     return:  time of completion
     """
@@ -31,7 +33,7 @@ def presentTextToWindow(win, text,size=.15):
     event.waitKeys()
         
 # window, apeture, and stim setup           
-win = get_win(fullscr=False)
+win = get_win(fullscr=True)
 aperture = define_aperture(win)
 aperture.enable()
 # potential color spaces
@@ -40,9 +42,9 @@ colors = np.array([[75,0,128],[75,0,-128]])
 # stim parameters
 base_speed =.1
 base_ori = 45
-height = .05
-ratio = win.size[1]/float(win.size[0])/3
-stim = OpticFlow(win,base_speed, color = colors[0], mask='bar',
+height = .8
+ratio = .2
+stim = OpticFlow(win,base_speed, color = colors[0], mask=None,
                  sizes=[height*ratio, height], 
                  nElements = 3000, oris=45)
 
