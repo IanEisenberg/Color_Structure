@@ -12,14 +12,14 @@ def get_win(screen=0,fullscr=True):
                                      allowStencil=True) 
 def define_aperture(win):
      # define aperture
-    aperture_size = 20
+    aperture_size = 30
     aperture_vertices = visual.Aperture(win, size=aperture_size).vertices
     #ratio = float(win.size[1])/win.size[0]
     #aperture_vertices[:,0]*=ratio
     aperture = visual.Aperture(win, size=aperture_size, shape = aperture_vertices)
     return aperture
 
-def presentTextToWindow(win, text,size=.1):
+def presentTextToWindow(win, text,size=.15):
     """ present a text message to the screen
     return:  time of completion
     """
@@ -42,11 +42,11 @@ colors = np.array([[75,0,128],[75,0,-128]])
 # stim parameters
 base_speed =.1
 base_ori = 45
-height = .8
-ratio = .2
-stim = OpticFlow(win,base_speed, color = colors[0], mask=None,
+height = 1
+ratio = .3
+stim = OpticFlow(win,base_speed, color = colors[0], mask='bar',
                  sizes=[height*ratio, height], 
-                 nElements = 3000, oris=45)
+                 nElements = 2000, oris=45)
 
 
 

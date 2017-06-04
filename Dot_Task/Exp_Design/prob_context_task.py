@@ -209,9 +209,9 @@ class probContextTask:
         
     def defineStims(self, stim = None, cue = None):
         ratio = self.win.size[1]/float(self.win.size[0])
-        stim_height = .02
-        cue_height = .1
-        ratio = self.win.size[1]/float(self.win.size[0])
+        stim_height = 1
+        ratio = .3
+        cue_height = 5
         if stim == None:
             self.stim=OpticFlow(self.win, speed=.1,
                                 color=[0,0,0], nElements = 3000,
@@ -221,7 +221,7 @@ class probContextTask:
         if cue == None:
             # set up cue
             self.cue = visual.Circle(self.win,units = 'norm',
-                                     radius = (cue_height*ratio, cue_height),
+                                     radius = (cue_height, cue_height),
                                      fillColor = 'white', edges = 120)
         else:
             self.cue = cue
