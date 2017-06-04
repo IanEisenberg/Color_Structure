@@ -5,7 +5,7 @@ from psychopy import visual, event, core
 from utils import pixel_lab2rgb
 
 def get_win(screen=0,fullscr=True):       
-    return  visual.Window([800,600], color=[-1,-1,-1], allowGUI=False, fullscr=fullscr, 
+    return  visual.Window([1200,1200], color=[-1,-1,-1], allowGUI=False, fullscr=fullscr, 
                                      monitor='testMonitor', units='norm',  screen=screen,
                                      allowStencil=True) 
 def define_aperture(win):
@@ -38,11 +38,13 @@ aperture.enable()
 colors = np.array([[75,0,128],[75,0,-128]])
 #colors = np.array([[75,128,75],[75,-128,75]])
 # stim parameters
-base_speed=.1
-height = .03
-ratio = win.size[1]/float(win.size[0])
-stim = OpticFlow(win,base_speed, color = colors[0], 
-                 sizes=[height*ratio, height], nElements = 6000)
+base_speed =.1
+base_ori = 45
+height = .05
+ratio = win.size[1]/float(win.size[0])/3
+stim = OpticFlow(win,base_speed, color = colors[0], mask='bar',
+                 sizes=[height*ratio, height], 
+                 nElements = 3000, oris=45)
 
 
 
@@ -99,7 +101,49 @@ while True:
     color = pixel_lab2rgb(color)
     stim.updateTrialAttributes(dir=dir, color=color)
     stim.draw()
+    
+# *************************************************************************
+# DEMO Orientation changes
+# *************************************************************************
 
+presentTextToWindow(win,'Orientation Demo')
+# duration per episode
+duration = 3
+presentation_order = [('in',.15, 90),
+                      ('in',.15, 0),
+                      ('out',.15, 90),
+                      ('out',.15, 0)]
+# show changes of color and speed
+for dir,color_proportion, oe in presentation_order:
+    # update trial attributes
+    color = colors[0]*color_proportion \
+                + colors[1]*(1-color_proportion)
+    # convert LAB color to RGB
+    color = pixel_lab2rgb(color)
+    stim.updateTrialAttributes(dir=dir, color=color)
+    
+    stim_clock = core.Clock()
+    while True:
+        percent_complete = (stim_clock.getTime()%duration)/duration
+        # change speed
+        ori = base_ori*(1-percent_complete) + oe*percent_complete
+        stim.updateTrialAttributes(ori=ori)
+        # at the end of a cycle wait for key press
+        if .98 < percent_complete:
+            win.flip()
+            keys=event.waitKeys()
+            stim_clock.reset()
+            if 'q' in keys: 
+                break
+        # wait for keys
+        keys=event.getKeys()
+        if 'q' in keys:
+            break
+        elif keys != []:
+            keys=event.waitKeys()
+        stim.draw()
+
+"""
 # *************************************************************************
 # DEMO Speed changes
 # *************************************************************************
@@ -184,5 +228,5 @@ for dir,start_proportion, end_proportion in presentation_order:
         elif keys != []:
             keys=event.waitKeys()
         stim.draw()
-        
+"""
 win.close()      
