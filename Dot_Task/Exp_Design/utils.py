@@ -43,7 +43,7 @@ def get_trackers(subject_code):
 
 def pixel_lab2rgb(lst):
     lst = [float(x) for x in lst]
-    return lab2rgb([[(lst)]]).flatten()
+    return lab2rgb([[(lst)]]).flatten()*2-1
             
 from psychopy.data import _baseFunctionFit   
 

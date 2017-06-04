@@ -36,10 +36,13 @@ aperture = define_aperture(win)
 aperture.enable()
 # potential color spaces
 colors = np.array([[75,0,128],[75,0,-128]])
-# colors = np.array([[75,128,75],[75,-128,75]])
+#colors = np.array([[75,128,75],[75,-128,75]])
 # stim parameters
 base_speed=.1
-stim = OpticFlow(win,base_speed, color = colors[0], sizes = [.015,.02], nElements = 8000)
+height = .03
+ratio = win.size[1]/float(win.size[0])
+stim = OpticFlow(win,base_speed, color = colors[0], 
+                 sizes=[height*ratio, height], nElements = 6000)
 
 
 
@@ -55,7 +58,7 @@ while True:
     if 'q' in keys:
         break
     color_proportion+=(.005*color_direction)
-    if color_proportion > .99 or color_proportion < .01:
+    if color_proportion > .98 or color_proportion < .02:
         color_direction*=-1    
     color = colors[0]*color_proportion \
                 + colors[1]*(1-color_proportion)
@@ -145,10 +148,10 @@ presentTextToWindow(win,'Color Demo')
 # duration per episode
 duration = 3
 stim.updateTrialAttributes(speed=base_speed)
-presentation_order = [('in',.15, .25),
-                      ('in',.15, .05),
-                      ('out',.85, .95),
-                      ('out',.85, .75)]
+presentation_order = [('in',.15, .3),
+                      ('in',.15, 0),
+                      ('out',.85, 1),
+                      ('out',.85, .7)]
 # show changes of color and speed
 for dir,start_proportion, end_proportion in presentation_order:
     # update trial attributes
