@@ -18,7 +18,7 @@ class probContextTask:
     """
     
     def __init__(self,config_file,subjid,save_dir,verbose=True, 
-                 fullscreen = False, mode = 'task'):
+                 fullscreen = False, mode = 'task', cue_type='probabilistic'):
         # set up some variables
         self.stimulusInfo=[]
         self.loadedStimulusFile=[]
@@ -50,6 +50,7 @@ class probContextTask:
         self.pointtracker = 0
         #Choose 'practice', 'task': determines stimulus set to use
         self.mode = mode
+        self.cue_type = cue_type
         # set up recording files
         self.logfilename='%s_%s_%s.log'%(self.subjid,self.taskname,self.timestamp)
         self.datafilename='%s_%s_%s.pkl'%(self.subjid,self.taskname,self.timestamp)
@@ -208,9 +209,9 @@ class probContextTask:
         
     def defineStims(self, stim = None, cue = None):
         ratio = self.win.size[1]/float(self.win.size[0])
-        stim_height = .02
-        cue_height = .1
-        ratio = self.win.size[1]/float(self.win.size[0])
+        stim_height = 1
+        ratio = .3
+        cue_height = 5
         if stim == None:
             self.stim=OpticFlow(self.win, speed=.1,
                                 color=[0,0,0], nElements = 3000,
@@ -220,14 +221,20 @@ class probContextTask:
         if cue == None:
             # set up cue
             self.cue = visual.Circle(self.win,units = 'norm',
-                                     radius = (cue_height*ratio, cue_height),
+                                     radius = (cue_height, cue_height),
                                      fillColor = 'white', edges = 120)
         else:
             self.cue = cue
     
-    def presentCue(self, context, duration):
-        self.cue.setPos((0, context*.8))
-        self.cue.draw()
+    def presentCue(self, trial, duration):
+        if self.cue_type == 'deterministic':
+            self.textStim.setText(trial['ts'])
+            self.textStim.setHeight(.15)
+            self.textStim.setColor(self.text_color)
+            self.textStim.draw()
+        elif self.cue_type == 'probabilistic':  
+            self.cue.setPos((0, trial['context']*.8))
+            self.cue.draw()
         self.win.flip()
         core.wait(duration)
         self.win.flip()
@@ -314,7 +321,6 @@ class probContextTask:
         """
         trialClock = core.Clock()
         self.trialnum += 1
-        context = trial['context']
         stim = trial['stim']
         trial_attributes = self.getTrialAttributes(stim)
         
@@ -333,7 +339,8 @@ class probContextTask:
         trial['rt'] = 999
         trial['FB'] = 999
         # present cue
-        self.presentCue(context, trial['cueDuration'])
+        self.presentCue(trial, trial['cueDuration'])
+        
         core.wait(trial['CSI'])
         # present stimulus and get response
         event.clearEvents()
@@ -383,11 +390,12 @@ class probContextTask:
             
         
 
-    def run_task(self, pause_trial = None):
+    def run_task(self, pause_trials = None):
         self.startTime = core.getTime()
         pause_time = 0
+        if pause_trials is None: pause_trials = []
         for trial in self.stimulusInfo:
-            if trial == pause_trial:
+            if trial['trial_count'] in pause_trials:
                 time1 = core.getTime()
                 self.presentTextToWindow("Take a break! Press '5' when you're ready to continue.")
                 self.waitForKeypress(self.trigger_key)

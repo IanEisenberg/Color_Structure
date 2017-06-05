@@ -5,10 +5,11 @@ runprobContextTask
 import webbrowser
 from make_config import ProbContextConfig
 import glob
+import numpy as np
 import os
 from prob_context_task import probContextTask
-from psychopy import core, event
-from twilio.rest import TwilioRestClient
+from psychopy import event
+from twilio.rest import Client
 from utils import get_difficulties
 
 # ****************************************************************************
@@ -16,9 +17,10 @@ from utils import get_difficulties
 # ****************************************************************************
 def send_message(msg):
     accountSid = 'AC0055c137ee1b1c3896f6c47389e487dc'
-    twilioClient = TwilioRestClient(accountSid, authToken)
+    twilioClient = Client(accountSid, authToken)
     twilio_info = open('../../twilio_info.txt','r')
     authToken = twilio_info.readline()
+    twilioClient = TwilioRestClient(accountSid, authToken)
     myTwilioNumber = twilio_info.readline()
     destCellPhone = twilio_info.readline() 
     myMessage = twilioClient.messages.create(body = msg, from_=myTwilioNumber, to=destCellPhone)
@@ -33,10 +35,12 @@ message_on = False
 fullscr= False
 subdata=[]
 train_on = True
-test_on = True
+test_on = False
 home = os.getenv('HOME') 
 save_dir = '../Data' 
 trainname = 'Dot_task'
+cue_type = 'determinstic'
+n_pauses=3
 
 """
 # set things up for practice, training and tests
@@ -55,7 +59,7 @@ f = open('IDs.txt', 'a')
 f.write(subject_code + '\n')
 f.close()
 """
-subject_code = 'test'
+subject_code = 'IE'
 # set up task variables
 stim_repetitions = 5
 recursive_p = .9
@@ -93,15 +97,10 @@ test_config.setup_trial_list(displayFB = False)
 test_config_file = test_config.get_config()
 
 # setup tasks
-train=probContextTask(train_config_file,subject_code, save_dir=save_dir, fullscreen = fullscr)
-train.setupWindow()
-train.defineStims()
-train.run_task()
-
-
-
-
-test=probContextTask(test_config_file,subject_code, save_dir=save_dir, fullscreen = fullscr)
+train=probContextTask(train_config_file,subject_code, save_dir=save_dir, 
+                      fullscreen = fullscr, cue_type=cue_type)
+test=probContextTask(test_config_file,subject_code, save_dir=save_dir, 
+                     fullscreen = fullscr, cue_type=cue_type)
 
 
 # ****************************************************************************
@@ -134,8 +133,8 @@ if train_on:
     train.checkRespForQuitKey(resp)
     event.clearEvents()
 
-    pause_trial = train.stimulusInfo[len(train.stimulusInfo)/2]
-    train.run_task(pause_trial=pause_trial)    
+    pause_trials = np.round(np.linspace(0,train.exp_len,n_pauses+2))[1:-1]
+    train.run_task(pause_trials=pause_trials)    
     
     #************************************
     # Send text about train performance
@@ -169,8 +168,8 @@ if test_on:
     test.checkRespForQuitKey(resp)
     event.clearEvents()
         
-    pause_trial = test.stimulusInfo[len(test.stimulusInfo)/2]
-    test.run_task(pause_trial = pause_trial)
+    pause_trials = np.round(np.linspace(0,test.exp_len,n_pauses+2))[1:-1]
+    test.run_task(pause_trials=pause_trials)    
         
     #************************************
     # Send text about test performance

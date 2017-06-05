@@ -6,11 +6,13 @@ Created on Tue Dec  9 14:22:54 2014
 """
 
 import cPickle
+from glob import glob
 import numpy as np
+import os
 import pandas as pd
 from scipy.stats import norm
 
-def load_data(datafile, mode = 'train'):
+def load_data(datafile):
     """
     Load a temporal structure task data file. Cleans up the raw data (returns
     the first action/rt, removes trials without a response). Returns the global
@@ -31,9 +33,18 @@ def load_data(datafile, mode = 'train'):
     stim_df = pd.DataFrame(df.stim.tolist())
     df.drop('stim', axis=1, inplace=True)
     df = pd.concat([df,stim_df], axis=1)
-    
-    
     return (taskinfo, df)
+
+def load_threshold_data(subj_code, dim='motion'):
+    file_dir = os.path.dirname(__file__)
+    assert dim in ['motion','color']
+    files = glob(os.path.join(file_dir,'..','Data','RawData',
+                                        '*%s*%s*' % (subj_code, dim)))
+    datafile = pd.DataFrame()
+    for filey in files:
+        taskinfo,df = load_data(filey)
+        datafile = pd.concat([datafile, df])
+    return taskinfo, datafile
 
 def preproc_data(traindata, testdata, taskinfo, dist = norm):
             """ Sets TS2 to always be associated with the 'top' of the screen (positive context values),

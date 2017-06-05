@@ -15,18 +15,26 @@ See also the elementArrayStim demo.
 """
 
 from psychopy import visual, event
+from psychopy.visual import GratingStim
 import numpy as np
 from numpy import random
     
 class OpticFlow(object):
-    def __init__(self, win, speed, color, fixation_on=True, **kwargs):
+    def __init__(self, win, speed, color, 
+                 mask='bar', fixation_on=True, **kwargs):
         # arguments passed to ElementArray
         default_dict = {'nElements': 1000, 'sizes': .005}
         for key in default_dict:
             if key not in kwargs.keys():
                 kwargs[key]=default_dict[key]
-        self.dots = visual.ElementArrayStim(win, elementTex=None,
-                                       elementMask='circle', **kwargs)
+        if mask=='bar':
+            mask = np.ones((100,100))
+            mask[:,0:20]=0
+            mask[:,80:]=0
+            x = np.linspace(-np.pi, np.pi, 201)
+            mask = np.vstack([np.cos(x)]*201)
+        self.dots = visual.ElementArrayStim(win, elementTex=None,units = 'deg',
+                                       elementMask=mask, **kwargs)
         self.base_dot_size = self.dots.sizes
         self.__dict__.update(kwargs)
         # OpticFlow specific arguments
@@ -68,10 +76,11 @@ class OpticFlow(object):
         projection = np.divide(self.dots3d*self.f,self.dots3d[:,2:3])[:,:2]
         # for normed units
         for dim, limits in enumerate(self.fieldlimits[0:2]):
-            projection[:,dim]/=(np.abs(limits).sum()/2*self.f/self.fieldlimits[2][1])
+            projection[:,dim]*=12
         self.dots.xys = projection[:,0:2]
         
-    def updateTrialAttributes(self,dir=None,coherence=None,color=None,speed=None):
+    def updateTrialAttributes(self,dir=None,coherence=None,
+                              color=None,speed=None,ori=None):
         if dir != None:
             assert dir in ['in','out']
             self.dir = dir
@@ -82,6 +91,9 @@ class OpticFlow(object):
             self.dots.setColors(color)
         if speed is not None:
             self.speed = speed
+        # orientation of elements, only important for bar stim
+        if ori is not None:
+            self.dots.oris = ori            
         # appropriately update transformation matrix when needed
         if dir is not None or speed is not None:
             if self.dir == 'in':
