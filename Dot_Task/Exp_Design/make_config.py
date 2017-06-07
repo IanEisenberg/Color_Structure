@@ -220,33 +220,29 @@ class ThresholdConfig(object):
         self.stim_repetitions = stim_repetitions
         self.subjid = subjid
         # set task set
-        assert ts in ['color','motion']
+        assert ts in ['orientation','motion']
         self.ts = ts
         self.taskname = taskname
         self.action_keys = action_keys
         if action_keys == None:
-            self.action_keys = ['down','up','z','x']
+            self.action_keys = ['down','up','left','right']
         self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         self.loc = '../Config_Files/'
         self.states = None
         self.trial_states = None
         self.trial_list = None
         # stim attributes
-        # colors in LAB space
-        self.stim_colors = np.array([[75,128,75],[75,-128,75]])
         self.stim_motions = ['in','out']
-        self.color_starts = [.15,.85]
+        self.stim_oris = [-60,30]
         # from easy to hard
-        # each tuple defines a starting color proportion, and the change in color proportion
-        # each difficulty level has two tuples, for different sides of the
-        # color space.
-        self.color_difficulties = {'easy':.15,'hard':.05}
+        # determines the orientation change in degrees
+        self.ori_difficulties = {'easy':15,'hard':5}
         # motion speeds
         self.base_speed = .1
         self.motion_difficulties = {'easy':.03, 'hard':.015}
         # calculate exp len
-        num_stims = len(self.color_difficulties)*len(self.motion_difficulties)\
-                    *len(self.stim_colors)*len(self.stim_motions)*4
+        num_stims = len(self.ori_difficulties)*len(self.motion_difficulties)\
+                    *len(self.stim_oris)*len(self.stim_motions)*4
         if exp_len is None:
             self.exp_len = int(stim_repetitions*num_stims)
         else:
@@ -270,11 +266,10 @@ class ThresholdConfig(object):
           'exp_len': self.exp_len,
           'stim_ids': self.stim_ids,
           'ts': self.ts,
-          'stim_colors': self.stim_colors.tolist(),
+          'stim_oris': self.stim_oris,
           'stim_motions': self.stim_motions,
-          'color_difficulties': self.color_difficulties,
+          'ori_difficulties': self.ori_difficulties,
           'motion_difficulties': self.motion_difficulties,
-          'color_starts': self.color_starts,
           'base_speed': self.base_speed
         }
         to_save = self.trial_list
@@ -305,16 +300,16 @@ class ThresholdConfig(object):
         stim_ids = []
         for motion_difficulty in self.motion_difficulties.keys():
             for direction in self.stim_motions:
-                for color_difficulty in self.color_difficulties.keys():
-                    for color_space in self.color_starts:
-                        for color_direction in [-1,1]:
+                for ori_difficulty in self.ori_difficulties.keys():
+                    for base_ori in self.stim_oris:
+                        for ori_direction in [-1,1]:
                             for speed_direction in [-1,1]:
                                 stim_ids.append({'motionDirection': direction,
-                                                 'colorSpace': color_space,
+                                                 'oriBase': base_ori,
                                                  'speedStrength': motion_difficulty,
                                                  'speedDirection': speed_direction,
-                                                 'colorStrength': color_difficulty,
-                                                 'colorDirection': color_direction})
+                                                 'oriStrength': ori_difficulty,
+                                                 'oriDirection': ori_direction})
 
         self.stim_ids = stim_ids
   

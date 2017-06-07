@@ -57,8 +57,6 @@ class adaptiveThreshold:
         self.datafilename='%s_%s_%s.pkl'%(self.subjid,self.taskname,self.timestamp)
         # log initial state
         self.writeToLog(self.toJSON())
-        # convert colors to array to be more useable
-        self.stim_colors = np.array(self.stim_colors)
         # setup trackers
         if trackers is None:
             trackers = {}
@@ -221,7 +219,7 @@ class adaptiveThreshold:
         ratio = .3
         if stim == None:
             self.stim=OpticFlow(self.win, speed=self.base_speed,
-                                color=[0,0,0], nElements = 3000,
+                                color=[1,1,1], nElements = 1000,
                                 sizes=[height*ratio, height])
         else:
             self.stim = stim 
@@ -233,10 +231,10 @@ class adaptiveThreshold:
             difficulties = self.motion_difficulties
             pedestals = self.stim_motions
             maxVal = self.base_speed
-        elif self.ts == "color":
-            difficulties = self.color_difficulties
-            pedestals = self.color_starts
-            maxVal = self.color_starts[0]
+        elif self.ts == "orientation":
+            difficulties = self.ori_difficulties
+            pedestals = self.stim_oris
+            maxVal = 20 # no more than a 20 degree change
         if method=='basic':
             step_lookup = {'easy':5,
                            'hard': 3}
@@ -272,41 +270,35 @@ class adaptiveThreshold:
         
         
     def getTrialAttributes(self,stim):
-        ss, sd, cs, cd, md, color = [stim[k] for k in 
+        ss, sd, os, od, md, oriBase = [stim[k] for k in 
                                      ['speedStrength','speedDirection',
-                                      'colorStrength','colorDirection',
-                                      'motionDirection', 'colorSpace']]
+                                      'oriStrength','oriDirection',
+                                      'motionDirection', 'oriBase']]
         # transform word difficulties into numbers
         ss = self.motion_difficulties[ss]
-        cs = self.color_difficulties[cs]
+        os = self.ori_difficulties[os]
         # create start and end points
         speed_start = self.base_speed
         speed_end = self.base_speed + ss*sd
         
-        color1_start = color
-        color1_end = color1_start+cd*cs
-        colors = [self.stim_colors[0]*color1_start + 
-                self.stim_colors[1]*(1-color1_start),
-                self.stim_colors[0]*color1_end + 
-                self.stim_colors[1]*(1-color1_end)]
-        color_start,color_end = colors
-        return [speed_start, speed_end, color_start, color_end, md]
+        ori_start = oriBase
+        ori_end = oriBase + os*od
+
+        return [speed_start, speed_end, ori_start, ori_end, md]
                                       
         
     def presentStim(self, trial_attributes, duration=.5, response_window=1,
                     mode = 'practice', clock=True):
         """ Used during instructions to present possible stims
         """
-        ss,se,cs,ce,md = trial_attributes
-        cs = np.array(cs)
-        ce = np.array(ce)
+        ss,se,os,oe,md = trial_attributes
         # reset dot position
         self.stim.setupDots()
         if mode == 'practice':
-            self.stim.updateTrialAttributes(dir=md,color=cs,speed=ss)
+            self.stim.updateTrialAttributes(dir=md,ori=os,speed=ss)
 
         elif mode == 'task':
-            self.stim.updateTrialAttributes(dir=md,color=cs,speed=ss)
+            self.stim.updateTrialAttributes(dir=md,ori=os,speed=ss)
             
         stim_clock = core.Clock()
         recorded_keys = []
@@ -315,12 +307,10 @@ class adaptiveThreshold:
             if stim_clock.getTime() < duration:
                 percent_complete = stim_clock.getTime()/duration
                 # smoothly move color over the duration
-                color = cs*(1-percent_complete) + ce*percent_complete
+                orientation = os*(1-percent_complete) + oe*percent_complete
                 # change speed
                 speed = ss*(1-percent_complete) + se*percent_complete
-                # convert to rgb
-                color = pixel_lab2rgb(color)
-                self.stim.updateTrialAttributes(color=color, speed=speed)
+                self.stim.updateTrialAttributes(ori=orientation, speed=speed)
                 self.stim.draw()
             elif 0<(stim_clock.getTime()-duration)<.05:
                 self.win.flip()
@@ -337,15 +327,15 @@ class adaptiveThreshold:
         return recorded_keys
             
     def getCorrectChoice(self,trial_attributes,ts):
-        ss,se,cs,ce,md = trial_attributes
+        ss,se,os,oe,md = trial_attributes
         # action keys are set up as the choices for ts1 followed by ts2
         # so the index for the correct choice must take that into account
         if ts == 'motion':
             correct_choice = int(se>ss)
-        elif ts == 'color':
+        elif ts == 'orientation':
             # correct choice is based on whether the color became "more extreme"
             # i.e. more green/red
-            correct_choice = int(abs(cs[1])>abs(ce[1]))+2
+            correct_choice = int(oe>os)+2
         return self.action_keys[correct_choice]
         
     def presentTrial(self,trial):
@@ -362,10 +352,10 @@ class adaptiveThreshold:
             strength = stim["speedStrength"]
             pedestal = stim["motionDirection"]
             difficulties = self.motion_difficulties
-        elif self.ts == "color":
-            strength = stim["colorStrength"]
-            pedestal = stim["colorSpace"]
-            difficulties = self.color_difficulties
+        elif self.ts == "orientation":
+            strength = stim["oriStrength"]
+            pedestal = stim["oriBase"]
+            difficulties = self.ori_difficulties
         tracker_key = (pedestal,strength)
         tracker = self.trackers[tracker_key]
         decision_var = tracker.next()
@@ -376,11 +366,11 @@ class adaptiveThreshold:
         print('*'*40)
         print('Tracker: %s' % str(tracker_key), 'Best Guess: %s' % tracker.mean()) 
         print('Taskset: %s, choice value: %s\nSpeed: %s, Strength: %s \
-              \nColorDirection: %s, ColorStrength: %s \
+              \nOriDirection: %s, OriStrength: %s \
               \nCorrectChoice: %s' % 
               (trial['ts'], decision_var, 
                stim['speedDirection'], stim['speedStrength'], 
-               stim['colorDirection'],stim['colorStrength'],
+               stim['oriDirection'],stim['oriStrength'],
                self.getCorrectChoice(trial_attributes,trial['ts'])))
         
         

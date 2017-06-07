@@ -29,14 +29,14 @@ def send_message(msg):
 
 verbose=True
 message_on = False
-fullscr= True
+fullscr= False
 subdata=[]
-motion_on = True
-color_on = False
+motion_on = False
+orientation_on = True
 home = os.getenv('HOME') 
 save_dir = '../Data' 
 motionname = 'adaptive_motion'
-colorname = 'adaptive_color'
+orientationname = 'adaptive_orientation'
 # set up task variables
 subject_code = 'IE22'
 stim_repetitions = 4
@@ -63,18 +63,18 @@ f.close()
 
 
 # counterbalance ts_order (which ts is associated with top of screen)
-ts_order = ['motion','color']
+ts_order = ['motion','orientation']
 try:
     if int(subject_code)%2 == 1:
-        ts_order = ['color','motion']
+        ts_order = ['orientation','motion']
 except ValueError:
     pass
 
 # ****************************************************************************
 # set up config files
 # ****************************************************************************
-# load motion_difficulties and color_difficulties from adaptive tasks
-motion_trackers,color_trackers = get_trackers(subject_code)
+# load motion_difficulties and orientation_difficulties from adaptive tasks
+motion_trackers,orientation_trackers = get_trackers(subject_code)
 
 if motion_on:
     motion_config = ThresholdConfig(taskname=motionname, subjid=subject_code, 
@@ -85,14 +85,14 @@ if motion_on:
                                   save_dir=save_dir, fullscreen=fullscr,
                                   trackers=motion_trackers)
 
-if color_on:
-    color_config = ThresholdConfig(taskname=colorname, subjid=subject_code, 
+if orientation_on:
+    orientation_config = ThresholdConfig(taskname=orientationname, subjid=subject_code, 
                                         stim_repetitions=stim_repetitions, 
-                                        ts='color',exp_len=exp_len)
-    color_config_file = color_config.get_config()  
-    color_task=adaptiveThreshold(color_config_file,subject_code, 
+                                        ts='orientation',exp_len=exp_len)
+    orientation_config_file = orientation_config.get_config()  
+    orientation_task=adaptiveThreshold(orientation_config_file,subject_code, 
                                   save_dir=save_dir, fullscreen=fullscr,
-                                  trackers=color_trackers)
+                                  trackers=orientation_trackers)
 
 
 
@@ -125,22 +125,22 @@ if motion_on:
         
 
 
-if color_on:
+if orientation_on:
     # prepare to start
-    color_task.setupWindow()
-    color_task.defineStims()
-    color_task.presentTextToWindow("""Color""")
-    resp,time=color_task.waitForKeypress(color_task.trigger_key)
-    color_task.checkRespForQuitKey(resp)
+    orientation_task.setupWindow()
+    orientation_task.defineStims()
+    orientation_task.presentTextToWindow("""Orientation""")
+    resp,time=orientation_task.waitForKeypress(orientation_task.trigger_key)
+    orientation_task.checkRespForQuitKey(resp)
     event.clearEvents()
 
-    pause_trials = np.round(np.linspace(0,color_task.exp_len,n_pauses+2))[1:-1]
-    color_task.run_task(pause_trials=pause_trials)    
+    pause_trials = np.round(np.linspace(0,orientation_task.exp_len,n_pauses+2))[1:-1]
+    orientation_task.run_task(pause_trials=pause_trials)    
     
     #************************************
     # Send text about train performance
     #************************************
     if message_on == True:   
-        send_message('color done')
+        send_message('orientation done')
 
 
