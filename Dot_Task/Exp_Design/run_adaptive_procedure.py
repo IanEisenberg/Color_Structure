@@ -7,21 +7,8 @@ from make_config import ThresholdConfig
 import numpy as np
 from psychopy import event
 import os
-from twilio.rest import Client
 from utils import get_trackers
 
-# ****************************************************************************
-# Helper Function
-# ****************************************************************************
-def send_message(msg):
-    accountSid = 'AC0055c137ee1b1c3896f6c47389e487dc'
-    twilioClient = Client(accountSid, authToken)
-    twilio_info = open('../../twilio_info.txt','r')
-    authToken = twilio_info.readline()
-    myTwilioNumber = twilio_info.readline()
-    destCellPhone = twilio_info.readline() 
-    myMessage = twilioClient.messages.create(body = msg, from_=myTwilioNumber, to=destCellPhone)
-        
         
 # ****************************************************************************
 # set-up variables
@@ -117,12 +104,6 @@ if motion_on:
     pause_trials = np.round(np.linspace(0,motion_task.exp_len,n_pauses+2))[1:-1]
     motion_task.run_task(pause_trials=pause_trials)    
     
-    #************************************
-    # Send text about train performance
-    #************************************
-    if message_on == True:   
-        send_message('Motion done')
-        
 
 
 if orientation_on:
@@ -136,11 +117,3 @@ if orientation_on:
 
     pause_trials = np.round(np.linspace(0,orientation_task.exp_len,n_pauses+2))[1:-1]
     orientation_task.run_task(pause_trials=pause_trials)    
-    
-    #************************************
-    # Send text about train performance
-    #************************************
-    if message_on == True:   
-        send_message('orientation done')
-
-

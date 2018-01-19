@@ -9,23 +9,8 @@ import numpy as np
 import os
 from prob_context_task import probContextTask
 from psychopy import event
-from twilio.rest import Client
 from utils import get_difficulties
 
-# ****************************************************************************
-# Helper Function
-# ****************************************************************************
-def send_message(msg):
-    accountSid = 'AC0055c137ee1b1c3896f6c47389e487dc'
-    twilioClient = Client(accountSid, authToken)
-    twilio_info = open('../../twilio_info.txt','r')
-    authToken = twilio_info.readline()
-    twilioClient = TwilioRestClient(accountSid, authToken)
-    myTwilioNumber = twilio_info.readline()
-    destCellPhone = twilio_info.readline() 
-    myMessage = twilioClient.messages.create(body = msg, from_=myTwilioNumber, to=destCellPhone)
-        
-        
 # ****************************************************************************
 # set-up variables
 # ****************************************************************************
@@ -117,20 +102,12 @@ event.clearEvents()
 
 pause_trials = np.round(np.linspace(0,cued_task.exp_len,n_pauses+2))[1:-1]
 cued_task.run_task(pause_trials=pause_trials)    
-
-#************************************
-# Send text about cue performance
-#************************************
-if message_on == True:   
-    send_message('cueing done')
-    
-
         
        
 #************************************
 # Determine payment
 #************************************
-points,trials = test.getPoints()
+points,trials = cued_task.getPoints()
 performance = (float(points)/trials-.25)/.75
 pay_bonus = round(performance*5)
 print('Participant ' + subject_code + ' won ' + str(points) + ' points out of ' + str(trials) + ' trials. Bonus: $' + str(pay_bonus))

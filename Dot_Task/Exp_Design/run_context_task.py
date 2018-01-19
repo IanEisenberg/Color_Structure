@@ -9,23 +9,8 @@ import numpy as np
 import os
 from prob_context_task import probContextTask
 from psychopy import event
-from twilio.rest import Client
 from utils import get_difficulties
 
-# ****************************************************************************
-# Helper Function
-# ****************************************************************************
-def send_message(msg):
-    accountSid = 'AC0055c137ee1b1c3896f6c47389e487dc'
-    twilioClient = Client(accountSid, authToken)
-    twilio_info = open('../../twilio_info.txt','r')
-    authToken = twilio_info.readline()
-    twilioClient = TwilioRestClient(accountSid, authToken)
-    myTwilioNumber = twilio_info.readline()
-    destCellPhone = twilio_info.readline() 
-    myMessage = twilioClient.messages.create(body = msg, from_=myTwilioNumber, to=destCellPhone)
-        
-        
 # ****************************************************************************
 # set-up variables
 # ****************************************************************************
@@ -136,14 +121,6 @@ if train_on:
     pause_trials = np.round(np.linspace(0,train.exp_len,n_pauses+2))[1:-1]
     train.run_task(pause_trials=pause_trials)    
     
-    #************************************
-    # Send text about train performance
-    #************************************
-    if message_on == True:   
-        send_message('Training done')
-        
-
-        
 # ****************************************************************************
 # Start test
 # ****************************************************************************
@@ -171,12 +148,6 @@ if test_on:
     pause_trials = np.round(np.linspace(0,test.exp_len,n_pauses+2))[1:-1]
     test.run_task(pause_trials=pause_trials)    
         
-    #************************************
-    # Send text about test performance
-    #************************************
-    if message_on == True:   
-        send_message('Testing Done')
-       
 #************************************
 # Determine payment
 #************************************
