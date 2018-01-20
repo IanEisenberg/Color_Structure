@@ -46,7 +46,7 @@ except ValueError:
 motion_trackers,orientation_trackers = get_trackers(subject_code)
 
 if motion_on:
-    motion_config = ThresholdConfig(taskname=motionname, subjid=subject_code, 
+    motion_config = ThresholdConfig(subjid=subject_code, taskname=motionname,
                                         stim_repetitions=stim_repetitions,
                                         ts='motion',exp_len=exp_len)
     motion_config_file = motion_config.get_config()
@@ -55,7 +55,7 @@ if motion_on:
                                   trackers=motion_trackers)
 
 if orientation_on:
-    orientation_config = ThresholdConfig(taskname=orientationname, subjid=subject_code, 
+    orientation_config = ThresholdConfig(subjid=subject_code, taskname=orientationname,
                                         stim_repetitions=stim_repetitions, 
                                         ts='orientation',exp_len=exp_len)
     orientation_config_file = orientation_config.get_config()  

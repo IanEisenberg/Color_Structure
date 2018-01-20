@@ -11,86 +11,52 @@ from os import path
 import random as r
 from scipy.stats import norm
 import yaml
-    
-class ProbContextConfig(object): 
-    def __init__(self, color_difficulties, motion_difficulties,
-                 taskname='taskname', subjid='000', rp=.9,
-                 action_keys=None, distribution=norm, args=None, 
-                 stim_repetitions=5, ts_order=None, 
-                 seed=None, exp_len=None):
+  
+class Config(object):
+    def __init__(self, subjid, taskname, action_keys,
+                 stim_repetitions, exp_len, 
+                 distribution=norm, seed=None):
+        self.subjid = subjid
+        self.taskname = taskname
+        self.stim_repetitions = stim_repetitions
         self.seed = seed
         if self.seed is not None:
             np.random.seed(self.seed)
-        self.distribution = norm
-        self.stim_repetitions = stim_repetitions
-        self.rp = rp # recursive probability
-        self.subjid = subjid
-        self.taskname = taskname
-        try:
-            self.distribution_name = distribution.name
-        except AttributeError:
-            self.distribution_name = 'unknown'
-        self.action_keys = action_keys
-        if action_keys == None:
-            self.action_keys = ['down','up','z', 'x']
-        self.args = args
-        if args == None:
-            self.args = [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
-        self.ts_order = ts_order
-        if ts_order == None:
-            self.ts_order = ['motion','color']
-            r.shuffle(self.ts_order)
-        else:
-            assert (set(['motion','color']) == set(self.ts_order)), \
-                'Tasksets not recognized. Must be "motion" and "color"'
+        self.exp_len = exp_len
         self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         self.loc = '../Config_Files/'
-        self.states = None
-        self.trial_states = None
+        self.action_keys = action_keys
+        # set up distributions
+        if distribution:
+            self.distribution = distribution
+            try:
+                self.distribution_name = distribution.name
+            except AttributeError:
+                self.distribution_name = 'unknown'
+        # set up generic task variables
         self.trial_list = None
-        # stim attributes. Difficulties are a dictionary passed to the constructor
-        # colors in LAB space
-        self.stim_colors = np.array([[75,128,75],[75,-128,75]])
-        self.stim_motions = ['in','out']
-        self.color_starts = [.15,.85]
-        self.color_difficulties = color_difficulties
-        # motion speeds
         self.base_speed = .1
-        self.motion_difficulties = motion_difficulties
-        # calculate exp len
-        num_stims = len(self.color_difficulties)*len(self.motion_difficulties)\
-                    *len(self.stim_colors)*len(self.stim_motions)*4
-        if exp_len is None:
-            self.exp_len = int(stim_repetitions*num_stims)
-        else:
-            assert exp_len < int(stim_repetitions*num_stims)
-            self.exp_len=exp_len
-        # setup
-        self.setup_stims()
+        self.stim_motions = ['in','out']
+        self.stim_oris = [-60,30]
     
-    def get_config(self, save=True, filey=None):
+    def get_config(self, save=True, filey=None, other_params={}):
         if self.trial_list==None:
             self.setup_trial_list()
         
         initial_params = {
-          'clearAfterResponse': 1,
-          'quit_key': 'q',
-          'responseWindow': 1.0,
-          'taskname': self.taskname,
-          'id': self.subjid,
-          'trigger_key': '5',
-          'action_keys': self.action_keys,
-          'states': self.states,
-          'rp': self.rp,
-          'exp_len': self.exp_len,
-          'stim_ids': self.stim_ids,
-          'ts_order': self.ts_order,
-          'stim_colors': self.stim_colors.tolist(),
-          'stim_motions': self.stim_motions,
-          'color_difficulties': self.color_difficulties,
-          'motion_difficulties': self.motion_difficulties,
-          'base_speed': self.base_speed
-        }
+                'subjid': self.subjid,
+                'taskname': self.taskname,
+                'action_keys': self.action_keys,
+                'trigger_key': '5',
+                'quit_key': 'q',
+                'exp_len': self.exp_len,
+                'stim_oris': self.stim_oris,
+                'stim_motions': self.stim_motions,
+                'base_speed': self.base_speed,
+                'clearAfterResponse': 1,
+                'responseWindow': 1.0}
+                
+        initial_params.update(other_params)
         to_save = self.trial_list
         to_save.insert(0,initial_params)
         if save==True:
@@ -101,7 +67,7 @@ class ProbContextConfig(object):
             return filey
         else:
             return to_save
-      
+        
     def load_config_settings(self, filename, **kwargs):
         if not path.exists(filename):
             raise BaseException('Config file not found')
@@ -111,30 +77,92 @@ class ProbContextConfig(object):
             self.__dict__[k] = v
         for k,v in kwargs.items():
             self.__dict__[k] = v  
-        self.stim_colors = np.array([np.array(x) for x in self.stim_colors])
         # setup
         self.setup_stims()
-        self.setup_trial_states()
         
     def setup_stims(self):
         stim_ids = []
         for motion_difficulty in self.motion_difficulties.keys():
             for direction in self.stim_motions:
-                for color_difficulty in self.color_difficulties.keys():
-                    for color_space in self.color_starts:
-                        for color_direction in [-1,1]:
+                for ori_difficulty in self.ori_difficulties.keys():
+                    for base_ori in self.stim_oris:
+                        for ori_direction in [-1,1]:
                             for speed_direction in [-1,1]:
                                 stim_ids.append({'motionDirection': direction,
-                                                 'colorSpace': color_space,
+                                                 'oriBase': base_ori,
                                                  'speedStrength': motion_difficulty,
                                                  'speedDirection': speed_direction,
-                                                 'colorStrength': color_difficulty,
-                                                 'colorDirection': color_direction})
+                                                 'oriStrength': ori_difficulty,
+                                                 'oriDirection': ori_direction})
 
         self.stim_ids = stim_ids
-        self.states = {i: {'ts': self.ts_order[i], 'dist_args': self.args[i]} for i in range(len(self.ts_order))}
+        
+        
+class ProbContextConfig(Config): 
+    def __init__(self, subjid, taskname, ori_difficulties, motion_difficulties,
+                 action_keys=None, stim_repetitions=5,
+                 exp_len=None, distribution=norm, dist_args=None, seed=None, 
+                 ts_order=None, rp=.9):
+        
+        if not action_keys:
+            action_keys = ['down','up','z', 'x']
+        # init Base Exp
+        super(ProbContextConfig, self).__init__(subjid,
+                                                taskname,
+                                                action_keys,
+                                                stim_repetitions,
+                                                exp_len,
+                                                distribution,
+                                                seed)
+        
+        self.rp = rp # recursive probability
+        self.dist_args = dist_args
+        if dist_args == None:
+            self.dist_args = [{'loc': -.3, 'scale': .37}, {'loc': .3, 'scale': .37}]
+            
+        self.ts_order = ts_order
+        if ts_order == None:
+            self.ts_order = ['motion','orientation']
+            r.shuffle(self.ts_order)
+        else:
+            assert (set(['motion','orientation']) == set(self.ts_order)), \
+                'Tasksets not recognized. Must be "motion" and "orientation"'
+        self.states = None
+        self.trial_states = None
+        # stim difficulties
+        self.ori_difficulties = ori_difficulties
+        self.motion_difficulties = motion_difficulties
+        # calculate exp len
+        num_stims = len(self.ori_difficulties)*len(self.motion_difficulties)\
+                    *len(self.stim_oris)*len(self.stim_motions)*4
+        if exp_len is None:
+            self.exp_len = int(stim_repetitions*num_stims)
+        else:
+            assert exp_len < int(stim_repetitions*num_stims)
+            self.exp_len=exp_len
+        # setup
+        self.setup_stims()
+        
+    def get_config(self, save=True, filey=None):
+        other_params = {'rp': self.rp,
+                        'states': self.states,
+                        'stim_ids': self.stim_ids,
+                        'ts_order': self.ts_order,
+                        'ori_difficulties': self.ori_difficulties,
+                        'motion_difficulties': self.motion_difficulties}
+        return super(ProbContextConfig, self).get_config(save, 
+                                                         filey, 
+                                                         other_params)
+      
+    def load_config_settings(self, filename, **kwargs):
+        super(ProbContextConfig, self).load_config_settings(filename, **kwargs)
         self.setup_trial_states()
-  
+    
+    def setup_stims(self):
+        super(ProbContextConfig, self).setup_stims()
+        self.states = {i: {'ts': self.ts_order[i], 'dist_args': self.dist_args[i]} for i in range(len(self.ts_order))}
+        self.setup_trial_states()
+
     def setup_trial_states(self):
         """
         Create a list of trials with the correct block length. Define tasksets with
@@ -210,35 +238,29 @@ class ProbContextConfig(object):
         self.trial_list = trial_list
        
 
-class ThresholdConfig(object): 
-    def __init__(self, taskname='taskname', subjid='000', action_keys=None,  
-                 stim_repetitions=5, ts='motion', seed=None, exp_len=None):
-        self.seed = seed
-        if self.seed is not None:
-            np.random.seed(self.seed)
-        self.distribution = norm
-        self.stim_repetitions = stim_repetitions
-        self.subjid = subjid
+class ThresholdConfig(Config): 
+    def __init__(self, subjid, taskname, action_keys=None, stim_repetitions=5,
+                 seed=None, exp_len=None, ts='motion'):             
+        
+        if not action_keys:
+            action_keys = ['down','up','left','right']
+        # init Base Exp
+        super(ThresholdConfig, self).__init__(subjid,
+                                                taskname,
+                                                action_keys,
+                                                stim_repetitions,
+                                                exp_len,
+                                                distribution=None,
+                                                seed=seed)
+        
         # set task set
         assert ts in ['orientation','motion']
         self.ts = ts
-        self.taskname = taskname
-        self.action_keys = action_keys
-        if action_keys == None:
-            self.action_keys = ['down','up','left','right']
-        self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        self.loc = '../Config_Files/'
-        self.states = None
-        self.trial_states = None
-        self.trial_list = None
         # stim attributes
-        self.stim_motions = ['in','out']
-        self.stim_oris = [-60,30]
         # from easy to hard
         # determines the orientation change in degrees
         self.ori_difficulties = {'easy':15,'hard':5}
         # motion speeds
-        self.base_speed = .1
         self.motion_difficulties = {'easy':.03, 'hard':.015}
         # calculate exp len
         num_stims = len(self.ori_difficulties)*len(self.motion_difficulties)\
@@ -251,68 +273,16 @@ class ThresholdConfig(object):
         # setup
         self.setup_stims()
     
+        
     def get_config(self, save=True, filey=None):
-        if self.trial_list==None:
-            self.setup_trial_list()
+        other_params = {'stim_ids': self.stim_ids,
+                        'ts': self.ts,
+                        'ori_difficulties': self.ori_difficulties,
+                        'motion_difficulties': self.motion_difficulties}
+        return super(ThresholdConfig, self).get_config(save, 
+                                                       filey, 
+                                                       other_params)
         
-        initial_params = {
-          'clearAfterResponse': 1,
-          'quit_key': 'q',
-          'responseWindow': 1.0,
-          'taskname': self.taskname,
-          'id': self.subjid,
-          'trigger_key': '5',
-          'action_keys': self.action_keys,
-          'exp_len': self.exp_len,
-          'stim_ids': self.stim_ids,
-          'ts': self.ts,
-          'stim_oris': self.stim_oris,
-          'stim_motions': self.stim_motions,
-          'ori_difficulties': self.ori_difficulties,
-          'motion_difficulties': self.motion_difficulties,
-          'base_speed': self.base_speed
-        }
-        to_save = self.trial_list
-        to_save.insert(0,initial_params)
-        if save==True:
-            filename = self.taskname + '_' + self.subjid + '_config_' + self.timestamp + '.yaml'
-            if filey == None:
-                filey = path.join(self.loc,filename)
-            yaml.dump(to_save, open(filey,'w'))
-            return filey
-        else:
-            return to_save
-      
-    def load_config_settings(self, filename, **kwargs):
-        if not path.exists(filename):
-            raise BaseException('Config file not found')
-        config_file = yaml.load(open(filename,'r'))
-        configuration = config_file[0]
-        for k,v in configuration.items():
-            self.__dict__[k] = v
-        for k,v in kwargs.items():
-            self.__dict__[k] = v  
-        self.stim_colors = np.array([np.array(x) for x in self.stim_colors])
-        # setup
-        self.setup_stims()
-        
-    def setup_stims(self):
-        stim_ids = []
-        for motion_difficulty in self.motion_difficulties.keys():
-            for direction in self.stim_motions:
-                for ori_difficulty in self.ori_difficulties.keys():
-                    for base_ori in self.stim_oris:
-                        for ori_direction in [-1,1]:
-                            for speed_direction in [-1,1]:
-                                stim_ids.append({'motionDirection': direction,
-                                                 'oriBase': base_ori,
-                                                 'speedStrength': motion_difficulty,
-                                                 'speedDirection': speed_direction,
-                                                 'oriStrength': ori_difficulty,
-                                                 'oriDirection': ori_direction})
-
-        self.stim_ids = stim_ids
-  
                     
     def setup_trial_list(self, stimulusDuration=2, responseWindow=1,
                          FBDuration=.5, FBonset=.5, base_ITI=1, 
