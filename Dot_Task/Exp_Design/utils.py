@@ -55,40 +55,6 @@ def pixel_lab2rgb(lst):
     lst = [float(x) for x in lst]
     return lab2rgb([[(lst)]]).flatten()*2-1
             
-from psychopy.data import _baseFunctionFit   
-
-def fit_weibull(xx,yy, beta=3.5):
-    _chance=.5
-    class FitWeibull(_baseFunctionFit):
-        """Fit a Weibull function (either 2AFC or YN)
-        of the form::
-    
-            y = chance + (1.0-chance)*(1-exp( -(xx/alpha)**(beta) ))
-    
-        and with inverse::
-    
-            x = alpha * (-log((1.0-y)/(1-chance)))**(1.0/beta)
-    
-        After fitting the function you can evaluate an array of x-values
-        with ``fit.eval(x)``, retrieve the inverse of the function with
-        ``fit.inverse(y)`` or retrieve the parameters from ``fit.params``
-        (a list with ``[alpha, beta]``)
-        """
-        # static methods have no `self` and this is important for
-        # optimise.curve_fit
-        @staticmethod
-        def _eval(xx, alpha):
-            xx = np.asarray(xx)
-            yy = _chance + (1.0 - _chance) * (1 - np.exp(-(xx / alpha)**beta))
-            return yy
-    
-        @staticmethod
-        def _inverse(yy, alpha):
-            xx = alpha * (-np.log((1.0 - yy) / (1 - _chance))) ** (1.0 / beta)
-            return xx
-    fit = FitWeibull(xx,yy)
-    return fit
-    
 def plot_weibull(alpha, beta=3.5, chance = .5):
     x = np.linspace(0,alpha*3,100)
     y = chance + (1.0-chance)*(1-np.exp( -(x/alpha)**(beta) ))

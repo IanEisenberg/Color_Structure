@@ -1,11 +1,8 @@
 """
 generic task using psychopy
 """
-
-import cPickle
-import datetime
+from BaseExp import BaseExp
 import json
-import numpy as np
 from psychopy import visual, core, event
 from psychopy.data import QuestHandler, StairHandler
 import subprocess
@@ -15,18 +12,17 @@ import yaml
 from flowstim import OpticFlow
 from utils import pixel_lab2rgb
 
-class adaptiveThreshold:
+class adaptiveThreshold(BaseExp):
     """ class defining a probabilistic context task
     """
     
     def __init__(self,config_file,subjid,save_dir,verbose=True, 
-                 fullscreen = False, mode = 'task', trackers = None):
+                 fullscreen=False, mode='task', trackers=None):
         # set up some variables
         self.stimulusInfo=[]
         self.loadedStimulusFile=[]
         self.startTime=[]
         self.alldata=[]
-        self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         #looks up the hash of the most recent git push. Stored in log file
         self.gitHash = subprocess.check_output(['git','rev-parse','--short','HEAD'])[:-1]
         # load config file
@@ -37,30 +33,18 @@ class adaptiveThreshold:
             print(mode + ': cannot load config file')
             sys.exit()
             
-        self.save_dir = save_dir  
-        self.subjid=subjid
-        # set up window
-        self.win=[]
-        self.window_dims=[800,600]
         self.aperture=None
-        
-        self.textStim=[]
         self.trialnum = 0
         self.track_response = []
-        self.fullscreen = fullscreen
-        self.text_color = [1]*3
         self.pointtracker = 0
         #Choose 'practice', 'task': determines stimulus set to use
         self.mode = mode
-        # set up recording files
-        self.logfilename='%s_%s_%s.log'%(self.subjid,self.taskname,self.timestamp)
-        self.datafilename='%s_%s_%s.pkl'%(self.subjid,self.taskname,self.timestamp)
-        # log initial state
-        self.writeToLog(self.toJSON())
         # setup trackers
         if trackers is None:
             trackers = {}
         self.defineTrackers(trackers)
+        # init Base Exp
+        super(adaptiveThreshold, self).__init__(self.taskname, subjid, save_dir, fullscreen)
     
     def loadConfigFile(self,filename):
         """ load a config file from yaml
@@ -91,24 +75,6 @@ class adaptiveThreshold:
                     not in ('clock', 'stimulusInfo', 'alldata', 'bot', 'taskinfo','win')}
         return json.dumps(init_dict)
     
-    def writeToLog(self,msg):
-        f=open(os.path.join(self.save_dir,'Log',self.logfilename),'a')
-        f.write(msg)
-        f.write('\n')
-        f.close()
-         
-    def writeData(self):
-        save_loc = os.path.join(self.save_dir,'RawData',self.datafilename)
-        data = {}
-        data['taskinfo']=self.taskinfo
-        data['configfile']=self.config_file
-        data['subcode']=self.subjid
-        data['timestamp']=self.timestamp
-        data['taskdata']=self.alldata
-        data['trackers'] = self.trackers
-        f=open(save_loc,'w')
-        cPickle.dump(data,f)
-    
     #**************************************************************************
     # ******* Display Functions **************
     #**************************************************************************
@@ -131,69 +97,7 @@ class adaptiveThreshold:
                      
         self.win.flip()
         self.win.flip()
-        
-        
-    def presentTextToWindow(self,text,size=.15):
-        """ present a text message to the screen
-        return:  time of completion
-        """
-        
-        if not self.textStim:
-            self.textStim=visual.TextStim(self.win, text=text,font='BiauKai',
-                                height=size,color=self.text_color, colorSpace=u'rgb',
-                                opacity=1,depth=0.0,
-                                alignHoriz='center',wrapWidth=50)
-        else:
-            self.textStim.setText(text)
-            self.textStim.setHeight(size)
-            self.textStim.setColor(self.text_color)
-        self.textStim.draw()
-        self.win.flip()
-        return core.getTime()
 
-    def clearWindow(self, fixation=False):
-        """ clear the main window
-        """
-        if fixation==True:
-            self.fixation.draw()
-        if self.textStim:
-            self.textStim.setText('')
-            self.win.flip()
-        else:
-            self.presentTextToWindow('')
-
-    def waitForKeypress(self,key=[]):
-        """ wait for a keypress and return the pressed key
-        - this is primarily for waiting to start a task
-        - use getResponse to get responses on a task
-        """
-        start=False
-        event.clearEvents()
-        while start==False:
-            key_response=event.getKeys()
-            if len(key_response)>0:
-                if key:
-                    if key in key_response or self.quit_key in key_response:
-                        start=True
-                else:
-                    start=True
-        self.clearWindow()
-        return key_response,core.getTime()
-        
-    def closeWindow(self):
-        """ close the main window
-        """
-        if self.win:
-            self.win.close()
-
-    def checkRespForQuitKey(self,resp):
-        if self.quit_key in resp:
-            self.shutDownEarly()
-
-    def shutDownEarly(self):
-        self.closeWindow()
-        sys.exit()
-    
     def getPastAcc(self, time_win):
         """Returns the ratio of hits/trials in a predefined window
         """
@@ -415,7 +319,7 @@ class adaptiveThreshold:
                 else:
                     self.presentTextToWindow('incorrect')
                 core.wait(trial['FBDuration'])
-                self.clearWindow(fixation=True)        
+                self.clearWindow(fixation=self.fixation)        
         # If subject did not respond within the stimulus window clear the stim
         # and admonish the subject
         if trial['rt']==999:
@@ -424,7 +328,7 @@ class adaptiveThreshold:
             core.wait(trial['FBonset'])
             self.presentTextToWindow('Please Respond Faster')
             core.wait(trial['FBDuration'])
-            self.clearWindow(fixation=True)
+            self.clearWindow(fixation=self.fixation)
         
         # log trial and add to data
         self.writeToLog(json.dumps(trial))
@@ -455,7 +359,11 @@ class adaptiveThreshold:
             self.presentTrial(trial)
                 
         # clean up and save
-        self.writeData()
+        other_data={'taskinfo': self.taskinfo,
+                    'configfile': self.config_file,
+                    'trackers': self.trackers}
+        self.writeData(taskdata=self.alldata,
+                       other_data=other_data)
         self.presentTextToWindow('Thank you. Please wait for the experimenter',
                                  size=.05)
         self.waitForKeypress(self.quit_key)

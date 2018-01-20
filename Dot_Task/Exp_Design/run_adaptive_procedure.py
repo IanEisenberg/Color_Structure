@@ -25,28 +25,10 @@ save_dir = '../Data'
 motionname = 'adaptive_motion'
 orientationname = 'adaptive_orientation'
 # set up task variables
-subject_code = 'IE22'
+subject_code = 'test'
 stim_repetitions = 4
 exp_len = None
 n_pauses=1
-
-"""
-# set things up for practice, training and tests
-try:
-    f = open('IDs.txt','r')
-    lines = f.readlines()
-    f.close()
-    try:
-        last_id = lines[-1][:-1]
-        subject_code = raw_input('Last subject: "%s". Input new subject code: ' % last_id);
-    except IndexError:
-        subject_code = raw_input('Input first subject code: ');
-except IOError:
-    subject_code = raw_input('Input first subject code: ');
-f = open('IDs.txt', 'a')
-f.write(subject_code + '\n')
-f.close()
-"""
 
 
 # counterbalance ts_order (which ts is associated with top of screen)

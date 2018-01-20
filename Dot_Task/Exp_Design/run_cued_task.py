@@ -16,33 +16,14 @@ from utils import get_difficulties
 # ****************************************************************************
 
 verbose=True
-message_on = False
 fullscr= False
 subdata=[]
-home = os.getenv('HOME') 
 save_dir = '../Data' 
 cuename = 'cued_dot_task'
 cue_type = 'deterministic'
 n_pauses=3
 
-"""
-# set things up for practice, cueing and tests
-try:
-    f = open('IDs.txt','r')
-    lines = f.readlines()
-    f.close()
-    try:
-        last_id = lines[-1][:-1]
-        subject_code = raw_input('Last subject: "%s". Input new subject code: ' % last_id);
-    except IndexError:
-        subject_code = raw_input('Input first subject code: ');
-except IOError:
-    subject_code = raw_input('Input first subject code: ');
-f = open('IDs.txt', 'a')
-f.write(subject_code + '\n')
-f.close()
-"""
-subject_code = 'IE'
+subject_code = 'test'
 # set up task variables
 stim_repetitions = 5
 recursive_p = .9
