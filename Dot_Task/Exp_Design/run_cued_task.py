@@ -41,7 +41,7 @@ except ValueError:
 # set up config files
 # ****************************************************************************
 # load motion_difficulties and color_difficulties from adaptive tasks
-motion_difficulties, color_difficulties = get_difficulties(subject_code)
+motion_difficulties, ori_difficulties = get_difficulties(subject_code)
 
 # cued task 
 cue_config = ProbContextConfig(taskname = cuename, 
@@ -49,7 +49,7 @@ cue_config = ProbContextConfig(taskname = cuename,
                                  stim_repetitions = stim_repetitions, 
                                  ts_order = ts_order, rp = recursive_p,
                                  motion_difficulties = motion_difficulties,
-                                 color_difficulties = color_difficulties)
+                                 color_difficulties = ori_difficulties)
 cue_config_file = cue_config.get_config()
 
     

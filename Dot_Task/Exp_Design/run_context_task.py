@@ -43,7 +43,7 @@ except ValueError:
 # set up config files
 # ****************************************************************************
 # load motion_difficulties and color_difficulties from adaptive tasks
-motion_difficulties, color_difficulties = get_difficulties(subject_code)
+motion_difficulties, ori_difficulties = get_difficulties(subject_code)
 
 # train 
 if train_on:
@@ -52,12 +52,12 @@ if train_on:
                                      stim_repetitions = stim_repetitions, 
                                      ts_order = ts_order, rp = recursive_p,
                                      motion_difficulties = motion_difficulties,
-                                     color_difficulties = color_difficulties)
+                                     color_difficulties = ori_difficulties)
     train_config_file = train_config.get_config()
 else:
     train_config_file = glob.glob('../Config_Files/*Context_' +subject_code +'*yaml')[-1]
     
-test_config = ProbContextConfig(motion_difficulties, color_difficulties)
+test_config = ProbContextConfig(motion_difficulties, ori_difficulties)
 test_config.load_config_settings(train_config_file, taskname=train_config.taskname+'_test', stim_repetitions = stim_repetitions)
 test_config.setup_trial_list(displayFB = False)
 test_config_file = test_config.get_config()

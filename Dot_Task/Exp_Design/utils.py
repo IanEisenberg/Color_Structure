@@ -5,7 +5,7 @@ import numpy as np
 from psychopy import monitors
 
 # convert from LAB to RGB space
-from skimage.color import lab2rgb
+from skimage.orientation import lab2rgb
 import os
 
 def get_difficulties(subject_code):
@@ -18,13 +18,13 @@ def get_difficulties(subject_code):
     except IndexError:
         motion_difficulties = {}
     try:
-        color_file = glob(os.path.join(file_dir,'..','Data','RawData',
-                                       '*%s*color*' % subject_code))[-1]
-        color_data = cPickle.load(open(color_file,'r'))
-        color_difficulties = {k:v.mean() for k,v in color_data['trackers'].items()}
+        orientation_file = glob(os.path.join(file_dir,'..','Data','RawData',
+                                       '*%s*orientation*' % subject_code))[-1]
+        orientation_data = cPickle.load(open(orientation_file,'r'))
+        orientation_difficulties = {k:v.mean() for k,v in orientation_data['trackers'].items()}
     except IndexError:
-        color_difficulties = {}
-    return motion_difficulties, color_difficulties
+        orientation_difficulties = {}
+    return motion_difficulties, orientation_difficulties
 
 def get_trackers(subject_code):
     file_dir = os.path.dirname(__file__)
@@ -36,13 +36,13 @@ def get_trackers(subject_code):
     except IndexError:
         motion_trackers = {}
     try:
-        color_file = glob(os.path.join(file_dir,'..','Data','RawData',
-                                       '*%s*color*' % subject_code))[-1]
-        color_data = cPickle.load(open(color_file,'r'))
-        color_trackers = color_data['trackers']
+        orientation_file = glob(os.path.join(file_dir,'..','Data','RawData',
+                                       '*%s*orientation*' % subject_code))[-1]
+        orientation_data = cPickle.load(open(orientation_file,'r'))
+        orientation_trackers = orientation_data['trackers']
     except IndexError:
-        color_trackers = {}
-    return motion_trackers, color_trackers
+        orientation_trackers = {}
+    return motion_trackers, orientation_trackers
 
 def get_monitor(distance=30, width=30):  
     monitor = monitors.Monitor('test')
