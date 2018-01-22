@@ -41,13 +41,13 @@ base_color = [1,1,1] # white
 colors = np.array([[75,0,128],[75,0,-128]])
 #colors = np.array([[75,128,75],[75,-128,75]])
 # stim parameters
-base_speed =.1
+base_speed =.01
 base_ori = 45
 height = 1.5
 ratio = .3
 stim = OpticFlow(win,base_speed, color = base_color, mask='bar',
                  sizes=[height*ratio, height], 
-                 nElements = 1000, oris=base_ori)
+                 nElements = 600, oris=base_ori)
 
 
  
