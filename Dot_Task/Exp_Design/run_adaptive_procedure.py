@@ -13,22 +13,23 @@ from utils import get_trackers
 # ****************************************************************************
 # set-up variables
 # ****************************************************************************
+print('Enter the subject ID')
+subject_code = raw_input('subject id: ')
+
 
 verbose=True
 message_on = False
 fullscr= False
 subdata=[]
-motion_on = False
+motion_on = True
 orientation_on = True
 home = os.getenv('HOME') 
 save_dir = '../Data' 
 motionname = 'adaptive_motion'
 orientationname = 'adaptive_orientation'
 # set up task variables
-subject_code = 'test'
 stim_repetitions = 4
 exp_len = None
-n_pauses=1
 
 
 # counterbalance ts_order (which ts is associated with top of screen)
@@ -46,22 +47,30 @@ except ValueError:
 motion_trackers,orientation_trackers = get_trackers(subject_code)
 
 if motion_on:
-    motion_config = ThresholdConfig(subjid=subject_code, taskname=motionname,
-                                        stim_repetitions=stim_repetitions,
-                                        ts='motion',exp_len=exp_len)
+    motion_config = ThresholdConfig(subjid=subject_code, 
+                                    taskname='adaptive_motion',
+                                    stim_repetitions=stim_repetitions,
+                                    ts='motion',
+                                    exp_len=exp_len)
     motion_config_file = motion_config.get_config()
-    motion_task=adaptiveThreshold(motion_config_file,subject_code, 
-                                  save_dir=save_dir, fullscreen=fullscr,
+    motion_task=adaptiveThreshold(motion_config_file,
+                                  subject_code, 
+                                  save_dir=save_dir, 
+                                  fullscreen=fullscr,
                                   trackers=motion_trackers)
 
 if orientation_on:
-    orientation_config = ThresholdConfig(subjid=subject_code, taskname=orientationname,
-                                        stim_repetitions=stim_repetitions, 
-                                        ts='orientation',exp_len=exp_len)
+    orientation_config = ThresholdConfig(subjid=subject_code, 
+                                         taskname='adaptive_orientation',
+                                         stim_repetitions=stim_repetitions,
+                                         ts='orientation',
+                                         exp_len=exp_len)
     orientation_config_file = orientation_config.get_config()  
-    orientation_task=adaptiveThreshold(orientation_config_file,subject_code, 
-                                  save_dir=save_dir, fullscreen=fullscr,
-                                  trackers=orientation_trackers)
+    orientation_task=adaptiveThreshold(orientation_config_file,
+                                       subject_code,
+                                       save_dir=save_dir, 
+                                       fullscreen=fullscr,
+                                       trackers=orientation_trackers)
 
 
 
@@ -73,29 +82,13 @@ if orientation_on:
 # ****************************************************************************
 # Start training
 # ****************************************************************************
-
-if motion_on:
-    # prepare to start
-    motion_task.setupWindow()
-    motion_task.defineStims()
-    motion_task.presentTextToWindow("""Motion""")
-    resp,time=motion_task.waitForKeypress(motion_task.trigger_key)
-    motion_task.checkRespForQuitKey(resp)
-    event.clearEvents()
-    
-    pause_trials = np.round(np.linspace(0,motion_task.exp_len,n_pauses+2))[1:-1]
-    motion_task.run_task(pause_trials=pause_trials)    
-    
-
-
-if orientation_on:
-    # prepare to start
-    orientation_task.setupWindow()
-    orientation_task.defineStims()
-    orientation_task.presentTextToWindow("""Orientation""")
-    resp,time=orientation_task.waitForKeypress(orientation_task.trigger_key)
-    orientation_task.checkRespForQuitKey(resp)
-    event.clearEvents()
-
-    pause_trials = np.round(np.linspace(0,orientation_task.exp_len,n_pauses+2))[1:-1]
-    orientation_task.run_task(pause_trials=pause_trials)    
+if ts_order == ['motion', 'orientation']:
+    if motion_on:
+        motion_task.run_task()    
+    if orientation_on:
+        orientation_task.run_task()    
+else:
+    if orientation_on:
+        orientation_task.run_task() 
+    if motion_on:
+        motion_task.run_task()    

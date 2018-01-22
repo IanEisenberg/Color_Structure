@@ -6,7 +6,6 @@ import webbrowser
 from make_config import ProbContextConfig
 import glob
 import numpy as np
-import os
 from prob_context_task import probContextTask
 from psychopy import event
 from utils import get_difficulties
@@ -14,6 +13,9 @@ from utils import get_difficulties
 # ****************************************************************************
 # set-up variables
 # ****************************************************************************
+print('Enter the subject ID')
+subject_code = raw_input('subject id: ')
+
 
 verbose=True
 fullscr= False
@@ -21,52 +23,69 @@ subdata=[]
 train_on = True
 test_on = False
 save_dir = '../Data' 
-trainname = 'Dot_task'
-cue_type = 'determinstic'
-n_pauses=3
-
-subject_code = 'test'
+trainname = 'dot_task'
+cue_type = 'probabilistic'
 # set up task variables
 stim_repetitions = 5
 recursive_p = .9
 
 # counterbalance ts_order (which ts is associated with top of screen)
-ts_order = ['motion','color']
-try:
-    if int(subject_code)%2 == 1:
-        ts_order = ['color','motion']
-except ValueError:
-    pass
+ts_order = ['motion','orientation']
+np.random.shuffle(ts_order)
 
 
 # ****************************************************************************
 # set up config files
 # ****************************************************************************
-# load motion_difficulties and color_difficulties from adaptive tasks
+# load motion_difficulties and ori_difficulties from adaptive tasks
 motion_difficulties, ori_difficulties = get_difficulties(subject_code)
-
+if motion_difficulties == {}:
+    motion_difficulties = {
+     ('in', 'easy'): 0.05,
+     ('in', 'hard'): 0.01,
+     ('out', 'easy'): 0.05,
+     ('out', 'hard'): 0.01}
+    
+if ori_difficulties == {}:
+     ori_difficulties = {
+     (-60, 'easy'): 5,
+     (-60, 'hard'): 15,
+     (30, 'easy'): 5,
+     (30, 'hard'): 15}   
+    
 # train 
 if train_on:
-    train_config = ProbContextConfig(taskname = trainname, 
-                                     subjid = subject_code, 
-                                     stim_repetitions = stim_repetitions, 
-                                     ts_order = ts_order, rp = recursive_p,
-                                     motion_difficulties = motion_difficulties,
-                                     color_difficulties = ori_difficulties)
+    train_config = ProbContextConfig(taskname=trainname, 
+                                     subjid=subject_code, 
+                                     stim_repetitions=stim_repetitions, 
+                                     ts_order=ts_order, 
+                                     rp=recursive_p,
+                                     motion_difficulties=motion_difficulties,
+                                     ori_difficulties=ori_difficulties)
     train_config_file = train_config.get_config()
 else:
     train_config_file = glob.glob('../Config_Files/*Context_' +subject_code +'*yaml')[-1]
     
-test_config = ProbContextConfig(motion_difficulties, ori_difficulties)
-test_config.load_config_settings(train_config_file, taskname=train_config.taskname+'_test', stim_repetitions = stim_repetitions)
+test_config = ProbContextConfig(taskname=train_config.taskname+'_test',
+                                subjid=subject_code,
+                                motion_difficulties=motion_difficulties, 
+                                ori_difficulties=ori_difficulties)
+test_config.load_config_settings(train_config_file, 
+                                 stim_repetitions=stim_repetitions)
 test_config.setup_trial_list(displayFB = False)
 test_config_file = test_config.get_config()
 
 # setup tasks
-train=probContextTask(train_config_file,subject_code, save_dir=save_dir, 
-                      fullscreen = fullscr, cue_type=cue_type)
-test=probContextTask(test_config_file,subject_code, save_dir=save_dir, 
-                     fullscreen = fullscr, cue_type=cue_type)
+train=probContextTask(train_config_file,
+                      subject_code, 
+                      save_dir=save_dir, 
+                      fullscreen = fullscr, 
+                      cue_type=cue_type)
+test=probContextTask(test_config_file,
+                     subject_code, 
+                     save_dir=save_dir, 
+                     fullscreen = fullscr, 
+                     cue_type=cue_type)
 
 
 # ****************************************************************************
@@ -78,10 +97,8 @@ test=probContextTask(test_config_file,subject_code, save_dir=save_dir,
 # ****************************************************************************
 
 if train_on:
-    # prepare to start
-    train.setupWindow()
-    train.defineStims()
-    train.presentTextToWindow(
+
+    intro_text = \
         """
         We will now start the training phase of the experiment.
         
@@ -94,24 +111,17 @@ if train_on:
         as you press '5' the experiment will start so get ready!
         
         Please wait for the experimenter.
-        """)
-    resp,time=train.waitForKeypress(train.trigger_key)
-    train.checkRespForQuitKey(resp)
-    event.clearEvents()
+        """
 
-    pause_trials = np.round(np.linspace(0,train.exp_len,n_pauses+2))[1:-1]
-    train.run_task(pause_trials=pause_trials)    
+    train.run_task(intro_text=intro_text)    
     
 # ****************************************************************************
 # Start test
 # ****************************************************************************
         
 if test_on:
-    # prepare to start
-    test.setupWindow()
-    test.defineStims()
-    test.presentTextToWindow(
-        """
+    intro_text = \
+    """
         In this next part the feedback will be invisible. You
         are still earning points, though, and these points are
         used to determine your bonus.
@@ -120,14 +130,9 @@ if test_on:
         in the last section.
         
         Please wait for the experimenter.
-        """)
+        """
                         
-    resp,time=test.waitForKeypress(test.trigger_key)
-    test.checkRespForQuitKey(resp)
-    event.clearEvents()
-        
-    pause_trials = np.round(np.linspace(0,test.exp_len,n_pauses+2))[1:-1]
-    test.run_task(pause_trials=pause_trials)    
+    test.run_task(intro_text=intro_text)    
         
 #************************************
 # Determine payment

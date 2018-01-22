@@ -3,14 +3,13 @@ generic task using psychopy
 """
 from BaseExp import BaseExp
 import json
+import numpy as np
 from psychopy import visual, core, event
 from psychopy.data import QuestHandler, StairHandler
 import subprocess
 import sys,os
 import yaml
-
 from flowstim import OpticFlow
-from utils import pixel_lab2rgb
 
 class adaptiveThreshold(BaseExp):
     """ class defining a probabilistic context task
@@ -78,53 +77,15 @@ class adaptiveThreshold(BaseExp):
     #**************************************************************************
     # ******* Display Functions **************
     #**************************************************************************
-    
-    def setupWindow(self, aperture=True):
-        """ set up the main window
-        """
-        self.win = visual.Window(self.window_dims, allowGUI=False, 
-                                 fullscr=self.fullscreen, monitor='testMonitor', 
-                                 units='norm', allowStencil=True,
-                                 color=[-1,-1,-1])   
-        if aperture==True:
-            # define aperture
-            aperture_size = 1.5
-            aperture_vertices = visual.Aperture(self.win, size=aperture_size, units='norm').vertices
-            ratio = float(self.win.size[1])/self.win.size[0]
-            aperture_vertices[:,0]*=ratio
-            self.aperture = visual.Aperture(self.win, size=aperture_size, units='norm', shape = aperture_vertices)
-            self.aperture.disable()
-                     
-        self.win.flip()
-        self.win.flip()
-
-    def getPastAcc(self, time_win):
-        """Returns the ratio of hits/trials in a predefined window
-        """
-        if time_win > self.trialnum:
-            time_win = self.trialnum
-        return sum(self.track_response[-time_win:])
-        
-    def getStims(self):
-        return self.stims
-        
-    def getActions(self):
-        return self.action_keys
-        
-    def getTSorder(self):
-        return [self.taskinfo['states'][0]['ts'],
-                self.taskinfo['states'][1]['ts']]
-        
-    def getPoints(self):
-        return (self.pointtracker,self.trialnum)
-        
     def defineStims(self, stim = None):
         height = 1
         ratio = .3
         if stim == None:
-            self.stim=OpticFlow(self.win, speed=self.base_speed,
-                                color=[1,1,1], nElements = 1000,
-                                sizes=[height*ratio, height])
+            self.stim = OpticFlow(self.win, 
+                                 speed=self.base_speed,
+                                 color=[1,1,1], 
+                                 nElements = 2000,
+                                 sizes=[height*ratio, height])
         else:
             self.stim = stim 
         # define fixation
@@ -171,76 +132,6 @@ class adaptiveThreshold(BaseExp):
                                                 beta=3.5,
                                                 staircase=trackers.get(key,None))
         self.trackers = trackers
-        
-        
-    def getTrialAttributes(self,stim):
-        ss, sd, os, od, md, oriBase = [stim[k] for k in 
-                                     ['speedStrength','speedDirection',
-                                      'oriStrength','oriDirection',
-                                      'motionDirection', 'oriBase']]
-        # transform word difficulties into numbers
-        ss = self.motion_difficulties[ss]
-        os = self.ori_difficulties[os]
-        # create start and end points
-        speed_start = self.base_speed
-        speed_end = self.base_speed + ss*sd
-        
-        ori_start = oriBase
-        ori_end = oriBase + os*od
-
-        return [speed_start, speed_end, ori_start, ori_end, md]
-                                      
-        
-    def presentStim(self, trial_attributes, duration=.5, response_window=1,
-                    mode = 'practice', clock=True):
-        """ Used during instructions to present possible stims
-        """
-        ss,se,os,oe,md = trial_attributes
-        # reset dot position
-        self.stim.setupDots()
-        if mode == 'practice':
-            self.stim.updateTrialAttributes(dir=md,ori=os,speed=ss)
-
-        elif mode == 'task':
-            self.stim.updateTrialAttributes(dir=md,ori=os,speed=ss)
-            
-        stim_clock = core.Clock()
-        recorded_keys = []
-        if self.aperture: self.aperture.enable()
-        while stim_clock.getTime() < duration+response_window:
-            if stim_clock.getTime() < duration:
-                percent_complete = stim_clock.getTime()/duration
-                # smoothly move color over the duration
-                orientation = os*(1-percent_complete) + oe*percent_complete
-                # change speed
-                speed = ss*(1-percent_complete) + se*percent_complete
-                self.stim.updateTrialAttributes(ori=orientation, speed=speed)
-                self.stim.draw()
-            elif 0<(stim_clock.getTime()-duration)<.05:
-                self.win.flip()
-                self.win.flip()
-            keys = event.getKeys(self.action_keys + [self.quit_key],
-                                 timeStamped=clock)
-            for key,response_time in keys:
-                # check for quit key
-                if key == self.quit_key:
-                    self.shutDownEarly()
-                recorded_keys+=keys
-        if self.aperture: self.aperture.disable()
-        self.win.flip(clearBuffer=True)
-        return recorded_keys
-            
-    def getCorrectChoice(self,trial_attributes,ts):
-        ss,se,os,oe,md = trial_attributes
-        # action keys are set up as the choices for ts1 followed by ts2
-        # so the index for the correct choice must take that into account
-        if ts == 'motion':
-            correct_choice = int(se>ss)
-        elif ts == 'orientation':
-            # correct choice is based on whether the color became "more extreme"
-            # i.e. more green/red
-            correct_choice = int(oe>os)+2
-        return self.action_keys[correct_choice]
         
     def presentTrial(self,trial):
         """
@@ -315,14 +206,14 @@ class adaptiveThreshold(BaseExp):
                 core.wait(trial['FBonset'])  
                 trial['actualFBOnsetTime'] = trialClock.getTime()
                 if FB == 1:
-                    self.presentTextToWindow('correct')
+                    self.presentTextToWindow('CORRECT')
                 else:
-                    self.presentTextToWindow('incorrect')
+                    self.presentTextToWindow('INCORRECT')
                 core.wait(trial['FBDuration'])
                 self.clearWindow(fixation=self.fixation)        
         # If subject did not respond within the stimulus window clear the stim
         # and admonish the subject
-        if trial['rt']==999:
+        else:
             tracker.addResponse(0)
             self.clearWindow()            
             core.wait(trial['FBonset'])
@@ -335,8 +226,16 @@ class adaptiveThreshold(BaseExp):
         self.alldata.append(trial)
         return trial
             
-    def run_task(self, pause_trials = None):
+    def run_task(self):
         self.startTime = core.getTime()
+        self.setupWindow()
+        self.defineStims()
+        
+        # present intro screen
+        self.presentInstruction(self.ts.title(), size=.15)
+        
+        # set up pause trials
+        pause_trials = np.round(np.linspace(0,self.exp_len,3))[1:-1]
         pause_time = 0
         if pause_trials is None: pause_trials = []
         for trial in self.stimulusInfo:

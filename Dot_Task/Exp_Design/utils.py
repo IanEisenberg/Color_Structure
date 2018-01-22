@@ -5,7 +5,7 @@ import numpy as np
 from psychopy import monitors
 
 # convert from LAB to RGB space
-from skimage.orientation import lab2rgb
+from skimage.color import lab2rgb
 import os
 
 def get_difficulties(subject_code):

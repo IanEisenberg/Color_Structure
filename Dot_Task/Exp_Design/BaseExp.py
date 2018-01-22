@@ -84,17 +84,109 @@ class BaseExp(object):
         if self.win:
             self.win.close()
             
+    
+    
+    
+        
+    def getActions(self):
+        return self.action_keys
+    
+    def getPastAcc(self, time_win):
+        """Returns the ratio of hits/trials in a predefined window
+        """
+        if time_win > self.trialnum:
+            time_win = self.trialnum
+        return sum(self.track_response[-time_win:])
+    
+    def getPoints(self):
+        return (self.pointtracker,self.trialnum)
+    
     def getSquareSize(self, win, size=.3):
             stim_ratio = float(win.size[0])/win.size[1]
             square_size = np.array([size, stim_ratio*size])
             return square_size
-                
+        
+    def getStims(self):
+        return self.stims
+    
+    def getTSorder(self):
+        return [self.taskinfo['states'][0]['ts'],
+                self.taskinfo['states'][1]['ts']]
+        
+    
+    def presentStim(self, trial_attributes, duration=.5, response_window=1,
+                    mode = 'practice', clock=True):
+        """ Used during instructions to present possible stims
+        """
+        ss,se,os,oe,md = trial_attributes
+        # reset dot position
+        self.stim.setupDots()
+        if mode == 'practice':
+            self.stim.updateTrialAttributes(dir=md,ori=os,speed=ss)
+
+        elif mode == 'task':
+            self.stim.updateTrialAttributes(dir=md,ori=os,speed=ss)
+            
+        stim_clock = core.Clock()
+        recorded_keys = []
+        if self.aperture: self.aperture.enable()
+        while stim_clock.getTime() < duration+response_window:
+            if stim_clock.getTime() < duration:
+                percent_complete = stim_clock.getTime()/duration
+                # smoothly move color over the duration
+                orientation = os*(1-percent_complete) + oe*percent_complete
+                # change speed
+                speed = ss*(1-percent_complete) + se*percent_complete
+                self.stim.updateTrialAttributes(ori=orientation, speed=speed)
+                self.stim.draw()
+            elif 0<(stim_clock.getTime()-duration)<.05:
+                self.win.flip()
+                self.win.flip()
+            keys = event.getKeys(self.action_keys + [self.quit_key],
+                                 timeStamped=clock)
+            for key,response_time in keys:
+                # check for quit key
+                if key == self.quit_key:
+                    self.shutDownEarly()
+                recorded_keys+=keys
+        if self.aperture: self.aperture.disable()
+        self.win.flip(clearBuffer=True)
+        return recorded_keys
+            
+    def getCorrectChoice(self,trial_attributes,ts):
+        ss,se,os,oe,md = trial_attributes
+        # action keys are set up as the choices for ts1 followed by ts2
+        # so the index for the correct choice must take that into account
+        if ts == 'motion':
+            correct_choice = int(se>ss)
+        elif ts == 'orientation':
+            # correct choice is based on whether the orientation become more or less positive
+            correct_choice = int(oe>os)+2
+        return self.action_keys[correct_choice]
+    
+    def getTrialAttributes(self,stim):
+        ss, sd, os, od, md, oriBase = [stim[k] for k in 
+                                     ['speedStrength','speedDirection',
+                                      'oriStrength','oriDirection',
+                                      'motionDirection', 'oriBase']]
+        # transform word difficulties into numbers
+        ss = self.motion_difficulties[ss]
+        os = self.ori_difficulties[os]
+        # create start and end points
+        speed_start = self.base_speed
+        speed_end = self.base_speed + ss*sd
+        
+        ori_start = oriBase
+        ori_end = oriBase + os*od
+
+        return [speed_start, speed_end, ori_start, ori_end, md]
+    
     def presentInstruction(self, text, size=.07):
             self.presentTextToWindow(text, size=size)
             resp,time=self.waitForKeypress(self.trigger_key)
             self.checkRespForQuitKey(resp)
             event.clearEvents()
-    
+            
     def presentTextToWindow(self, text, size=.15, color=None, duration=None,
                             position=None, flip=True):
         """ present a text message to the screen
@@ -150,19 +242,24 @@ class BaseExp(object):
             self.presentTextToWindow(timer_text, position=timer_position)
         self.win.flip()
         
-    def setupWindow(self, **kwargs):
-            """ set up the main window
-            """
-            additional_kwargs = {'screen': 1, 
-                                 'monitor': 'testMonitor'}
-            additional_kwargs.update(kwargs)
-            self.win = visual.Window(self.window_dims, allowGUI=False, 
-                                     fullscr=self.fullscreen, units='norm',
-                                     allowStencil=True, color=[-1,-1,-1], 
-                                     **additional_kwargs)   
-    
-            self.win.flip()
-            self.win.flip()
+    def setupWindow(self, aperture=True):
+        """ set up the main window
+        """
+        self.win = visual.Window(self.window_dims, allowGUI=False, 
+                                 fullscr=self.fullscreen, monitor='testMonitor', 
+                                 units='norm', allowStencil=True,
+                                 color=[-1,-1,-1])   
+        if aperture==True:
+            # define aperture
+            aperture_size = 1.5
+            aperture_vertices = visual.Aperture(self.win, size=aperture_size, units='norm').vertices
+            ratio = float(self.win.size[1])/self.win.size[0]
+            aperture_vertices[:,0]*=ratio
+            self.aperture = visual.Aperture(self.win, size=aperture_size, units='norm', shape = aperture_vertices)
+            self.aperture.disable()
+                     
+        self.win.flip()
+        self.win.flip()
         
     def shutDownEarly(self):
         self.closeWindow()
