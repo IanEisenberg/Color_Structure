@@ -48,10 +48,10 @@ if motion_difficulties == {}:
     
 if ori_difficulties == {}:
      ori_difficulties = {
-     (-60, 'easy'): 5,
-     (-60, 'hard'): 15,
-     (30, 'easy'): 5,
-     (30, 'hard'): 15}   
+     (-60, 'easy'): 15,
+     (-60, 'hard'): 5,
+     (30, 'easy'): 15,
+     (30, 'hard'): 5}   
     
 # train 
 if train_on:

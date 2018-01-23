@@ -83,10 +83,6 @@ class BaseExp(object):
         """
         if self.win:
             self.win.close()
-            
-    
-    
-    
         
     def getActions(self):
         return self.action_keys
