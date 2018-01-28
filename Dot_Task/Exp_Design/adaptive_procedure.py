@@ -227,13 +227,12 @@ class adaptiveThreshold(BaseExp):
         return trial
             
     def run_task(self):
-        self.startTime = core.getTime()
         self.setupWindow()
         self.defineStims()
         
         # present intro screen
         self.presentInstruction(self.ts.title(), size=.15)
-        
+        self.startTime = core.getTime()
         # set up pause trials
         pause_trials = np.round(np.linspace(0,self.exp_len,3))[1:-1]
         pause_time = 0
@@ -263,9 +262,10 @@ class adaptiveThreshold(BaseExp):
                     'trackers': self.trackers}
         self.writeData(taskdata=self.alldata,
                        other_data=other_data)
-        self.presentTextToWindow('Thank you. Please wait for the experimenter',
-                                 size=.05)
-        self.waitForKeypress(self.quit_key)
+        self.presentInstruction(
+            """
+            Thank you. Please wait for the experimenter.
+            """)
         self.closeWindow()
 
 

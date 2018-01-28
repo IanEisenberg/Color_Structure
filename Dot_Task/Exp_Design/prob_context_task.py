@@ -225,8 +225,10 @@ class probContextTask(BaseExp):
                     'configfile': self.config_file}
         self.writeData(taskdata=self.alldata,
                        other_data=other_data)
-        self.presentTextToWindow('Thank you. Please wait for the experimenter.')
-        self.waitForKeypress(self.quit_key)
+        self.presentInstruction(
+            """
+            Thank you. Please wait for the experimenter.
+            """)
         self.closeWindow()
 
 
