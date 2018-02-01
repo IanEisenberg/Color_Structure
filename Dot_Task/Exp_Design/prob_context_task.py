@@ -120,9 +120,9 @@ class probContextTask(BaseExp):
         self.trialnum += 1
         trial['actualOnsetTime']=core.getTime() - self.startTime
         trial['stimulusCleared']=0
-        trial['response'] = 999
-        trial['rt'] = 999
-        trial['FB'] = 999
+        trial['response'] = np.nan
+        trial['rt'] = np.nan
+        trial['FB'] = np.nan
         
         
         stim = trial['stim']

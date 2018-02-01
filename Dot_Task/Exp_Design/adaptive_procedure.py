@@ -170,9 +170,9 @@ class adaptiveThreshold(BaseExp):
         
         
         trial['actualOnsetTime']=core.getTime() - self.startTime
-        trial['response'] = 999
-        trial['rt'] = 999
-        trial['FB'] = 999
+        trial['response'] = np.nan
+        trial['rt'] = np.nan
+        trial['FB'] = np.nan
         # present stimulus and get response
         event.clearEvents()
         trialClock.reset()

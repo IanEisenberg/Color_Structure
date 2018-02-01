@@ -82,18 +82,16 @@ class Config(object):
         
     def setup_stims(self):
         stim_ids = []
-        for motion_difficulty in self.motion_difficulties.keys():
-            for direction in self.stim_motions:
-                for ori_difficulty in self.ori_difficulties.keys():
-                    for base_ori in self.stim_oris:
-                        for ori_direction in [-1,1]:
-                            for speed_direction in [-1,1]:
-                                stim_ids.append({'motionDirection': direction,
-                                                 'oriBase': base_ori,
-                                                 'speedStrength': motion_difficulty,
-                                                 'speedDirection': speed_direction,
-                                                 'oriStrength': ori_difficulty,
-                                                 'oriDirection': ori_direction})
+        for direction, motion_difficulty in self.motion_difficulties.keys():
+            for base_ori, ori_difficulty in self.ori_difficulties.keys():
+                for ori_direction in [-1,1]:
+                    for speed_direction in [-1,1]:
+                        stim_ids.append({'motionDirection': direction,
+                                         'oriBase': base_ori,
+                                         'speedStrength': motion_difficulty,
+                                         'speedDirection': speed_direction,
+                                         'oriStrength': ori_difficulty,
+                                         'oriDirection': ori_direction})
 
         self.stim_ids = stim_ids
         
@@ -134,7 +132,7 @@ class ProbContextConfig(Config):
         self.motion_difficulties = motion_difficulties
         # calculate exp len
         num_stims = len(self.ori_difficulties)*len(self.motion_difficulties)\
-                    *len(self.stim_oris)*len(self.stim_motions)*4
+                    *len(self.stim_oris)*len(self.stim_motions)
         if exp_len is None:
             self.exp_len = int(stim_repetitions*num_stims)
         else:
@@ -259,9 +257,15 @@ class ThresholdConfig(Config):
         # stim attributes
         # from easy to hard
         # determines the orientation change in degrees
-        self.ori_difficulties = {'easy':15,'hard':5}
+        self.ori_difficulties = {(self.stim_oris[0], 'easy'): 25,
+                                 (self.stim_oris[1], 'easy'): 25,
+                                 (self.stim_oris[0], 'hard'): 15,
+                                 (self.stim_oris[1], 'hard'): 15}
         # motion speeds
-        self.motion_difficulties = {'easy':.03, 'hard':.015}
+        self.motion_difficulties = {(self.stim_motions[0], 'easy'): .04,
+                                 (self.stim_motions[1], 'easy'): .04,
+                                 (self.stim_motions[0], 'hard'): .02,
+                                 (self.stim_motions[1], 'hard'): .02}
         # calculate exp len
         num_stims = len(self.ori_difficulties)*len(self.motion_difficulties)\
                     *len(self.stim_oris)*len(self.stim_motions)*4

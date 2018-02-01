@@ -47,10 +47,10 @@ if motion_difficulties == {}:
     
 if ori_difficulties == {}:
      ori_difficulties = {
-     (-60, 'easy'): 15,
-     (-60, 'hard'): 5,
-     (30, 'easy'): 15,
-     (30, 'hard'): 5}   
+     (-60, 'easy'): 25,
+     (-60, 'hard'): 15,
+     (30, 'easy'): 25,
+     (30, 'hard'): 15}   
      
 # cued task 
 cue_config = ProbContextConfig(taskname=cuename, 
