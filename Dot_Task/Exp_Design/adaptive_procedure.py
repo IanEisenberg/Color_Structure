@@ -94,43 +94,39 @@ class adaptiveThreshold(BaseExp):
     def defineTrackers(self, trackers, method='quest'):
         if self.ts == "motion":
             difficulties = self.motion_difficulties
-            pedestals = self.stim_motions
             maxVal = self.base_speed
         elif self.ts == "orientation":
             difficulties = self.ori_difficulties
-            pedestals = self.stim_oris
             maxVal = 20 # no more than a 20 degree change
         if method=='basic':
             step_lookup = {'easy':5,
                            'hard': 3}
-            for difficulty,val in difficulties.items():
-                for pedestal in pedestals:
-                    key = (pedestal,difficulty)
-                    nDown = step_lookup[difficulty]
-                    trackers[key] = StairHandler(startVal=val, minVal=0, 
-                                                maxVal=maxVal,
-                                                stepSizes=maxVal/10.0, 
-                                                stepType='lin',
-                                                nDown=nDown,
-                                                nReversals=20,
-                                                staircase=trackers.get(key,None))
+            for (pedestal, difficulty),val in difficulties.items():
+                key = (pedestal,difficulty)
+                nDown = step_lookup[difficulty]
+                trackers[key] = StairHandler(startVal=val, minVal=0, 
+                                            maxVal=maxVal,
+                                            stepSizes=maxVal/10.0, 
+                                            stepType='lin',
+                                            nDown=nDown,
+                                            nReversals=20,
+                                            staircase=trackers.get(key,None))
         elif method=='quest':
             quest_lookup = {'easy': .85,
-                           'hard': .7}
-            for difficulty,val in difficulties.items():
-                for pedestal in pedestals:
-                    key = (pedestal,difficulty)
-                    threshold = quest_lookup[difficulty]
-                    trackers[key] = QuestHandler(pThreshold=threshold,
-                                                nTrials = self.exp_len,
-                                                startVal=val, startValSd=maxVal/2,
-                                                minVal=0.0001, 
-                                                maxVal=maxVal,
-                                                gamma=.01,
-                                                grain=maxVal/400.0,
-                                                range=maxVal*2,
-                                                beta=3.5,
-                                                staircase=trackers.get(key,None))
+                            'hard': .7}
+            for (pedestal, difficulty), val in difficulties.items():
+                key = (pedestal,difficulty)
+                threshold = quest_lookup[difficulty]
+                trackers[key] = QuestHandler(pThreshold=threshold,
+                                            nTrials = self.exp_len,
+                                            startVal=val, startValSd=maxVal/2,
+                                            minVal=0.0001, 
+                                            maxVal=maxVal,
+                                            gamma=.01,
+                                            grain=maxVal/400.0,
+                                            range=maxVal*2,
+                                            beta=3.5,
+                                            staircase=trackers.get(key,None))
         self.trackers = trackers
         
     def presentTrial(self,trial):

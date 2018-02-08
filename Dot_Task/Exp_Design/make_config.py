@@ -14,15 +14,13 @@ import yaml
   
 class Config(object):
     def __init__(self, subjid, taskname, action_keys,
-                 stim_repetitions, exp_len, 
-                 distribution=norm, seed=None):
+                 stim_repetitions, distribution=norm, seed=None):
         self.subjid = subjid
         self.taskname = taskname
         self.stim_repetitions = stim_repetitions
         self.seed = seed
         if self.seed is not None:
             np.random.seed(self.seed)
-        self.exp_len = exp_len
         self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         self.loc = '../Config_Files/'
         self.action_keys = action_keys
@@ -247,7 +245,6 @@ class ThresholdConfig(Config):
                                                 taskname,
                                                 action_keys,
                                                 stim_repetitions,
-                                                exp_len,
                                                 distribution=None,
                                                 seed=seed)
         
@@ -268,7 +265,7 @@ class ThresholdConfig(Config):
                                  (self.stim_motions[1], 'hard'): .02}
         # calculate exp len
         num_stims = len(self.ori_difficulties)*len(self.motion_difficulties)\
-                    *len(self.stim_oris)*len(self.stim_motions)*4
+                    *len(self.stim_oris)*len(self.stim_motions)
         if exp_len is None:
             self.exp_len = int(stim_repetitions*num_stims)
         else:
