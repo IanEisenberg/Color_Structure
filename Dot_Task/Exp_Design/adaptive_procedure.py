@@ -150,7 +150,7 @@ class adaptiveThreshold(BaseExp):
         tracker_key = (pedestal,strength)
         tracker = self.trackers[tracker_key]
         decision_var = tracker.next()
-        difficulties[strength] = decision_var
+        difficulties[(pedestal,strength)] = decision_var
         trial['decision_var'] = decision_var
         # get stim attributes
         trial_attributes = self.getTrialAttributes(stim)

@@ -19,7 +19,7 @@ subject_code = raw_input('subject id: ')
 
 verbose=True
 message_on = False
-fullscr= False
+fullscr= True
 subdata=[]
 motion_on = True
 orientation_on = True

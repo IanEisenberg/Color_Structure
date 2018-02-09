@@ -107,7 +107,6 @@ class ProbContextConfig(Config):
                                                 taskname,
                                                 action_keys,
                                                 stim_repetitions,
-                                                exp_len,
                                                 distribution,
                                                 seed)
         
