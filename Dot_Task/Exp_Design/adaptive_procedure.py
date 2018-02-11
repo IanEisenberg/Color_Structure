@@ -97,7 +97,7 @@ class adaptiveThreshold(BaseExp):
             maxVal = self.base_speed
         elif self.ts == "orientation":
             difficulties = self.ori_difficulties
-            maxVal = 20 # no more than a 20 degree change
+            maxVal = 25 # no more than a 20 degree change
         if method=='basic':
             step_lookup = {'easy':5,
                            'hard': 3}
