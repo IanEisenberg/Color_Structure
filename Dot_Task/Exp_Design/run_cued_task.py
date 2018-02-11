@@ -18,7 +18,7 @@ print('Enter the subject ID')
 subject_code = raw_input('subject id: ')
 
 verbose=True
-fullscr= False
+fullscr= True
 subdata=[]
 save_dir = '../Data' 
 cuename = 'cued_dot_task'
