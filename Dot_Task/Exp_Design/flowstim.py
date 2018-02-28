@@ -18,7 +18,18 @@ from psychopy import visual, event
 from psychopy.visual import GratingStim
 import numpy as np
 from numpy import random
-    
+
+def get_fixation(win, color="white", height=1, width=4):
+    ratio = win.size[1]/float(win.size[0])
+    fixation = visual.ShapeStim(win, 
+            vertices=((0,-height),(0,height), 
+                      (0,0), (-height*ratio,0), (height*ratio,0)),
+            lineWidth=width,
+            closeShape=False,
+            lineColor=color
+        )
+    return fixation
+
 class OpticFlow(object):
     def __init__(self, win, speed, color, 
                  mask='bar', fixation_on=True, **kwargs):
@@ -56,15 +67,8 @@ class OpticFlow(object):
         self.project2screen()
         # set up fixation
         fix_height = .03
-        ratio = win.size[1]/float(win.size[0])
         self.fixation_on = fixation_on
-        self.fixation = visual.ShapeStim(self.win, 
-            vertices=((0,-fix_height),(0,fix_height), 
-                      (0,0), (-fix_height*ratio,0), (fix_height*ratio,0)),
-            lineWidth=4,
-            closeShape=False,
-            lineColor="white"
-        )
+        self.fixation = get_fixation(self.win, height=fix_height)
         
     def setupDots(self):
         self.dots3d = random.rand(self.nElements,3)
