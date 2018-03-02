@@ -5,6 +5,7 @@ import numpy as np
 from psychopy import core, event, visual
 import os
 import sys
+from flowstim import get_fixation
 
 
         
@@ -110,7 +111,7 @@ class BaseExp(object):
                 self.taskinfo['states'][1]['ts']]
         
     
-    def presentStim(self, trial_attributes, duration=.5, response_window=1,
+    def presentStim(self, trial_attributes, duration=.5, response_window=3,
                     mode = 'practice', clock=True):
         """ Used during instructions to present possible stims
         """
@@ -126,7 +127,7 @@ class BaseExp(object):
         stim_clock = core.Clock()
         recorded_keys = []
         if self.aperture: self.aperture.enable()
-        while stim_clock.getTime() < duration+response_window:
+        while stim_clock.getTime() < duration:
             if stim_clock.getTime() < duration:
                 percent_complete = stim_clock.getTime()/duration
                 # smoothly move color over the duration
@@ -138,6 +139,16 @@ class BaseExp(object):
             elif 0<(stim_clock.getTime()-duration)<.05:
                 self.win.flip()
                 self.win.flip()
+            keys = event.getKeys(self.action_keys + [self.quit_key],
+                                 timeStamped=clock)
+            for key,response_time in keys:
+                # check for quit key
+                if key == self.quit_key:
+                    self.shutDownEarly()
+        fixation = get_fixation(self.win, color='#00FF00', height=.03)
+        self.clearWindow(fixation=fixation)
+        while stim_clock.getTime() < response_window+duration:
+            
             keys = event.getKeys(self.action_keys + [self.quit_key],
                                  timeStamped=clock)
             for key,response_time in keys:

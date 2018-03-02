@@ -1,5 +1,14 @@
 """
-runprobContextTask
+run_adaptive_procedure.py
+--------------------------
+Controls the sequence of the adaptive (calibration)
+phase of the experiment.
+
+Creats config file for subject and run the task.
+-------------------------
+
+@author: ian
+
 """
 
 from adaptive_procedure import adaptiveThreshold
@@ -13,9 +22,9 @@ from utils import get_trackers
 # ****************************************************************************
 # set-up variables
 # ****************************************************************************
+#get subject id
 print('Enter the subject ID')
 subject_code = raw_input('subject id: ')
-
 
 verbose=True
 message_on = False
@@ -23,6 +32,7 @@ fullscr= True
 subdata=[]
 motion_on = True
 orientation_on = True
+practice_on = True
 home = os.getenv('HOME') 
 save_dir = '../Data' 
 motionname = 'adaptive_motion'
@@ -30,7 +40,6 @@ orientationname = 'adaptive_orientation'
 # set up task variables
 stim_repetitions = 4
 exp_len = None
-
 
 # counterbalance ts_order (which ts is associated with top of screen)
 ts_order = ['motion','orientation']
@@ -72,6 +81,9 @@ if orientation_on:
                                        fullscreen=fullscr,
                                        trackers=orientation_trackers)
 
+# ****************************************************************************
+# ************** INTRODUCTION AND PRACTICE ***********************************
+# ****************************************************************************
 
 
 
@@ -84,11 +96,22 @@ if orientation_on:
 # ****************************************************************************
 if ts_order == ['motion', 'orientation']:
     if motion_on:
+        if practice_on:
+            motion_task.run_practice()
         motion_task.run_task()    
     if orientation_on:
+        if practice_on:
+            orientation_task.run_practice()
         orientation_task.run_task()    
 else:
     if orientation_on:
+        if practice_on:
+            orientation_task.run_practice()
         orientation_task.run_task() 
     if motion_on:
-        motion_task.run_task()    
+        if practice_on:
+            motion_task.run_practice()
+        motion_task.run_task()
+        
+        
+

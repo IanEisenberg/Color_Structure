@@ -1,5 +1,9 @@
 """
-generic task using psychopy
+adaptive_procedure.py
+---------------------
+Handles all the highlevel functions during the adaptive (calibration)
+phase of the experiment. 
+
 """
 from BaseExp import BaseExp
 import json
@@ -129,14 +133,19 @@ class adaptiveThreshold(BaseExp):
                                             staircase=trackers.get(key,None))
         self.trackers = trackers
         
-    def presentTrial(self,trial):
+    def presentTrial(self,trial, mode = 'trial', show_FB = True):
         """
         This function presents a stimuli, waits for a response, tracks the
-        response and RT and presents appropriate feedback. This function also controls the timing of FB 
+        response and RT and presents appropriate feedback. 
+        This function also controls the timing of FB 
         presentation.
+        -------------
+        modes: 'trial' (default) saves values to tracker
+                'preactice' does not save values to tracker
         """
         trialClock = core.Clock()
-        self.trialnum += 1
+        if mode == 'trial':
+            self.trialnum += 1
         stim = trial['stim']
         # update difficulties based on adaptive tracker
         if self.ts == "motion":
@@ -186,34 +195,40 @@ class adaptiveThreshold(BaseExp):
             trial['secondary_rts']=[i[1] for i in keys[1:]]
             # get feedback and update tracker
             correct_choice = self.getCorrectChoice(trial_attributes,trial['ts'])
+            #update tracker if in trial mode
             if correct_choice == choice:
                 FB = trial['reward_amount']
-                tracker.addResponse(1)
+                if mode == 'trial':
+                    tracker.addResponse(1)
             else:
                 FB = trial['punishment_amount']
-                tracker.addResponse(0)
+                if mode == 'trial':
+                    tracker.addResponse(0)
             # add current tracker estimate
             trial['quest_estimate'] = tracker.mean()
             # record points for bonus
-            self.pointtracker += FB
+            if mode == 'trial':
+                self.pointtracker += FB
             # Present FB to window
             if trial['displayFB'] == True:
                 trial['FB'] = FB
                 core.wait(trial['FBonset'])  
                 trial['actualFBOnsetTime'] = trialClock.getTime()
-                if FB == 1:
+                if FB == 1 and show_FB:
                     self.presentTextToWindow('CORRECT')
-                else:
+                elif show_FB:
                     self.presentTextToWindow('INCORRECT')
                 core.wait(trial['FBDuration'])
                 self.clearWindow(fixation=self.fixation)        
         # If subject did not respond within the stimulus window clear the stim
         # and admonish the subject
         else:
-            tracker.addResponse(0)
+            if mode == 'trial':
+                tracker.addResponse(0)
             self.clearWindow()            
             core.wait(trial['FBonset'])
-            self.presentTextToWindow('Please Respond Faster')
+            if show_FB:
+                self.presentTextToWindow('Please Respond Faster')
             core.wait(trial['FBDuration'])
             self.clearWindow(fixation=self.fixation)
         
@@ -221,7 +236,9 @@ class adaptiveThreshold(BaseExp):
         self.writeToLog(json.dumps(trial))
         self.alldata.append(trial)
         return trial
-            
+    
+    
+
     def run_task(self):
         self.setupWindow()
         self.defineStims()
@@ -263,8 +280,83 @@ class adaptiveThreshold(BaseExp):
             Thank you. Please wait for the experimenter.
             """)
         self.closeWindow()
+        
+    
+    def run_practice(self, num_practice=10):
+        self.setupWindow()
+        self.defineStims()
+        self.presentInstruction(
+            """
+            Press 5 to move through instructions                         
+            """)
+        self.presentInstruction(
+            """
+            We are going to do some practice trials.
+            
+            In this task, shapes will appear on the screen moving towards or away 
+            from the center of the screen, while rotating clockwise or counter-clockwise.
+            
+            Press 5 to look at a demo. Notice that at the end of the trial 
+            the cross at the center of the screen will turn green.             
+            """)
+        self.startTime = core.getTime()
+        trial = self.stimulusInfo[0]
+        while core.getTime() < trial['onset'] + self.startTime:
+                key_response=event.getKeys(None,True)
+                if len(key_response)==0:
+                    continue
+                for key,response_time in key_response:
+                    if self.quit_key==key:
+                        self.shutDownEarly()
+        self.presentTrial(trial, mode='practice', show_FB = False)
+        if self.ts == "motion":
+            self.presentInstruction(
+            """
+            Your task is to respond to what you see on the screen.
+            
+            If the shapes are speeding up (regardless of direction) press "UP" on the arrow keys.
+            
+            If they are slowing down press "DOWN" on the arrow keys.
+            
+            Respond only after the cross at the center of the screen has changed to green.
+            
+            Please press 5 for some practice.
+            
+            """)
+        elif self.ts == "orientation":
+                        self.presentInstruction("""
+            Your task is to respond to what you see on the screen.
+            
+            If the shapes are rotating clockwise press "LEFT" on the arrow keys.
+            
+            If they rotating counter-clockwise press "RIGHT" on the arrow keys.
+            
+            Respond only after the cross at the center of the screen has changed to green.
+            
+            Please press 5 for some practice.
+            """)
+        self.startTime = core.getTime()
+        trial_timing = self.stimulusInfo[0:num_practice]#get timing from the first few trials
+        practice = np.random.choice(self.stimulusInfo, num_practice) #get random trials
+        for num, trial in enumerate(practice):            
+            # wait for onset time
+            while core.getTime() < trial_timing[num]['onset'] + self.startTime:
+                    key_response=event.getKeys(None,True)
+                    if len(key_response)==0:
+                        continue
+                    for key,response_time in key_response:
+                        if self.quit_key==key:
+                            self.shutDownEarly()
+            self.presentTrial(trial, mode='practice')
+        self.presentInstruction(
+            """
+            Press 5 to move on to the testing phase.
+            """)
+        self.closeWindow()
 
-
+        #for _ in range(self.num_practice_trials):
+          #  trial = np.random.choice(self.stimulusInfo)
+         #   self.presentTrial(trial, mode='practice')
 
 
 
