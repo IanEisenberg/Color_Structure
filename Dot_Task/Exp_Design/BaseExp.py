@@ -6,8 +6,6 @@ from psychopy import core, event, visual
 import os
 import sys
 from flowstim import get_fixation
-
-
         
 class BaseExp(object):
     """ class defining a probabilistic context task

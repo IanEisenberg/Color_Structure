@@ -20,28 +20,27 @@ class adaptiveThreshold(BaseExp):
     """
     
     def __init__(self,config_file,subjid,save_dir,verbose=True, 
-                 fullscreen=False, mode='task', trackers=None):
-        # set up some variables
-        self.stimulusInfo=[]
-        self.loadedStimulusFile=[]
-        self.startTime=[]
-        self.alldata=[]
+                 fullscreen=False, num_practice=10, trackers=None):
+        # set up internal variables
+        self.stimulusInfo = []
+        self.loadedStimulusFile = []
+        self.startTime = []
+        self.alldata = []
+        self.aperture=None
+        self.num_practice = num_practice
+        self.pointtracker = 0
+        self.trialnum = 0
+        self.track_response = []
+        
         #looks up the hash of the most recent git push. Stored in log file
         self.gitHash = subprocess.check_output(['git','rev-parse','--short','HEAD'])[:-1]
         # load config file
-        self.config_file=config_file
+        self.config_file = config_file
         try:
             self.loadConfigFile(config_file)
         except:
-            print(mode + ': cannot load config file')
+            print('cannot load config file')
             sys.exit()
-            
-        self.aperture=None
-        self.trialnum = 0
-        self.track_response = []
-        self.pointtracker = 0
-        #Choose 'practice', 'task': determines stimulus set to use
-        self.mode = mode
         # setup trackers
         if trackers is None:
             trackers = {}
@@ -172,9 +171,9 @@ class adaptiveThreshold(BaseExp):
                stim['speedDirection'], stim['speedStrength'], 
                stim['oriDirection'],stim['oriStrength'],
                self.getCorrectChoice(trial_attributes,trial['ts'])))
-        
-        
-        trial['actualOnsetTime']=core.getTime() - self.startTime
+        # if startTime has been recorded
+        if self.startTime:
+            trial['actualOnsetTime']=core.getTime() - self.startTime
         trial['response'] = np.nan
         trial['rt'] = np.nan
         trial['FB'] = np.nan
@@ -237,11 +236,81 @@ class adaptiveThreshold(BaseExp):
         self.alldata.append(trial)
         return trial
     
-    
+    def run_practice(self):
+        assert self.num_practice > 0
+        self.presentInstruction(
+            """
+            Welcome to the experiment!
+            
+            Press 5 to move through instructions                         
+            """)
+        self.presentInstruction(
+            """
+            In this task, on every trial you will see 
+            many small slanted bars either moving towards 
+            you or away from you.
+            
+            The bars will be changing their speed and rotating.
+            
+            Press 5 to see a demo.             
+            """)
+        trial = self.stimulusInfo[0]
+        self.presentTrial(trial, mode='practice', show_FB = False)
 
-    def run_task(self):
+        if self.ts == "motion":
+            self.presentInstruction(
+            """
+            Your task is to attend to the SPEED of the oriented bars.
+            
+            If the bars are speeding up (regardless of direction) 
+            press "UP" on the arrow keys.
+            
+            If they are slowing down press "DOWN" on the arrow keys.
+            
+            You should respond after the stimulus ends. The central cross
+            will change to green to indicate that you should respond.
+            
+            Wait for the experimenter
+            
+            """)
+        elif self.ts == "orientation":
+                        self.presentInstruction("""
+            Your task is to attend to the ROTATION of the oriented bars.
+            
+            If the bars are rotating clockwise press "RIGHT" on the arrow keys.
+            
+            If they are rotatig counter-clockwise press "LEFT" on the arrow keys.
+            
+            You should respond after the stimulus ends. The central cross
+            will change to green to indicate that you should respond.
+            
+            Wait for the experimenter
+            """)
+        self.startTime = core.getTime()
+        trial_timing = self.stimulusInfo[0:self.num_practice]#get timing from the first few trials
+        practice = np.random.choice(self.stimulusInfo, self.num_practice) #get random trials
+        for num, trial in enumerate(practice):            
+            # wait for onset time
+            while core.getTime() < trial_timing[num]['onset'] + self.startTime:
+                    key_response=event.getKeys(None,True)
+                    if len(key_response)==0:
+                        continue
+                    for key,response_time in key_response:
+                        if self.quit_key==key:
+                            self.shutDownEarly()
+            self.presentTrial(trial, mode='practice')
+        self.presentInstruction(
+            """
+            Press 5 to move on to the testing phase.
+            """)
+        #self.aperture.enable()
+
+    def run_task(self, practice=False):
         self.setupWindow()
         self.defineStims()
+        
+        if practice:
+            self.run_practice()
         
         # present intro screen
         self.presentInstruction(self.ts.title(), size=.15)
@@ -282,85 +351,6 @@ class adaptiveThreshold(BaseExp):
         self.closeWindow()
         
     
-    def run_practice(self, num_practice=10):
-        self.setupWindow()
-        self.defineStims()
-        self.presentInstruction(
-            """
-            Press 5 to move through instructions                         
-            """)
-        self.presentInstruction(
-            """
-            We are going to do some practice trials.
-            
-            In this task, shapes will appear on the screen moving towards or away 
-            from the center of the screen, while rotating clockwise or counter-clockwise.
-            
-            Press 5 to look at a demo. Notice that at the end of the trial 
-            the cross at the center of the screen will turn green.             
-            """)
-        self.startTime = core.getTime()
-        trial = self.stimulusInfo[0]
-        while core.getTime() < trial['onset'] + self.startTime:
-                key_response=event.getKeys(None,True)
-                if len(key_response)==0:
-                    continue
-                for key,response_time in key_response:
-                    if self.quit_key==key:
-                        self.shutDownEarly()
-        self.presentTrial(trial, mode='practice', show_FB = False)
-        if self.ts == "motion":
-            self.presentInstruction(
-            """
-            Your task is to respond to what you see on the screen.
-            
-            If the shapes are speeding up (regardless of direction) press "UP" on the arrow keys.
-            
-            If they are slowing down press "DOWN" on the arrow keys.
-            
-            Respond only after the cross at the center of the screen has changed to green.
-            
-            Please press 5 for some practice.
-            
-            """)
-        elif self.ts == "orientation":
-                        self.presentInstruction("""
-            Your task is to respond to what you see on the screen.
-            
-            If the shapes are rotating clockwise press "LEFT" on the arrow keys.
-            
-            If they rotating counter-clockwise press "RIGHT" on the arrow keys.
-            
-            Respond only after the cross at the center of the screen has changed to green.
-            
-            Please press 5 for some practice.
-            """)
-        self.startTime = core.getTime()
-        trial_timing = self.stimulusInfo[0:num_practice]#get timing from the first few trials
-        practice = np.random.choice(self.stimulusInfo, num_practice) #get random trials
-        for num, trial in enumerate(practice):            
-            # wait for onset time
-            while core.getTime() < trial_timing[num]['onset'] + self.startTime:
-                    key_response=event.getKeys(None,True)
-                    if len(key_response)==0:
-                        continue
-                    for key,response_time in key_response:
-                        if self.quit_key==key:
-                            self.shutDownEarly()
-            self.presentTrial(trial, mode='practice')
-        self.presentInstruction(
-            """
-            Press 5 to move on to the testing phase.
-            """)
-        self.closeWindow()
-
-        #for _ in range(self.num_practice_trials):
-          #  trial = np.random.choice(self.stimulusInfo)
-         #   self.presentTrial(trial, mode='practice')
-
-
-
-
 
 
 

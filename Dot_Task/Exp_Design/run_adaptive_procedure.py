@@ -13,8 +13,6 @@ Creats config file for subject and run the task.
 
 from adaptive_procedure import adaptiveThreshold
 from make_config import ThresholdConfig
-import numpy as np
-from psychopy import event
 import os
 from utils import get_trackers
 
@@ -96,22 +94,14 @@ if orientation_on:
 # ****************************************************************************
 if ts_order == ['motion', 'orientation']:
     if motion_on:
-        if practice_on:
-            motion_task.run_practice()
-        motion_task.run_task()    
+        motion_task.run_task(practice=practice_on)    
     if orientation_on:
-        if practice_on:
-            orientation_task.run_practice()
-        orientation_task.run_task()    
+        orientation_task.run_task(practice=practice_on)    
 else:
     if orientation_on:
-        if practice_on:
-            orientation_task.run_practice()
-        orientation_task.run_task() 
+        orientation_task.run_task(practice=practice_on) 
     if motion_on:
-        if practice_on:
-            motion_task.run_practice()
-        motion_task.run_task()
+        motion_task.run_task(practice=practice_on)
         
         
 
