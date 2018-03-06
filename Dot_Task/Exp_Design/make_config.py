@@ -258,10 +258,10 @@ class ThresholdConfig(Config):
                                  (self.stim_oris[0], 'hard'): 15,
                                  (self.stim_oris[1], 'hard'): 15}
         # motion speeds
-        self.motion_difficulties = {(self.stim_motions[0], 'easy'): .04,
-                                 (self.stim_motions[1], 'easy'): .04,
-                                 (self.stim_motions[0], 'hard'): .02,
-                                 (self.stim_motions[1], 'hard'): .02}
+        self.motion_difficulties = {(self.stim_motions[0], 'easy'): .08,
+                                 (self.stim_motions[1], 'easy'): .08,
+                                 (self.stim_motions[0], 'hard'): .04,
+                                 (self.stim_motions[1], 'hard'): .04}
         # calculate exp len
         num_stims = len(self.ori_difficulties)*len(self.motion_difficulties)\
                     *len(self.stim_oris)*len(self.stim_motions)

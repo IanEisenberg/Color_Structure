@@ -82,8 +82,9 @@ cued_task=probContextTask(cue_config_file,
 
 intro_text = \
     """
-    We will now start the cued phase of the experiment.
-    
+    In this phase of the experiment you will be cued
+    whether to pay attention to motion or orientation
+    before each trial.
     
     Please wait for the experimenter.
     """

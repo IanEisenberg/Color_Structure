@@ -155,7 +155,7 @@ class BaseExp(object):
                     self.shutDownEarly()
                 recorded_keys+=keys
         if self.aperture: self.aperture.disable()
-        self.win.flip(clearBuffer=True)
+        self.win.flip()
         return recorded_keys
             
     def getCorrectChoice(self,trial_attributes,ts):

@@ -132,7 +132,7 @@ class adaptiveThreshold(BaseExp):
                                             staircase=trackers.get(key,None))
         self.trackers = trackers
         
-    def presentTrial(self,trial, mode = 'trial', show_FB = True):
+    def presentTrial(self,trial, practice=False, show_FB = True):
         """
         This function presents a stimuli, waits for a response, tracks the
         response and RT and presents appropriate feedback. 
@@ -140,10 +140,10 @@ class adaptiveThreshold(BaseExp):
         presentation.
         -------------
         modes: 'trial' (default) saves values to tracker
-                'preactice' does not save values to tracker
+                'practi' does not save values to tracker
         """
         trialClock = core.Clock()
-        if mode == 'trial':
+        if not practice:
             self.trialnum += 1
         stim = trial['stim']
         # update difficulties based on adaptive tracker
@@ -197,39 +197,38 @@ class adaptiveThreshold(BaseExp):
             #update tracker if in trial mode
             if correct_choice == choice:
                 FB = trial['reward_amount']
-                if mode == 'trial':
+                if not practice:
                     tracker.addResponse(1)
             else:
                 FB = trial['punishment_amount']
-                if mode == 'trial':
+                if not practice:
                     tracker.addResponse(0)
             # add current tracker estimate
             trial['quest_estimate'] = tracker.mean()
             # record points for bonus
-            if mode == 'trial':
+            if not practice:
                 self.pointtracker += FB
             # Present FB to window
-            if trial['displayFB'] == True:
+            if trial['displayFB'] == True and show_FB:
                 trial['FB'] = FB
                 core.wait(trial['FBonset'])  
                 trial['actualFBOnsetTime'] = trialClock.getTime()
-                if FB == 1 and show_FB:
+                if FB == 1:
                     self.presentTextToWindow('CORRECT')
-                elif show_FB:
+                else:
                     self.presentTextToWindow('INCORRECT')
                 core.wait(trial['FBDuration'])
-                self.clearWindow(fixation=self.fixation)        
         # If subject did not respond within the stimulus window clear the stim
         # and admonish the subject
         else:
-            if mode == 'trial':
+            if not practice:
                 tracker.addResponse(0)
-            self.clearWindow()            
-            core.wait(trial['FBonset'])
             if show_FB:
+                self.clearWindow()            
+                core.wait(trial['FBonset'])
                 self.presentTextToWindow('Please Respond Faster')
-            core.wait(trial['FBDuration'])
-            self.clearWindow(fixation=self.fixation)
+                core.wait(trial['FBDuration'])
+        self.clearWindow(fixation=self.fixation)
         
         # log trial and add to data
         self.writeToLog(json.dumps(trial))
@@ -246,7 +245,7 @@ class adaptiveThreshold(BaseExp):
             """)
         self.presentInstruction(
             """
-            In this task, on every trial you will see 
+            On every trial of this task you will see 
             many small slanted bars either moving towards 
             you or away from you.
             
@@ -255,7 +254,7 @@ class adaptiveThreshold(BaseExp):
             Press 5 to see a demo.             
             """)
         trial = self.stimulusInfo[0]
-        self.presentTrial(trial, mode='practice', show_FB = False)
+        self.presentTrial(trial, practice=True, show_FB = False)
 
         if self.ts == "motion":
             self.presentInstruction(
@@ -298,33 +297,34 @@ class adaptiveThreshold(BaseExp):
                     for key,response_time in key_response:
                         if self.quit_key==key:
                             self.shutDownEarly()
-            self.presentTrial(trial, mode='practice')
+            self.presentTrial(trial, practice=True)
         self.presentInstruction(
             """
-            Press 5 to move on to the testing phase.
+            Done with practice. Wait for the experimenter
             """)
         #self.aperture.enable()
 
     def run_task(self, practice=False):
         self.setupWindow()
         self.defineStims()
-        
+        # present intro screen
         if practice:
             self.run_practice()
+        else:
+            self.presentInstruction(self.ts.title(), size=.15)
         
-        # present intro screen
-        self.presentInstruction(self.ts.title(), size=.15)
         self.startTime = core.getTime()
         # set up pause trials
-        pause_trials = np.round(np.linspace(0,self.exp_len,3))[1:-1]
+        length_min = self.stimulusInfo[-1]['onset']/60
+        # have break every 6 minutes
+        num_pauses = np.round(length_min/6)
+        pause_trials = np.round(np.linspace(0,self.exp_len,num_pauses+1))[1:-1]
         pause_time = 0
-        if pause_trials is None: pause_trials = []
+        timer_text = "Take a break!\n\nContinue in: \n\n       "
         for trial in self.stimulusInfo:
             if trial['trial_count'] in pause_trials:
                 time = core.getTime()
-                self.presentTextToWindow("Take a break! Press '5' when you're ready to continue.", size = .1)
-                self.waitForKeypress(self.trigger_key)
-                self.clearWindow()
+                self.presentTimer(duration=30, text=timer_text)
                 self.aperture.enable()
                 pause_time += core.getTime() - time
             

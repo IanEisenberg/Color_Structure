@@ -197,17 +197,20 @@ class probContextTask(BaseExp):
         
         if intro_text:
             self.presentInstruction(intro_text)
-        
-        pause_trials = np.round(np.linspace(0,self.exp_len,3))[1:-1]
+        # set up pause trials
+        length_min = self.stimulusInfo[-1]['onset']/60
+        # have break every 6 minutes
+        num_pauses = np.round(length_min/6)
+        pause_trials = np.round(np.linspace(0,self.exp_len,num_pauses+1))[1:-1]
         pause_time = 0
-        if pause_trials is None: pause_trials = []
+        timer_text = "Take a break!\n\nContinue in: \n\n       "
+
         for trial in self.stimulusInfo:
             if trial['trial_count'] in pause_trials:
                 time1 = core.getTime()
-                self.presentTextToWindow("Take a break! Press '5' when you're ready to continue.")
-                self.waitForKeypress(self.trigger_key)
+                self.presentTimer(duration=30, text=timer_text)
                 self.clearWindow()
-                pause_time = core.getTime() - time1
+                pause_time += core.getTime() - time1
             
             # wait for onset time
             while core.getTime() < trial['onset'] + self.startTime + pause_time:
