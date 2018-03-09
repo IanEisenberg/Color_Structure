@@ -26,10 +26,9 @@ subject_code = raw_input('subject id: ')
 
 verbose=True
 message_on = False
-fullscr= True
 subdata=[]
 motion_on = True
-orientation_on = True
+orientation_on = False #True
 practice_on = True
 home = os.getenv('HOME') 
 save_dir = '../Data' 
@@ -38,6 +37,10 @@ orientationname = 'adaptive_orientation'
 # set up task variables
 stim_repetitions = 4
 exp_len = None
+# window variables
+win_kwargs = {'fullscr': False,
+              'screen': 1,
+              'size': [1920*.8, 1200*.8]}
 
 # counterbalance ts_order (which ts is associated with top of screen)
 ts_order = ['motion','orientation']
@@ -63,7 +66,7 @@ if motion_on:
     motion_task=adaptiveThreshold(motion_config_file,
                                   subject_code, 
                                   save_dir=save_dir, 
-                                  fullscreen=fullscr,
+                                  win_kwargs=win_kwargs,
                                   trackers=motion_trackers)
 
 if orientation_on:
@@ -76,7 +79,7 @@ if orientation_on:
     orientation_task=adaptiveThreshold(orientation_config_file,
                                        subject_code,
                                        save_dir=save_dir, 
-                                       fullscreen=fullscr,
+                                       win_kwargs=win_kwargs,
                                        trackers=orientation_trackers)
 
 # ****************************************************************************

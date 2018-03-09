@@ -20,7 +20,7 @@ class adaptiveThreshold(BaseExp):
     """
     
     def __init__(self,config_file,subjid,save_dir,verbose=True, 
-                 fullscreen=False, num_practice=10, trackers=None):
+                 num_practice=10, trackers=None, win_kwargs={}):
         # set up internal variables
         self.stimulusInfo = []
         self.loadedStimulusFile = []
@@ -46,7 +46,8 @@ class adaptiveThreshold(BaseExp):
             trackers = {}
         self.defineTrackers(trackers)
         # init Base Exp
-        super(adaptiveThreshold, self).__init__(self.taskname, subjid, save_dir, fullscreen)
+        super(adaptiveThreshold, self).__init__(self.taskname, subjid, 
+                                                 save_dir, win_kwargs)
     
     def loadConfigFile(self,filename):
         """ load a config file from yaml
@@ -142,7 +143,6 @@ class adaptiveThreshold(BaseExp):
         modes: 'trial' (default) saves values to tracker
                 'practi' does not save values to tracker
         """
-        trialClock = core.Clock()
         if not practice:
             self.trialnum += 1
         stim = trial['stim']
@@ -179,23 +179,18 @@ class adaptiveThreshold(BaseExp):
         trial['FB'] = np.nan
         # present stimulus and get response
         event.clearEvents()
-        trialClock.reset()
-        keys = self.presentStim(trial_attributes, trial['stimulusDuration'], 
-                                trial['responseWindow'], mode = 'task',
-                                clock=trialClock)
-        if len(keys)>0:
-            choice = keys[0][0]
-            print('Choice: %s' % choice)
+        key_response = self.presentStim(trial_attributes, 
+                                        duration=trial['stimulusDuration'], 
+                                        response_window=trial['responseWindow'], 
+                                        SRI=trial['stimResponseInterval'])
+        if key_response:
             # record response
-            trial['response'] = choice
-            trial['rt'] = keys[0][1]
-            # record any responses after the first
-            trial['secondary_responses']=[i[0] for i in keys[1:]]
-            trial['secondary_rts']=[i[1] for i in keys[1:]]
+            trial['response'], trial['rt'] = key_response
+            print('Choice: %s' % trial['response'])
             # get feedback and update tracker
             correct_choice = self.getCorrectChoice(trial_attributes,trial['ts'])
             #update tracker if in trial mode
-            if correct_choice == choice:
+            if correct_choice == trial['response']:
                 FB = trial['reward_amount']
                 if not practice:
                     tracker.addResponse(1)
@@ -212,7 +207,6 @@ class adaptiveThreshold(BaseExp):
             if trial['displayFB'] == True and show_FB:
                 trial['FB'] = FB
                 core.wait(trial['FBonset'])  
-                trial['actualFBOnsetTime'] = trialClock.getTime()
                 if FB == 1:
                     self.presentTextToWindow('CORRECT')
                 else:
@@ -246,8 +240,8 @@ class adaptiveThreshold(BaseExp):
         self.presentInstruction(
             """
             On every trial of this task you will see 
-            many small slanted bars either moving towards 
-            you or away from you.
+            many small slanted bars either moving 
+            towards you or away from you.
             
             The bars will be changing their speed and rotating.
             
@@ -267,7 +261,7 @@ class adaptiveThreshold(BaseExp):
             If they are slowing down press "DOWN" on the arrow keys.
             
             You should respond after the stimulus ends. The central cross
-            will change to green to indicate that you should respond.
+            will change to green to indicate when you should respond.
             
             Wait for the experimenter
             
@@ -281,22 +275,25 @@ class adaptiveThreshold(BaseExp):
             If they are rotatig counter-clockwise press "LEFT" on the arrow keys.
             
             You should respond after the stimulus ends. The central cross
-            will change to green to indicate that you should respond.
+            will change to green to indicate when you should respond.
             
             Wait for the experimenter
             """)
-        self.startTime = core.getTime()
+                        
         trial_timing = self.stimulusInfo[0:self.num_practice]#get timing from the first few trials
         practice = np.random.choice(self.stimulusInfo, self.num_practice) #get random trials
+        # get ready
+        self.presentTextToWindow('Get Ready!', size=.15)
+        core.wait(1.5)
+        # start practice
+        practiceStartTime = core.getTime()
+        self.clearWindow(fixation=self.fixation)
         for num, trial in enumerate(practice):            
             # wait for onset time
-            while core.getTime() < trial_timing[num]['onset'] + self.startTime:
-                    key_response=event.getKeys(None,True)
-                    if len(key_response)==0:
-                        continue
-                    for key,response_time in key_response:
-                        if self.quit_key==key:
-                            self.shutDownEarly()
+            while core.getTime() < trial_timing[num]['onset'] + practiceStartTime:
+                    key_response=event.getKeys([self.quit_key])
+                    if len(key_response)==1:
+                        self.shutDownEarly()
             self.presentTrial(trial, practice=True)
         self.presentInstruction(
             """
@@ -307,13 +304,6 @@ class adaptiveThreshold(BaseExp):
     def run_task(self, practice=False):
         self.setupWindow()
         self.defineStims()
-        # present intro screen
-        if practice:
-            self.run_practice()
-        else:
-            self.presentInstruction(self.ts.title(), size=.15)
-        
-        self.startTime = core.getTime()
         # set up pause trials
         length_min = self.stimulusInfo[-1]['onset']/60
         # have break every 6 minutes
@@ -321,6 +311,17 @@ class adaptiveThreshold(BaseExp):
         pause_trials = np.round(np.linspace(0,self.exp_len,num_pauses+1))[1:-1]
         pause_time = 0
         timer_text = "Take a break!\n\nContinue in: \n\n       "
+        # present intro screen
+        if practice:
+            self.run_practice()
+        else:
+            self.presentInstruction(self.ts.title(), size=.15)
+        # get ready
+        self.presentTextToWindow('Get Ready!', size=.15)
+        core.wait(1.5)
+        # start the task
+        self.startTime = core.getTime()
+        self.clearWindow(fixation=self.fixation)
         for trial in self.stimulusInfo:
             if trial['trial_count'] in pause_trials:
                 time = core.getTime()
@@ -330,12 +331,9 @@ class adaptiveThreshold(BaseExp):
             
             # wait for onset time
             while core.getTime() < trial['onset'] + self.startTime + pause_time:
-                    key_response=event.getKeys(None,True)
-                    if len(key_response)==0:
-                        continue
-                    for key,response_time in key_response:
-                        if self.quit_key==key:
-                            self.shutDownEarly()
+                    key_response=event.getKeys([self.quit_key])
+                    if len(key_response)==1:
+                        self.shutDownEarly()
             self.presentTrial(trial)
                 
         # clean up and save

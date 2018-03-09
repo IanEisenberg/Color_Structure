@@ -15,7 +15,7 @@ class probContextTask(BaseExp):
     """
     
     def __init__(self,config_file,subjid,save_dir,verbose=True, 
-                 fullscreen=False, mode='task', cue_type='probabilistic'):
+                 cue_type='probabilistic', win_kwargs={}):
         # set up some variables
         self.stimulusInfo=[]
         self.loadedStimulusFile=[]
@@ -28,20 +28,18 @@ class probContextTask(BaseExp):
         try:
             self.loadConfigFile(config_file)
         except:
-            print(mode + ': cannot load config file')
+            print('cannot load config file')
             sys.exit()
             
         self.aperture=None
         
         self.trialnum = 0
         self.track_response = []
-        self.fullscreen = fullscreen
         self.pointtracker = 0
-        #Choose 'practice', 'task': determines stimulus set to use
-        self.mode = mode
         self.cue_type = cue_type
         # init Base Exp
-        super(probContextTask, self).__init__(self.taskname, subjid, save_dir, fullscreen)
+        super(probContextTask, self).__init__(self.taskname, subjid, save_dir, 
+                                              win_kwargs)
     
     def loadConfigFile(self,filename):
         """ load a config file from yaml
@@ -144,20 +142,19 @@ class probContextTask(BaseExp):
         # present stimulus and get response
         event.clearEvents()
         trialClock.reset()
-        keys = self.presentStim(trial_attributes, trial['stimulusDuration'], 
-                                mode = 'task', clock=trialClock)
-        if len(keys)>0:
-            choice = keys[0][0]
-            print('Choice: %s' % choice)
+        key_response = self.presentStim(trial_attributes, 
+                                        duration=trial['stimulusDuration'], 
+                                        response_window=trial['responseWindow'], 
+                                        SRI=trial['stimResponseInterval'],
+                                        clock=trialClock)
+        if key_response:
             # record response
-            trial['response'] = choice
-            trial['rt'] = keys[0][1]
-            # record any responses after the first
-            trial['secondary_responses']=[i[0] for i in keys[1:]]
-            trial['secondary_rts']=[i[1] for i in keys[1:]]
-            # get feedback
+            trial['response'], trial['rt'] = key_response
+            print('Choice: %s' % trial['response'])
+            # get feedback and update tracker
             correct_choice = self.getCorrectChoice(trial_attributes,trial['ts'])
-            if correct_choice == choice:
+            #update tracker if in trial mode
+            if correct_choice == trial['response']:
                 FB = trial['reward_amount']
             else:
                 FB = trial['punishment_amount']
@@ -188,23 +185,25 @@ class probContextTask(BaseExp):
         self.alldata.append(trial)
         return trial
             
-        
-
     def run_task(self, intro_text=None):
-        self.startTime = core.getTime()
         self.setupWindow()
         self.defineStims()
-        
-        if intro_text:
-            self.presentInstruction(intro_text)
-        # set up pause trials
+         # set up pause trials
         length_min = self.stimulusInfo[-1]['onset']/60
         # have break every 6 minutes
         num_pauses = np.round(length_min/6)
         pause_trials = np.round(np.linspace(0,self.exp_len,num_pauses+1))[1:-1]
         pause_time = 0
         timer_text = "Take a break!\n\nContinue in: \n\n       "
-
+        # present intro screen
+        if intro_text:
+            self.presentInstruction(intro_text)
+        # get ready
+        self.presentTextToWindow('Get Ready!', size=.15)
+        core.wait(1.5)
+        # start the task
+        self.startTime = core.getTime()
+        self.clearWindow(fixation=self.fixation)
         for trial in self.stimulusInfo:
             if trial['trial_count'] in pause_trials:
                 time1 = core.getTime()
@@ -214,13 +213,9 @@ class probContextTask(BaseExp):
             
             # wait for onset time
             while core.getTime() < trial['onset'] + self.startTime + pause_time:
-                    key_response=event.getKeys(None,True)
-                    if len(key_response)==0:
-                        continue
-                    for key,response_time in key_response:
-                        if self.quit_key==key:
-                            self.shutDownEarly()
-        
+                    key_response=event.getKeys([self.quit_key])
+                    if len(key_response)==1:
+                        self.shutDownEarly()
             self.presentTrial(trial)
         
         # clean up and save

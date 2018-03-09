@@ -18,7 +18,6 @@ print('Enter the subject ID')
 subject_code = raw_input('subject id: ')
 
 verbose=True
-fullscr= True
 subdata=[]
 save_dir = '../Data' 
 cuename = 'cued_dot_task'
@@ -26,7 +25,10 @@ cue_type = 'deterministic'
 # set up task variables
 stim_repetitions = 5
 recursive_p = .9
-
+# window variables
+win_kwargs = {'fullscr': True,
+              'screen': 1,
+              'size': [1920, 1200]}
 # counterbalance ts_order (which ts is associated with top of screen)
 ts_order = ['motion','orientation']
 np.random.shuffle(ts_order)
@@ -67,9 +69,9 @@ cue_config_file = cue_config.get_config()
 # setup tasks
 cued_task=probContextTask(cue_config_file,
                           subject_code, 
-                          save_dir=save_dir, 
-                          fullscreen=fullscr, 
-                          cue_type=cue_type)
+                          save_dir=save_dir,
+                          cue_type=cue_type,
+                          win_kwargs=win_kwargs)
 
 
 # ****************************************************************************

@@ -37,9 +37,9 @@ class Config(object):
         self.stim_motions = ['in','out']
         self.stim_oris = [-60,30]
     
-    def get_config(self, save=True, filey=None, other_params={}):
+    def get_config(self, save=True, filey=None, other_params={}, setup_args={}):
         if self.trial_list==None:
-            self.setup_trial_list()
+            self.setup_trial_list(**setup_args)
         
         initial_params = {
                 'subjid': self.subjid,
@@ -184,8 +184,9 @@ class ProbContextConfig(Config):
                     state_reps += 1
         self.trial_states = trial_states
             
-    def setup_trial_list(self, cueDuration=1.5, CSI=.5, stimulusDuration=2, 
-                         responseWindow=1, FBDuration=.5, FBonset=.5, 
+    def setup_trial_list(self, cueDuration=1.5, CSI=.5, 
+                         stimulusDuration=2, responseWindow=1.5, SRI=1,
+                         FBDuration=.5, FBonset=.5, 
                          base_ITI=1, displayFB = True):
         if self.seed is not None:
             np.random.seed(self.seed)
@@ -215,6 +216,8 @@ class ProbContextConfig(Config):
                 'onset': curr_onset,
                 'cueDuration': cueDuration,
                 'stimulusDuration': stimulusDuration,
+                'responseWindow': responseWindow,
+                'stimResponseInterval': SRI,
                 'FBDuration': FBDuration,
                 'FBonset': FBonset,
                 'displayFB': displayFB,
@@ -229,7 +232,7 @@ class ProbContextConfig(Config):
 
             trial_count += 1
             curr_onset += cueDuration+CSI+stimulusDuration+responseWindow\
-                            +FBDuration+FBonset+ITI
+                            +SRI+FBDuration+FBonset+ITI
         self.trial_list = trial_list
        
 
@@ -284,7 +287,7 @@ class ThresholdConfig(Config):
                                                        other_params)
         
                     
-    def setup_trial_list(self, stimulusDuration=2, responseWindow=1,
+    def setup_trial_list(self, stimulusDuration=2, responseWindow=1.5, SRI=1,
                          FBDuration=.5, FBonset=.5, base_ITI=1, 
                          displayFB = True):
         if self.seed is not None:
@@ -303,6 +306,7 @@ class ThresholdConfig(Config):
                 'onset': curr_onset,
                 'stimulusDuration': stimulusDuration,
                 'responseWindow': responseWindow,
+                'stimResponseInterval': SRI,
                 'FBDuration': FBDuration,
                 'FBonset': FBonset,
                 'displayFB': displayFB,
@@ -316,6 +320,6 @@ class ThresholdConfig(Config):
 
             trial_count += 1
             curr_onset += stimulusDuration+responseWindow\
-                          +FBDuration+FBonset+ITI
+                          +SRI+FBDuration+FBonset+ITI
         self.trial_list = trial_list
        

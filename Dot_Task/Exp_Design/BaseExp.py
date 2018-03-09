@@ -11,11 +11,10 @@ class BaseExp(object):
     """ class defining a probabilistic context task
     """
     
-    def __init__(self, expid, subjid, save_dir, fullscreen = False):
+    def __init__(self, expid, subjid, save_dir, win_kwargs={}):
         self.expid = expid
         self.subjid=subjid
         self.save_dir = save_dir  
-        self.fullscreen = fullscreen
         self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         
         # set up static variables
@@ -23,9 +22,12 @@ class BaseExp(object):
         self.trigger_key = '5'
         self.text_color = [1]*3
         self.text_stim = None
+        self.fixation = None
         # set up window
         self.win=[]
-        self.window_dims=[1920,1080]
+        self.win_kwargs = win_kwargs
+        if 'size' not in win_kwargs.keys():
+            win_kwargs['size'] = [1920,1200]
         
         # set up recording files
         self.logfilename='%s_%s_%s.log'%(self.subjid,self.expid,self.timestamp)
@@ -110,53 +112,46 @@ class BaseExp(object):
         
     
     def presentStim(self, trial_attributes, duration=.5, response_window=3,
-                    mode = 'practice', clock=True):
+                    SRI=0):
         """ Used during instructions to present possible stims
         """
         ss,se,os,oe,md = trial_attributes
         # reset dot position
         self.stim.setupDots()
-        if mode == 'practice':
-            self.stim.updateTrialAttributes(dir=md,ori=os,speed=ss)
-
-        elif mode == 'task':
-            self.stim.updateTrialAttributes(dir=md,ori=os,speed=ss)
-            
-        stim_clock = core.Clock()
-        recorded_keys = []
+        self.stim.updateTrialAttributes(dir=md,ori=os,speed=ss)            
         if self.aperture: self.aperture.enable()
+        # display stimulus
+        stim_clock = core.Clock()
         while stim_clock.getTime() < duration:
-            if stim_clock.getTime() < duration:
-                percent_complete = stim_clock.getTime()/duration
-                # smoothly move color over the duration
-                orientation = os*(1-percent_complete) + oe*percent_complete
-                # change speed
-                speed = ss*(1-percent_complete) + se*percent_complete
-                self.stim.updateTrialAttributes(ori=orientation, speed=speed)
-                self.stim.draw()
-            elif 0<(stim_clock.getTime()-duration)<.05:
-                self.win.flip()
-                self.win.flip()
-            keys = event.getKeys(self.action_keys + [self.quit_key],
-                                 timeStamped=clock)
-            for key,response_time in keys:
-                # check for quit key
-                if key == self.quit_key:
-                    self.shutDownEarly()
+            percent_complete = stim_clock.getTime()/duration
+            # smoothly move color over the duration
+            orientation = os*(1-percent_complete) + oe*percent_complete
+            # change speed
+            speed = ss*(1-percent_complete) + se*percent_complete
+            self.stim.updateTrialAttributes(ori=orientation, speed=speed)
+            self.stim.draw()
+            keys = event.getKeys([self.quit_key])
+            self.checkRespForQuitKey(keys)
+        # wait stim-respones interval
+        if SRI>0: 
+            self.clearWindow(fixation=self.fixation)
+            self.win.flip()
+            core.wait(SRI)
+        # indicate response window and wait for response
         fixation = get_fixation(self.win, color='#00FF00', height=.03)
         self.clearWindow(fixation=fixation)
-        while stim_clock.getTime() < response_window+duration:
-            
-            keys = event.getKeys(self.action_keys + [self.quit_key],
-                                 timeStamped=clock)
-            for key,response_time in keys:
-                # check for quit key
-                if key == self.quit_key:
-                    self.shutDownEarly()
-                recorded_keys+=keys
+        key_response = event.waitKeys(response_window,
+                                      self.action_keys + [self.quit_key],
+                                      timeStamped=True)
+        if key_response is not None:
+            assert len(key_response) == 1
+            key_response = key_response[0]
+            self.checkRespForQuitKey([key_response[0]])
+        else:
+            key_response = []
         if self.aperture: self.aperture.disable()
         self.win.flip()
-        return recorded_keys
+        return key_response
             
     def getCorrectChoice(self,trial_attributes,ts):
         ss,se,os,oe,md = trial_attributes
@@ -250,10 +245,12 @@ class BaseExp(object):
     def setupWindow(self, aperture=True):
         """ set up the main window
         """
-        self.win = visual.Window(self.window_dims, allowGUI=False, 
-                                 fullscr=self.fullscreen, monitor='testMonitor', 
-                                 units='norm', allowStencil=True,
-                                 color=[-1,-1,-1])   
+        self.win = visual.Window(allowGUI=False, 
+                                 monitor='testMonitor', 
+                                 units='norm', 
+                                 allowStencil=True,
+                                 color=[-1,-1,-1],
+                                 **self.win_kwargs)   
         if aperture==True:
             # define aperture
             aperture_size = 1.5
