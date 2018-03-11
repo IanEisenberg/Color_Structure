@@ -115,7 +115,12 @@ class BaseExp(object):
                     SRI=0):
         """ Used during instructions to present possible stims
         """
-        ss,se,os,oe,md = trial_attributes
+        # unpack trial attributes
+        ss = trial_attributes['speed_start']
+        se = trial_attributes['speed_end']
+        os = trial_attributes['ori_start']
+        oe = trial_attributes['ori_end']
+        md = trial_attributes['motion_direction']
         # reset dot position
         self.stim.setupDots()
         self.stim.updateTrialAttributes(dir=md,ori=os,speed=ss)            
@@ -135,7 +140,6 @@ class BaseExp(object):
         # wait stim-respones interval
         if SRI>0: 
             self.clearWindow(fixation=self.fixation)
-            self.win.flip()
             core.wait(SRI)
         # indicate response window and wait for response
         fixation = get_fixation(self.win, color='#00FF00', height=.03)
@@ -154,14 +158,13 @@ class BaseExp(object):
         return key_response
             
     def getCorrectChoice(self,trial_attributes,ts):
-        ss,se,os,oe,md = trial_attributes
         # action keys are set up as the choices for ts1 followed by ts2
         # so the index for the correct choice must take that into account
         if ts == 'motion':
-            correct_choice = int(se>ss)
+            correct_choice = int(trial_attributes['speed_end']>trial_attributes['speed_start'])
         elif ts == 'orientation':
             # correct choice is based on whether the orientation become more or less positive
-            correct_choice = int(oe>os)+2
+            correct_choice = int(trial_attributes['ori_end']>trial_attributes['ori_start'])+2
         return self.action_keys[correct_choice]
     
     def getTrialAttributes(self,stim):
@@ -179,7 +182,11 @@ class BaseExp(object):
         ori_start = oriBase
         ori_end = oriBase + os*od
 
-        return [speed_start, speed_end, ori_start, ori_end, md]
+        return {'speed_start': speed_start, 
+                'speed_end': speed_end, 
+                'ori_start': ori_start, 
+                'ori_end': ori_end, 
+                'motion_direction': md}
     
     def presentInstruction(self, text, size=.07):
             self.presentTextToWindow(text, size=size)

@@ -20,7 +20,8 @@ class adaptiveThreshold(BaseExp):
     """
     
     def __init__(self,config_file,subjid,save_dir,verbose=True, 
-                 num_practice=10, trackers=None, win_kwargs={}):
+                 num_practice=10, trackers=None, ignore_pedestal=True,
+                 win_kwargs={}):
         # set up internal variables
         self.stimulusInfo = []
         self.loadedStimulusFile = []
@@ -43,8 +44,9 @@ class adaptiveThreshold(BaseExp):
             sys.exit()
         # setup trackers
         if trackers is None:
-            trackers = {}
-        self.defineTrackers(trackers)
+            self.trackers = self.defineTrackers(ignore_pedestal)
+        else:
+            self.trackers = trackers
         # init Base Exp
         super(adaptiveThreshold, self).__init__(self.taskname, subjid, 
                                                  save_dir, win_kwargs)
@@ -95,7 +97,8 @@ class adaptiveThreshold(BaseExp):
         # define fixation
         self.fixation = self.stim.fixation
     
-    def defineTrackers(self, trackers, method='quest'):
+    def defineTrackers(self, method='quest', ignore_pedestal=False):
+        trackers = {}
         if self.ts == "motion":
             difficulties = self.motion_difficulties
             maxVal = self.base_speed
@@ -130,8 +133,15 @@ class adaptiveThreshold(BaseExp):
                                             grain=maxVal/400.0,
                                             range=maxVal*2,
                                             beta=3.5,
-                                            staircase=trackers.get(key,None))
-        self.trackers = trackers
+                                            staircase=trackers.get(key,None))            
+                
+        if ignore_pedestal:
+            difficulties = np.unique([i[1] for i in trackers.keys()])
+            for d in difficulties:
+                difficulty_keys = [k for k in trackers.keys() if d in k]
+                for k in difficulty_keys:
+                    trackers[k] = trackers[difficulty_keys[0]]
+        return trackers
         
     def presentTrial(self,trial, practice=False, show_FB = True):
         """
@@ -162,6 +172,7 @@ class adaptiveThreshold(BaseExp):
         trial['decision_var'] = decision_var
         # get stim attributes
         trial_attributes = self.getTrialAttributes(stim)
+        trial['stim'].update(trial_attributes)
         print('*'*40)
         print('Tracker: %s' % str(tracker_key), 'Best Guess: %s' % tracker.mean()) 
         print('Taskset: %s, choice value: %s\nSpeed: %s, Strength: %s \

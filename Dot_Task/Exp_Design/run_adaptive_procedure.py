@@ -28,17 +28,17 @@ verbose=True
 message_on = False
 subdata=[]
 motion_on = True
-orientation_on = False #True
-practice_on = True
+orientation_on = True #True
+practice_on = False
 home = os.getenv('HOME') 
 save_dir = '../Data' 
 motionname = 'adaptive_motion'
 orientationname = 'adaptive_orientation'
 # set up task variables
-stim_repetitions = 4
+stim_repetitions = 2
 exp_len = None
 # window variables
-win_kwargs = {'fullscr': False,
+win_kwargs = {'fullscr': True,
               'screen': 1,
               'size': [1920*.8, 1200*.8]}
 
