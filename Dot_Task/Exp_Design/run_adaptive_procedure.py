@@ -38,7 +38,7 @@ orientationname = 'adaptive_orientation'
 stim_repetitions = 2
 exp_len = None
 # window variables
-win_kwargs = {'fullscr': True,
+win_kwargs = {'fullscr': False,
               'screen': 1,
               'size': [1920*.8, 1200*.8]}
 

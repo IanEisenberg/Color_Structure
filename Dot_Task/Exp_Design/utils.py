@@ -33,6 +33,7 @@ def get_trackers(subject_code):
                                         '*%s*motion*' % subject_code))[-1]
         motion_data = cPickle.load(open(motion_file,'r'))
         motion_trackers = motion_data['trackers']
+        print('Found Motion Trackers. Loading from file: %s' % motion_file)
     except IndexError:
         motion_trackers = {}
     try:
@@ -40,6 +41,7 @@ def get_trackers(subject_code):
                                        '*%s*orientation*' % subject_code))[-1]
         orientation_data = cPickle.load(open(orientation_file,'r'))
         orientation_trackers = orientation_data['trackers']
+        print('Found Orientation Trackers. Loading from file: %s' % orientation_file)
     except IndexError:
         orientation_trackers = {}
     return motion_trackers, orientation_trackers

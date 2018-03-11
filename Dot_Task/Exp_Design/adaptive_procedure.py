@@ -43,9 +43,11 @@ class adaptiveThreshold(BaseExp):
             print('cannot load config file')
             sys.exit()
         # setup trackers
-        if trackers is None:
-            self.trackers = self.defineTrackers(ignore_pedestal)
+        if not trackers:
+            self.trackers = self.defineTrackers('quest',
+                                                ignore_pedestal)
         else:
+            print('Loading trackers')
             self.trackers = trackers
         # init Base Exp
         super(adaptiveThreshold, self).__init__(self.taskname, subjid, 

@@ -75,9 +75,10 @@ class BaseExp(object):
             fixation.draw()
         if self.text_stim:
             self.text_stim.setText('')
-            self.win.flip()
         else:
-            self.presentTextToWindow('')
+            self.presentTextToWindow('', flip=False)
+        self.win.flip()
+        self.win.flip()
             
     def closeWindow(self):
         """ close the main window
