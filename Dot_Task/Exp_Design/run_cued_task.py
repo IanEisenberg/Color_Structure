@@ -3,13 +3,11 @@ runprobContextTask
 """
 
 import webbrowser
-from make_config import ProbContextConfig
-import glob
 import numpy as np
-import os
-from prob_context_task import probContextTask
 from psychopy import event
-from utils import get_difficulties
+from Dot_Task.Exp_Design.make_config import ProbContextConfig
+from Dot_Task.Exp_Design.prob_context_task import probContextTask
+from Dot_Task.Exp_Design.utils import get_difficulties
 
 # ****************************************************************************
 # set-up variables

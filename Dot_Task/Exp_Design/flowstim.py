@@ -14,8 +14,7 @@ and avoiding for loops in your code for optimised performance.
 See also the elementArrayStim demo.
 """
 
-from psychopy import visual, event
-from psychopy.visual import GratingStim
+from psychopy import visual
 import numpy as np
 from numpy import random
 

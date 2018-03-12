@@ -5,7 +5,7 @@ import numpy as np
 from psychopy import core, event, visual
 import os
 import sys
-from flowstim import get_fixation
+from Dot_Task.Exp_Design.flowstim import get_fixation
         
 class BaseExp(object):
     """ class defining a probabilistic context task
@@ -258,8 +258,7 @@ class BaseExp(object):
     def setupWindow(self, aperture=True):
         """ set up the main window
         """
-        self.win = visual.Window(allowGUI=False, 
-                                 monitor='testMonitor', 
+        self.win = visual.Window(monitor='testMonitor', 
                                  units='norm', 
                                  allowStencil=True,
                                  color=[-1,-1,-1],
@@ -271,9 +270,7 @@ class BaseExp(object):
             ratio = float(self.win.size[1])/self.win.size[0]
             aperture_vertices[:,0]*=ratio
             self.aperture = visual.Aperture(self.win, size=aperture_size, units='norm', shape = aperture_vertices)
-            self.aperture.disable()
-                     
-        self.win.flip()
+            self.aperture.disable()                     
         self.win.flip()
         
     def shutDownEarly(self):

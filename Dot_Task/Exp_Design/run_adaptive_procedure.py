@@ -11,10 +11,10 @@ Creats config file for subject and run the task.
 
 """
 
-from adaptive_procedure import adaptiveThreshold
-from make_config import ThresholdConfig
 import os
-from utils import get_trackers
+from Dot_Task.Exp_Design.adaptive_procedure import adaptiveThreshold
+from Dot_Task.Exp_Design.utils import get_trackers
+from Dot_Task.Exp_Design.make_config import ThresholdConfig
 
         
 # ****************************************************************************
@@ -39,6 +39,7 @@ stim_repetitions = 2
 exp_len = None
 # window variables
 win_kwargs = {'fullscr': False,
+              'allowGUI': True,
               'screen': 1,
               'size': [1920*.8, 1200*.8]}
 

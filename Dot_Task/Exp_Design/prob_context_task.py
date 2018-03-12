@@ -1,14 +1,14 @@
 """
 generic task using psychopy
 """
-from BaseExp import BaseExp
 import json
 import numpy as np
 from psychopy import visual, core, event
 import subprocess
 import sys,os
 import yaml
-from flowstim import OpticFlow
+from Dot_Task.Exp_Design.BaseExp import BaseExp
+from Dot_Task.Exp_Design.flowstim import OpticFlow
 
 class probContextTask(BaseExp):
     """ class defining a probabilistic context task
@@ -107,10 +107,10 @@ class probContextTask(BaseExp):
         core.wait(duration)
         self.win.flip()
     
-    def present_pause(self):
+    def presentPause(self):
         pauseClock = core.Clock()
         timer_text = "Take a break!\n\nContinue in: \n\n       "
-        self.presentTimer(duration=30, text=timer_text)
+        self.presentTimer(duration=20, text=timer_text)
         self.presentTextToWindow('Get Ready!', size=.15)
         core.wait(1.5)
         self.aperture.enable()
@@ -217,7 +217,7 @@ class probContextTask(BaseExp):
         self.clearWindow(fixation=self.fixation)
         for trial in self.stimulusInfo:
             if trial['trial_count'] in pause_trials:
-                pause_time += self.present_pause()
+                pause_time += self.presentPause()
             
             # wait for onset time
             while self.expClock.getTime() < trial['onset']+pause_time:

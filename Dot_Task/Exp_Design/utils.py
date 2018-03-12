@@ -1,11 +1,9 @@
 import cPickle
 from glob import glob
-from matplotlib import pyplot as plt
 import numpy as np
 from psychopy import monitors
 
 # convert from LAB to RGB space
-from skimage.color import lab2rgb
 import os
 
 def get_difficulties(subject_code):
@@ -55,14 +53,6 @@ def get_monitor(distance=30, width=30):
     monitor.setWidth(60)
     return monitor
 
-def pixel_lab2rgb(lst):
-    lst = [float(x) for x in lst]
-    return lab2rgb([[(lst)]]).flatten()*2-1
-            
-def plot_weibull(alpha, beta=3.5, chance = .5):
-    x = np.linspace(0,alpha*3,100)
-    y = chance + (1.0-chance)*(1-np.exp( -(x/alpha)**(beta) ))
-    plt.plot(x,y)
-    return alpha
+
     
 

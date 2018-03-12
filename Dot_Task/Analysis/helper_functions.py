@@ -7,8 +7,7 @@ Created on Fri Apr 24 16:22:54 2015
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import pylab, lmfit
+import lmfit
 import random as r
 from helper_classes import BiasPredModel, SwitchModel, MemoryModel, softmax
 
@@ -32,11 +31,6 @@ def track_runs(iterable):
         element_i += 1
     track_repeats = track_repeats[1:]
     return track_repeats
-
-def bar(x, y, title):
-    plot = plt.bar(x,y,width = .5)
-    plt.title(str(title))
-    return plot
 
 def calc_posterior(data,prior,likelihood_dist, reduce = True):
     n = len(prior)
@@ -400,43 +394,3 @@ def gen_memory_TS_posteriors(models, data, model_names = None, model_type = 'TS'
         data[model_name + '_posterior' + postfix] = model_posteriors[j]
         if get_choice:
             data[model_name + '_choices' + postfix] = model_choices[j]
-        
-#*********************************************
-# Plotting
-#*********************************************
-
-def plot_run(sub,plotting_dict, exclude = [], fontsize = 16):
-    #plot the posterior estimates for different models, the TS they currently select
-    #and the vertical position of the stimulus
-    sns.set_style("white")
-    plt.hold(True)
-    models = []
-    displacement = 0
-    #plot model certainty and task-set choices
-    for arg in plotting_dict.values():
-        if arg[2] not in exclude:
-            plt.plot(sub.trial_count,sub[arg[0]]*2,arg[1], label = arg[2], lw = 2)
-            plt.plot(sub.trial_count, [int(val>.5)+3+displacement for val in sub[arg[0]]],arg[1]+'o')
-            displacement+=.15
-            models.append(arg[0])
-    plt.axhline(1, color = 'y', ls = 'dashed', lw = 2)
-    plt.axhline(2.5, color = 'k', ls = 'dashed', lw = 3)
-    #plot subject choices (con_shape = conforming to TS1)
-    #plot current TS, flipping bit to plot correctly
-    plt.plot(sub.trial_count,(sub.ts)-2, 'go', label = 'operating TS')
-    plt.plot(sub.trial_count, sub.context/2-1.5,'k', lw = 2, label = 'stimulus height')
-    plt.plot(sub.trial_count, sub.con_2dim+2.85, 'yo', label = 'subject choice')
-    plt.yticks([-2, -1.5, -1, 0, 1, 2, 3.1, 4.1], [ -1, 0 , 1,'0%', '50%',  '100%', 'TS2 Choice', 'TS1 Choice'], size = fontsize-4 )
-    plt.xticks(size = fontsize - 4)
-    plt.xlim([min(sub.index)-.5,max(sub.index)])
-    plt.ylim(-2.5,5)
-    #subdivide graph
-    plt.axhline(-.5, color = 'k', ls = 'dashed', lw = 3)
-    plt.axhline(-1.5, color = 'y', ls = 'dashed', lw = 2)
-    #axes labels
-    plt.xlabel('Trial Number', size = fontsize, fontweight = 'bold')
-    plt.ylabel('Predicted P(TS1)', size = fontsize, fontweight = 'bold')
-    ax = plt.gca()
-    ax.yaxis.set_label_coords(-.1, .45)
-    pylab.legend(loc='upper center', bbox_to_anchor=(0.5, 1.08),
-              ncol=3, fancybox=True, shadow=True, prop={'size':fontsize}, frameon = True)

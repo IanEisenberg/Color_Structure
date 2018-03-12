@@ -16,7 +16,7 @@ from Load_Data import load_data, load_threshold_data
 from matplotlib import pyplot as plt
 from psychopy.data import FitWeibull, QuestHandler 
 
-subj_code = 'IE2'
+subj_code = 'IE'
 ts,df = load_threshold_data(subj_code)
 trackers = get_trackers(subj_code)
 
