@@ -25,12 +25,11 @@ class adaptiveThreshold(BaseExp):
         # set up internal variables
         self.stimulusInfo = []
         self.loadedStimulusFile = []
-        self.startTime = []
+        self.expClock = core.Clock()
         self.alldata = []
         self.aperture=None
         self.num_practice = num_practice
         self.pointtracker = 0
-        self.trialnum = 0
         self.track_response = []
         
         #looks up the hash of the most recent git push. Stored in log file
@@ -144,7 +143,19 @@ class adaptiveThreshold(BaseExp):
                 for k in difficulty_keys:
                     trackers[k] = trackers[difficulty_keys[0]]
         return trackers
-        
+    
+    def present_pause(self):
+        pauseClock = core.Clock()
+        timer_text = "Take a break!\n\nContinue in: \n\n       "
+        self.presentTimer(duration=30, text=timer_text)
+        self.presentTextToWindow('Get Ready!', size=.15)
+        core.wait(1.5)
+        self.aperture.enable()
+        pause_time = pauseClock.getTime()
+        self.alldata.append({'exp_stage': 'pause',
+                             'trial_time':  pause_time})
+        return pause_time
+    
     def presentTrial(self,trial, practice=False, show_FB = True):
         """
         This function presents a stimuli, waits for a response, tracks the
@@ -155,8 +166,11 @@ class adaptiveThreshold(BaseExp):
         modes: 'trial' (default) saves values to tracker
                 'practi' does not save values to tracker
         """
-        if not practice:
-            self.trialnum += 1
+        trialClock = core.Clock()
+        if practice:
+            trial['exp_stage'] = 'practice'
+        else:
+            trial['exp_stage'] = 'adaptive_procedure'
         stim = trial['stim']
         # update difficulties based on adaptive tracker
         if self.ts == "motion":
@@ -175,6 +189,7 @@ class adaptiveThreshold(BaseExp):
         # get stim attributes
         trial_attributes = self.getTrialAttributes(stim)
         trial['stim'].update(trial_attributes)
+        # print useful information about trial
         print('*'*40)
         print('Tracker: %s' % str(tracker_key), 'Best Guess: %s' % tracker.mean()) 
         print('Taskset: %s, choice value: %s\nSpeed: %s, Strength: %s \
@@ -184,9 +199,6 @@ class adaptiveThreshold(BaseExp):
                stim['speedDirection'], stim['speedStrength'], 
                stim['oriDirection'],stim['oriStrength'],
                self.getCorrectChoice(trial_attributes,trial['ts'])))
-        # if startTime has been recorded
-        if self.startTime:
-            trial['actualOnsetTime']=core.getTime() - self.startTime
         trial['response'] = np.nan
         trial['rt'] = np.nan
         trial['FB'] = np.nan
@@ -238,6 +250,7 @@ class adaptiveThreshold(BaseExp):
         self.clearWindow(fixation=self.fixation)
         
         # log trial and add to data
+        trial['trial_time'] = trialClock.getTime()
         self.writeToLog(json.dumps(trial))
         self.alldata.append(trial)
         return trial
@@ -299,11 +312,11 @@ class adaptiveThreshold(BaseExp):
         self.presentTextToWindow('Get Ready!', size=.15)
         core.wait(1.5)
         # start practice
-        practiceStartTime = core.getTime()
         self.clearWindow(fixation=self.fixation)
+        self.expClock.reset()
         for num, trial in enumerate(practice):            
             # wait for onset time
-            while core.getTime() < trial_timing[num]['onset'] + practiceStartTime:
+            while self.expClock.getTime() < trial_timing[num]['onset']:
                     key_response=event.getKeys([self.quit_key])
                     if len(key_response)==1:
                         self.shutDownEarly()
@@ -313,7 +326,7 @@ class adaptiveThreshold(BaseExp):
             Done with practice. Wait for the experimenter
             """)
         #self.aperture.enable()
-
+    
     def run_task(self, practice=False):
         self.setupWindow()
         self.defineStims()
@@ -323,7 +336,7 @@ class adaptiveThreshold(BaseExp):
         num_pauses = np.round(length_min/6)
         pause_trials = np.round(np.linspace(0,self.exp_len,num_pauses+1))[1:-1]
         pause_time = 0
-        timer_text = "Take a break!\n\nContinue in: \n\n       "
+        
         # present intro screen
         if practice:
             self.run_practice()
@@ -333,20 +346,16 @@ class adaptiveThreshold(BaseExp):
         self.presentTextToWindow('Get Ready!', size=.15)
         core.wait(1.5)
         # start the task
-        self.startTime = core.getTime()
+        self.expClock.reset()
         self.clearWindow(fixation=self.fixation)
         for trial in self.stimulusInfo:
             if trial['trial_count'] in pause_trials:
-                time = core.getTime()
-                self.presentTimer(duration=30, text=timer_text)
-                self.aperture.enable()
-                pause_time += core.getTime() - time
-            
+                pause_time += self.present_pause()
             # wait for onset time
-            while core.getTime() < trial['onset'] + self.startTime + pause_time:
-                    key_response=event.getKeys([self.quit_key])
-                    if len(key_response)==1:
-                        self.shutDownEarly()
+            while self.expClock.getTime()+pause_time < trial['onset']:
+                key_response=event.getKeys([self.quit_key])
+                if len(key_response)==1:
+                    self.shutDownEarly()
             self.presentTrial(trial)
                 
         # clean up and save

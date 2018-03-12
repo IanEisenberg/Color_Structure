@@ -25,9 +25,9 @@ class BaseExp(object):
         self.fixation = None
         # set up window
         self.win=[]
-        self.win_kwargs = win_kwargs
         if 'size' not in win_kwargs.keys():
             win_kwargs['size'] = [1920,1200]
+        self.win_kwargs = win_kwargs
         
         # set up recording files
         self.logfilename='%s_%s_%s.log'%(self.subjid,self.expid,self.timestamp)
@@ -78,7 +78,8 @@ class BaseExp(object):
         else:
             self.presentTextToWindow('', flip=False)
         self.win.flip()
-        self.win.flip()
+        if not self.win_kwargs.get('fullscr', None) == True:
+            self.win.flip()
             
     def closeWindow(self):
         """ close the main window
@@ -145,9 +146,10 @@ class BaseExp(object):
         # indicate response window and wait for response
         fixation = get_fixation(self.win, color='#00FF00', height=.03)
         self.clearWindow(fixation=fixation)
+        stim_clock.reset()
         key_response = event.waitKeys(response_window,
                                       self.action_keys + [self.quit_key],
-                                      timeStamped=True)
+                                      timeStamped=stim_clock)
         if key_response is not None:
             assert len(key_response) == 1
             key_response = key_response[0]

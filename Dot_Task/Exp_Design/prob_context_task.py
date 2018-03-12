@@ -19,7 +19,7 @@ class probContextTask(BaseExp):
         # set up some variables
         self.stimulusInfo=[]
         self.loadedStimulusFile=[]
-        self.startTime=[]
+        self.expClock = core.Clock()
         self.alldata=[]
         #looks up the hash of the most recent git push. Stored in log file
         self.gitHash = subprocess.check_output(['git','rev-parse','--short','HEAD'])[:-1]
@@ -33,7 +33,6 @@ class probContextTask(BaseExp):
             
         self.aperture=None
         
-        self.trialnum = 0
         self.track_response = []
         self.pointtracker = 0
         self.cue_type = cue_type
@@ -107,7 +106,19 @@ class probContextTask(BaseExp):
         self.win.flip()
         core.wait(duration)
         self.win.flip()
-        
+    
+    def present_pause(self):
+        pauseClock = core.Clock()
+        timer_text = "Take a break!\n\nContinue in: \n\n       "
+        self.presentTimer(duration=30, text=timer_text)
+        self.presentTextToWindow('Get Ready!', size=.15)
+        core.wait(1.5)
+        self.aperture.enable()
+        pause_time = pauseClock.getTime()
+        self.alldata.append({'exp_stage': 'pause',
+                             'trial_time':  pause_time})
+        return pause_time
+    
     def presentTrial(self,trial):
         """
         This function presents a stimuli, waits for a response, tracks the
@@ -115,8 +126,7 @@ class probContextTask(BaseExp):
         presentation.
         """
         trialClock = core.Clock()
-        self.trialnum += 1
-        trial['actualOnsetTime']=core.getTime() - self.startTime
+        trial['exp_stage'] = 'practice'
         trial['stimulusCleared']=0
         trial['response'] = np.nan
         trial['rt'] = np.nan
@@ -141,12 +151,10 @@ class probContextTask(BaseExp):
         core.wait(trial['CSI'])
         # present stimulus and get response
         event.clearEvents()
-        trialClock.reset()
         key_response = self.presentStim(trial_attributes, 
                                         duration=trial['stimulusDuration'], 
                                         response_window=trial['responseWindow'], 
-                                        SRI=trial['stimResponseInterval'],
-                                        clock=trialClock)
+                                        SRI=trial['stimResponseInterval'])
         if key_response:
             # record response
             trial['response'], trial['rt'] = key_response
@@ -181,6 +189,7 @@ class probContextTask(BaseExp):
             self.clearWindow()
         
         # log trial and add to data
+        trial['trial_time'] = trialClock.getTime()
         self.writeToLog(json.dumps(trial))
         self.alldata.append(trial)
         return trial
@@ -202,17 +211,14 @@ class probContextTask(BaseExp):
         self.presentTextToWindow('Get Ready!', size=.15)
         core.wait(1.5)
         # start the task
-        self.startTime = core.getTime()
+        self.expClock.reset()
         self.clearWindow(fixation=self.fixation)
         for trial in self.stimulusInfo:
             if trial['trial_count'] in pause_trials:
-                time1 = core.getTime()
-                self.presentTimer(duration=30, text=timer_text)
-                self.clearWindow()
-                pause_time += core.getTime() - time1
+                pause_time += self.present_pause()
             
             # wait for onset time
-            while core.getTime() < trial['onset'] + self.startTime + pause_time:
+            while self.expClock.getTime()+pause_time < trial['onset']:
                     key_response=event.getKeys([self.quit_key])
                     if len(key_response)==1:
                         self.shutDownEarly()
