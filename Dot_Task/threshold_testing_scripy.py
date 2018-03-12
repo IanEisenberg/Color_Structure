@@ -34,18 +34,20 @@ for key,tracker in motion_trackers.items():
     plt.title(key)
     index+=1
 plt.tight_layout()
-    
+
+added_trackers = []
 tracker_df = pd.DataFrame()
 for key,tracker in motion_trackers.items():
-    df = pd.DataFrame({'difficulty': key[1],
-                       'pedestal': key[0],
-                       'data': tracker.data,
-                       'intensities': tracker.intensities})
-    tracker_df = pd.concat([tracker_df,df], axis=0)
+    if tracker not in added_trackers:
+        added_trackers.append(tracker)
+        df = pd.DataFrame({'difficulty': key[1],
+                           'pedestal': key[0],
+                           'data': tracker.data,
+                           'intensities': tracker.intensities})
+        tracker_df = pd.concat([tracker_df,df], axis=0)
 
 # bin intensities
-bins =np.linspace(0,tracker_df.intensities.max()/2,
-                                                          10)
+bins =np.linspace(0,tracker_df.intensities.max()/2,10)
 tracker_df.loc[:,'binned_intensities'] = bins[np.digitize(tracker_df.intensities,
                                               bins)-1]
 

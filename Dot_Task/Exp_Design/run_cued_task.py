@@ -37,16 +37,16 @@ np.random.shuffle(ts_order)
 # set up config files
 # ****************************************************************************
 # load motion_difficulties and ori_difficulties from adaptive tasks
-motion_difficulties, ori_difficulties = get_difficulties(subject_code)
-if motion_difficulties == {}:
-    motion_difficulties = {
+difficulties = get_difficulties(subject_code)
+if difficulties['motion'] == {}:
+    difficulties['motion'] = {
      ('in', 'easy'): 0.05,
      ('in', 'hard'): 0.01,
      ('out', 'easy'): 0.05,
      ('out', 'hard'): 0.01}
     
-if ori_difficulties == {}:
-     ori_difficulties = {
+if difficulties['orientation'] == {}:
+     difficulties['orientation'] = {
      (-60, 'easy'): 25,
      (-60, 'hard'): 15,
      (30, 'easy'): 25,
@@ -58,8 +58,8 @@ cue_config = ProbContextConfig(taskname=cuename,
                                stim_repetitions=stim_repetitions, 
                                ts_order=ts_order, 
                                rp=recursive_p,
-                               motion_difficulties=motion_difficulties,
-                               ori_difficulties=ori_difficulties)
+                               motion_difficulties=difficulties['motion'],
+                               ori_difficulties=difficulties['orientation'])
 cue_config_file = cue_config.get_config()
 
     

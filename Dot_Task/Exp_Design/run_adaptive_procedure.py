@@ -55,7 +55,7 @@ except ValueError:
 # set up config files
 # ****************************************************************************
 # load motion_difficulties and orientation_difficulties from adaptive tasks
-motion_trackers,orientation_trackers = get_trackers(subject_code)
+trackers = get_trackers(subject_code)
 
 if motion_on:
     motion_config = ThresholdConfig(subjid=subject_code, 
@@ -68,7 +68,7 @@ if motion_on:
                                   subject_code, 
                                   save_dir=save_dir, 
                                   win_kwargs=win_kwargs,
-                                  trackers=motion_trackers)
+                                  trackers=trackers['motion'])
 
 if orientation_on:
     orientation_config = ThresholdConfig(subjid=subject_code, 
@@ -81,7 +81,7 @@ if orientation_on:
                                        subject_code,
                                        save_dir=save_dir, 
                                        win_kwargs=win_kwargs,
-                                       trackers=orientation_trackers)
+                                       trackers=trackers['orientation'])
 
 # ****************************************************************************
 # ************** INTRODUCTION AND PRACTICE ***********************************

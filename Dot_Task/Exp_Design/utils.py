@@ -24,7 +24,8 @@ def get_difficulties(subject_code):
         print('Found Orientation Difficulties. Loading from file: %s' % orientation_file)
     except IndexError:
         orientation_difficulties = {}
-    return motion_difficulties, orientation_difficulties
+    return {'motion': motion_difficulties, 
+            'orientation': orientation_difficulties}
 
 def get_trackers(subject_code):
     file_dir = os.path.dirname(__file__)
@@ -44,7 +45,8 @@ def get_trackers(subject_code):
         print('Found Orientation Trackers. Loading from file: %s' % orientation_file)
     except IndexError:
         orientation_trackers = {}
-    return motion_trackers, orientation_trackers
+    return {'motion': motion_trackers, 
+            'orientation': orientation_trackers}
 
 def get_monitor(distance=30, width=30):  
     monitor = monitors.Monitor('test')
