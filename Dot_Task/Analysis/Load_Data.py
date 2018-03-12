@@ -30,7 +30,8 @@ def load_data(datafile):
     #Load data into a dataframe
     df = pd.DataFrame(data)
     # separate stim attributes
-    stim_df = pd.DataFrame(df.stim.tolist())
+    stim_df = pd.DataFrame(df.query('rt==rt').stim.tolist())
+    stim_df.index = df.query('rt==rt').index
     df.drop('stim', axis=1, inplace=True)
     df = pd.concat([df,stim_df], axis=1)
     return (taskinfo, df)

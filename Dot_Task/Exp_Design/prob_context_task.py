@@ -203,7 +203,6 @@ class probContextTask(BaseExp):
         num_pauses = np.round(length_min/6)
         pause_trials = np.round(np.linspace(0,self.exp_len,num_pauses+1))[1:-1]
         pause_time = 0
-        timer_text = "Take a break!\n\nContinue in: \n\n       "
         # present intro screen
         if intro_text:
             self.presentInstruction(intro_text)
@@ -218,7 +217,7 @@ class probContextTask(BaseExp):
                 pause_time += self.present_pause()
             
             # wait for onset time
-            while self.expClock.getTime()+pause_time < trial['onset']:
+            while self.expClock.getTime() < trial['onset']+pause_time:
                     key_response=event.getKeys([self.quit_key])
                     if len(key_response)==1:
                         self.shutDownEarly()
