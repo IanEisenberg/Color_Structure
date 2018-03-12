@@ -184,10 +184,10 @@ class ProbContextConfig(Config):
                     state_reps += 1
         self.trial_states = trial_states
             
-    def setup_trial_list(self, cueDuration=1.5, CSI=.5, 
-                         stimulusDuration=2, responseWindow=1.5, SRI=1,
+    def setup_trial_list(self, cueDuration=.5, CSI=.5, 
+                         stimulusDuration=1.5, responseWindow=1.5, SRI=1,
                          FBDuration=.5, FBonset=.5, 
-                         base_ITI=1, displayFB = True):
+                         base_ITI=.5, displayFB = True):
         if self.seed is not None:
             np.random.seed(self.seed)
         trial_list = []    
@@ -287,8 +287,8 @@ class ThresholdConfig(Config):
                                                        other_params)
         
                     
-    def setup_trial_list(self, stimulusDuration=2, responseWindow=1.5, SRI=1,
-                         FBDuration=.5, FBonset=.5, base_ITI=1, 
+    def setup_trial_list(self, stimulusDuration=1.5, responseWindow=1.5, SRI=1,
+                         FBDuration=.5, FBonset=.5, base_ITI=.5, 
                          displayFB = True):
         if self.seed is not None:
             np.random.seed(self.seed)

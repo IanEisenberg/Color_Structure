@@ -172,19 +172,22 @@ class probContextTask(BaseExp):
             if trial['displayFB'] == True:
                 trial['FB'] = FB
                 core.wait(trial['FBonset'])  
-                trial['actualFBOnsetTime'] = trialClock.getTime()-trial['stimulusCleared']
                 if FB == 1:
-                    self.presentTextToWindow('+1 point')
+                    self.presentTextToWindow('+1 point', 
+                                             position=[0, .3], 
+                                             fixation=self.fixation)
                 else:
-                    self.presentTextToWindow('+' + str(FB) + ' points')
+                    self.presentTextToWindow('+' + str(FB) + ' points', 
+                                             position=[0, .3], 
+                                             fixation=self.fixation)
                 core.wait(trial['FBDuration'])
-                self.clearWindow()              
         #If subject did not respond within the stimulus window clear the stim
         #and admonish the subject
         else:
-            self.clearWindow()            
             core.wait(trial['FBonset'])
-            self.presentTextToWindow('Please Respond Faster')
+            self.presentTextToWindow('Please Respond Faster', 
+                                     position=[0, .3], 
+                                     fixation=self.fixation)
             core.wait(trial['FBDuration'])
             self.clearWindow()
         

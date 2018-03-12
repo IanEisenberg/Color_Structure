@@ -157,7 +157,7 @@ class BaseExp(object):
         else:
             key_response = []
         if self.aperture: self.aperture.disable()
-        self.win.flip()
+        self.clearWindow(fixation=self.fixation)
         return key_response
             
     def getCorrectChoice(self,trial_attributes,ts):
@@ -198,7 +198,7 @@ class BaseExp(object):
             event.clearEvents()
             
     def presentTextToWindow(self, text, size=.15, color=None, duration=None,
-                            position=None, flip=True):
+                            position=None, flip=True, fixation=False):
         """ present a text message to the screen
         return:  time of completion
         """
@@ -222,8 +222,11 @@ class BaseExp(object):
         else:
             self.text_stim.setText(text)
             self.text_stim.setHeight(size)
-            self.text_stim.setColor(self.text_color)
+            self.text_stim.setColor(color)
+            self.text_stim.pos = position
         self.text_stim.draw()
+        if fixation:
+            fixation.draw()
         if flip:
             self.win.flip()
         if duration:

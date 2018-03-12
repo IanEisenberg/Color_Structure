@@ -233,9 +233,13 @@ class adaptiveThreshold(BaseExp):
                 trial['FB'] = FB
                 core.wait(trial['FBonset'])  
                 if FB == 1:
-                    self.presentTextToWindow('CORRECT')
+                    self.presentTextToWindow('CORRECT', 
+                                             position=[0, .3], 
+                                             fixation=self.fixation)
                 else:
-                    self.presentTextToWindow('INCORRECT')
+                    self.presentTextToWindow('INCORRECT', 
+                                             position=[0, .3], 
+                                             fixation=self.fixation)
                 core.wait(trial['FBDuration'])
         # If subject did not respond within the stimulus window clear the stim
         # and admonish the subject
@@ -243,9 +247,10 @@ class adaptiveThreshold(BaseExp):
             if not practice:
                 tracker.addResponse(0)
             if show_FB:
-                self.clearWindow()            
                 core.wait(trial['FBonset'])
-                self.presentTextToWindow('Please Respond Faster')
+                self.presentTextToWindow('Please Respond Faster', 
+                                         position=[0, .3], 
+                                         fixation=self.fixation)
                 core.wait(trial['FBDuration'])
         self.clearWindow(fixation=self.fixation)
         
