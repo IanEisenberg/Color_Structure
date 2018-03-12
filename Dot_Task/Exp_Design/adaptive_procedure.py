@@ -113,12 +113,12 @@ class adaptiveThreshold(BaseExp):
                 key = (pedestal,difficulty)
                 nDown = step_lookup[difficulty]
                 trackers[key] = StairHandler(startVal=val, minVal=0, 
-                                            maxVal=maxVal,
-                                            stepSizes=maxVal/10.0, 
-                                            stepType='lin',
-                                            nDown=nDown,
-                                            nReversals=20,
-                                            staircase=trackers.get(key,None))
+                                             maxVal=maxVal,
+                                             stepSizes=maxVal/10.0, 
+                                             stepType='lin',
+                                             nDown=nDown,
+                                             nReversals=20,
+                                             staircase=trackers.get(key,None))
         elif method=='quest':
             quest_lookup = {'easy': .85,
                             'hard': .7}
@@ -126,15 +126,15 @@ class adaptiveThreshold(BaseExp):
                 key = (pedestal,difficulty)
                 threshold = quest_lookup[difficulty]
                 trackers[key] = QuestHandler(pThreshold=threshold,
-                                            nTrials = self.exp_len,
-                                            startVal=val, startValSd=maxVal/2,
-                                            minVal=0.0001, 
-                                            maxVal=maxVal,
-                                            gamma=.01,
-                                            grain=maxVal/400.0,
-                                            range=maxVal*2,
-                                            beta=3.5,
-                                            staircase=trackers.get(key,None))            
+                                             nTrials = self.exp_len,
+                                             startVal=val, startValSd=maxVal/2,
+                                             minVal=0.0001, 
+                                             maxVal=maxVal,
+                                             gamma=.5,
+                                             grain=maxVal/400.0,
+                                             range=maxVal*2,
+                                             beta=3.5,
+                                             staircase=trackers.get(key,None))            
                 
         if ignore_pedestal:
             difficulties = np.unique([i[1] for i in trackers.keys()])
