@@ -156,7 +156,7 @@ class adaptiveThreshold(BaseExp):
                              'trial_time':  pause_time})
         return pause_time
     
-    def presentTrial(self,trial, practice=False, show_FB = True):
+    def presentTrial(self,trial, practice=False):
         """
         This function presents a stimuli, waits for a response, tracks the
         response and RT and presents appropriate feedback. 
@@ -229,30 +229,31 @@ class adaptiveThreshold(BaseExp):
             if not practice:
                 self.pointtracker += FB
             # Present FB to window
-            if trial['displayFB'] == True and show_FB:
+            if trial['displayFB'] == True:
                 trial['FB'] = FB
-                core.wait(trial['FBonset'])  
+                if trial['FBonset'] > 0: 
+                    self.clearWindow(fixation=True)
+                    core.wait(trial['FBonset'])  
                 if FB == 1:
-                    self.presentTextToWindow('CORRECT', 
-                                             position=[0, .3], 
-                                             fixation=self.fixation)
+                    self.clearWindow(fixation=True,
+                                     fixation_color='#66ff66')
                 else:
-                    self.presentTextToWindow('INCORRECT', 
-                                             position=[0, .3], 
-                                             fixation=self.fixation)
+                    self.clearWindow(fixation=True,
+                                     fixation_color='#ff3300')
                 core.wait(trial['FBDuration'])
         # If subject did not respond within the stimulus window clear the stim
         # and admonish the subject
         else:
             if not practice:
                 tracker.addResponse(0)
-            if show_FB:
-                core.wait(trial['FBonset'])
-                self.presentTextToWindow('Please Respond Faster', 
-                                         position=[0, .3], 
-                                         fixation=self.fixation)
+            if trial['displayFB'] == True:
+                if trial['FBonset'] > 0: 
+                    self.clearWindow(fixation=True)
+                    core.wait(trial['FBonset'])  
+                self.clearWindow(fixation=True,
+                                     fixation_color='red')
                 core.wait(trial['FBDuration'])
-        self.clearWindow(fixation=self.fixation)
+        self.clearWindow(fixation=True)
         
         # log trial and add to data
         trial['trial_time'] = trialClock.getTime()
@@ -278,8 +279,9 @@ class adaptiveThreshold(BaseExp):
             
             Press 5 to see a demo.             
             """)
-        trial = self.stimulusInfo[0]
-        self.presentTrial(trial, practice=True, show_FB = False)
+        trial = self.stimulusInfo[0].copy()
+        trial['displayFB'] = False
+        self.presentTrial(trial, practice=True)
 
         if self.ts == "motion":
             self.presentInstruction(
@@ -317,7 +319,7 @@ class adaptiveThreshold(BaseExp):
         self.presentTextToWindow('Get Ready!', size=.15)
         core.wait(1.5)
         # start practice
-        self.clearWindow(fixation=self.fixation)
+        self.clearWindow(fixation=True)
         self.expClock.reset()
         for num, trial in enumerate(practice):            
             # wait for onset time
@@ -352,7 +354,7 @@ class adaptiveThreshold(BaseExp):
         core.wait(1.5)
         # start the task
         self.expClock.reset()
-        self.clearWindow(fixation=self.fixation)
+        self.clearWindow(fixation=True)
         for trial in self.stimulusInfo:
             if trial['trial_count'] in pause_trials:
                 pause_time += self.presentPause()

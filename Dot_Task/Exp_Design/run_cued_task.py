@@ -24,7 +24,7 @@ cue_type = 'deterministic'
 stim_repetitions = 5
 recursive_p = .9
 # window variables
-win_kwargs = {'fullscr': True,
+win_kwargs = {'fullscr': False,
               'screen': 1,
               'size': [1920, 1200]}
 # counterbalance ts_order (which ts is associated with top of screen)

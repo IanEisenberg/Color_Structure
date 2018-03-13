@@ -18,20 +18,42 @@ from psychopy import visual
 import numpy as np
 from numpy import random
 
-def get_fixation(win, color="white", height=1, width=4):
-    ratio = win.size[1]/float(win.size[0])
-    fixation = visual.ShapeStim(win, 
-            vertices=((0,-height),(0,height), 
-                      (0,0), (-height*ratio,0), (height*ratio,0)),
-            lineWidth=width,
-            closeShape=False,
-            lineColor=color
-        )
-    return fixation
-
+class Fixation:
+    def __init__(self, win, height=1, width=4, 
+                 color="white", background_ratio=1.8):
+        ratio = win.size[1]/float(win.size[0])
+        self.fixation = visual.ShapeStim(win, 
+                vertices=((0,-height),(0,height), 
+                          (0,0), (-height*ratio,0), (height*ratio,0)),
+                lineWidth=width,
+                closeShape=False,
+                lineColor=color
+            )
+        self.background = None
+        if background_ratio > 0:
+            self.background = visual.Circle(win,units = 'norm',
+                                        radius=(height*ratio*background_ratio, 
+                                                height*background_ratio),
+                                        fillColor=win.color, 
+                                        lineColor=win.color,
+                                        edges=60)
+    def change_color(self, color):
+        self.fixation.lineColor = color
+        
+    def draw(self, color=None):
+        default_color = self.fixation.lineColor
+        if color:
+            self.change_color(color)
+        if self.background:
+            self.background.draw()
+        self.fixation.draw()
+        if color:
+            self.change_color(default_color)
+        
 class OpticFlow(object):
     def __init__(self, win, speed, color, 
-                 mask='bar', fixation_on=True, **kwargs):
+                 mask='bar', fixation_on=True,
+                 center_gap=.08, **kwargs):
         # arguments passed to ElementArray
         default_dict = {'nElements': 1000, 'sizes': .005}
         for key in default_dict:
@@ -48,6 +70,7 @@ class OpticFlow(object):
         self.base_dot_size = self.dots.sizes
         self.__dict__.update(kwargs)
         # OpticFlow specific arguments
+        self.gap = center_gap/2
         self.speed = speed
         self.win = win
         self.win.units = 'norm'
@@ -67,10 +90,19 @@ class OpticFlow(object):
         # set up fixation
         fix_height = .03
         self.fixation_on = fixation_on
-        self.fixation = get_fixation(self.win, height=fix_height)
+        self.fixation = Fixation(self.win, height=fix_height)
         
     def setupDots(self):
-        self.dots3d = random.rand(self.nElements,3)
+        self.dots3d = random.rand(self.nElements,2)
+        if self.gap > 0:
+            # check that none are in the gap
+            rejected = np.sum((self.dots3d-.5)**2,1)**.5 < self.gap
+            while np.sum(rejected) > 0:
+                N_rejected = np.sum(rejected)
+                self.dots3d = self.dots3d[np.logical_not(rejected)]
+                self.dots3d = np.append(self.dots3d, random.rand(N_rejected, 2), 0)
+                rejected = np.sum((self.dots3d-.5)**2,1)**.5 < self.gap
+        self.dots3d = np.hstack([self.dots3d, random.rand(self.nElements,1)])
         for dim, limits in enumerate(self.fieldlimits):
             self.dots3d[:,dim]*=(limits[1]-limits[0])
             self.dots3d[:,dim]+=limits[0]

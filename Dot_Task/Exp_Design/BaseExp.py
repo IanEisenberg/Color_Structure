@@ -5,7 +5,7 @@ import numpy as np
 from psychopy import core, event, visual
 import os
 import sys
-from Dot_Task.Exp_Design.flowstim import get_fixation
+from Dot_Task.Exp_Design.flowstim import Fixation
         
 class BaseExp(object):
     """ class defining a probabilistic context task
@@ -68,18 +68,16 @@ class BaseExp(object):
             if self.quit_key in resp:
                 self.shutDownEarly()
     
-    def clearWindow(self, fixation=None):
+    def clearWindow(self, fixation=True, fixation_color=None):
         """ clear the main window
         """
         if fixation:
-            fixation.draw()
+            self.fixation.draw(color=fixation_color)
         if self.text_stim:
             self.text_stim.setText('')
         else:
             self.presentTextToWindow('', flip=False)
         self.win.flip()
-        if not self.win_kwargs.get('fullscr', None) == True:
-            self.win.flip()
             
     def closeWindow(self):
         """ close the main window
@@ -141,11 +139,10 @@ class BaseExp(object):
             self.checkRespForQuitKey(keys)
         # wait stim-respones interval
         if SRI>0: 
-            self.clearWindow(fixation=self.fixation)
+            self.clearWindow(fixation=True)
             core.wait(SRI)
         # indicate response window and wait for response
-        fixation = get_fixation(self.win, color='#00FF00', height=.03)
-        self.clearWindow(fixation=fixation)
+        self.clearWindow(fixation=True, fixation_color='#0099ff')
         stim_clock.reset()
         key_response = event.waitKeys(response_window,
                                       self.action_keys + [self.quit_key],
@@ -157,7 +154,6 @@ class BaseExp(object):
         else:
             key_response = []
         if self.aperture: self.aperture.disable()
-        self.clearWindow(fixation=self.fixation)
         return key_response
             
     def getCorrectChoice(self,trial_attributes,ts):
