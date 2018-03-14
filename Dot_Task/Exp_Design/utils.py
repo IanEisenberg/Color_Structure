@@ -1,10 +1,9 @@
 import cPickle
 from glob import glob
 import numpy as np
+import os
 from psychopy import monitors
 
-# convert from LAB to RGB space
-import os
 
 def get_difficulties(subject_code):
     file_dir = os.path.dirname(__file__)

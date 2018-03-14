@@ -17,9 +17,6 @@ print('Enter the subject ID')
 subject_code = raw_input('subject id: ')
 
 
-verbose=True
-fullscr= False
-subdata=[]
 train_on = True
 test_on = False
 save_dir = '../Data' 
@@ -28,6 +25,10 @@ cue_type = 'probabilistic'
 # set up task variables
 stim_repetitions = 5
 recursive_p = .9
+# window variables
+win_kwargs = {'fullscr': False,
+              'screen': 1,
+              'size': [1920, 1200]}
 
 # counterbalance ts_order (which ts is associated with top of screen)
 ts_order = ['motion','orientation']
@@ -79,13 +80,13 @@ test_config_file = test_config.get_config()
 train=probContextTask(train_config_file,
                       subject_code, 
                       save_dir=save_dir, 
-                      fullscreen = fullscr, 
-                      cue_type=cue_type)
+                      cue_type=cue_type,
+                      win_kwargs=win_kwargs)
 test=probContextTask(test_config_file,
                      subject_code, 
                      save_dir=save_dir, 
-                     fullscreen = fullscr, 
-                     cue_type=cue_type)
+                     cue_type=cue_type,
+                     win_kwargs=win_kwargs)
 
 
 # ****************************************************************************

@@ -238,7 +238,7 @@ class ProbContextConfig(Config):
 
 class ThresholdConfig(Config): 
     def __init__(self, subjid, taskname, action_keys=None, stim_repetitions=5,
-                 seed=None, exp_len=None, ts='motion'):             
+                 seed=None, exp_len=None, ts='motion', one_difficulty=False):             
         
         if not action_keys:
             action_keys = ['down','up','left','right']
@@ -254,17 +254,25 @@ class ThresholdConfig(Config):
         assert ts in ['orientation','motion']
         self.ts = ts
         # stim attributes
+        if not one_difficulty:
         # from easy to hard
-        # determines the orientation change in degrees
-        self.ori_difficulties = {(self.stim_oris[0], 'easy'): 25,
-                                 (self.stim_oris[1], 'easy'): 25,
-                                 (self.stim_oris[0], 'hard'): 15,
-                                 (self.stim_oris[1], 'hard'): 15}
-        # motion speeds
-        self.motion_difficulties = {(self.stim_motions[0], 'easy'): .08,
-                                 (self.stim_motions[1], 'easy'): .08,
-                                 (self.stim_motions[0], 'hard'): .04,
-                                 (self.stim_motions[1], 'hard'): .04}
+            # determines the orientation change in degrees
+            self.ori_difficulties = {(self.stim_oris[0], 'easy'): 25,
+                                     (self.stim_oris[1], 'easy'): 25,
+                                     (self.stim_oris[0], 'hard'): 15,
+                                     (self.stim_oris[1], 'hard'): 15}
+            # motion speeds
+            self.motion_difficulties = {(self.stim_motions[0], 'easy'): .08,
+                                     (self.stim_motions[1], 'easy'): .08,
+                                     (self.stim_motions[0], 'hard'): .04,
+                                     (self.stim_motions[1], 'hard'): .04}
+        else:
+            self.ori_difficulties = {(self.stim_oris[0], 'medium'): 20,
+                                     (self.stim_oris[1], 'medium'): 20}
+            # motion speeds
+            self.motion_difficulties = {(self.stim_motions[0], 'medium'): .06,
+                                        (self.stim_motions[1], 'medium'): .06}
+            
         # calculate exp len
         num_stims = len(self.ori_difficulties)*len(self.motion_difficulties)\
                     *len(self.stim_oris)*len(self.stim_motions)

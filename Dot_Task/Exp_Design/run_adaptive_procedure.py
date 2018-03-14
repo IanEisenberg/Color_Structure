@@ -11,7 +11,6 @@ Creats config file for subject and run the task.
 
 """
 
-import os
 from Dot_Task.Exp_Design.adaptive_procedure import adaptiveThreshold
 from Dot_Task.Exp_Design.utils import get_trackers
 from Dot_Task.Exp_Design.make_config import ThresholdConfig
@@ -24,16 +23,11 @@ from Dot_Task.Exp_Design.make_config import ThresholdConfig
 print('Enter the subject ID')
 subject_code = raw_input('subject id: ')
 
-verbose=True
-message_on = False
-subdata=[]
 motion_on = True
-orientation_on = True #True
+orientation_on = True 
 practice_on = False
-home = os.getenv('HOME') 
+one_difficulty=True
 save_dir = '../Data' 
-motionname = 'adaptive_motion'
-orientationname = 'adaptive_orientation'
 # set up task variables
 stim_repetitions = 2
 exp_len = None
@@ -62,7 +56,8 @@ if motion_on:
                                     taskname='adaptive_motion',
                                     stim_repetitions=stim_repetitions,
                                     ts='motion',
-                                    exp_len=exp_len)
+                                    exp_len=exp_len,
+                                    one_difficulty=one_difficulty)
     motion_config_file = motion_config.get_config()
     motion_task=adaptiveThreshold(motion_config_file,
                                   subject_code, 
@@ -75,7 +70,8 @@ if orientation_on:
                                          taskname='adaptive_orientation',
                                          stim_repetitions=stim_repetitions,
                                          ts='orientation',
-                                         exp_len=exp_len)
+                                         exp_len=exp_len,
+                                         one_difficulty=one_difficulty)
     orientation_config_file = orientation_config.get_config()  
     orientation_task=adaptiveThreshold(orientation_config_file,
                                        subject_code,

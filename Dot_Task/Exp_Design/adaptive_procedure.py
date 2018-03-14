@@ -108,6 +108,7 @@ class adaptiveThreshold(BaseExp):
             maxVal = 25 # no more than a 20 degree change
         if method=='basic':
             step_lookup = {'easy':5,
+                           'medium': 4,
                            'hard': 3}
             for (pedestal, difficulty),val in difficulties.items():
                 key = (pedestal,difficulty)
@@ -121,6 +122,7 @@ class adaptiveThreshold(BaseExp):
                                              staircase=trackers.get(key,None))
         elif method=='quest':
             quest_lookup = {'easy': .85,
+                            'medium': .775,
                             'hard': .7}
             for (pedestal, difficulty), val in difficulties.items():
                 key = (pedestal,difficulty)

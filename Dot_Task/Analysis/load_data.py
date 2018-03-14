@@ -39,17 +39,21 @@ def load_data(datafile):
     
 def load_threshold_data(subj_code, dim='motion'):
     file_dir = os.path.dirname(__file__)
-    assert dim in ['motion','color']
+    assert dim in ['motion','orientation']
     files = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
                                      '*%s*%s*' % (subj_code, dim))))
-    datafile = pd.DataFrame()
-    for i, filey in enumerate(files):
-        taskinfo,df = load_data(filey)
-        df.insert(0, 'Session', i)
-        datafile = pd.concat([datafile, df])
-    # reorganize
-    datafile.reset_index(drop=True, inplace=True)
-    return taskinfo, datafile
+    if len(files) > 0:
+        datafile = pd.DataFrame()
+        for i, filey in enumerate(files):
+            taskinfo,df = load_data(filey)
+            df.insert(0, 'Session', i)
+            datafile = pd.concat([datafile, df])
+        # reorganize
+        datafile.reset_index(drop=True, inplace=True)
+        return taskinfo, datafile
+    else:
+        print('No %s files found for subject %s!' % (dim, subj_code))
+        return None, None
 
 def preproc_data(traindata, testdata, taskinfo, dist = norm):
             """ Sets TS2 to always be associated with the 'top' of the screen (positive context values),
