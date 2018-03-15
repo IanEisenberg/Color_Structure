@@ -45,7 +45,7 @@ def load_threshold_data(subj_code, dim='motion'):
     file_dir = os.path.dirname(__file__)
     assert dim in ['motion','orientation']
     files = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
-                                     '*%s*%s*' % (subj_code, dim))))
+                                     '%s_*%s*' % (subj_code, dim))))
     if len(files) > 0:
         datafile = pd.DataFrame()
         for i, filey in enumerate(files):

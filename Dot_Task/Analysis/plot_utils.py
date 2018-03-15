@@ -106,11 +106,9 @@ def plot_threshold_run(subjid):
         axes[1][i].set_xlabel('%s Ending Value' % key, fontsize=24)
         
         # plot quest estimate
-        plot_info[key]['df'].quest_estimate.plot(ax=axes[2][i], c=colors[i], legend=True)
+        plot_info[key]['df'].quest_estimate.plot(ax=axes[2][i], c=colors[i])
         axes[2][i].set_ylabel('Quest Estimate', fontsize=24)
         axes[2][i].set_xlabel('Trial Number', fontsize=24)
-        leg = axes[2][i].get_legend()
-        beautify_legend(leg, colors)
         plt.subplots_adjust(hspace=.4)
 
 
