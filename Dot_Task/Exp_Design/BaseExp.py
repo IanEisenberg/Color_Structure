@@ -172,7 +172,7 @@ class BaseExp(object):
                                       'oriStrength','oriDirection',
                                       'motionDirection', 'oriBase']]
         # transform word difficulties into numbers
-        ss = self.motion_difficulties[(md, ss)]
+        ss = self.speed_difficulties[(md, ss)]
         os = self.ori_difficulties[(oriBase, os)]
         # create start and end points
         speed_start = self.base_speed

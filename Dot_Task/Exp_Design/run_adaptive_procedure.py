@@ -26,6 +26,7 @@ subject_code = raw_input('subject id: ')
 motion_on = True
 orientation_on = True 
 practice_on = False
+eyetracker_on = False
 one_difficulty=True
 save_dir = '../Data' 
 # set up task variables
@@ -79,29 +80,26 @@ if orientation_on:
                                        win_kwargs=win_kwargs,
                                        trackers=trackers['orientation'])
 
-# ****************************************************************************
-# ************** INTRODUCTION AND PRACTICE ***********************************
-# ****************************************************************************
-
-
 
 # ****************************************************************************
 # ************** RUN TASK ****************************************************
 # ****************************************************************************
 
-# ****************************************************************************
-# Start training
-# ****************************************************************************
+
 if ts_order == ['motion', 'orientation']:
     if motion_on:
-        motion_task.run_task(practice=practice_on)    
+        motion_task.run_task(practice=practice_on,
+                             eyetracker=eyetracker_on)    
     if orientation_on:
-        orientation_task.run_task(practice=practice_on)    
+        orientation_task.run_task(practice=practice_on,
+                                  eyetracker=eyetracker_on)    
 else:
     if orientation_on:
-        orientation_task.run_task(practice=practice_on) 
+        orientation_task.run_task(practice=practice_on,
+                                  eyetracker=eyetracker_on) 
     if motion_on:
-        motion_task.run_task(practice=practice_on)
+        motion_task.run_task(practice=practice_on,
+                             eyetracker=eyetracker_on)
         
         
 

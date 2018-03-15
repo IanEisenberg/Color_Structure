@@ -36,7 +36,11 @@ def load_data(datafile):
     df = pd.concat([df,stim_df], axis=1)
     return (taskinfo, df)
 
-    
+
+def preproc_threshold_data(df):
+    df.insert(0, 'binarized_response', df.response.replace({'up':1, 'down':0, 
+                                                            'right': 1, 'left': 0}))
+              
 def load_threshold_data(subj_code, dim='motion'):
     file_dir = os.path.dirname(__file__)
     assert dim in ['motion','orientation']
@@ -47,6 +51,7 @@ def load_threshold_data(subj_code, dim='motion'):
         for i, filey in enumerate(files):
             taskinfo,df = load_data(filey)
             df.insert(0, 'Session', i)
+            preproc_threshold_data(df)
             datafile = pd.concat([datafile, df])
         # reorganize
         datafile.reset_index(drop=True, inplace=True)

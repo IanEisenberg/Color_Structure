@@ -7,13 +7,14 @@ phase of the experiment.
 """
 import json
 import numpy as np
-from psychopy import visual, core, event
+from psychopy import core, event
 from psychopy.data import QuestHandler, StairHandler
 import subprocess
 import sys,os
 import yaml
 from Dot_Task.Exp_Design.BaseExp import BaseExp
 from Dot_Task.Exp_Design.flowstim import OpticFlow
+from Dot_Task.pylinkwrapper.connector import Connect
 
 class adaptiveThreshold(BaseExp):
     """ class defining a probabilistic context task
@@ -21,7 +22,7 @@ class adaptiveThreshold(BaseExp):
     
     def __init__(self,config_file,subjid,save_dir,verbose=True, 
                  num_practice=10, trackers=None, ignore_pedestal=True,
-                 win_kwargs={}):
+                 eyetracker=None, win_kwargs={}):
         # set up internal variables
         self.stimulusInfo = []
         self.loadedStimulusFile = []
@@ -101,7 +102,7 @@ class adaptiveThreshold(BaseExp):
     def defineTrackers(self, method='quest', ignore_pedestal=False):
         trackers = {}
         if self.ts == "motion":
-            difficulties = self.motion_difficulties
+            difficulties = self.speed_difficulties
             maxVal = self.base_speed
         elif self.ts == "orientation":
             difficulties = self.ori_difficulties
@@ -178,7 +179,7 @@ class adaptiveThreshold(BaseExp):
         if self.ts == "motion":
             strength = stim["speedStrength"]
             pedestal = stim["motionDirection"]
-            difficulties = self.motion_difficulties
+            difficulties = self.speed_difficulties
         elif self.ts == "orientation":
             strength = stim["oriStrength"]
             pedestal = stim["oriBase"]
@@ -336,7 +337,7 @@ class adaptiveThreshold(BaseExp):
             """)
         #self.aperture.enable()
     
-    def run_task(self, practice=False):
+    def run_task(self, practice=False, eyetracker=False):
         self.setupWindow()
         self.defineStims()
         # set up pause trials
@@ -345,6 +346,10 @@ class adaptiveThreshold(BaseExp):
         num_pauses = np.round(length_min/6)
         pause_trials = np.round(np.linspace(0,self.exp_len,num_pauses+1))[1:-1]
         pause_time = 0
+        # set up eyetracker
+        if eyetracker:
+            conn = Connect(self.win, 'eyetest')
+            conn.calibrate()
         
         # present intro screen
         if practice:
@@ -377,6 +382,11 @@ class adaptiveThreshold(BaseExp):
             """
             Thank you. Please wait for the experimenter.
             """)
+        if eyetracker:
+            conn.end_experiment(self.save_dir)
+            default_eyefile = os.path.join(self.save_dir, 'eyetest.edf')
+            os.rename(default_eyefile, os.path.join('..','Data','EyeTrackData',
+                                                    self.datafilename.replace('pkl','edf')))
         self.closeWindow()
         
     

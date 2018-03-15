@@ -33,7 +33,7 @@ class Config(object):
                 self.distribution_name = 'unknown'
         # set up generic task variables
         self.trial_list = None
-        self.base_speed = .1
+        self.base_speed = .12
         self.stim_motions = ['in','out']
         self.stim_oris = [-60,30]
     
@@ -80,13 +80,13 @@ class Config(object):
         
     def setup_stims(self):
         stim_ids = []
-        for direction, motion_difficulty in self.motion_difficulties.keys():
+        for direction, speed_difficulty in self.speed_difficulties.keys():
             for base_ori, ori_difficulty in self.ori_difficulties.keys():
                 for ori_direction in [-1,1]:
                     for speed_direction in [-1,1]:
                         stim_ids.append({'motionDirection': direction,
                                          'oriBase': base_ori,
-                                         'speedStrength': motion_difficulty,
+                                         'speedStrength': speed_difficulty,
                                          'speedDirection': speed_direction,
                                          'oriStrength': ori_difficulty,
                                          'oriDirection': ori_direction})
@@ -95,7 +95,7 @@ class Config(object):
         
         
 class ProbContextConfig(Config): 
-    def __init__(self, subjid, taskname, ori_difficulties, motion_difficulties,
+    def __init__(self, subjid, taskname, ori_difficulties, speed_difficulties,
                  action_keys=None, stim_repetitions=5,
                  exp_len=None, distribution=norm, dist_args=None, seed=None, 
                  ts_order=None, rp=.9):
@@ -126,9 +126,9 @@ class ProbContextConfig(Config):
         self.trial_states = None
         # stim difficulties
         self.ori_difficulties = ori_difficulties
-        self.motion_difficulties = motion_difficulties
+        self.speed_difficulties = speed_difficulties
         # calculate exp len
-        num_stims = len(self.ori_difficulties)*len(self.motion_difficulties)\
+        num_stims = len(self.ori_difficulties)*len(self.speed_difficulties)\
                     *len(self.stim_oris)*len(self.stim_motions)
         if exp_len is None:
             self.exp_len = int(stim_repetitions*num_stims)
@@ -144,7 +144,7 @@ class ProbContextConfig(Config):
                         'stim_ids': self.stim_ids,
                         'ts_order': self.ts_order,
                         'ori_difficulties': self.ori_difficulties,
-                        'motion_difficulties': self.motion_difficulties}
+                        'speed_difficulties': self.speed_difficulties}
         return super(ProbContextConfig, self).get_config(save, 
                                                          filey, 
                                                          other_params)
@@ -262,7 +262,7 @@ class ThresholdConfig(Config):
                                      (self.stim_oris[0], 'hard'): 15,
                                      (self.stim_oris[1], 'hard'): 15}
             # motion speeds
-            self.motion_difficulties = {(self.stim_motions[0], 'easy'): .08,
+            self.speed_difficulties = {(self.stim_motions[0], 'easy'): .08,
                                      (self.stim_motions[1], 'easy'): .08,
                                      (self.stim_motions[0], 'hard'): .04,
                                      (self.stim_motions[1], 'hard'): .04}
@@ -270,11 +270,11 @@ class ThresholdConfig(Config):
             self.ori_difficulties = {(self.stim_oris[0], 'medium'): 20,
                                      (self.stim_oris[1], 'medium'): 20}
             # motion speeds
-            self.motion_difficulties = {(self.stim_motions[0], 'medium'): .06,
+            self.speed_difficulties = {(self.stim_motions[0], 'medium'): .06,
                                         (self.stim_motions[1], 'medium'): .06}
             
         # calculate exp len
-        num_stims = len(self.ori_difficulties)*len(self.motion_difficulties)\
+        num_stims = len(self.ori_difficulties)*len(self.speed_difficulties)\
                     *len(self.stim_oris)*len(self.stim_motions)
         if exp_len is None:
             self.exp_len = int(stim_repetitions*num_stims)
@@ -289,7 +289,7 @@ class ThresholdConfig(Config):
         other_params = {'stim_ids': self.stim_ids,
                         'ts': self.ts,
                         'ori_difficulties': self.ori_difficulties,
-                        'motion_difficulties': self.motion_difficulties}
+                        'speed_difficulties': self.speed_difficulties}
         return super(ThresholdConfig, self).get_config(save, 
                                                        filey, 
                                                        other_params)
