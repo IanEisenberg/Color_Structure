@@ -14,7 +14,6 @@ import sys,os
 import yaml
 from Dot_Task.Exp_Design.BaseExp import BaseExp
 from Dot_Task.Exp_Design.flowstim import OpticFlow
-from Dot_Task.pylinkwrapper.connector import Connect
 
 class adaptiveThreshold(BaseExp):
     """ class defining a probabilistic context task
@@ -22,7 +21,7 @@ class adaptiveThreshold(BaseExp):
     
     def __init__(self,config_file,subjid,save_dir,verbose=True, 
                  num_practice=10, trackers=None, ignore_pedestal=True,
-                 eyetracker=None, win_kwargs={}):
+                 win_kwargs={}):
         # set up internal variables
         self.stimulusInfo = []
         self.loadedStimulusFile = []
@@ -348,6 +347,7 @@ class adaptiveThreshold(BaseExp):
         pause_time = 0
         # set up eyetracker
         if eyetracker:
+            from Dot_Task.pylinkwrapper.connector import Connect
             conn = Connect(self.win, 'eyetest')
             conn.calibrate()
         

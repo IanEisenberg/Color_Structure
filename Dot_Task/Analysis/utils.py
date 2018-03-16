@@ -8,7 +8,7 @@ def fit_choice_fun(df, stim_col='speed_change'):
     """ Fits a logistic regression to predict choice """
     df = df.query('exp_stage != "pause" and rt==rt')
     clf = LogisticRegression(C=1e20)
-    X=(df.loc[:,stim_col]).reshape(-1, 1)
+    X=(df.loc[:,stim_col]).values.reshape(-1, 1)
     clf.fit(X, df.binarized_response)
     return clf
     

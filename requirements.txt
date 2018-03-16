@@ -1,0 +1,4 @@
+pandas>=0.22.0
+psychopy>=1.85.3
+scikit-learn>=0.19.1
+seaborn>=0.8.1
