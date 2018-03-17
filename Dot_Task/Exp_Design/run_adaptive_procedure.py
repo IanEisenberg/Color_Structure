@@ -12,7 +12,7 @@ Creats config file for subject and run the task.
 """
 import random as r
 from Dot_Task.Exp_Design.adaptive_procedure import adaptiveThreshold
-from Dot_Task.Exp_Design.utils import get_trackers
+from Dot_Task.Exp_Design.utils import get_difficulties, get_trackers
 from Dot_Task.Exp_Design.make_config import ThresholdConfig
 
         
@@ -66,23 +66,29 @@ def setup_task(trackers, dim='motion',
 # ************** RUN TASK ****************************************************
 # ****************************************************************************
 trackers = get_trackers(subjid)
+difficulties = get_difficulties(trackers=trackers)
 
 if first_task == 'motion':
-    curr_task = setup_task(trackers, 'motion')
+    curr_task = setup_task(trackers, 'motion', 
+                           ori_difficulties=difficulties['orientation'])
 else:
-    curr_task = setup_task(trackers, 'orientation')
-
+    curr_task = setup_task(trackers, 'orientation',
+                           speed_difficulties=difficulties['motion'])
+last_task = None
 done = False
 while not done:
     done = curr_task.run_task(practice=practice_on,
                               eyetracker=eyetracker_on)
+    last_task = curr_task
     # update trackers and swap task
     if curr_task.ts == 'motion':
         trackers['motion'] = curr_task.trackers
+        difficulties = get_difficulties(trackers=trackers)
         curr_task = setup_task(trackers, 'orientation', 
-                               speed_difficulties=curr_task.speed_difficulties)
+                               speed_difficulties=difficulties['motion'])
     else:
         trackers['orientation'] = curr_task.trackers
+        difficulties = get_difficulties(trackers=trackers)
         curr_task = setup_task(trackers, 'motion',
-                               ori_difficulties=curr_task.ori_difficulties)
+                               ori_difficulties=difficulties['orientation'])
 

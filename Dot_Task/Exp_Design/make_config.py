@@ -219,7 +219,7 @@ class ProbContextConfig(Config):
                 'task_distributions': self.distribution_name,
                 'distribution_args': state['dist_args'],
                 'context': context_sample,
-                'stim': stims[trial],
+                'stim': stims[trial].copy(),
                 'onset': curr_onset,
                 'cueDuration': cueDuration,
                 'stimulusDuration': stimulusDuration,
@@ -264,8 +264,8 @@ class ThresholdConfig(Config):
         if not one_difficulty:
         # from easy to hard
             # determines the orientation change in degrees
-            self.ori_difficulties = {(self.stim_oris[0], 'easy'): 40,
-                                     (self.stim_oris[1], 'easy'): 40,
+            self.ori_difficulties = {(self.stim_oris[0], 'easy'): 30,
+                                     (self.stim_oris[1], 'easy'): 30,
                                      (self.stim_oris[0], 'hard'): 20,
                                      (self.stim_oris[1], 'hard'): 20}
             # motion speeds
@@ -303,7 +303,7 @@ class ThresholdConfig(Config):
         
                     
     def setup_trial_list(self, stimulusDuration=1.5, responseWindow=1.5, 
-                         avg_SRI=1, FBDuration=1, FBonset=0, avg_ITI=1, 
+                         avg_SRI=.5, FBDuration=.5, FBonset=0, avg_ITI=.5, 
                          displayFB = True):
         if self.seed is not None:
             np.random.seed(self.seed)
@@ -318,7 +318,7 @@ class ThresholdConfig(Config):
             trial_dict = {
                 'trial_count': trial_count,
                 'ts': self.ts,
-                'stim': stims[trial],
+                'stim': stims[trial].copy(),
                 'onset': curr_onset,
                 'stimulusDuration': stimulusDuration,
                 'responseWindow': responseWindow,

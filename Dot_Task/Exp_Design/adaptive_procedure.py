@@ -102,7 +102,7 @@ class adaptiveThreshold(BaseExp):
         trackers = {}
         if self.ts == "motion":
             difficulties = self.speed_difficulties
-            maxVal = self.base_speed*.95
+            maxVal = self.base_speed*.9
         elif self.ts == "orientation":
             difficulties = self.ori_difficulties
             maxVal = 40 # no more than a 40 degree change
@@ -129,7 +129,7 @@ class adaptiveThreshold(BaseExp):
                 threshold = quest_lookup[difficulty]
                 trackers[key] = QuestHandler(pThreshold=threshold,
                                              nTrials = 5000,
-                                             startVal=val, startValSd=maxVal/2,
+                                             startVal=val, startValSd=maxVal,
                                              minVal=0.0001, 
                                              maxVal=maxVal,
                                              gamma=.5,
@@ -193,6 +193,8 @@ class adaptiveThreshold(BaseExp):
         trial['stim'].update(trial_attributes)
         # print useful information about trial
         print('*'*40)
+        """
+        print('Trial: %s' % str(trial['trial_count']))
         print('Tracker: %s' % str(tracker_key), 'Best Guess: %s' % tracker.mean()) 
         print('Taskset: %s, choice value: %s\nSpeed: %s, Strength: %s \
               \nOriDirection: %s, OriStrength: %s \
@@ -201,6 +203,8 @@ class adaptiveThreshold(BaseExp):
                stim['speedDirection'], stim['speedStrength'], 
                stim['oriDirection'],stim['oriStrength'],
                self.getCorrectChoice(trial_attributes,trial['ts'])))
+        """
+        print(trial['stim'])
         trial['response'] = np.nan
         trial['rt'] = np.nan
         trial['FB'] = np.nan
@@ -261,6 +265,7 @@ class adaptiveThreshold(BaseExp):
         trial['trial_time'] = trialClock.getTime()
         self.writeToLog(json.dumps(trial))
         self.alldata.append(trial)
+        print(self.alldata[-1]['stim'])
         return trial
     
     def run_practice(self):
