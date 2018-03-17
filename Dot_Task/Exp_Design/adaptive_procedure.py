@@ -204,7 +204,6 @@ class adaptiveThreshold(BaseExp):
                stim['oriDirection'],stim['oriStrength'],
                self.getCorrectChoice(trial_attributes,trial['ts'])))
         """
-        print(trial['stim'])
         trial['response'] = np.nan
         trial['rt'] = np.nan
         trial['FB'] = np.nan
@@ -265,7 +264,6 @@ class adaptiveThreshold(BaseExp):
         trial['trial_time'] = trialClock.getTime()
         self.writeToLog(json.dumps(trial))
         self.alldata.append(trial)
-        print(self.alldata[-1]['stim'])
         return trial
     
     def run_practice(self):
