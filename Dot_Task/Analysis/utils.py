@@ -3,6 +3,7 @@ from past.utils import old_div
 from psychopy.data.fit import _baseFunctionFit
 from psychopy.data import FitCumNormal, FitWeibull
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, log_loss
 
 def fit_choice_fun(df, stim_col='speed_change'):
     """ Fits a logistic regression to predict choice """
@@ -10,9 +11,17 @@ def fit_choice_fun(df, stim_col='speed_change'):
     clf = LogisticRegression(C=1e20)
     X=(df.loc[:,stim_col]).values.reshape(-1, 1)
     clf.fit(X, df.binarized_response)
-    return clf
+    loss = log_loss(df.binarized_response, clf.predict_proba(X))
+    accuracy = accuracy_score(df.binarized_response, clf.predict(X))
+    return clf, {'log-loss': loss,
+                 'accuracy': accuracy}
     
-    
+
+def response_probs(responseFun, X):
+   probs = list(responseFun.eval(X))
+   probs = [[1-i, i] for i in probs]
+   return probs
+
 def fit_response_fun(df, kind='lapseWeibull', fit_kwargs={}):
     """ Fits a response function to accuracy data """ 
     df = df.query('exp_stage != "pause" and rt==rt')
@@ -23,7 +32,13 @@ def fit_response_fun(df, kind='lapseWeibull', fit_kwargs={}):
         fun = FitWeibull
     elif kind == 'lapseWeibull':
         fun = FitLapseWeibull
-    return fun(df.decision_var, df.FB, sigma, **fit_kwargs)
+    out = fun(df.decision_var, df.FB, sigma, **fit_kwargs)
+    probs = response_probs(out, df.decision_var)
+    loss = log_loss(df.FB, probs)
+    accuracy = accuracy_score(df.FB, [i>.5 for i in list(out.eval(df.decision_var))])
+    return out, {'log-loss': loss,
+                 'accuracy': accuracy}
+
 
 global _chance
 _chance = .5

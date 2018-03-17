@@ -33,7 +33,6 @@ def get_plot_info(subjid):
     plot_info = {}
     for dim in ['motion', 'orientation']:
         taskinfo, df = load_threshold_data(subjid, dim)
-        df = df.iloc[20:] # drop first trials where the threshold rapidly drops
         if df is not None:
             # get accuracy as a function of binned decision variable
             # bins decision variables
@@ -47,13 +46,13 @@ def get_plot_info(subjid):
             
             # get choice as a function of binned ending stimulus value
             if dim == 'motion':
-                bins = df.speed_end.quantile(np.linspace(0,1,11)); bins.iloc[-1]+=100
-                df.insert(0, 'stim_bins', np.digitize(df.speed_end, bins))
-                binned_stim_var = df.groupby('stim_bins').speed_end.mean()
+                bins = df.speed_change.quantile(np.linspace(0,1,11)); bins.iloc[-1]+=100
+                df.insert(0, 'stim_bins', np.digitize(df.speed_change, bins))
+                binned_stim_var = df.groupby('stim_bins').speed_change.mean()
             else:
-                bins = df.ori_end.quantile(np.linspace(0,1,11)); bins.iloc[-1]+=100
-                df.insert(0, 'stim_bins', np.digitize(df.ori_end, bins))
-                binned_stim_var = df.groupby('stim_bins').ori_end.mean()
+                bins = df.ori_change.quantile(np.linspace(0,1,11)); bins.iloc[-1]+=100
+                df.insert(0, 'stim_bins', np.digitize(df.ori_change, bins))
+                binned_stim_var = df.groupby('stim_bins').ori_change.mean()
             df.insert(0, 'binned_stim_var', df.stim_bins.replace(binned_stim_var))
             bin_response = df.groupby('binned_stim_var').binarized_response.agg(['mean', 'std', 'count'])
             # calculate standard error
@@ -63,10 +62,10 @@ def get_plot_info(subjid):
             plot_info[dim] = {'bin_accuracy': bin_accuracy,
                               'bin_response': bin_response,
                               'df': df}
-        return plot_info
+    return plot_info
     
 def plot_threshold_run(subjid):
-    colors = ['m', 't']
+    colors = ['m', 'c']
     plot_info = get_plot_info(subjid)
     sns.set_context('poster')
     f, axes = plt.subplots(3,2, figsize=(16,16))
@@ -80,8 +79,8 @@ def plot_threshold_run(subjid):
                             c=colors[i])
         # plot response fun fit
         threshold = plot_info[key]['df'].quest_estimate.mean()
-        fitResponseCurve = fit_response_fun(plot_info[key]['df'], 
-                                    fit_kwargs={'guess': [threshold, 3.5, .05]})
+        fitResponseCurve, metrics = fit_response_fun(plot_info[key]['df'], 
+                                                        fit_kwargs={'guess': [threshold, 3.5, .05]})
         plot_response_fun(fitResponseCurve, axes[0][i], plot_kws={'c': colors[i]})
         axes[0][i].set_ylabel('Accuracy', fontsize=24)
         axes[0][i].set_xlabel('Decision Var', fontsize=24)
@@ -95,15 +94,15 @@ def plot_threshold_run(subjid):
                             linestyle="None",
                             c=colors[i])
         # plot fit logistic function
-        stim_col = 'ori_end' if key=='orientation' else 'speed_end'
-        fitClf = fit_choice_fun(plot_info[key]['df'], stim_col)
+        stim_col = 'ori_change' if key=='orientation' else 'speed_change'
+        fitClf, metrics = fit_choice_fun(plot_info[key]['df'], stim_col)
         plot_choice_fun(fitClf,
                         minval=plot_info[key]['df'].loc[:,stim_col].min(),
                         maxval=plot_info[key]['df'].loc[:,stim_col].max(),
                         ax=axes[1][i], 
                         plot_kws={'c': colors[i]})
         axes[1][i].set_ylabel('Positive Choice %', fontsize=24)
-        axes[1][i].set_xlabel('%s Ending Value' % key, fontsize=24)
+        axes[1][i].set_xlabel('%s Change' % key, fontsize=24)
         
         # plot quest estimate
         plot_info[key]['df'].quest_estimate.plot(ax=axes[2][i], c=colors[i])

@@ -20,7 +20,7 @@ class adaptiveThreshold(BaseExp):
     """
     
     def __init__(self,config_file,subjid,save_dir,verbose=True, 
-                 num_practice=10, trackers=None, ignore_pedestal=True,
+                 num_practice=32, trackers=None, ignore_pedestal=True,
                  win_kwargs={}):
         # set up internal variables
         self.stimulusInfo = []
@@ -102,7 +102,7 @@ class adaptiveThreshold(BaseExp):
         trackers = {}
         if self.ts == "motion":
             difficulties = self.speed_difficulties
-            maxVal = self.base_speed
+            maxVal = self.base_speed*.95
         elif self.ts == "orientation":
             difficulties = self.ori_difficulties
             maxVal = 25 # no more than a 20 degree change
@@ -378,16 +378,21 @@ class adaptiveThreshold(BaseExp):
                     'trackers': self.trackers}
         self.writeData(taskdata=self.alldata,
                        other_data=other_data)
-        self.presentInstruction(
-            """
-            Thank you. Please wait for the experimenter.
-            """)
+        resp = self.presentInstruction(
+                """
+                Please wait for the experimenter.
+                
+                Continue? Y/N
+                """,
+                keys = ['y', 'n'])
+        done = True if resp=='n' else False
         if eyetracker:
             conn.end_experiment(self.save_dir)
             default_eyefile = os.path.join(self.save_dir, 'eyetest.edf')
             os.rename(default_eyefile, os.path.join('..','Data','EyeTrackData',
                                                     self.datafilename.replace('pkl','edf')))
         self.closeWindow()
+        return done
         
     
 

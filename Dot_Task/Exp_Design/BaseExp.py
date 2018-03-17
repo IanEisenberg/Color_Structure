@@ -44,14 +44,23 @@ class BaseExp(object):
         return json.dumps(init_dict)
     
     def writeToLog(self,msg):
-        f = open(os.path.join(self.save_dir,'Log',self.logfilename),'a')
+        log_loc = os.path.join(self.save_dir,'Log',self.subjid,self.logfilename)
+        try:
+            os.makedirs(os.path.dirname(log_loc))
+        except OSError:
+            pass
+        f = open(log_loc,'a')
         f.write(msg)
         f.write('\n')
         f.close()
          
     def writeData(self, taskdata={}, other_data={}):
         # save data
-        save_loc = os.path.join(self.save_dir,'RawData',self.datafilename)
+        save_loc = os.path.join(self.save_dir,'RawData',self.subjid,self.datafilename)
+        try:
+            os.makedirs(os.path.dirname(save_loc))
+        except OSError:
+            pass
         data = {}
         data['subjid']=self.subjid
         data['taskdata'] = taskdata
@@ -71,7 +80,7 @@ class BaseExp(object):
     def clearWindow(self, fixation=True, fixation_color=None):
         """ clear the main window
         """
-        if fixation:
+        if fixation and self.fixation is not None:
             self.fixation.draw(color=fixation_color)
         if self.text_stim:
             self.text_stim.setText('')
@@ -187,11 +196,14 @@ class BaseExp(object):
                 'ori_end': ori_end, 
                 'motion_direction': md}
     
-    def presentInstruction(self, text, size=.07):
+    def presentInstruction(self, text, keys=None, size=.07):
+            if keys is None:
+                keys = self.trigger_key
             self.presentTextToWindow(text, size=size)
-            resp,time=self.waitForKeypress(self.trigger_key)
+            resp,time=self.waitForKeypress(keys)
             self.checkRespForQuitKey(resp)
             event.clearEvents()
+            return resp[0][0]
             
     def presentTextToWindow(self, text, size=.15, color=None, duration=None,
                             position=None, flip=True, fixation=False):

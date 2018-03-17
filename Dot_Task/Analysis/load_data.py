@@ -40,12 +40,14 @@ def load_data(datafile):
 def preproc_threshold_data(df):
     df.insert(0, 'binarized_response', df.response.replace({'up':1, 'down':0, 
                                                             'right': 1, 'left': 0}))
+    df.insert(0, 'speed_change', df.speed_end-df.speed_start)
+    df.insert(0, 'ori_change', df.ori_end-df.ori_start)
               
-def load_threshold_data(subj_code, dim='motion'):
+def load_threshold_data(subjid, dim='motion'):
     file_dir = os.path.dirname(__file__)
     assert dim in ['motion','orientation']
-    files = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
-                                     '%s_*%s*' % (subj_code, dim))))
+    files = sorted(glob(os.path.join(file_dir,'..','Data','RawData',subjid,
+                                     '%s_*%s*' % (subjid, dim))))
     if len(files) > 0:
         datafile = pd.DataFrame()
         for i, filey in enumerate(files):
@@ -57,7 +59,7 @@ def load_threshold_data(subj_code, dim='motion'):
         datafile.reset_index(drop=True, inplace=True)
         return taskinfo, datafile
     else:
-        print('No %s files found for subject %s!' % (dim, subj_code))
+        print('No %s files found for subject %s!' % (dim, subjid))
         return None, None
 
 def preproc_data(traindata, testdata, taskinfo, dist = norm):

@@ -7,6 +7,7 @@ Created on Thu Nov 20 16:13:45 2014
 
 import datetime
 import numpy as np
+import os
 from os import path
 import random as r
 from scipy.stats import norm
@@ -22,7 +23,12 @@ class Config(object):
         if self.seed is not None:
             np.random.seed(self.seed)
         self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        self.loc = '../Config_Files/'
+        self.loc = path.join('..','Config_Files',subjid)
+        # make loc if not made
+        try:
+            os.makedirs(self.loc)
+        except OSError:
+            pass
         self.action_keys = action_keys
         # set up distributions
         if distribution:
@@ -185,9 +191,9 @@ class ProbContextConfig(Config):
         self.trial_states = trial_states
             
     def setup_trial_list(self, cueDuration=.5, CSI=.5, 
-                         stimulusDuration=1.5, responseWindow=1.5, SRI=1,
+                         stimulusDuration=1.5, responseWindow=1.5, avg_SRI=1,
                          FBDuration=1, FBonset=0, 
-                         base_ITI=.5, displayFB = True):
+                         avg_ITI=1, displayFB = True):
         if self.seed is not None:
             np.random.seed(self.seed)
         trial_list = []    
@@ -199,8 +205,9 @@ class ProbContextConfig(Config):
         bin_boundaries = np.linspace(-1,1,11)
         
         for trial in range(self.exp_len):
-            # define ITI
-            ITI = base_ITI + r.random()*.5
+            # define ITI and SRI
+            ITI = avg_ITI + r.random()-.5
+            SRI = avg_SRI + r.random()-.5
             state = self.states[self.trial_states[trial]]
             dist = self.distribution(**state['dist_args'])
             binned = -1.1 + np.digitize([dist.rvs()],bin_boundaries)*.2
@@ -257,18 +264,18 @@ class ThresholdConfig(Config):
         if not one_difficulty:
         # from easy to hard
             # determines the orientation change in degrees
-            self.ori_difficulties = {(self.stim_oris[0], 'easy'): 25,
-                                     (self.stim_oris[1], 'easy'): 25,
-                                     (self.stim_oris[0], 'hard'): 15,
-                                     (self.stim_oris[1], 'hard'): 15}
+            self.ori_difficulties = {(self.stim_oris[0], 'easy'): 40,
+                                     (self.stim_oris[1], 'easy'): 40,
+                                     (self.stim_oris[0], 'hard'): 20,
+                                     (self.stim_oris[1], 'hard'): 20}
             # motion speeds
             self.speed_difficulties = {(self.stim_motions[0], 'easy'): .08,
                                      (self.stim_motions[1], 'easy'): .08,
                                      (self.stim_motions[0], 'hard'): .04,
                                      (self.stim_motions[1], 'hard'): .04}
         else:
-            self.ori_difficulties = {(self.stim_oris[0], 'medium'): 20,
-                                     (self.stim_oris[1], 'medium'): 20}
+            self.ori_difficulties = {(self.stim_oris[0], 'medium'): 30,
+                                     (self.stim_oris[1], 'medium'): 30}
             # motion speeds
             self.speed_difficulties = {(self.stim_motions[0], 'medium'): .06,
                                         (self.stim_motions[1], 'medium'): .06}
@@ -295,8 +302,8 @@ class ThresholdConfig(Config):
                                                        other_params)
         
                     
-    def setup_trial_list(self, stimulusDuration=1.5, responseWindow=1.5, SRI=1,
-                         FBDuration=1, FBonset=0, base_ITI=.5, 
+    def setup_trial_list(self, stimulusDuration=1.5, responseWindow=1.5, 
+                         avg_SRI=1, FBDuration=1, FBonset=0, avg_ITI=1, 
                          displayFB = True):
         if self.seed is not None:
             np.random.seed(self.seed)
@@ -305,8 +312,9 @@ class ThresholdConfig(Config):
         curr_onset = 2 #initial onset time
         stims = r.sample(self.stim_ids*self.stim_repetitions,self.exp_len)   
         for trial in range(self.exp_len):
-            # set ITI
-            ITI = base_ITI + r.random()
+            # define ITI and SRI
+            ITI = avg_ITI + r.random()-.5
+            SRI = avg_SRI + r.random()-.5
             trial_dict = {
                 'trial_count': trial_count,
                 'ts': self.ts,

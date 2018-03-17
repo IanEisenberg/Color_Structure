@@ -1,4 +1,4 @@
-rm Data/Log/*test*
-rm Data/ProcessedData/*test*
-rm Data/RawData/*test*
-rm Config_Files/*test*
+rm -r Data/Log/test
+rm -r Data/ProcessedData/test
+rm -r Data/RawData/test
+rm -r Config_Files/test
