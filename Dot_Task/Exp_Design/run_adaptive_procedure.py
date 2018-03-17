@@ -33,7 +33,7 @@ save_dir = '../Data'
 stim_repetitions = 4
 exp_len = None
 # window variables
-win_kwargs = {'fullscr': False,
+win_kwargs = {'fullscr': True,
               'allowGUI': True,
               'screen': 1,
               'size': [1920*.8, 1200*.8]}
@@ -42,13 +42,18 @@ win_kwargs = {'fullscr': False,
 first_task = 'motion' if r.random() > .5 else 'orientation'
 first_task = 'orientation'
 
-def setup_task(trackers, dim='motion'):
+def setup_task(trackers, dim='motion', 
+               speed_difficulties=None, ori_difficulties=None):
     config = ThresholdConfig(subjid=subjid, 
                              taskname='adaptive_%s' % dim,
                              stim_repetitions=stim_repetitions,
                              ts=dim,
                              exp_len=exp_len,
                              one_difficulty=one_difficulty)
+    if speed_difficulties:
+        config.speed_difficulties = speed_difficulties
+    if ori_difficulties:
+        config.ori_difficulties = ori_difficulties
     config_file = config.get_config()  
     task=adaptiveThreshold(config_file,
                            subjid,
@@ -74,8 +79,10 @@ while not done:
     # update trackers and swap task
     if curr_task.ts == 'motion':
         trackers['motion'] = curr_task.trackers
-        curr_task = setup_task(trackers, 'orientation')
+        curr_task = setup_task(trackers, 'orientation', 
+                               speed_difficulties=curr_task.speed_difficulties)
     else:
         trackers['orientation'] = curr_task.trackers
-        curr_task = setup_task(trackers, 'motion')
+        curr_task = setup_task(trackers, 'motion',
+                               ori_difficulties=curr_task.ori_difficulties)
 

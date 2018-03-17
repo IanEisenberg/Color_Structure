@@ -4,884 +4,892 @@
   exp_len: 64
   ori_difficulties:
     ? !!python/tuple [-60, medium]
-    : 20
+    : 30
     ? !!python/tuple [30, medium]
-    : 20
+    : 30
   quit_key: q
   responseWindow: 1.0
   speed_difficulties:
     ? !!python/tuple [in, medium]
-    : 0.06
+    : !!python/object/apply:numpy.core.multiarray.scalar
+    - &id001 !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      YFTgLRtWiT8=
     ? !!python/tuple [out, medium]
-    : 0.06
+    : !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      eHffHVJ+iz8=
   stim_ids:
-  - &id002 {motionDirection: in, oriBase: 30, oriDirection: -1, oriStrength: medium,
+  - &id006 {motionDirection: in, oriBase: 30, oriDirection: -1, oriStrength: medium,
     speedDirection: -1, speedStrength: medium}
-  - &id015 {motionDirection: in, oriBase: 30, oriDirection: -1, oriStrength: medium,
+  - &id011 {motionDirection: in, oriBase: 30, oriDirection: -1, oriStrength: medium,
     speedDirection: 1, speedStrength: medium}
-  - &id013 {motionDirection: in, oriBase: 30, oriDirection: 1, oriStrength: medium,
+  - &id016 {motionDirection: in, oriBase: 30, oriDirection: 1, oriStrength: medium,
     speedDirection: -1, speedStrength: medium}
-  - &id007 {motionDirection: in, oriBase: 30, oriDirection: 1, oriStrength: medium,
+  - &id005 {motionDirection: in, oriBase: 30, oriDirection: 1, oriStrength: medium,
     speedDirection: 1, speedStrength: medium}
-  - &id008 {motionDirection: in, oriBase: -60, oriDirection: -1, oriStrength: medium,
+  - &id007 {motionDirection: in, oriBase: -60, oriDirection: -1, oriStrength: medium,
     speedDirection: -1, speedStrength: medium}
-  - &id009 {motionDirection: in, oriBase: -60, oriDirection: -1, oriStrength: medium,
+  - &id014 {motionDirection: in, oriBase: -60, oriDirection: -1, oriStrength: medium,
     speedDirection: 1, speedStrength: medium}
-  - &id014 {motionDirection: in, oriBase: -60, oriDirection: 1, oriStrength: medium,
+  - &id002 {motionDirection: in, oriBase: -60, oriDirection: 1, oriStrength: medium,
     speedDirection: -1, speedStrength: medium}
-  - &id016 {motionDirection: in, oriBase: -60, oriDirection: 1, oriStrength: medium,
+  - &id010 {motionDirection: in, oriBase: -60, oriDirection: 1, oriStrength: medium,
     speedDirection: 1, speedStrength: medium}
-  - &id003 {motionDirection: out, oriBase: 30, oriDirection: -1, oriStrength: medium,
+  - &id004 {motionDirection: out, oriBase: 30, oriDirection: -1, oriStrength: medium,
     speedDirection: -1, speedStrength: medium}
-  - &id012 {motionDirection: out, oriBase: 30, oriDirection: -1, oriStrength: medium,
+  - &id017 {motionDirection: out, oriBase: 30, oriDirection: -1, oriStrength: medium,
     speedDirection: 1, speedStrength: medium}
-  - &id010 {motionDirection: out, oriBase: 30, oriDirection: 1, oriStrength: medium,
+  - &id012 {motionDirection: out, oriBase: 30, oriDirection: 1, oriStrength: medium,
     speedDirection: -1, speedStrength: medium}
-  - &id005 {motionDirection: out, oriBase: 30, oriDirection: 1, oriStrength: medium,
+  - &id013 {motionDirection: out, oriBase: 30, oriDirection: 1, oriStrength: medium,
     speedDirection: 1, speedStrength: medium}
-  - &id006 {motionDirection: out, oriBase: -60, oriDirection: -1, oriStrength: medium,
+  - &id008 {motionDirection: out, oriBase: -60, oriDirection: -1, oriStrength: medium,
     speedDirection: -1, speedStrength: medium}
-  - &id011 {motionDirection: out, oriBase: -60, oriDirection: -1, oriStrength: medium,
+  - &id009 {motionDirection: out, oriBase: -60, oriDirection: -1, oriStrength: medium,
     speedDirection: 1, speedStrength: medium}
-  - &id004 {motionDirection: out, oriBase: -60, oriDirection: 1, oriStrength: medium,
+  - &id015 {motionDirection: out, oriBase: -60, oriDirection: 1, oriStrength: medium,
     speedDirection: -1, speedStrength: medium}
-  - &id001 {motionDirection: out, oriBase: -60, oriDirection: 1, oriStrength: medium,
+  - &id003 {motionDirection: out, oriBase: -60, oriDirection: 1, oriStrength: medium,
     speedDirection: 1, speedStrength: medium}
   stim_motions: [in, out]
   stim_oris: [-60, 30]
   subjid: IE2
-  taskname: adaptive_motion
+  taskname: adaptive_orientation
   trigger_key: '5'
-  ts: motion
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 0.9684397089858425
+  ITI: 1.1195064068178506
   displayFB: true
   onset: 2
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
-  stim: *id001
-  stimResponseInterval: 0.936413651445323
+  stim: *id002
+  stimResponseInterval: 0.5006446095149899
   stimulusDuration: 1.5
   trial_count: 1
-  ts: motion
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 0.9448716463693494
+  ITI: 1.3107917555995412
   displayFB: true
-  onset: 7.904853360431165
+  onset: 7.620151016332841
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
-  stim: *id002
-  stimResponseInterval: 1.3242838356035156
+  stim: *id003
+  stimResponseInterval: 1.3970693665937828
   stimulusDuration: 1.5
   trial_count: 2
-  ts: motion
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 1.2306637370913083
+  ITI: 0.8960456055438015
   displayFB: true
-  onset: 14.17400884240403
+  onset: 14.328012138526166
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
-  stim: *id003
-  stimResponseInterval: 0.5215268333690843
+  stim: *id004
+  stimResponseInterval: 0.6344922182409531
   stimulusDuration: 1.5
   trial_count: 3
-  ts: motion
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 0.8950637906862262
+  ITI: 1.0814942806537837
   displayFB: true
-  onset: 19.92619941286442
+  onset: 19.85854996231092
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
-  stim: *id004
-  stimResponseInterval: 1.4842062748309357
+  stim: *id005
+  stimResponseInterval: 1.3633690481754552
   stimulusDuration: 1.5
   trial_count: 4
-  ts: motion
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 1.4215681066364698
+  ITI: 1.0266116559216019
   displayFB: true
-  onset: 26.305469478381582
+  onset: 26.30341329114016
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
-  stim: *id005
-  stimResponseInterval: 0.928819820373247
+  stim: *id006
+  stimResponseInterval: 1.4634239916230616
   stimulusDuration: 1.5
   trial_count: 5
-  ts: motion
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 1.3761736477223248
+  ITI: 0.859246806029804
   displayFB: true
-  onset: 32.6558574053913
+  onset: 32.793448938684826
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
-  stim: *id005
-  stimResponseInterval: 1.3577502367370509
+  stim: *id007
+  stimResponseInterval: 0.6285453489483337
   stimulusDuration: 1.5
   trial_count: 6
-  ts: motion
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 1.466078033281853
+  ITI: 1.1713541461618209
   displayFB: true
-  onset: 39.389781289850674
+  onset: 38.28124109366296
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
-  stim: *id006
-  stimResponseInterval: 0.5918286610221912
+  stim: *id008
+  stimResponseInterval: 1.283623914745438
   stimulusDuration: 1.5
   trial_count: 7
-  ts: motion
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 0.8312275414728885
+  ITI: 1.1985349945298536
   displayFB: true
-  onset: 45.44768798415472
+  onset: 44.73621915457022
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
-  stim: *id007
-  stimResponseInterval: 0.6412345231400014
+  stim: *id008
+  stimResponseInterval: 0.7982062933794465
   stimulusDuration: 1.5
   trial_count: 8
-  ts: motion
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 0.9691066923250591
+  ITI: 0.8949605545128425
   displayFB: true
-  onset: 50.92015004876761
+  onset: 50.73296044247952
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
-  stim: *id008
-  stimResponseInterval: 1.135056762855784
+  stim: *id009
+  stimResponseInterval: 0.8607187791728057
   stimulusDuration: 1.5
   trial_count: 9
-  ts: motion
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 0.6665712151907268
+  ITI: 1.2087842070680264
   displayFB: true
-  onset: 57.024313503948456
+  onset: 56.48863977616517
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
-  stim: *id005
-  stimResponseInterval: 1.490964872556779
+  stim: *id010
+  stimResponseInterval: 0.8991123568207642
   stimulusDuration: 1.5
   trial_count: 10
-  ts: motion
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 0.5051319832269807
+  ITI: 1.1031199142201724
   displayFB: true
-  onset: 63.181849591695965
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id009
-  stimResponseInterval: 1.254945022138922
-  stimulusDuration: 1.5
-  trial_count: 11
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.2630169864791592
-  displayFB: true
-  onset: 68.94192659706187
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id010
-  stimResponseInterval: 1.4196547348443005
-  stimulusDuration: 1.5
-  trial_count: 12
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.9732451192322038
-  displayFB: true
-  onset: 75.62459831838532
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id011
-  stimResponseInterval: 0.6458261794607099
-  stimulusDuration: 1.5
-  trial_count: 13
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.5479972827519226
-  displayFB: true
-  onset: 81.24366961707824
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id010
-  stimResponseInterval: 0.6388198989969534
-  stimulusDuration: 1.5
-  trial_count: 14
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.7309732440971257
-  displayFB: true
-  onset: 86.43048679882712
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id012
-  stimResponseInterval: 1.445168010045037
-  stimulusDuration: 1.5
-  trial_count: 15
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.9367061639619656
-  displayFB: true
-  onset: 92.60662805296928
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id001
-  stimResponseInterval: 1.4875932186281369
-  stimulusDuration: 1.5
-  trial_count: 16
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.2326078527081186
-  displayFB: true
-  onset: 99.03092743555939
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id011
-  stimResponseInterval: 0.7997179120463691
-  stimulusDuration: 1.5
-  trial_count: 17
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.3450213627420338
-  displayFB: true
-  onset: 105.06325320031388
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id001
-  stimResponseInterval: 1.4146420446755812
-  stimulusDuration: 1.5
-  trial_count: 18
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.920448326746748
-  displayFB: true
-  onset: 111.8229166077315
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id007
-  stimResponseInterval: 1.395720362324119
-  stimulusDuration: 1.5
-  trial_count: 19
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.2262891918727759
-  displayFB: true
-  onset: 118.13908529680236
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id006
-  stimResponseInterval: 0.5462544749454947
-  stimulusDuration: 1.5
-  trial_count: 20
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.7456224541086134
-  displayFB: true
-  onset: 123.91162896362063
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id003
-  stimResponseInterval: 1.4910524201895234
-  stimulusDuration: 1.5
-  trial_count: 21
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.3288686648504053
-  displayFB: true
-  onset: 130.14830383791877
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id011
-  stimResponseInterval: 0.8192012636219612
-  stimulusDuration: 1.5
-  trial_count: 22
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.1434173450601413
-  displayFB: true
-  onset: 136.29637376639113
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id010
-  stimResponseInterval: 0.8875884753697298
-  stimulusDuration: 1.5
-  trial_count: 23
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.8099210560902708
-  displayFB: true
-  onset: 142.327379586821
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id003
-  stimResponseInterval: 1.2584317032772216
-  stimulusDuration: 1.5
-  trial_count: 24
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.8056209572042405
-  displayFB: true
-  onset: 148.39573234618848
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id008
-  stimResponseInterval: 0.9221781151539359
-  stimulusDuration: 1.5
-  trial_count: 25
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.5835531908511813
-  displayFB: true
-  onset: 154.12353141854666
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id012
-  stimResponseInterval: 0.5843094051805087
-  stimulusDuration: 1.5
-  trial_count: 26
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.6938606042418654
-  displayFB: true
-  onset: 159.29139401457834
+  onset: 62.59653634005396
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
   stim: *id005
-  stimResponseInterval: 1.3731440943571231
+  stimResponseInterval: 0.997749936581972
   stimulusDuration: 1.5
-  trial_count: 27
-  ts: motion
+  trial_count: 11
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 1.3203173589558448
+  ITI: 0.7653684696892569
   displayFB: true
-  onset: 165.35839871317734
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id008
-  stimResponseInterval: 0.5242764388964178
-  stimulusDuration: 1.5
-  trial_count: 28
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.4809867794152773
-  displayFB: true
-  onset: 171.2029925110296
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id009
-  stimResponseInterval: 1.2777153441387004
-  stimulusDuration: 1.5
-  trial_count: 29
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.6783501556903611
-  displayFB: true
-  onset: 177.96169463458358
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id002
-  stimResponseInterval: 0.7747340596920151
-  stimulusDuration: 1.5
-  trial_count: 30
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.495881634367706
-  displayFB: true
-  onset: 183.41477884996596
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id012
-  stimResponseInterval: 0.9720225812595982
-  stimulusDuration: 1.5
-  trial_count: 31
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.7346864157947173
-  displayFB: true
-  onset: 189.88268306559326
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id002
-  stimResponseInterval: 1.2072429637150224
-  stimulusDuration: 1.5
-  trial_count: 32
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.369679728666494
-  displayFB: true
-  onset: 195.82461244510299
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id013
-  stimResponseInterval: 0.598113157096527
-  stimulusDuration: 1.5
-  trial_count: 33
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.5432940092299372
-  displayFB: true
-  onset: 201.79240533086602
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id013
-  stimResponseInterval: 1.1909695636387319
-  stimulusDuration: 1.5
-  trial_count: 34
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.5240552187310632
-  displayFB: true
-  onset: 207.52666890373467
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id014
-  stimResponseInterval: 1.0922846726380033
-  stimulusDuration: 1.5
-  trial_count: 35
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.136075835309001
-  displayFB: true
-  onset: 213.14300879510375
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id013
-  stimResponseInterval: 1.0753553612211086
-  stimulusDuration: 1.5
-  trial_count: 36
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.8310417494777482
-  displayFB: true
-  onset: 219.35443999163385
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id010
-  stimResponseInterval: 0.5865211819501348
-  stimulusDuration: 1.5
-  trial_count: 37
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.9620423062785393
-  displayFB: true
-  onset: 224.77200292306173
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id015
-  stimResponseInterval: 1.2041137013936267
-  stimulusDuration: 1.5
-  trial_count: 38
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.3730038785605174
-  displayFB: true
-  onset: 230.9381589307339
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id016
-  stimResponseInterval: 1.0668311743185783
-  stimulusDuration: 1.5
-  trial_count: 39
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.3881169464514738
-  displayFB: true
-  onset: 237.37799398361298
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id015
-  stimResponseInterval: 0.823891647895366
-  stimulusDuration: 1.5
-  trial_count: 40
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.1441759763359824
-  displayFB: true
-  onset: 243.5900025779598
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id014
-  stimResponseInterval: 0.942322475021317
-  stimulusDuration: 1.5
-  trial_count: 41
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.0585828104524047
-  displayFB: true
-  onset: 249.6765010293171
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id015
-  stimResponseInterval: 1.1572478342533004
-  stimulusDuration: 1.5
-  trial_count: 42
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.9583982568065432
-  displayFB: true
-  onset: 255.8923316740228
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id014
-  stimResponseInterval: 1.1542734456266657
-  stimulusDuration: 1.5
-  trial_count: 43
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.9232628476564191
-  displayFB: true
-  onset: 262.00500337645605
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id009
-  stimResponseInterval: 0.8696372815480613
-  stimulusDuration: 1.5
-  trial_count: 44
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.5661377250466018
-  displayFB: true
-  onset: 267.79790350566054
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id011
-  stimResponseInterval: 0.5591557495538995
-  stimulusDuration: 1.5
-  trial_count: 45
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.6434857282109512
-  displayFB: true
-  onset: 272.923196980261
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id006
-  stimResponseInterval: 0.6474069099084829
-  stimulusDuration: 1.5
-  trial_count: 46
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.8100571152949689
-  displayFB: true
-  onset: 278.21408961838046
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id016
-  stimResponseInterval: 0.9730720162019293
-  stimulusDuration: 1.5
-  trial_count: 47
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.6390633021599834
-  displayFB: true
-  onset: 283.99721874987733
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id014
-  stimResponseInterval: 1.3501347925093428
-  stimulusDuration: 1.5
-  trial_count: 48
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.7316919177956052
-  displayFB: true
-  onset: 289.9864168445467
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id001
-  stimResponseInterval: 1.2737096861267423
-  stimulusDuration: 1.5
-  trial_count: 49
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.3810675840717428
-  displayFB: true
-  onset: 295.991818448469
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id002
-  stimResponseInterval: 0.5350132486807684
-  stimulusDuration: 1.5
-  trial_count: 50
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.880436433334201
-  displayFB: true
-  onset: 301.90789928122155
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id004
-  stimResponseInterval: 1.0884284245709845
-  stimulusDuration: 1.5
-  trial_count: 51
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.736913521875679
-  displayFB: true
-  onset: 307.87676413912675
+  onset: 68.6974061908561
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
   stim: *id003
-  stimResponseInterval: 0.9077512202105955
+  stimResponseInterval: 1.4224879763877927
   stimulusDuration: 1.5
-  trial_count: 52
-  ts: motion
+  trial_count: 12
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 0.6283542051325615
+  ITI: 0.7354697619191892
   displayFB: true
-  onset: 313.521428881213
+  onset: 74.88526263693315
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
-  stim: *id016
-  stimResponseInterval: 0.620212979905943
+  stim: *id010
+  stimResponseInterval: 0.6729187140932549
   stimulusDuration: 1.5
-  trial_count: 53
-  ts: motion
+  trial_count: 13
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 0.9643230228415622
+  ITI: 1.2781788667072251
   displayFB: true
-  onset: 318.7699960662515
+  onset: 80.2936511129456
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
-  stim: *id009
-  stimResponseInterval: 0.7047878019033815
+  stim: *id011
+  stimResponseInterval: 1.203851729729998
   stimulusDuration: 1.5
-  trial_count: 54
-  ts: motion
+  trial_count: 14
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 1.438159297236548
+  ITI: 0.9696954826450721
   displayFB: true
-  onset: 324.43910689099647
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id004
-  stimResponseInterval: 0.7279335094992563
-  stimulusDuration: 1.5
-  trial_count: 55
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.462191896762129
-  displayFB: true
-  onset: 330.60519969773225
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id007
-  stimResponseInterval: 1.2136854158527481
-  stimulusDuration: 1.5
-  trial_count: 56
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.6432514942560079
-  displayFB: true
-  onset: 337.28107701034713
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id006
-  stimResponseInterval: 1.4459025141404442
-  stimulusDuration: 1.5
-  trial_count: 57
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.191864153036032
-  displayFB: true
-  onset: 343.3702310187436
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id015
-  stimResponseInterval: 0.9093839950819729
-  stimulusDuration: 1.5
-  trial_count: 58
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.57912131591218
-  displayFB: true
-  onset: 349.4714791668616
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id016
-  stimResponseInterval: 0.5143325203635474
-  stimulusDuration: 1.5
-  trial_count: 59
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.6078155481824274
-  displayFB: true
-  onset: 354.56493300313736
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id004
-  stimResponseInterval: 0.6201526479723545
-  stimulusDuration: 1.5
-  trial_count: 60
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 0.7483673591158397
-  displayFB: true
-  onset: 359.79290119929215
+  onset: 86.77568170938282
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
   stim: *id012
-  stimResponseInterval: 1.2603438352770087
+  stimResponseInterval: 0.7457806152568289
   stimulusDuration: 1.5
-  trial_count: 61
-  ts: motion
+  trial_count: 15
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 1.028646504800331
+  ITI: 1.320075360404267
   displayFB: true
-  onset: 365.801612393685
-  punishment_amount: 0
-  responseWindow: 1.5
-  reward_amount: 1
-  stim: *id007
-  stimResponseInterval: 0.6779683778553345
-  stimulusDuration: 1.5
-  trial_count: 62
-  ts: motion
-- FBDuration: 1
-  FBonset: 0
-  ITI: 1.0856428820993722
-  displayFB: true
-  onset: 371.5082272763407
+  onset: 92.49115780728472
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
   stim: *id013
-  stimResponseInterval: 1.3225653576108654
+  stimResponseInterval: 1.2939612890040153
   stimulusDuration: 1.5
-  trial_count: 63
-  ts: motion
+  trial_count: 16
+  ts: orientation
 - FBDuration: 1
   FBonset: 0
-  ITI: 0.6861141733217702
+  ITI: 1.05885872379341
   displayFB: true
-  onset: 377.9164355160509
+  onset: 99.105194456693
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id006
+  stimResponseInterval: 1.0167566441816955
+  stimulusDuration: 1.5
+  trial_count: 17
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.2557868830516092
+  displayFB: true
+  onset: 105.1808098246681
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id014
+  stimResponseInterval: 1.1451450573920403
+  stimulusDuration: 1.5
+  trial_count: 18
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.7537638355130354
+  displayFB: true
+  onset: 111.58174176511176
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id012
+  stimResponseInterval: 1.2126824067072492
+  stimulusDuration: 1.5
+  trial_count: 19
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.4244893008525223
+  displayFB: true
+  onset: 117.54818800733204
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id012
+  stimResponseInterval: 1.0253132342569093
+  stimulusDuration: 1.5
+  trial_count: 20
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.5809865282105853
+  displayFB: true
+  onset: 123.99799054244147
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id004
+  stimResponseInterval: 1.4533998385870537
+  stimulusDuration: 1.5
+  trial_count: 21
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.4798877212191042
+  displayFB: true
+  onset: 130.0323769092391
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id005
+  stimResponseInterval: 0.5820527814070942
+  stimulusDuration: 1.5
+  trial_count: 22
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.6930441377161425
+  displayFB: true
+  onset: 136.0943174118653
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id007
+  stimResponseInterval: 1.4103666870361589
+  stimulusDuration: 1.5
+  trial_count: 23
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.7146439340463937
+  displayFB: true
+  onset: 142.1977282366176
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id015
+  stimResponseInterval: 0.7476847136032414
+  stimulusDuration: 1.5
+  trial_count: 24
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.9194913252402372
+  displayFB: true
+  onset: 147.66005688426722
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id011
+  stimResponseInterval: 1.3361929064604476
+  stimulusDuration: 1.5
+  trial_count: 25
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.0976822651270464
+  displayFB: true
+  onset: 153.9157411159679
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id013
+  stimResponseInterval: 0.7612904589630907
+  stimulusDuration: 1.5
+  trial_count: 26
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.2370792655791694
+  displayFB: true
+  onset: 159.77471384005804
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id015
+  stimResponseInterval: 1.0814451975391992
+  stimulusDuration: 1.5
+  trial_count: 27
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.9243702051437268
+  displayFB: true
+  onset: 166.0932383031764
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id011
+  stimResponseInterval: 0.6900502085123481
+  stimulusDuration: 1.5
+  trial_count: 28
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.1623674780280644
+  displayFB: true
+  onset: 171.70765871683247
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id016
+  stimResponseInterval: 0.6647744921667811
+  stimulusDuration: 1.5
+  trial_count: 29
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.8381464597452744
+  displayFB: true
+  onset: 177.5348006870273
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id009
+  stimResponseInterval: 1.1374145625725296
+  stimulusDuration: 1.5
+  trial_count: 30
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.636597099638933
+  displayFB: true
+  onset: 183.51036170934512
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id016
+  stimResponseInterval: 0.6121298304366531
+  stimulusDuration: 1.5
+  trial_count: 31
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.2668648390974295
+  displayFB: true
+  onset: 188.7590886394207
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id006
+  stimResponseInterval: 0.526359704565805
+  stimulusDuration: 1.5
+  trial_count: 32
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.743811562779529
+  displayFB: true
+  onset: 194.55231318308392
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id014
+  stimResponseInterval: 0.8284006939814241
+  stimulusDuration: 1.5
+  trial_count: 33
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.5765514735369008
+  displayFB: true
+  onset: 200.1245254398449
   punishment_amount: 0
   responseWindow: 1.5
   reward_amount: 1
   stim: *id008
-  stimResponseInterval: 1.248357944463904
+  stimResponseInterval: 1.0812931648569402
+  stimulusDuration: 1.5
+  trial_count: 34
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.1898008710438746
+  displayFB: true
+  onset: 205.78237007823873
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id017
+  stimResponseInterval: 0.993680863563347
+  stimulusDuration: 1.5
+  trial_count: 35
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.6928425349293823
+  displayFB: true
+  onset: 211.96585181284595
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id002
+  stimResponseInterval: 1.4353280248979092
+  stimulusDuration: 1.5
+  trial_count: 36
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.7501032455607763
+  displayFB: true
+  onset: 218.09402237267324
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id017
+  stimResponseInterval: 0.6613123079387453
+  stimulusDuration: 1.5
+  trial_count: 37
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.3739826107165922
+  displayFB: true
+  onset: 223.50543792617276
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id006
+  stimResponseInterval: 1.231955249781623
+  stimulusDuration: 1.5
+  trial_count: 38
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.1826840194045622
+  displayFB: true
+  onset: 230.11137578667098
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id016
+  stimResponseInterval: 0.7225784543115195
+  stimulusDuration: 1.5
+  trial_count: 39
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.0819549451000934
+  displayFB: true
+  onset: 236.01663826038705
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id007
+  stimResponseInterval: 1.0375321944013367
+  stimulusDuration: 1.5
+  trial_count: 40
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.147212404972054
+  displayFB: true
+  onset: 242.1361253998885
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id015
+  stimResponseInterval: 0.7971300450878713
+  stimulusDuration: 1.5
+  trial_count: 41
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.4721136777680033
+  displayFB: true
+  onset: 248.08046784994843
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id016
+  stimResponseInterval: 0.5319422385194799
+  stimulusDuration: 1.5
+  trial_count: 42
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.7126367718864555
+  displayFB: true
+  onset: 254.08452376623592
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id014
+  stimResponseInterval: 1.27019683493971
+  stimulusDuration: 1.5
+  trial_count: 43
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.6055194065836949
+  displayFB: true
+  onset: 260.06735737306207
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id015
+  stimResponseInterval: 1.2988690266970462
+  stimulusDuration: 1.5
+  trial_count: 44
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.4175225829562428
+  displayFB: true
+  onset: 265.9717458063428
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id012
+  stimResponseInterval: 1.337879402347796
+  stimulusDuration: 1.5
+  trial_count: 45
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.8226462863398458
+  displayFB: true
+  onset: 272.72714779164687
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id010
+  stimResponseInterval: 0.8235193521693296
+  stimulusDuration: 1.5
+  trial_count: 46
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.3470750582451632
+  displayFB: true
+  onset: 278.37331343015603
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id014
+  stimResponseInterval: 1.0990109950139635
+  stimulusDuration: 1.5
+  trial_count: 47
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.0520669086897185
+  displayFB: true
+  onset: 284.81939948341517
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id002
+  stimResponseInterval: 1.345427966755088
+  stimulusDuration: 1.5
+  trial_count: 48
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.264762073365455
+  displayFB: true
+  onset: 291.21689435886
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id017
+  stimResponseInterval: 1.3948800807955788
+  stimulusDuration: 1.5
+  trial_count: 49
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.6288944244669308
+  displayFB: true
+  onset: 297.876536513021
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id017
+  stimResponseInterval: 0.8156926596619991
+  stimulusDuration: 1.5
+  trial_count: 50
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.47837230165511
+  displayFB: true
+  onset: 303.32112359714995
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id005
+  stimResponseInterval: 1.393687066879832
+  stimulusDuration: 1.5
+  trial_count: 51
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.0272224605779716
+  displayFB: true
+  onset: 310.1931829656849
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id010
+  stimResponseInterval: 0.7997544030906463
+  stimulusDuration: 1.5
+  trial_count: 52
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.1483968889189695
+  displayFB: true
+  onset: 316.02015982935353
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id004
+  stimResponseInterval: 1.2196372737661587
+  stimulusDuration: 1.5
+  trial_count: 53
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.0888889169887095
+  displayFB: true
+  onset: 322.3881939920387
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id003
+  stimResponseInterval: 1.222093869251084
+  stimulusDuration: 1.5
+  trial_count: 54
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.1594682050696847
+  displayFB: true
+  onset: 328.69917677827846
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id008
+  stimResponseInterval: 1.229970526211723
+  stimulusDuration: 1.5
+  trial_count: 55
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.1898395367318246
+  displayFB: true
+  onset: 335.0886155095599
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id011
+  stimResponseInterval: 1.2966091335588783
+  stimulusDuration: 1.5
+  trial_count: 56
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.0507843519815765
+  displayFB: true
+  onset: 341.5750641798506
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id007
+  stimResponseInterval: 0.6342393418499617
+  stimulusDuration: 1.5
+  trial_count: 57
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.9514857495216802
+  displayFB: true
+  onset: 347.2600878736821
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id013
+  stimResponseInterval: 0.825666438570102
+  stimulusDuration: 1.5
+  trial_count: 58
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.1167031766302018
+  displayFB: true
+  onset: 353.0372400617739
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id009
+  stimResponseInterval: 1.4556927036227858
+  stimulusDuration: 1.5
+  trial_count: 59
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.5133371425727842
+  displayFB: true
+  onset: 359.6096359420269
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id009
+  stimResponseInterval: 0.7565409400267344
+  stimulusDuration: 1.5
+  trial_count: 60
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.8999177569597046
+  displayFB: true
+  onset: 364.8795140246264
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id013
+  stimResponseInterval: 1.0122434982555555
+  stimulusDuration: 1.5
+  trial_count: 61
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.632839522141039
+  displayFB: true
+  onset: 370.7916752798417
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id004
+  stimResponseInterval: 0.8819942454538288
+  stimulusDuration: 1.5
+  trial_count: 62
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 1.3739490775164251
+  displayFB: true
+  onset: 376.3065090474366
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id002
+  stimResponseInterval: 0.6378426529795054
+  stimulusDuration: 1.5
+  trial_count: 63
+  ts: orientation
+- FBDuration: 1
+  FBonset: 0
+  ITI: 0.7841861102393173
+  displayFB: true
+  onset: 382.3183007779325
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: *id003
+  stimResponseInterval: 0.7655036262498718
   stimulusDuration: 1.5
   trial_count: 64
-  ts: motion
+  ts: orientation

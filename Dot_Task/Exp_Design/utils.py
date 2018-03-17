@@ -9,7 +9,7 @@ def get_difficulties(subjid):
     file_dir = os.path.dirname(__file__)
     try:
         motion_file = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
-                                        '*%s*motion*' % subjid)))[-1]
+                                        subjid, '*%s*motion*' % subjid)))[-1]
         motion_data = cPickle.load(open(motion_file,'r'))
         speed_difficulties = {k:v.mean() for k,v in motion_data['trackers'].items()}
         print('Found Motion Difficulties. Loading from file: %s\n' % motion_file)
@@ -17,7 +17,7 @@ def get_difficulties(subjid):
         speed_difficulties = {}
     try:
         orientation_file = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
-                                       '*%s*orientation*' % subjid)))[-1]
+                                       subjid, '*%s*orientation*' % subjid)))[-1]
         orientation_data = cPickle.load(open(orientation_file,'r'))
         orientation_difficulties = {k:v.mean() for k,v in orientation_data['trackers'].items()}
         print('Found Orientation Difficulties. Loading from file: %s\n' % orientation_file)
@@ -30,7 +30,7 @@ def get_trackers(subjid):
     file_dir = os.path.dirname(__file__)
     try:
         motion_file = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
-                                        '*%s*motion*' % subjid)))[-1]
+                                        subjid, '*%s*motion*' % subjid)))[-1]
         motion_data = cPickle.load(open(motion_file,'r'))
         motion_trackers = motion_data['trackers']
         print('Found Motion Trackers. Loading from file: %s\n' % motion_file)
@@ -38,7 +38,7 @@ def get_trackers(subjid):
         motion_trackers = {}
     try:
         orientation_file = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
-                                       '*%s*orientation*' % subjid)))[-1]
+                                       subjid, '*%s*orientation*' % subjid)))[-1]
         orientation_data = cPickle.load(open(orientation_file,'r'))
         orientation_trackers = orientation_data['trackers']
         print('Found Orientation Trackers. Loading from file: %s\n' % orientation_file)

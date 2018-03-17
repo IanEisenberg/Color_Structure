@@ -105,7 +105,7 @@ class adaptiveThreshold(BaseExp):
             maxVal = self.base_speed*.95
         elif self.ts == "orientation":
             difficulties = self.ori_difficulties
-            maxVal = 25 # no more than a 20 degree change
+            maxVal = 40 # no more than a 40 degree change
         if method=='basic':
             step_lookup = {'easy':5,
                            'medium': 4,
@@ -128,7 +128,7 @@ class adaptiveThreshold(BaseExp):
                 key = (pedestal,difficulty)
                 threshold = quest_lookup[difficulty]
                 trackers[key] = QuestHandler(pThreshold=threshold,
-                                             nTrials = self.exp_len,
+                                             nTrials = 5000,
                                              startVal=val, startValSd=maxVal/2,
                                              minVal=0.0001, 
                                              maxVal=maxVal,
