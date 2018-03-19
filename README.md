@@ -28,6 +28,7 @@ Organization of Task:
 
 ## Setting up python environment
 
-py2.7 (required for psychopy)  
-pip install -r requirement.txt
+conda env create -f environment.yml
+source activate psychopy
+python setup.py install
 

@@ -1,4 +1,4 @@
-name: psychopy3
+name: psychopy
 channels:
 - defaults
 dependencies:
