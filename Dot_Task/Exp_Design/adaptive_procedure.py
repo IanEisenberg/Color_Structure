@@ -158,7 +158,7 @@ class adaptiveThreshold(BaseExp):
                              'trial_time':  pause_time})
         return pause_time
     
-    def presentTrial(self,trial, practice=False):
+    def presentTrial(self, trial, practice=False, decision_var=None):
         """
         This function presents a stimuli, waits for a response, tracks the
         response and RT and presents appropriate feedback. 
@@ -183,9 +183,12 @@ class adaptiveThreshold(BaseExp):
             strength = stim["oriStrength"]
             pedestal = stim["oriBase"]
             difficulties = self.ori_difficulties
-        tracker_key = (pedestal,strength)
-        tracker = self.trackers[tracker_key]
-        decision_var = next(tracker)
+        if decision_var is None:
+            tracker_key = (pedestal,strength)
+            tracker = self.trackers[tracker_key]
+            decision_var = next(tracker)
+        else:
+            decision_var = decision_var
         difficulties[(pedestal,strength)] = decision_var
         trial['decision_var'] = decision_var
         # get stim attributes
@@ -318,7 +321,7 @@ class adaptiveThreshold(BaseExp):
             """)
                         
         trial_timing = self.stimulusInfo[0:self.num_practice]#get timing from the first few trials
-        practice = np.random.choice(self.stimulusInfo, self.num_practice) #get random trials
+        practice = np.random.choice(self.stimulusInfo, self.num_practice, replace=False) #get random trials
         # get ready
         self.presentTextToWindow('Get Ready!', size=.15)
         core.wait(1.5)
@@ -336,28 +339,29 @@ class adaptiveThreshold(BaseExp):
             """
             Done with practice. Wait for the experimenter
             """)
-        #self.aperture.enable()
     
-    def run_task(self, practice=False, eyetracker=False):
-        self.setupWindow()
-        self.defineStims()
-        # set up pause trials
-        length_min = self.stimulusInfo[-1]['onset']/60
-        # have break every 6 minutes
-        num_pauses = np.round(length_min/6)
-        pause_trials = np.round(np.linspace(0,self.exp_len,num_pauses+1))[1:-1]
-        pause_time = 0
-        # set up eyetracker
-        if eyetracker:
-            from Dot_Task.pylinkwrapper.connector import Connect
-            conn = Connect(self.win, 'eyetest')
-            conn.calibrate()
-        
-        # present intro screen
-        if practice:
-            self.run_practice()
-        else:
-            self.presentInstruction(self.ts.title(), size=.15)
+    def run_super_threshold(self, numTrials=20):
+        if self.ts == 'motion':
+            decision_var = .1
+        elif self.ts == 'orientation':
+            decision_var = 30      
+        trial_timing = self.stimulusInfo[0:numTrials] #get timing from the first few trials
+        practice = np.random.choice(self.stimulusInfo, self.numTrials, replace=False) #get random trials
+        # get ready
+        self.presentTextToWindow('Get Ready!', size=.15)
+        core.wait(1.5)
+        # start practice
+        self.clearWindow(fixation=True)
+        self.expClock.reset()
+        for num, trial in enumerate(practice):            
+            # wait for onset time
+            while self.expClock.getTime() < trial_timing[num]['onset']:
+                    key_response=event.getKeys([self.quit_key])
+                    if len(key_response)==1:
+                        self.shutDownEarly()
+            self.presentTrial(trial, practice=False, decision_var=decision_var)
+
+    def run_estimation(self):
         # get ready
         self.presentTextToWindow('Get Ready!', size=.15)
         core.wait(1.5)
@@ -373,7 +377,32 @@ class adaptiveThreshold(BaseExp):
                 if len(key_response)==1:
                     self.shutDownEarly()
             self.presentTrial(trial)
-                
+
+    def run_task(self, practice=False, estimate_lapse=False, eyetracker=False):
+        self.setupWindow()
+        self.defineStims()
+        # set up pause trials
+        length_min = self.stimulusInfo[-1]['onset']/60
+        # have break every 6 minutes
+        num_pauses = np.round(length_min/6)
+        pause_trials = np.round(np.linspace(0,self.exp_len,num_pauses+1))[1:-1]
+        pause_time = 0
+        # set up eyetracker
+        if eyetracker:
+            from Dot_Task.pylinkwrapper.connector import Connect
+            conn = Connect(self.win, 'eyetest')
+            conn.calibrate()
+        
+        if practice:
+            self.run_practice()
+        else:
+            self.presentInstruction(self.ts.title(), size=.15)
+        # estimate lapse if this is the first run for the subject (trackers have no data)
+        estimate_lapse = np.sum([len(v.data) for v in self.trackers.values()]) == 0
+        if estimate_lapse:
+            self.run_super_threshold()
+        # run the estimation procedure
+        self.run_estimate()
         # clean up and save
         other_data={'taskinfo': self.taskinfo,
                     'configfile': self.config_file,
