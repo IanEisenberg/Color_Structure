@@ -34,9 +34,10 @@ def get_plot_info(subjid):
     for dim in ['motion', 'orientation']:
         taskinfo, df = load_threshold_data(subjid, dim)
         if df is not None:
+            nbins = min(11, len(df)//10)
             # get accuracy as a function of binned decision variable
             # bins decision variables
-            bins = df.decision_var.quantile(np.linspace(0,1,11)); bins.iloc[-1]+=100
+            bins = df.decision_var.quantile(np.linspace(0,1,nbins)); bins.iloc[-1]+=100
             df.insert(0, 'decision_bins', np.digitize(df.decision_var, bins))
             binned_decision_var = df.groupby('decision_bins').decision_var.mean()
             df.insert(0, 'binned_decision_var', df.decision_bins.replace(binned_decision_var))
@@ -46,11 +47,11 @@ def get_plot_info(subjid):
             
             # get choice as a function of binned ending stimulus value
             if dim == 'motion':
-                bins = df.speed_change.quantile(np.linspace(0,1,11)); bins.iloc[-1]+=100
+                bins = df.speed_change.quantile(np.linspace(0,1,nbins)); bins.iloc[-1]+=100
                 df.insert(0, 'stim_bins', np.digitize(df.speed_change, bins))
                 binned_stim_var = df.groupby('stim_bins').speed_change.mean()
             else:
-                bins = df.ori_change.quantile(np.linspace(0,1,11)); bins.iloc[-1]+=100
+                bins = df.ori_change.quantile(np.linspace(0,1,nbins)); bins.iloc[-1]+=100
                 df.insert(0, 'stim_bins', np.digitize(df.ori_change, bins))
                 binned_stim_var = df.groupby('stim_bins').ori_change.mean()
             df.insert(0, 'binned_stim_var', df.stim_bins.replace(binned_stim_var))
@@ -64,7 +65,7 @@ def get_plot_info(subjid):
                               'df': df}
     return plot_info
     
-def plot_threshold_run(subjid):
+def plot_threshold_run(subjid, responseFun='Weibull'):
     colors = ['m', 'c']
     plot_info = get_plot_info(subjid)
     sns.set_context('poster')
@@ -78,9 +79,8 @@ def plot_threshold_run(subjid):
                             linestyle="None",
                             c=colors[i])
         # plot response fun fit
-        threshold = plot_info[key]['df'].quest_estimate.mean()
-        fitResponseCurve, metrics = fit_response_fun(plot_info[key]['df'], 
-                                                        fit_kwargs={'guess': [threshold, 3.5, .05]})
+        fitResponseCurve, metrics = fit_response_fun(plot_info[key]['df'],
+                                                     kind=responseFun)
         plot_response_fun(fitResponseCurve, axes[0][i], plot_kws={'c': colors[i]})
         axes[0][i].set_ylabel('Accuracy', fontsize=24)
         axes[0][i].set_xlabel('Decision Var', fontsize=24)

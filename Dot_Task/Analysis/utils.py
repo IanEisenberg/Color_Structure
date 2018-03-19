@@ -30,8 +30,12 @@ def fit_response_fun(df, kind='lapseWeibull', fit_kwargs={}):
         fun = FitCumNormal
     elif kind == 'Weibull':
         fun = FitWeibull
+        #param guess
+        fit_kwargs['guess'] = [df.quest_estimate.iloc[-1], 3.5]
     elif kind == 'lapseWeibull':
         fun = FitLapseWeibull
+        #param guess
+        fit_kwargs['guess'] = [df.quest_estimate.iloc[-1], 3.5, .05]
     out = fun(df.decision_var, df.FB, sigma, **fit_kwargs)
     probs = response_probs(out, df.decision_var)
     loss = log_loss(df.FB, probs)

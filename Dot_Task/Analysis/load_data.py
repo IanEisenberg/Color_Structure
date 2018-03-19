@@ -21,7 +21,7 @@ def load_data(datafile):
     
     Finally saves the data as csv files
     """
-    f=open(datafile, 'r')
+    f=open(datafile, 'rb')
     loaded_pickle = pickle.load(f)
     data = loaded_pickle['taskdata']
     taskinfo = loaded_pickle['taskinfo']

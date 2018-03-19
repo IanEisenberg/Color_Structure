@@ -35,17 +35,16 @@ except NameError:
   save_dir = '../Data'
 
 # set up task variables
-stim_repetitions = 1
+stim_repetitions = 2
 exp_len = None
 # window variables
-win_kwargs = {'fullscr': False,
+win_kwargs = {'fullscr': True,
               'allowGUI': True,
               'screen': 1,
               'size': [1920*.8, 1200*.8]}
 
-# counterbalance ts_order (which ts is associated with top of screen)
+# randomize ts order (which ts is associated with top of screen)
 first_task = 'motion' if r.random() > .5 else 'orientation'
-first_task = 'orientation'
 
 def setup_task(trackers, dim='motion', 
                speed_difficulties=None, ori_difficulties=None):

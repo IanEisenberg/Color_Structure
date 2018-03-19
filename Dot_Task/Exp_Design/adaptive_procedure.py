@@ -130,7 +130,7 @@ class adaptiveThreshold(BaseExp):
                 trackers[key] = QuestHandler(pThreshold=threshold,
                                              nTrials = 5000,
                                              startVal=val, startValSd=maxVal,
-                                             minVal=0.0001, 
+                                             minVal=0.00001, 
                                              maxVal=maxVal,
                                              gamma=.5,
                                              grain=maxVal/400.0,
