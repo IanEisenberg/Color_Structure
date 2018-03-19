@@ -12,7 +12,8 @@ from os import path
 import random as r
 from scipy.stats import norm
 import yaml
-  
+file_dir = os.path.dirname(__file__)
+
 class Config(object):
     def __init__(self, subjid, taskname, action_keys,
                  stim_repetitions, distribution=norm, seed=None):
@@ -23,7 +24,7 @@ class Config(object):
         if self.seed is not None:
             np.random.seed(self.seed)
         self.timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        self.loc = path.join('..','Config_Files',subjid)
+        self.loc = path.join(file_dir, '..','Config_Files',subjid)
         # make loc if not made
         try:
             os.makedirs(self.loc)

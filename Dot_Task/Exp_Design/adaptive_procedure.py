@@ -38,8 +38,8 @@ class adaptiveThreshold(BaseExp):
         self.config_file = config_file
         try:
             self.loadConfigFile(config_file)
-        except:
-            print('cannot load config file')
+        except Exception as e:
+            print('cannot load config file', e)
             sys.exit()
         # setup trackers
         if not trackers:
@@ -59,9 +59,9 @@ class adaptiveThreshold(BaseExp):
             raise BaseException('Config file not found')
         config_file = yaml.load(open(filename,'r'))
         for trial in config_file:
-            if trial.has_key('taskname'):
+            if 'taskname' in trial.keys():
                 self.taskinfo=trial
-                for k in self.taskinfo.iterkeys():
+                for k in self.taskinfo.keys():
                     self.__dict__[k]=self.taskinfo[k]
             else:
                 self.stimulusInfo.append(trial)
@@ -77,7 +77,7 @@ class adaptiveThreshold(BaseExp):
         trials (stimulusinfo), the bot, and taskinfo (self.__dict__ includes 
         all of the same information as taskinfo)
         """
-        init_dict = {k:self.__dict__[k] for k in self.__dict__.iterkeys() if k 
+        init_dict = {k:self.__dict__[k] for k in self.__dict__.keys() if k 
                     not in ('clock', 'stimulusInfo', 'alldata', 'bot', 'taskinfo','win')}
         return json.dumps(init_dict)
     
@@ -185,7 +185,7 @@ class adaptiveThreshold(BaseExp):
             difficulties = self.ori_difficulties
         tracker_key = (pedestal,strength)
         tracker = self.trackers[tracker_key]
-        decision_var = tracker.next()
+        decision_var = next(tracker)
         difficulties[(pedestal,strength)] = decision_var
         trial['decision_var'] = decision_var
         # get stim attributes
@@ -241,10 +241,10 @@ class adaptiveThreshold(BaseExp):
                     core.wait(trial['FBonset'])  
                 if FB == 1:
                     self.clearWindow(fixation=True,
-                                     fixation_color='#66ff66')
+                                     fixation_color='green')
                 else:
                     self.clearWindow(fixation=True,
-                                     fixation_color='#ff3300')
+                                     fixation_color='red')
                 core.wait(trial['FBDuration'])
         # If subject did not respond within the stimulus window clear the stim
         # and admonish the subject
@@ -255,8 +255,7 @@ class adaptiveThreshold(BaseExp):
                 if trial['FBonset'] > 0: 
                     self.clearWindow(fixation=True)
                     core.wait(trial['FBonset'])  
-                self.clearWindow(fixation=True,
-                                     fixation_color='red')
+                self.clearWindow(fixation=True, fixation_color='red')
                 core.wait(trial['FBDuration'])
         self.clearWindow(fixation=True)
         

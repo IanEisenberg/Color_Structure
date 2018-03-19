@@ -1,4 +1,7 @@
 *.pyc
+build/
+dist/
+*egg*
 Plots/
 **/Data/Log/*.log
 **/Data/RawData/*.yaml

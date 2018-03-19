@@ -39,22 +39,6 @@ class probContextTask(BaseExp):
         # init Base Exp
         super(probContextTask, self).__init__(self.taskname, subjid, save_dir, 
                                               win_kwargs)
-    
-    def loadConfigFile(self,filename):
-        """ load a config file from yaml
-        """
-        if not os.path.exists(filename):
-            raise BaseException('Config file not found')
-        config_file = yaml.load(open(filename,'r'))
-        for trial in config_file:
-            if trial.has_key('taskname'):
-                self.taskinfo=trial
-                for k in self.taskinfo.iterkeys():
-                    self.__dict__[k]=self.taskinfo[k]
-            else:
-                self.stimulusInfo.append(trial)
-        if len(self.stimulusInfo)>0:
-            self.loadedStimulusFile=filename
             
     #**************************************************************************
     # ******* Function to Save Data **************
@@ -65,7 +49,7 @@ class probContextTask(BaseExp):
         trials (stimulusinfo), the bot, and taskinfo (self.__dict__ includes 
         all of the same information as taskinfo)
         """
-        init_dict = {k:self.__dict__[k] for k in self.__dict__.iterkeys() if k 
+        init_dict = {k:self.__dict__[k] for k in self.__dict__.keys() if k 
                     not in ('clock', 'stimulusInfo', 'alldata', 'bot', 'taskinfo','win')}
         return json.dumps(init_dict)
   

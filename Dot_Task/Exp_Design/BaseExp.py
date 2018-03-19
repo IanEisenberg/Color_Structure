@@ -1,4 +1,4 @@
-import cPickle
+import pickle
 import datetime
 import json
 import numpy as np
@@ -32,14 +32,30 @@ class BaseExp(object):
         # set up recording files
         self.logfilename='%s_%s_%s.log'%(self.subjid,self.expid,self.timestamp)
         self.datafilename='%s_%s_%s.pkl'%(self.subjid,self.expid,self.timestamp)
-            
+        
+    def loadConfigFile(self,filename):
+        """ load a config file from yaml
+        """
+        if not os.path.exists(filename):
+            raise BaseException('Config file not found')
+        config_file = yaml.load(open(filename,'r'))
+        for trial in config_file:
+            if 'taskname' in trial.keys():
+                self.taskinfo=trial
+                for k in self.taskinfo.keys():
+                    self.__dict__[k]=self.taskinfo[k]
+            else:
+                self.stimulusInfo.append(trial)
+        if len(self.stimulusInfo)>0:
+            self.loadedStimulusFile=filename
+
     #**************************************************************************
     # ******* Function to Save Data **************
     #**************************************************************************
     
     def toJSON(self, excluded_keys=[]):
         """ log the initial conditions for the task."""
-        init_dict = {k:self.__dict__[k] for k in self.__dict__.iterkeys() if k 
+        init_dict = {k:self.__dict__[k] for k in self.__dict__.keys() if k 
                     not in excluded_keys}
         return json.dumps(init_dict)
     
@@ -71,7 +87,7 @@ class BaseExp(object):
         except IOError:
             os.makedirs(os.path.split(save_loc)[0])
             f=open(save_loc,'wb')
-        cPickle.dump(data,f)
+        pickle.dump(data,f)
     
     def checkRespForQuitKey(self,resp):
             if self.quit_key in resp:

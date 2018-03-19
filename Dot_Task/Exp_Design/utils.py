@@ -1,4 +1,4 @@
-import cPickle
+import pickle
 from glob import glob
 import numpy as np
 import os
@@ -9,7 +9,7 @@ def get_trackers(subjid):
     try:
         motion_file = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
                                         subjid, '*%s*motion*' % subjid)))[-1]
-        motion_data = cPickle.load(open(motion_file,'r'))
+        motion_data = pickle.load(open(motion_file,'r'))
         motion_trackers = motion_data['trackers']
         print('Found Motion Trackers. Loading from file: %s\n' % motion_file)
     except IndexError:
@@ -17,7 +17,7 @@ def get_trackers(subjid):
     try:
         orientation_file = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
                                        subjid, '*%s*orientation*' % subjid)))[-1]
-        orientation_data = cPickle.load(open(orientation_file,'r'))
+        orientation_data = pickle.load(open(orientation_file,'r'))
         orientation_trackers = orientation_data['trackers']
         print('Found Orientation Trackers. Loading from file: %s\n' % orientation_file)
     except IndexError:
