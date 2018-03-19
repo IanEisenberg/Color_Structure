@@ -35,7 +35,7 @@ except NameError:
   save_dir = '../Data'
 
 # set up task variables
-stim_repetitions = 4
+stim_repetitions = 1
 exp_len = None
 # window variables
 win_kwargs = {'fullscr': False,

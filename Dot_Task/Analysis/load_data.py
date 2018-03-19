@@ -5,7 +5,7 @@ Created on Tue Dec  9 14:22:54 2014
 @author: admin
 """
 
-import cPickle
+import pickle
 from glob import glob
 import numpy as np
 import os
@@ -22,7 +22,7 @@ def load_data(datafile):
     Finally saves the data as csv files
     """
     f=open(datafile, 'r')
-    loaded_pickle = cPickle.load(f)
+    loaded_pickle = pickle.load(f)
     data = loaded_pickle['taskdata']
     taskinfo = loaded_pickle['taskinfo']
     

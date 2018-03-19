@@ -38,7 +38,7 @@ class Fixation:
                                         lineColor=win.color,
                                         edges=60)
     def change_color(self, color):
-        self.fixation.lineColor = color
+        self.fixation.setLineColor(color)
         
     def draw(self, color=None):
         default_color = self.fixation.lineColor
