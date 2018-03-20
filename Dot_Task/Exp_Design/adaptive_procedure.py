@@ -5,6 +5,7 @@ Handles all the highlevel functions during the adaptive (calibration)
 phase of the experiment. 
 
 """
+from copy import deepcopy
 import json
 import numpy as np
 from psychopy import core, event
@@ -286,7 +287,7 @@ class adaptiveThreshold(BaseExp):
             
             Press 5 to see a demo.             
             """)
-        trial = self.stimulusInfo[0].copy()
+        trial = deepcopy(self.stimulusInfo[0])
         trial['displayFB'] = False
         self.presentTrial(trial, practice=True)
 
@@ -334,7 +335,7 @@ class adaptiveThreshold(BaseExp):
                     key_response=event.getKeys([self.quit_key])
                     if len(key_response)==1:
                         self.shutDownEarly()
-            self.presentTrial(trial.copy(), practice=True)
+            self.presentTrial(deepcopy(trial), practice=True)
         self.presentInstruction(
             """
             Done with practice. Wait for the experimenter
@@ -359,7 +360,7 @@ class adaptiveThreshold(BaseExp):
                     key_response=event.getKeys([self.quit_key])
                     if len(key_response)==1:
                         self.shutDownEarly()
-            self.presentTrial(trial.copy(), practice=False, static_decision=decision_var)
+            self.presentTrial(deepcopy(trial), practice=False, static_decision=decision_var)
 
     def run_estimation(self, intro=True):
         # set up pause trials

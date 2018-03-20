@@ -22,10 +22,13 @@ def response_probs(responseFun, X):
    probs = [[1-i, i] for i in probs]
    return probs
 
-def fit_response_fun(df, kind='lapseWeibull', fit_kwargs={}):
+def fit_response_fun(df, kind='lapseWeibull', fit_kwargs=None):
     """ Fits a response function to accuracy data """ 
     df = df.query('exp_stage != "pause" and rt==rt')
     sigma = 1
+    fit_kwargs = {}
+    if fit_kwargs is None:
+        fit_kwargs = fit_kwargs
     if kind == 'CumNorm':
         fun = FitCumNormal
     elif kind == 'Weibull':

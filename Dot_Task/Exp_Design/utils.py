@@ -3,6 +3,8 @@ from glob import glob
 import numpy as np
 import os
 from psychopy import monitors
+from Dot_Task.Analysis.load_data import load_threshold_data
+from Dot_Task.Analysis.utils import fit_response_fun
 
 def get_trackers(subjid):
     file_dir = os.path.dirname(__file__)
@@ -25,17 +27,25 @@ def get_trackers(subjid):
     return {'motion': motion_trackers, 
             'orientation': orientation_trackers}
 
-def get_difficulties(subjid=None, trackers=None):
+def get_tracker_estimates(subjid=None, trackers=None):
     assert trackers or subjid
     if trackers is None:
         trackers = get_trackers(subjid)
-    difficulties = {}
+    estimates = {}
     for dim, value in trackers.items():
-        difficulties[dim] = {}
+        estimates[dim] = {}
         for subkey, subvalue in value.items():
-            difficulties[dim][subkey] = subvalue.mean()
-    return difficulties
-    
+            estimates[dim][subkey] = subvalue.mean()
+    return estimates
+
+def get_response_curve(subjid):
+    responseCurves = {}
+    for dim in ['motion', 'orientation']:
+        taskinfo, df = load_threshold_data(subjid, dim)
+        responseCurve = fit_response_fun(df, kind='lapseWeibull')
+        responseCurves[dim] = responseCurve
+    return responseCurves
+
 def get_monitor(distance=30, width=30):  
     monitor = monitors.Monitor('test')
     monitor.setDistance(60)

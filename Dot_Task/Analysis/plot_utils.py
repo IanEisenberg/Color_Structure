@@ -34,28 +34,40 @@ def get_plot_info(subjid):
     for dim in ['motion', 'orientation']:
         taskinfo, df = load_threshold_data(subjid, dim)
         if df is not None:
-            nbins = min(11, len(df)//10)
+            # remove outliers
+            subset = df.copy()
+            """
+            while True:
+                outlier_max = subset.decision_var.mean()+subset.decision_var.std()*2.5
+                outlier_min = subset.decision_var.mean()-subset.decision_var.std()*2.5
+                filter_vec = (outlier_min<subset.decision_var) & \
+                                (subset.decision_var<outlier_max)
+                if filter_vec.mean() == 1:
+                    break
+                subset = subset[filter_vec]
+            """
+            nbins = min(11, len(subset)//10)
             # get accuracy as a function of binned decision variable
             # bins decision variables
-            bins = df.decision_var.quantile(np.linspace(0,1,nbins)); bins.iloc[-1]+=100
-            df.insert(0, 'decision_bins', np.digitize(df.decision_var, bins))
-            binned_decision_var = df.groupby('decision_bins').decision_var.mean()
-            df.insert(0, 'binned_decision_var', df.decision_bins.replace(binned_decision_var))
-            bin_accuracy = df.groupby('binned_decision_var').FB.agg(['mean', 'std', 'count'])
+            bins = subset.decision_var.quantile(np.linspace(0,1,nbins)); bins.iloc[-1]+=100
+            subset.insert(0, 'decision_bins', np.digitize(subset.decision_var, bins))
+            binned_decision_var = subset.groupby('decision_bins').decision_var.mean()
+            subset.insert(0, 'binned_decision_var', subset.decision_bins.replace(binned_decision_var))
+            bin_accuracy = subset.groupby('binned_decision_var').FB.agg(['mean', 'std', 'count'])
             # calculate standard error
             bin_accuracy.insert(0, 'se', bin_accuracy['std']/bin_accuracy['count']**.5)
             
             # get choice as a function of binned ending stimulus value
             if dim == 'motion':
-                bins = df.speed_change.quantile(np.linspace(0,1,nbins)); bins.iloc[-1]+=100
-                df.insert(0, 'stim_bins', np.digitize(df.speed_change, bins))
-                binned_stim_var = df.groupby('stim_bins').speed_change.mean()
+                bins = subset.speed_change.quantile(np.linspace(0,1,nbins)); bins.iloc[-1]+=100
+                subset.insert(0, 'stim_bins', np.digitize(subset.speed_change, bins))
+                binned_stim_var = subset.groupby('stim_bins').speed_change.mean()
             else:
-                bins = df.ori_change.quantile(np.linspace(0,1,nbins)); bins.iloc[-1]+=100
-                df.insert(0, 'stim_bins', np.digitize(df.ori_change, bins))
-                binned_stim_var = df.groupby('stim_bins').ori_change.mean()
-            df.insert(0, 'binned_stim_var', df.stim_bins.replace(binned_stim_var))
-            bin_response = df.groupby('binned_stim_var').binarized_response.agg(['mean', 'std', 'count'])
+                bins = subset.ori_change.quantile(np.linspace(0,1,nbins)); bins.iloc[-1]+=100
+                subset.insert(0, 'stim_bins', np.digitize(subset.ori_change, bins))
+                binned_stim_var = subset.groupby('stim_bins').ori_change.mean()
+            subset.insert(0, 'binned_stim_var', subset.stim_bins.replace(binned_stim_var))
+            bin_response = subset.groupby('binned_stim_var').binarized_response.agg(['mean', 'std', 'count'])
             # calculate standard error
             bin_response.insert(0, 'se', bin_response['std']/bin_response['count']**.5)
 

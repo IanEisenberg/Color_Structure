@@ -13,7 +13,7 @@ Creats config file for subject and run the task.
 import os
 import random as r
 from Dot_Task.Exp_Design.adaptive_procedure import adaptiveThreshold
-from Dot_Task.Exp_Design.utils import get_difficulties, get_trackers
+from Dot_Task.Exp_Design.utils import get_tracker_estimates, get_trackers
 from Dot_Task.Exp_Design.make_config import ThresholdConfig
 
         
@@ -41,7 +41,7 @@ exp_len = None
 win_kwargs = {'fullscr': False,
               'allowGUI': True,
               'screen': 1,
-              'size': [1920*.8, 1200*.8]}
+              'size': [1920, 1080]}
 
 # randomize ts order (which ts is associated with top of screen)
 first_task = 'motion' if r.random() > .5 else 'orientation'
@@ -70,7 +70,7 @@ def setup_task(trackers, dim='motion',
 # ************** RUN TASK ****************************************************
 # ****************************************************************************
 trackers = get_trackers(subjid)
-difficulties = get_difficulties(trackers=trackers)
+difficulties = get_tracker_estimates(trackers=trackers)
 
 if first_task == 'motion':
     curr_task = setup_task(trackers, 'motion', 
@@ -87,12 +87,12 @@ while not done:
     # update trackers and swap task
     if curr_task.ts == 'motion':
         trackers['motion'] = curr_task.trackers
-        difficulties = get_difficulties(trackers=trackers)
+        difficulties = get_tracker_estimates(trackers=trackers)
         curr_task = setup_task(trackers, 'orientation', 
                                speed_difficulties=difficulties['motion'])
     else:
         trackers['orientation'] = curr_task.trackers
-        difficulties = get_difficulties(trackers=trackers)
+        difficulties = get_tracker_estimates(trackers=trackers)
         curr_task = setup_task(trackers, 'motion',
                                ori_difficulties=difficulties['orientation'])
 

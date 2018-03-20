@@ -11,7 +11,7 @@ import numpy as np
 import os
 import pandas as pd
 from scipy.stats import norm
-
+    
 def load_data(datafile):
     """
     Load a temporal structure task data file. Cleans up the raw data (returns
