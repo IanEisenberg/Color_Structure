@@ -11,8 +11,7 @@ import numpy as np
 from psychopy import core, event
 from psychopy.data import QuestHandler, StairHandler
 import subprocess
-import sys,os
-import yaml
+import sys
 from Dot_Task.Exp_Design.BaseExp import BaseExp
 from Dot_Task.Exp_Design.flowstim import OpticFlow
 
@@ -52,22 +51,7 @@ class adaptiveThreshold(BaseExp):
         # init Base Exp
         super(adaptiveThreshold, self).__init__(self.taskname, subjid, 
                                                  save_dir, win_kwargs)
-    
-    def loadConfigFile(self,filename):
-        """ load a config file from yaml
-        """
-        if not os.path.exists(filename):
-            raise BaseException('Config file not found')
-        config_file = yaml.load(open(filename,'r'))
-        for trial in config_file:
-            if 'taskname' in trial.keys():
-                self.taskinfo=trial
-                for k in self.taskinfo.keys():
-                    self.__dict__[k]=self.taskinfo[k]
-            else:
-                self.stimulusInfo.append(trial)
-        if len(self.stimulusInfo)>0:
-            self.loadedStimulusFile=filename
+
             
     #**************************************************************************
     # ******* Function to Save Data **************
@@ -108,9 +92,9 @@ class adaptiveThreshold(BaseExp):
             difficulties = self.ori_difficulties
             maxVal = 40 # no more than a 40 degree change
         if method=='basic':
-            step_lookup = {'easy':5,
-                           'medium': 4,
-                           'hard': 3}
+            step_lookup = {.85: 5,
+                           .775: 4,
+                           .7: 3}
             for (pedestal, difficulty),val in difficulties.items():
                 key = (pedestal,difficulty)
                 nDown = step_lookup[difficulty]
@@ -122,12 +106,9 @@ class adaptiveThreshold(BaseExp):
                                              nReversals=20,
                                              staircase=trackers.get(key,None))
         elif method=='quest':
-            quest_lookup = {'easy': .85,
-                            'medium': .775,
-                            'hard': .7}
             for (pedestal, difficulty), val in difficulties.items():
                 key = (pedestal,difficulty)
-                threshold = quest_lookup[difficulty]
+                threshold = difficulty
                 trackers[key] = QuestHandler(pThreshold=threshold,
                                              nTrials = 5000,
                                              startVal=val, startValSd=maxVal,

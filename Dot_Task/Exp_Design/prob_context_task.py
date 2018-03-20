@@ -5,8 +5,7 @@ import json
 import numpy as np
 from psychopy import visual, core, event
 import subprocess
-import sys,os
-import yaml
+import sys
 from Dot_Task.Exp_Design.BaseExp import BaseExp
 from Dot_Task.Exp_Design.flowstim import OpticFlow
 

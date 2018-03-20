@@ -43,7 +43,7 @@ def get_response_curve(subjid):
     for dim in ['motion', 'orientation']:
         taskinfo, df = load_threshold_data(subjid, dim)
         responseCurve = fit_response_fun(df, kind='lapseWeibull')
-        responseCurves[dim] = responseCurve
+        responseCurves[dim] = responseCurve[0]
     return responseCurves
 
 def get_monitor(distance=30, width=30):  

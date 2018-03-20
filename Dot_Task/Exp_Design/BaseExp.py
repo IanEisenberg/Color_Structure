@@ -6,6 +6,7 @@ from psychopy import core, event, visual
 import os
 import sys
 from Dot_Task.Exp_Design.flowstim import Fixation
+import yaml
         
 class BaseExp(object):
     """ class defining a probabilistic context task

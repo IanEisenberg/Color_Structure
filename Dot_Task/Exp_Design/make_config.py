@@ -102,7 +102,8 @@ class Config(object):
         
         
 class ProbContextConfig(Config): 
-    def __init__(self, subjid, taskname, ori_difficulties, speed_difficulties,
+    def __init__(self, subjid, taskname, 
+                 ori_difficulties, speed_difficulties, responseCurves,
                  action_keys=None, stim_repetitions=5,
                  exp_len=None, distribution=norm, dist_args=None, seed=None, 
                  ts_order=None, rp=.9):
@@ -132,8 +133,16 @@ class ProbContextConfig(Config):
         self.states = None
         self.trial_states = None
         # stim difficulties
-        self.ori_difficulties = ori_difficulties
-        self.speed_difficulties = speed_difficulties
+        self.ori_difficulties = {}
+        for difficulty in ori_difficulties:
+            for pedestal in self.stim_oris:
+                val = responseCurves['orientation'].inverse(difficulty)
+                self.ori_difficulties[(pedestal, difficulty)] = val
+        self.speed_difficulties = {}
+        for difficulty in speed_difficulties:
+            for pedestal in self.stim_motions:
+                val = responseCurves['motion'].inverse(difficulty)
+                self.speed_difficulties[(pedestal, difficulty)] = val
         # calculate exp len
         num_stims = len(self.ori_difficulties)*len(self.speed_difficulties)\
                     *len(self.stim_oris)*len(self.stim_motions)
@@ -265,21 +274,21 @@ class ThresholdConfig(Config):
         if not one_difficulty:
         # from easy to hard
             # determines the orientation change in degrees
-            self.ori_difficulties = {(self.stim_oris[0], 'easy'): 30,
-                                     (self.stim_oris[1], 'easy'): 30,
-                                     (self.stim_oris[0], 'hard'): 20,
-                                     (self.stim_oris[1], 'hard'): 20}
+            self.ori_difficulties = {(self.stim_oris[0], .85): 30,
+                                     (self.stim_oris[1], .85): 30,
+                                     (self.stim_oris[0], .7): 20,
+                                     (self.stim_oris[1], .7): 20}
             # motion speeds
-            self.speed_difficulties = {(self.stim_motions[0], 'easy'): .08,
-                                     (self.stim_motions[1], 'easy'): .08,
-                                     (self.stim_motions[0], 'hard'): .04,
-                                     (self.stim_motions[1], 'hard'): .04}
+            self.speed_difficulties = {(self.stim_motions[0], .85): .08,
+                                     (self.stim_motions[1], .85): .08,
+                                     (self.stim_motions[0], .7): .04,
+                                     (self.stim_motions[1], .7): .04}
         else:
-            self.ori_difficulties = {(self.stim_oris[0], 'medium'): 30,
-                                     (self.stim_oris[1], 'medium'): 30}
+            self.ori_difficulties = {(self.stim_oris[0], .775): 30,
+                                     (self.stim_oris[1], .775): 30}
             # motion speeds
-            self.speed_difficulties = {(self.stim_motions[0], 'medium'): .06,
-                                        (self.stim_motions[1], 'medium'): .06}
+            self.speed_difficulties = {(self.stim_motions[0], .775): .06,
+                                        (self.stim_motions[1], .775): .06}
             
         # calculate exp len
         num_stims = len(self.ori_difficulties)*len(self.speed_difficulties)\
