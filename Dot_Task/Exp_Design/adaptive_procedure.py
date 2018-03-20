@@ -158,7 +158,7 @@ class adaptiveThreshold(BaseExp):
                              'trial_time':  pause_time})
         return pause_time
     
-    def presentTrial(self, trial, practice=False, decision_var=None):
+    def presentTrial(self, trial, practice=False, static_decision=None):
         """
         This function presents a stimuli, waits for a response, tracks the
         response and RT and presents appropriate feedback. 
@@ -183,20 +183,20 @@ class adaptiveThreshold(BaseExp):
             strength = stim["oriStrength"]
             pedestal = stim["oriBase"]
             difficulties = self.ori_difficulties
-        if decision_var is None:
+        if static_decision is None:
             tracker_key = (pedestal,strength)
             tracker = self.trackers[tracker_key]
             decision_var = next(tracker)
         else:
-            decision_var = decision_var
+            decision_var = static_decision
         difficulties[(pedestal,strength)] = decision_var
         trial['decision_var'] = decision_var
         # get stim attributes
         trial_attributes = self.getTrialAttributes(stim)
         trial['stim'].update(trial_attributes)
         # print useful information about trial
-        print('*'*40)
         """
+        print('*'*40)
         print('Trial: %s' % str(trial['trial_count']))
         print('Tracker: %s' % str(tracker_key), 'Best Guess: %s' % tracker.mean()) 
         print('Taskset: %s, choice value: %s\nSpeed: %s, Strength: %s \
@@ -219,20 +219,20 @@ class adaptiveThreshold(BaseExp):
         if key_response:
             # record response
             trial['response'], trial['rt'] = key_response
-            print('Choice: %s' % trial['response'])
             # get feedback and update tracker
             correct_choice = self.getCorrectChoice(trial_attributes,trial['ts'])
             #update tracker if in trial mode
             if correct_choice == trial['response']:
                 FB = trial['reward_amount']
-                if not practice:
+                if not practice and static_decision is None:
                     tracker.addResponse(1)
             else:
                 FB = trial['punishment_amount']
-                if not practice:
+                if not practice and static_decision is None:
                     tracker.addResponse(0)
             # add current tracker estimate
-            trial['quest_estimate'] = tracker.mean()
+            if not practice and static_decision is None:
+                trial['quest_estimate'] = tracker.mean()
             # record points for bonus
             if not practice:
                 self.pointtracker += FB
@@ -252,7 +252,7 @@ class adaptiveThreshold(BaseExp):
         # If subject did not respond within the stimulus window clear the stim
         # and admonish the subject
         else:
-            if not practice:
+            if not practice and static_decision is None:
                 tracker.addResponse(0)
             if trial['displayFB'] == True:
                 if trial['FBonset'] > 0: 
@@ -334,7 +334,7 @@ class adaptiveThreshold(BaseExp):
                     key_response=event.getKeys([self.quit_key])
                     if len(key_response)==1:
                         self.shutDownEarly()
-            self.presentTrial(trial, practice=True)
+            self.presentTrial(trial.copy(), practice=True)
         self.presentInstruction(
             """
             Done with practice. Wait for the experimenter
@@ -346,7 +346,7 @@ class adaptiveThreshold(BaseExp):
         elif self.ts == 'orientation':
             decision_var = 30      
         trial_timing = self.stimulusInfo[0:numTrials] #get timing from the first few trials
-        practice = np.random.choice(self.stimulusInfo, self.numTrials, replace=False) #get random trials
+        practice = np.random.choice(self.stimulusInfo, numTrials, replace=False) #get random trials
         # get ready
         self.presentTextToWindow('Get Ready!', size=.15)
         core.wait(1.5)
@@ -359,12 +359,20 @@ class adaptiveThreshold(BaseExp):
                     key_response=event.getKeys([self.quit_key])
                     if len(key_response)==1:
                         self.shutDownEarly()
-            self.presentTrial(trial, practice=False, decision_var=decision_var)
+            self.presentTrial(trial.copy(), practice=False, static_decision=decision_var)
 
-    def run_estimation(self):
-        # get ready
-        self.presentTextToWindow('Get Ready!', size=.15)
-        core.wait(1.5)
+    def run_estimation(self, intro=True):
+        # set up pause trials
+        length_min = self.stimulusInfo[-1]['onset']/60
+        # have break every 6 minutes
+        num_pauses = np.round(length_min/6)
+        pause_trials = np.round(np.linspace(0,self.exp_len,num_pauses+1))[1:-1]
+        pause_time = 0
+        
+        if intro:
+            # get ready
+            self.presentTextToWindow('Get Ready!', size=.15)
+            core.wait(1.5)
         # start the task
         self.expClock.reset()
         self.clearWindow(fixation=True)
@@ -381,18 +389,12 @@ class adaptiveThreshold(BaseExp):
     def run_task(self, practice=False, estimate_lapse=False, eyetracker=False):
         self.setupWindow()
         self.defineStims()
-        # set up pause trials
-        length_min = self.stimulusInfo[-1]['onset']/60
-        # have break every 6 minutes
-        num_pauses = np.round(length_min/6)
-        pause_trials = np.round(np.linspace(0,self.exp_len,num_pauses+1))[1:-1]
-        pause_time = 0
         # set up eyetracker
         if eyetracker:
             from Dot_Task.pylinkwrapper.connector import Connect
             conn = Connect(self.win, 'eyetest')
             conn.calibrate()
-        
+        # run practice
         if practice:
             self.run_practice()
         else:
@@ -402,7 +404,7 @@ class adaptiveThreshold(BaseExp):
         if estimate_lapse:
             self.run_super_threshold()
         # run the estimation procedure
-        self.run_estimate()
+        self.run_estimation(intro=not estimate_lapse)
         # clean up and save
         other_data={'taskinfo': self.taskinfo,
                     'configfile': self.config_file,
