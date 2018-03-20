@@ -65,7 +65,7 @@ def get_plot_info(subjid):
                               'df': df}
     return plot_info
     
-def plot_threshold_run(subjid, responseFun='Weibull'):
+def plot_threshold_run(subjid, responseFun='lapseWeibull'):
     colors = ['m', 'c']
     plot_info = get_plot_info(subjid)
     sns.set_context('poster')
@@ -78,6 +78,7 @@ def plot_threshold_run(subjid, responseFun='Weibull'):
                             marker='o',
                             linestyle="None",
                             c=colors[i])
+        xlim = axes[0][i].get_xlim()
         # plot response fun fit
         fitResponseCurve, metrics = fit_response_fun(plot_info[key]['df'],
                                                      kind=responseFun)
@@ -85,7 +86,7 @@ def plot_threshold_run(subjid, responseFun='Weibull'):
         axes[0][i].set_ylabel('Accuracy', fontsize=24)
         axes[0][i].set_xlabel('Decision Var', fontsize=24)
         axes[0][i].set_title(key.title(), fontsize=30, y=1.05)
-        
+        axes[0][i].set_xlim(*xlim)
         # plot choice proportion
         axes[1][i].errorbar(plot_info[key]['bin_response'].index, 
                             plot_info[key]['bin_response']['mean'], 

@@ -25,7 +25,7 @@ def response_probs(responseFun, X):
 def fit_response_fun(df, kind='lapseWeibull', fit_kwargs={}):
     """ Fits a response function to accuracy data """ 
     df = df.query('exp_stage != "pause" and rt==rt')
-    sigma = [1]*len(df)
+    sigma = 1
     if kind == 'CumNorm':
         fun = FitCumNormal
     elif kind == 'Weibull':
@@ -36,6 +36,7 @@ def fit_response_fun(df, kind='lapseWeibull', fit_kwargs={}):
         fun = FitLapseWeibull
         #param guess
         fit_kwargs['guess'] = [df.quest_estimate.iloc[-1], 3.5, .05]
+        fit_kwargs['optimize_kws'] = {'bounds': ([-np.inf, -np.inf, 0], [np.inf, np.inf, 1])}
     out = fun(df.decision_var, df.FB, sigma, **fit_kwargs)
     probs = response_probs(out, df.decision_var)
     loss = log_loss(df.FB, probs)
