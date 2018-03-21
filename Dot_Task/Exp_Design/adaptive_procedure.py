@@ -10,10 +10,13 @@ import json
 import numpy as np
 from psychopy import core, event
 from psychopy.data import QuestHandler, StairHandler
+import os
 import subprocess
 import sys
 from Dot_Task.Exp_Design.BaseExp import BaseExp
 from Dot_Task.Exp_Design.flowstim import OpticFlow
+from Dot_Task.Exp_Design.utils import get_total_trials, get_tracker_data
+from Dot_Task.Analysis.utils import fit_response_fun
 
 class adaptiveThreshold(BaseExp):
     """ class defining a probabilistic context task
@@ -128,6 +131,15 @@ class adaptiveThreshold(BaseExp):
                     trackers[k] = trackers[difficulty_keys[0]]
         return trackers
     
+    def get_response_intensity(self, desired_acc):
+        responses, intensities = get_tracker_data(self.trackers)
+        estimate = self.alldata[-1]['quest_estimate']
+        out, metrics = fit_response_fun(responses,
+                                        intensities,
+                                        estimate)
+        return out.inverse(desired_acc)
+        
+        
     def presentPause(self):
         pauseClock = core.Clock()
         timer_text = "Take a break!\n\nContinue in: \n\n       "
@@ -140,7 +152,7 @@ class adaptiveThreshold(BaseExp):
                              'trial_time':  pause_time})
         return pause_time
     
-    def presentTrial(self, trial, practice=False, static_decision=None):
+    def presentTrial(self, trial, practice=False, intensity=None):
         """
         This function presents a stimuli, waits for a response, tracks the
         response and RT and presents appropriate feedback. 
@@ -165,12 +177,12 @@ class adaptiveThreshold(BaseExp):
             strength = stim["oriStrength"]
             pedestal = stim["oriBase"]
             difficulties = self.ori_difficulties
-        if static_decision is None:
+        if intensity is None:
             tracker_key = (pedestal,strength)
             tracker = self.trackers[tracker_key]
             decision_var = next(tracker)
         else:
-            decision_var = static_decision
+            decision_var = intensity
         difficulties[(pedestal,strength)] = decision_var
         trial['decision_var'] = decision_var
         # get stim attributes
@@ -206,14 +218,14 @@ class adaptiveThreshold(BaseExp):
             #update tracker if in trial mode
             if correct_choice == trial['response']:
                 FB = trial['reward_amount']
-                if not practice and static_decision is None:
-                    tracker.addResponse(1)
+                if not practice:
+                    tracker.addResponse(1, intensity=decision_var)
             else:
                 FB = trial['punishment_amount']
-                if not practice and static_decision is None:
-                    tracker.addResponse(0)
+                if not practice:
+                    tracker.addResponse(0, intensity=decision_var)
             # add current tracker estimate
-            if not practice and static_decision is None:
+            if not practice and intensity is None:
                 trial['quest_estimate'] = tracker.mean()
             # record points for bonus
             if not practice:
@@ -234,7 +246,7 @@ class adaptiveThreshold(BaseExp):
         # If subject did not respond within the stimulus window clear the stim
         # and admonish the subject
         else:
-            if not practice and static_decision is None:
+            if not practice and intensity is None:
                 tracker.addResponse(0)
             if trial['displayFB'] == True:
                 if trial['FBonset'] > 0: 
@@ -343,22 +355,28 @@ class adaptiveThreshold(BaseExp):
                         self.shutDownEarly()
             self.presentTrial(deepcopy(trial), practice=False, static_decision=decision_var)
 
-    def run_estimation(self, intro=True):
+    def run_estimation(self, intro=True, prop_estimate=.7):
         # set up pause trials
         length_min = self.stimulusInfo[-1]['onset']/60
         # have break every 6 minutes
         num_pauses = np.round(length_min/6)
         pause_trials = np.round(np.linspace(0,self.exp_len,num_pauses+1))[1:-1]
         pause_time = 0
-        
+        # get the total number of trials already run on this subject
+        starting_trial_num = get_total_trials(self.trackers)
         if intro:
             # get ready
             self.presentTextToWindow('Get Ready!', size=.15)
             core.wait(1.5)
+        # randomly set some trials to sample from response function
+        N = len(self.stimulusInfo)
+        response_samples = [.6, .7, .85, .95]*int(N*(1-prop_estimate)/4)
+        trial_type = ['estimate']*(N-len(response_samples)) + response_samples
+        np.random.shuffle(trial_type)
         # start the task
         self.expClock.reset()
         self.clearWindow(fixation=True)
-        for trial in self.stimulusInfo:
+        for i, trial in enumerate(self.stimulusInfo):
             if trial['trial_count'] in pause_trials:
                 pause_time += self.presentPause()
             # wait for onset time
@@ -366,9 +384,16 @@ class adaptiveThreshold(BaseExp):
                 key_response=event.getKeys([self.quit_key])
                 if len(key_response)==1:
                     self.shutDownEarly()
-            self.presentTrial(trial)
-
-    def run_task(self, practice=False, estimate_lapse=False, eyetracker=False):
+            if trial_type[i] == 'estimate' or (starting_trial_num+i+0) < 50:
+                trial['trial_type'] = 'threshold_estimation'
+                self.presentTrial(trial)
+            else:
+                desired_acc = trial_type[i]
+                trial['trial_type'] = 'intensity%s' % int(desired_acc)
+                intensity = self.get_response_intensity(desired_acc)
+                self.presentTrial(trial, intensity=intensity)
+                
+    def run_task(self, practice=False,  eyetracker=False):
         self.setupWindow()
         self.defineStims()
         # set up eyetracker
@@ -381,12 +406,8 @@ class adaptiveThreshold(BaseExp):
             self.run_practice()
         else:
             self.presentInstruction(self.ts.title(), size=.15)
-        # estimate lapse if this is the first run for the subject (trackers have no data)
-        estimate_lapse = np.sum([len(v.data) for v in self.trackers.values()]) == 0
-        if estimate_lapse:
-            self.run_super_threshold()
         # run the estimation procedure
-        self.run_estimation(intro=not estimate_lapse)
+        self.run_estimation(intro=True)
         # clean up and save
         other_data={'taskinfo': self.taskinfo,
                     'configfile': self.config_file,

@@ -38,6 +38,26 @@ def get_tracker_estimates(subjid=None, trackers=None):
             estimates[dim][subkey] = subvalue.mean()
     return estimates
 
+def get_tracker_data(trackers):
+    loaded_trackers = []
+    responses = []
+    intensities = []
+    for k,v in trackers.items():
+        if v not in loaded_trackers:
+            responses += v.data
+            intensities += v.intensities
+        loaded_trackers.append(v)
+    return responses, intensities
+        
+def get_total_trials(trackers):
+    loaded_trackers = []
+    trials = 0
+    for k,v in trackers.items():
+        if v not in loaded_trackers:
+            trials += len(v.data)
+        loaded_trackers.append(v)
+    return trials
+    
 def get_response_curve(subjid):
     responseCurves = {}
     for dim in ['motion', 'orientation']:

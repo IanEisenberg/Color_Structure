@@ -22,9 +22,9 @@ def response_probs(responseFun, X):
    probs = [[1-i, i] for i in probs]
    return probs
 
-def fit_response_fun(df, kind='lapseWeibull', fit_kwargs=None):
+def fit_response_fun(responses, intensities, threshold_estimate,
+                     kind='lapseWeibull', fit_kwargs=None):
     """ Fits a response function to accuracy data """ 
-    df = df.query('exp_stage != "pause" and rt==rt')
     sigma = 1
     fit_kwargs = {}
     if fit_kwargs is None:
@@ -34,16 +34,16 @@ def fit_response_fun(df, kind='lapseWeibull', fit_kwargs=None):
     elif kind == 'Weibull':
         fun = FitWeibull
         #param guess
-        fit_kwargs['guess'] = [df.quest_estimate.iloc[-1], 3.5]
+        fit_kwargs['guess'] = [threshold_estimate, 3.5]
     elif kind == 'lapseWeibull':
         fun = FitLapseWeibull
         #param guess
-        fit_kwargs['guess'] = [df.quest_estimate.iloc[-1], 3.5, .05]
+        fit_kwargs['guess'] = [threshold_estimate, 3.5, .05]
         fit_kwargs['optimize_kws'] = {'bounds': ([-np.inf, -np.inf, 0], [np.inf, np.inf, 1])}
-    out = fun(df.decision_var, df.FB, sigma, **fit_kwargs)
-    probs = response_probs(out, df.decision_var)
-    loss = log_loss(df.FB, probs)
-    accuracy = accuracy_score(df.FB, [i>.5 for i in list(out.eval(df.decision_var))])
+    out = fun(intensities, responses, sigma, **fit_kwargs)
+    probs = response_probs(out, intensities)
+    loss = log_loss(responses, probs)
+    accuracy = accuracy_score(responses, [i>.5 for i in list(out.eval(intensities))])
     return out, {'log-loss': loss,
                  'accuracy': accuracy}
 
