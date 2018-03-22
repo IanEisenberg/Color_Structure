@@ -39,7 +39,8 @@ def fit_response_fun(responses, intensities, threshold_estimate,
         fun = FitLapseWeibull
         #param guess
         fit_kwargs['guess'] = [threshold_estimate, 3.5, .05]
-        fit_kwargs['optimize_kws'] = {'bounds': ([-np.inf, -np.inf, 0], [np.inf, np.inf, 1])}
+        fit_kwargs['optimize_kws'] = {'bounds': ([-np.inf, -np.inf, 0], 
+                                                  [np.inf, np.inf, 1])}
     out = fun(intensities, responses, sigma, **fit_kwargs)
     probs = response_probs(out, intensities)
     loss = log_loss(responses, probs)

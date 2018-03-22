@@ -17,6 +17,7 @@ from Dot_Task.Exp_Design.BaseExp import BaseExp
 from Dot_Task.Exp_Design.flowstim import OpticFlow
 from Dot_Task.Exp_Design.utils import get_total_trials, get_tracker_data
 from Dot_Task.Analysis.utils import fit_response_fun
+np.set_printoptions(precision=4, suppress=True)
 
 class adaptiveThreshold(BaseExp):
     """ class defining a probabilistic context task
@@ -34,6 +35,9 @@ class adaptiveThreshold(BaseExp):
         self.num_practice = num_practice
         self.pointtracker = 0
         self.track_response = []
+        
+        # holds responseFun
+        self.responseFun = None
         
         #looks up the hash of the most recent git push. Stored in log file
         self.gitHash = subprocess.check_output(['git','rev-parse','--short','HEAD'])[:-1]
@@ -131,13 +135,26 @@ class adaptiveThreshold(BaseExp):
                     trackers[k] = trackers[difficulty_keys[0]]
         return trackers
     
-    def get_response_intensity(self, desired_acc):
-        responses, intensities = get_tracker_data(self.trackers)
-        estimate = self.alldata[-1]['quest_estimate']
+    def defineResponseFun(self):
+        responses, intensities = get_tracker_data(self.trackers, N=200)
+        estimate = list(self.trackers.values())[0].mean()
         out, metrics = fit_response_fun(responses,
                                         intensities,
                                         estimate)
-        return out.inverse(desired_acc)
+        print("Response Fit, params: %s" % out.params)
+        accept = input('Accept Parameters?: y/n: ')=='y'
+        if accept is False:
+            new_params = input('Enter new parameters separated by spaces, or enter for default: ')
+            if new_params == '':
+                default = .01 if self.ts=='motion' else 8
+                new_params = [default, 3.5, .05]
+            else:
+                new_params = [float(i) for i in new_params.split(' ')]
+            out.params = new_params
+        self.responseFun = out
+    
+    def get_response_intensity(self, desired_acc):
+        return self.responseFun.inverse(desired_acc)
         
         
     def presentPause(self):
@@ -177,9 +194,9 @@ class adaptiveThreshold(BaseExp):
             strength = stim["oriStrength"]
             pedestal = stim["oriBase"]
             difficulties = self.ori_difficulties
+        tracker_key = (pedestal,strength)
+        tracker = self.trackers[tracker_key]
         if intensity is None:
-            tracker_key = (pedestal,strength)
-            tracker = self.trackers[tracker_key]
             decision_var = next(tracker)
         else:
             decision_var = intensity
@@ -189,9 +206,9 @@ class adaptiveThreshold(BaseExp):
         trial_attributes = self.getTrialAttributes(stim)
         trial['stim'].update(trial_attributes)
         # print useful information about trial
-        """
         print('*'*40)
-        print('Trial: %s' % str(trial['trial_count']))
+        print('Trial: %s, %s' % (str(trial['trial_count']), trial['trial_type']))
+        """
         print('Tracker: %s' % str(tracker_key), 'Best Guess: %s' % tracker.mean()) 
         print('Taskset: %s, choice value: %s\nSpeed: %s, Strength: %s \
               \nOriDirection: %s, OriStrength: %s \
@@ -246,8 +263,8 @@ class adaptiveThreshold(BaseExp):
         # If subject did not respond within the stimulus window clear the stim
         # and admonish the subject
         else:
-            if not practice and intensity is None:
-                tracker.addResponse(0)
+            if not practice:
+                tracker.addResponse(0, intensity=decision_var)
             if trial['displayFB'] == True:
                 if trial['FBonset'] > 0: 
                     self.clearWindow(fixation=True)
@@ -355,7 +372,7 @@ class adaptiveThreshold(BaseExp):
                         self.shutDownEarly()
             self.presentTrial(deepcopy(trial), practice=False, static_decision=decision_var)
 
-    def run_estimation(self, intro=True, prop_estimate=.7):
+    def run_estimation(self, intro=True, prop_estimate=.75):
         # set up pause trials
         length_min = self.stimulusInfo[-1]['onset']/60
         # have break every 6 minutes
@@ -363,16 +380,20 @@ class adaptiveThreshold(BaseExp):
         pause_trials = np.round(np.linspace(0,self.exp_len,num_pauses+1))[1:-1]
         pause_time = 0
         # get the total number of trials already run on this subject
-        starting_trial_num = get_total_trials(self.trackers)
         if intro:
             # get ready
             self.presentTextToWindow('Get Ready!', size=.15)
             core.wait(1.5)
         # randomly set some trials to sample from response function
+        # ensure that at least 50 trials were collected before sampling from
+        # response function
         N = len(self.stimulusInfo)
-        response_samples = [.6, .7, .85, .95]*int(N*(1-prop_estimate)/4)
-        trial_type = ['estimate']*(N-len(response_samples)) + response_samples
-        np.random.shuffle(trial_type)
+        if self.responseFun is not None:
+            response_samples = [.65, .7, .85, .95]*int(N*(1-prop_estimate)/4)
+            trial_type = ['estimate']*(N-len(response_samples)) + response_samples
+            np.random.shuffle(trial_type)
+        else:
+            trial_type = ['estimate']*N
         # start the task
         self.expClock.reset()
         self.clearWindow(fixation=True)
@@ -384,16 +405,19 @@ class adaptiveThreshold(BaseExp):
                 key_response=event.getKeys([self.quit_key])
                 if len(key_response)==1:
                     self.shutDownEarly()
-            if trial_type[i] == 'estimate' or (starting_trial_num+i+0) < 50:
+            # if currently estimating, or there are few trials...
+            if trial_type[i] == 'estimate':
                 trial['trial_type'] = 'threshold_estimation'
                 self.presentTrial(trial)
             else:
                 desired_acc = trial_type[i]
-                trial['trial_type'] = 'intensity%s' % int(desired_acc)
+                trial['trial_type'] = 'intensity-%s' % int(desired_acc*100)
                 intensity = self.get_response_intensity(desired_acc)
                 self.presentTrial(trial, intensity=intensity)
                 
     def run_task(self, practice=False,  eyetracker=False):
+        if get_total_trials(self.trackers) > 100:
+            self.defineResponseFun()
         self.setupWindow()
         self.defineStims()
         # set up eyetracker

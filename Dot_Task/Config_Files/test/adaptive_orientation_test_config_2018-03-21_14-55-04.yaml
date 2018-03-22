@@ -1,0 +1,279 @@
+- action_keys: [down, up, left, right]
+  base_speed: 0.12
+  clearAfterResponse: 1
+  exp_len: 16
+  ori_difficulties:
+    ? !!python/tuple [-60, 0.775]
+    : 30
+    ? !!python/tuple [30, 0.775]
+    : 30
+  quit_key: q
+  responseWindow: 1.0
+  speed_difficulties:
+    ? !!python/tuple [in, 0.775]
+    : 0.06
+    ? !!python/tuple [out, 0.775]
+    : 0.06
+  stim_ids:
+  - {motionDirection: in, oriBase: -60, oriDirection: -1, oriStrength: 0.775, speedDirection: -1,
+    speedStrength: 0.775}
+  - {motionDirection: in, oriBase: -60, oriDirection: -1, oriStrength: 0.775, speedDirection: 1,
+    speedStrength: 0.775}
+  - {motionDirection: in, oriBase: -60, oriDirection: 1, oriStrength: 0.775, speedDirection: -1,
+    speedStrength: 0.775}
+  - {motionDirection: in, oriBase: -60, oriDirection: 1, oriStrength: 0.775, speedDirection: 1,
+    speedStrength: 0.775}
+  - {motionDirection: in, oriBase: 30, oriDirection: -1, oriStrength: 0.775, speedDirection: -1,
+    speedStrength: 0.775}
+  - {motionDirection: in, oriBase: 30, oriDirection: -1, oriStrength: 0.775, speedDirection: 1,
+    speedStrength: 0.775}
+  - {motionDirection: in, oriBase: 30, oriDirection: 1, oriStrength: 0.775, speedDirection: -1,
+    speedStrength: 0.775}
+  - {motionDirection: in, oriBase: 30, oriDirection: 1, oriStrength: 0.775, speedDirection: 1,
+    speedStrength: 0.775}
+  - {motionDirection: out, oriBase: -60, oriDirection: -1, oriStrength: 0.775, speedDirection: -1,
+    speedStrength: 0.775}
+  - {motionDirection: out, oriBase: -60, oriDirection: -1, oriStrength: 0.775, speedDirection: 1,
+    speedStrength: 0.775}
+  - {motionDirection: out, oriBase: -60, oriDirection: 1, oriStrength: 0.775, speedDirection: -1,
+    speedStrength: 0.775}
+  - {motionDirection: out, oriBase: -60, oriDirection: 1, oriStrength: 0.775, speedDirection: 1,
+    speedStrength: 0.775}
+  - {motionDirection: out, oriBase: 30, oriDirection: -1, oriStrength: 0.775, speedDirection: -1,
+    speedStrength: 0.775}
+  - {motionDirection: out, oriBase: 30, oriDirection: -1, oriStrength: 0.775, speedDirection: 1,
+    speedStrength: 0.775}
+  - {motionDirection: out, oriBase: 30, oriDirection: 1, oriStrength: 0.775, speedDirection: -1,
+    speedStrength: 0.775}
+  - {motionDirection: out, oriBase: 30, oriDirection: 1, oriStrength: 0.775, speedDirection: 1,
+    speedStrength: 0.775}
+  stim_motions: [in, out]
+  stim_oris: [-60, 30]
+  subjid: test
+  taskname: adaptive_orientation
+  trigger_key: '5'
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.9789786882101534
+  displayFB: true
+  onset: 2
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: in, oriBase: -60, oriDirection: -1, oriStrength: 0.775,
+    speedDirection: -1, speedStrength: 0.775}
+  stimResponseInterval: 0.9909404914690483
+  stimulusDuration: 1.5
+  trial_count: 1
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.554886512064741
+  displayFB: true
+  onset: 7.469919179679202
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: in, oriBase: -60, oriDirection: 1, oriStrength: 0.775, speedDirection: -1,
+    speedStrength: 0.775}
+  stimResponseInterval: 0.2759102686902334
+  stimulusDuration: 1.5
+  trial_count: 2
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.21948693108532236
+  displayFB: true
+  onset: 11.800715960434177
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: in, oriBase: 30, oriDirection: -1, oriStrength: 0.775, speedDirection: -1,
+    speedStrength: 0.775}
+  stimResponseInterval: 0.605570780268228
+  stimulusDuration: 1.5
+  trial_count: 3
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.8953694783576609
+  displayFB: true
+  onset: 16.125773671787726
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: out, oriBase: -60, oriDirection: -1, oriStrength: 0.775,
+    speedDirection: 1, speedStrength: 0.775}
+  stimResponseInterval: 0.11016424719562568
+  stimulusDuration: 1.5
+  trial_count: 4
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.8732482306731453
+  displayFB: true
+  onset: 20.63130739734101
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: in, oriBase: 30, oriDirection: 1, oriStrength: 0.775, speedDirection: -1,
+    speedStrength: 0.775}
+  stimResponseInterval: 0.7203603521967927
+  stimulusDuration: 1.5
+  trial_count: 5
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.848414427583474
+  displayFB: true
+  onset: 25.72491598021095
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: out, oriBase: 30, oriDirection: -1, oriStrength: 0.775,
+    speedDirection: -1, speedStrength: 0.775}
+  stimResponseInterval: 0.2629921909780115
+  stimulusDuration: 1.5
+  trial_count: 6
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.9393625469844946
+  displayFB: true
+  onset: 30.336322598772437
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: in, oriBase: -60, oriDirection: -1, oriStrength: 0.775,
+    speedDirection: 1, speedStrength: 0.775}
+  stimResponseInterval: 0.6214255476351451
+  stimulusDuration: 1.5
+  trial_count: 7
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.6271093933415726
+  displayFB: true
+  onset: 35.39711069339208
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: out, oriBase: -60, oriDirection: 1, oriStrength: 0.775,
+    speedDirection: -1, speedStrength: 0.775}
+  stimResponseInterval: 0.9376324632009996
+  stimulusDuration: 1.5
+  trial_count: 8
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.4649444105535342
+  displayFB: true
+  onset: 40.461852549934655
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: out, oriBase: -60, oriDirection: 1, oriStrength: 0.775,
+    speedDirection: 1, speedStrength: 0.775}
+  stimResponseInterval: 0.43756403578588565
+  stimulusDuration: 1.5
+  trial_count: 9
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.39574241427521895
+  displayFB: true
+  onset: 44.86436099627407
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: out, oriBase: 30, oriDirection: 1, oriStrength: 0.775, speedDirection: -1,
+    speedStrength: 0.775}
+  stimResponseInterval: 0.33831239096270094
+  stimulusDuration: 1.5
+  trial_count: 10
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.15287713965621774
+  displayFB: true
+  onset: 49.09841580151199
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: out, oriBase: 30, oriDirection: -1, oriStrength: 0.775,
+    speedDirection: 1, speedStrength: 0.775}
+  stimResponseInterval: 0.5921670841500908
+  stimulusDuration: 1.5
+  trial_count: 11
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.77146629654072
+  displayFB: true
+  onset: 53.3434600253183
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: out, oriBase: 30, oriDirection: 1, oriStrength: 0.775, speedDirection: 1,
+    speedStrength: 0.775}
+  stimResponseInterval: 0.7278151887719297
+  stimulusDuration: 1.5
+  trial_count: 12
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.2126210339764596
+  displayFB: true
+  onset: 58.34274151063095
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: out, oriBase: -60, oriDirection: -1, oriStrength: 0.775,
+    speedDirection: -1, speedStrength: 0.775}
+  stimResponseInterval: 0.16009316459046963
+  stimulusDuration: 1.5
+  trial_count: 13
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.3812959262999881
+  displayFB: true
+  onset: 62.21545570919788
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: in, oriBase: 30, oriDirection: 1, oriStrength: 0.775, speedDirection: 1,
+    speedStrength: 0.775}
+  stimResponseInterval: 0.8418157483619919
+  stimulusDuration: 1.5
+  trial_count: 14
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.9195326657208716
+  displayFB: true
+  onset: 66.93856738385986
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: in, oriBase: 30, oriDirection: -1, oriStrength: 0.775, speedDirection: 1,
+    speedStrength: 0.775}
+  stimResponseInterval: 0.1998931998712128
+  stimulusDuration: 1.5
+  trial_count: 15
+  ts: orientation
+- FBDuration: 0.5
+  FBonset: 0
+  ITI: 0.04014863764424936
+  displayFB: true
+  onset: 71.55799324945195
+  punishment_amount: 0
+  responseWindow: 1.5
+  reward_amount: 1
+  stim: {motionDirection: in, oriBase: -60, oriDirection: 1, oriStrength: 0.775, speedDirection: 1,
+    speedStrength: 0.775}
+  stimResponseInterval: 0.4863649257585434
+  stimulusDuration: 1.5
+  trial_count: 16
+  ts: orientation

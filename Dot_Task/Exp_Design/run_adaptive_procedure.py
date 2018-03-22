@@ -21,11 +21,7 @@ from Dot_Task.Exp_Design.make_config import ThresholdConfig
 # set-up variables
 # ****************************************************************************
 #get subject id
-print('Enter the subject ID')
-subjid = input('subject id: ')
-
-motion_on = True
-orientation_on = True 
+subjid = input('Enter the subject ID: ')
 practice_on = False
 eyetracker_on = False
 one_difficulty=True
@@ -44,7 +40,7 @@ win_kwargs = {'fullscr': False,
               'size': [1920, 1080]}
 
 # randomize ts order (which ts is associated with top of screen)
-first_task = 'motion' if r.random() > .5 else 'orientation'
+first_task = 'motion' #if r.random() > .5 else 'orientation'
 
 def setup_task(trackers, dim='motion', 
                speed_difficulties=None, ori_difficulties=None):

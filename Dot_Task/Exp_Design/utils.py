@@ -1,6 +1,5 @@
 import pickle
 from glob import glob
-import numpy as np
 import os
 from psychopy import monitors
 from Dot_Task.Analysis.load_data import load_threshold_data
@@ -38,7 +37,7 @@ def get_tracker_estimates(subjid=None, trackers=None):
             estimates[dim][subkey] = subvalue.mean()
     return estimates
 
-def get_tracker_data(trackers):
+def get_tracker_data(trackers, N=None):
     loaded_trackers = []
     responses = []
     intensities = []
@@ -47,6 +46,9 @@ def get_tracker_data(trackers):
             responses += v.data
             intensities += v.intensities
         loaded_trackers.append(v)
+    if N:
+        responses = responses[-N:]
+        intensities = intensities[-N:]
     return responses, intensities
         
 def get_total_trials(trackers):

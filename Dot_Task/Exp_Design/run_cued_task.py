@@ -12,8 +12,7 @@ from Dot_Task.Exp_Design.utils import get_response_curve
 # ****************************************************************************
 # set-up variables
 # ****************************************************************************
-print('Enter the subject ID')
-subjid = input('subject id: ')
+subjid = input('Enter the subject ID: ')
 
 save_dir = '../Data' 
 cuename = 'cued_dot_task'

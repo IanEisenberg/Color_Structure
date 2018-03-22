@@ -92,9 +92,10 @@ def plot_threshold_run(subjid, responseFun='lapseWeibull'):
                             c=colors[i])
         xlim = axes[0][i].get_xlim()
         # plot response fun fit
+        estimate = .01 if key=='motion' else 8
         fitResponseCurve, metrics = fit_response_fun(plot_info[key]['df'].FB,
                                             plot_info[key]['df'].decision_var,
-                                            plot_info[key]['df'].quest_estimate[-1],
+                                            estimate,
                                             kind=responseFun)
         plot_response_fun(fitResponseCurve, axes[0][i], plot_kws={'c': colors[i]})
         axes[0][i].set_ylabel('Accuracy', fontsize=24)

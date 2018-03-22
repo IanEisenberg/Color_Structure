@@ -13,9 +13,7 @@ from utils import get_difficulties
 # ****************************************************************************
 # set-up variables
 # ****************************************************************************
-print('Enter the subject ID')
-subject_code = raw_input('subject id: ')
-
+subjid = input('Enter the subject ID: ')
 
 train_on = True
 test_on = False
