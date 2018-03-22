@@ -40,7 +40,7 @@ win_kwargs = {'fullscr': False,
               'size': [1920, 1080]}
 
 # randomize ts order (which ts is associated with top of screen)
-first_task = 'motion' #if r.random() > .5 else 'orientation'
+first_task = 'motion' if r.random() > .5 else 'orientation'
 
 def setup_task(trackers, dim='motion', 
                speed_difficulties=None, ori_difficulties=None):

@@ -22,13 +22,22 @@ def plot_choice_fun(clf, minval, maxval, ax=None, plot_kws={}):
     y = [i[1] for i in clf.predict_proba(X.reshape(-1,1))]
     ax.plot(X, y, **plot_kws)
     
-def plot_response_fun(responseFun, ax=None, plot_kws={}):
+def plot_response_fun(responseFun, ax=None, plot_kws=None):
+    if plot_kws is None:
+        plot_kws = {}
     if ax is None:
         f, ax = plt.subplots()
     X = np.linspace(0,responseFun.inverse(.99),100)
     y = [responseFun.eval(x) for x in X]
     ax.plot(X, y, **plot_kws)
-
+    # plot points of interest
+    y_points = [.7, .85]
+    x_points = [responseFun.inverse(i) for i in y_points]
+    ax.plot(x_points, y_points, 'o', color='red',
+            markeredgecolor='white', markeredgewidth=2, markersize=15,
+            zorder=10)
+    # add lines
+    
 def get_plot_info(subjid):
     plot_info = {}
     for dim in ['motion', 'orientation']:
@@ -88,14 +97,16 @@ def plot_threshold_run(subjid, responseFun='lapseWeibull'):
                             plot_info[key]['bin_accuracy']['mean'], 
                             yerr=plot_info[key]['bin_accuracy']['se'].tolist(), 
                             marker='o',
+                            markeredgecolor='white', 
+                            markeredgewidth=1.5,
                             linestyle="None",
-                            c=colors[i])
+                            c=colors[i],)
         xlim = axes[0][i].get_xlim()
         # plot response fun fit
-        estimate = .01 if key=='motion' else 8
+        init_estimate = .01 if key=='motion' else 8
         fitResponseCurve, metrics = fit_response_fun(plot_info[key]['df'].FB,
                                             plot_info[key]['df'].decision_var,
-                                            estimate,
+                                            init_estimate,
                                             kind=responseFun)
         plot_response_fun(fitResponseCurve, axes[0][i], plot_kws={'c': colors[i]})
         axes[0][i].set_ylabel('Accuracy', fontsize=24)
@@ -107,6 +118,8 @@ def plot_threshold_run(subjid, responseFun='lapseWeibull'):
                             plot_info[key]['bin_response']['mean'], 
                             yerr=plot_info[key]['bin_response']['se'].tolist(), 
                             marker='o',
+                            markeredgecolor='white', 
+                            markeredgewidth=1.5,
                             linestyle="None",
                             c=colors[i])
         # plot fit logistic function

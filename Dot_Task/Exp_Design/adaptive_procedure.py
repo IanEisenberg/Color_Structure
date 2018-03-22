@@ -137,17 +137,17 @@ class adaptiveThreshold(BaseExp):
     
     def defineResponseFun(self):
         responses, intensities = get_tracker_data(self.trackers, N=200)
-        estimate = list(self.trackers.values())[0].mean()
+        init_estimate = .01 if self.ts=='motion' else 8
         out, metrics = fit_response_fun(responses,
                                         intensities,
-                                        estimate)
+                                        init_estimate)
         print("Response Fit, params: %s" % out.params)
         accept = input('Accept Parameters?: y/n: ')=='y'
         if accept is False:
             new_params = input('Enter new parameters separated by spaces, or enter for default: ')
             if new_params == '':
-                default = .01 if self.ts=='motion' else 8
-                new_params = [default, 3.5, .05]
+                
+                new_params = [init_estimate, 3.5, .05]
             else:
                 new_params = [float(i) for i in new_params.split(' ')]
             out.params = new_params
@@ -242,7 +242,7 @@ class adaptiveThreshold(BaseExp):
                 if not practice:
                     tracker.addResponse(0, intensity=decision_var)
             # add current tracker estimate
-            if not practice and intensity is None:
+            if not practice:
                 trial['quest_estimate'] = tracker.mean()
             # record points for bonus
             if not practice:
