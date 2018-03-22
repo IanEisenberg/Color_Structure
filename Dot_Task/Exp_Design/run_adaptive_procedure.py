@@ -23,6 +23,7 @@ from Dot_Task.Exp_Design.make_config import ThresholdConfig
 #get subject id
 subjid = input('Enter the subject ID: ')
 practice_on = False
+estimate_on = True # If True, will use quest estimator
 eyetracker_on = False
 one_difficulty=True
 try:
@@ -76,10 +77,11 @@ else:
                            speed_difficulties=difficulties['motion'])
 last_task = None
 done = False
+prop_estimate = .6875 if estimate_on else 0
 while not done:
     done = curr_task.run_task(practice=practice_on,
                               eyetracker=eyetracker_on,
-                              prop_estimate=0)
+                              prop_estimate=prop_estimate)
     last_task = curr_task
     # update trackers and swap task
     if curr_task.ts == 'motion':
