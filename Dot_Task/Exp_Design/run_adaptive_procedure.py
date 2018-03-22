@@ -78,7 +78,8 @@ last_task = None
 done = False
 while not done:
     done = curr_task.run_task(practice=practice_on,
-                              eyetracker=eyetracker_on)
+                              eyetracker=eyetracker_on,
+                              prop_estimate=0)
     last_task = curr_task
     # update trackers and swap task
     if curr_task.ts == 'motion':

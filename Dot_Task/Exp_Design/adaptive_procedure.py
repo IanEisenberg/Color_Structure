@@ -123,6 +123,7 @@ class adaptiveThreshold(BaseExp):
                                              minVal=0.00001, 
                                              maxVal=maxVal,
                                              gamma=.5,
+                                             delta=.05,
                                              grain=maxVal/400.0,
                                              range=maxVal*2,
                                              beta=3.5,
@@ -424,7 +425,7 @@ class adaptiveThreshold(BaseExp):
                 intensity = self.get_response_intensity(desired_acc)
                 self.presentTrial(trial, intensity=intensity)
                 
-    def run_task(self, practice=False,  eyetracker=False):
+    def run_task(self, practice=False,  eyetracker=False, prop_estimate=.6875):
         if get_total_trials(self.trackers) > 100:
             self.defineResponseFun()
         self.setupWindow()
@@ -440,7 +441,7 @@ class adaptiveThreshold(BaseExp):
         else:
             self.presentInstruction(self.ts.title(), size=.15)
         # run the estimation procedure
-        self.run_estimation(intro=True)
+        self.run_estimation(intro=True, prop_estimate=prop_estimate)
         # clean up and save
         other_data={'taskinfo': self.taskinfo,
                     'configfile': self.config_file,

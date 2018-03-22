@@ -54,7 +54,7 @@ def get_plot_info(subjid, N=None):
     for dim in ['motion', 'orientation']:
         taskinfo, df = load_threshold_data(subjid, dim)
         if df is not None:
-            if N: df = df.iloc[-N:]
+            if N: df = df.iloc[-N:].query('rt==rt')
             # remove outliers
             subset = df.copy()
             """
