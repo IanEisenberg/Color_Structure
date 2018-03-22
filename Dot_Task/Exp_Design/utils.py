@@ -74,3 +74,32 @@ def get_monitor(distance=30, width=30):
     monitor.setSizePix([2560,1440])
     monitor.setWidth(60)
     return monitor
+
+def fix_trackers(subjid):
+    file_dir = os.path.dirname(__file__)
+    try:
+        motion_file = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
+                                        subjid, '*%s*motion*' % subjid)))[-1]
+        motion_data = pickle.load(open(motion_file,'rb'))
+        motion_trackers = motion_data['trackers']
+        print('Found Motion Trackers. Loading from file: %s\n' % motion_file)
+        taskdata = motion_data['taskdata']
+        tracker = list(motion_trackers.values())[0]
+        tracker.data = tracker.data[:128] + [i['FB'] for i in taskdata]       
+        tracker.intensities = tracker.intensities[:128] + [i['decision_var'] for i in taskdata]
+        pickle.dump(motion_data, open(motion_file, 'wb'))
+    except IndexError:
+        print('No motion file found')
+    try:
+        ori_file = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
+                                        subjid, '*%s*ori*' % subjid)))[-1]
+        ori_data = pickle.load(open(ori_file,'rb'))
+        ori_trackers = ori_data['trackers']
+        print('Found ori Trackers. Loading from file: %s\n' % ori_file)
+        taskdata = ori_data['taskdata']
+        tracker = list(ori_trackers.values())[0]
+        tracker.data = tracker.data[:128] + [i['FB'] for i in taskdata]       
+        tracker.intensities = tracker.intensities[:128] + [i['decision_var'] for i in taskdata]
+        pickle.dump(ori_data, open(ori_file, 'wb'))
+    except IndexError:
+        print('No ori file found')
