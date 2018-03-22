@@ -38,6 +38,7 @@ class adaptiveThreshold(BaseExp):
         
         # holds responseFun
         self.responseFun = None
+        self.acc_tiers = [.6, .7, .85, .95]
         
         #looks up the hash of the most recent git push. Stored in log file
         self.gitHash = subprocess.check_output(['git','rev-parse','--short','HEAD'])[:-1]
@@ -137,25 +138,34 @@ class adaptiveThreshold(BaseExp):
     
     def defineResponseFun(self):
         responses, intensities = get_tracker_data(self.trackers, N=200)
-        init_estimate = .01 if self.ts=='motion' else 8
+        init_estimate = .01 if self.ts=='motion' else 4
         out, metrics = fit_response_fun(responses,
                                         intensities,
                                         init_estimate)
+        # reset accuracy tiers based on response fun to account for reduced
+        # max accuracy as a function of lapse rate
+        max_acc = int(out.eval(np.inf)*100)/100.0
+        self.acc_tiers = [min(i, max_acc) for i in self.acc_tiers]
+        # define intensities
+        intensities = [(i, out.inverse(i)) for i in self.acc_tiers]
         print("Response Fit, params: %s" % out.params)
+        print("Intensities: %s" % intensities)
         accept = input('Accept Parameters?: y/n: ')=='y'
-        if accept is False:
+        while accept is False:
             new_params = input('Enter new parameters separated by spaces, or enter for default: ')
             if new_params == '':
-                
                 new_params = [init_estimate, 3.5, .05]
             else:
                 new_params = [float(i) for i in new_params.split(' ')]
             out.params = new_params
+            intensities = [(i, out.inverse(i)) for i in self.acc_tiers]
+            print("New Response Fit, params: %s" % out.params)
+            print("Intensities: %s" % intensities)
+            accept = input('Accept Parameters?: y/n: ')=='y'
         self.responseFun = out
     
     def get_response_intensity(self, desired_acc):
         return self.responseFun.inverse(desired_acc)
-        
         
     def presentPause(self):
         pauseClock = core.Clock()
@@ -371,7 +381,7 @@ class adaptiveThreshold(BaseExp):
                         self.shutDownEarly()
             self.presentTrial(deepcopy(trial), practice=False, static_decision=decision_var)
 
-    def run_estimation(self, intro=True, prop_estimate=.75):
+    def run_estimation(self, intro=True, prop_estimate=.6875):
         # set up pause trials
         length_min = self.stimulusInfo[-1]['onset']/60
         # have break every 6 minutes
@@ -388,7 +398,7 @@ class adaptiveThreshold(BaseExp):
         # response function
         N = len(self.stimulusInfo)
         if self.responseFun is not None:
-            response_samples = [.65, .7, .85, .95]*int(N*(1-prop_estimate)/4)
+            response_samples = self.acc_tiers*int(N*(1-prop_estimate)/4)
             trial_type = ['estimate']*(N-len(response_samples)) + response_samples
             np.random.shuffle(trial_type)
         else:

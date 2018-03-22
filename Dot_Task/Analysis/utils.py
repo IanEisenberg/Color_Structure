@@ -39,7 +39,7 @@ def fit_response_fun(responses, intensities, threshold_estimate,
         fun = FitLapseWeibull
         #param guess
         fit_kwargs['guess'] = [threshold_estimate, 3.5, .05]
-        fit_kwargs['optimize_kws'] = {'bounds': ([-np.inf, -np.inf, 0], 
+        fit_kwargs['optimize_kws'] = {'bounds': ([0, 0, 0], 
                                                   [np.inf, np.inf, 1])}
     out = fun(intensities, responses, sigma, **fit_kwargs)
     probs = response_probs(out, intensities)
@@ -78,5 +78,5 @@ class FitLapseWeibull(_baseFunctionFit):
     @staticmethod
     def _inverse(yy, alpha, beta, lapse):
         global _chance
-        xx = alpha * (-np.log(old_div((1.0 - yy), (1 - _chance - lapse)))) ** (old_div(1.0, beta))
+        xx = alpha * (-np.log(old_div((1.0 - lapse - yy), (1 - _chance - lapse)))) ** (old_div(1.0, beta))
         return xx

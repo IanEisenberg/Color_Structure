@@ -23,11 +23,18 @@ def plot_choice_fun(clf, minval, maxval, ax=None, plot_kws={}):
     ax.plot(X, y, **plot_kws)
     
 def plot_response_fun(responseFun, ax=None, plot_kws=None):
+    xlim = None
     if plot_kws is None:
         plot_kws = {}
+    max_acc = responseFun.eval(np.inf)
+    maxX = responseFun.inverse(max_acc-.001)
+    minX = responseFun.inverse(.51)
     if ax is None:
         f, ax = plt.subplots()
-    X = np.linspace(0,responseFun.inverse(.99),100)
+    else:
+        xlim = ax.get_xlim()
+        maxX = xlim[1]        
+    X = np.linspace(minX,maxX,100)
     y = [responseFun.eval(x) for x in X]
     ax.plot(X, y, **plot_kws)
     # plot points of interest
@@ -36,13 +43,18 @@ def plot_response_fun(responseFun, ax=None, plot_kws=None):
     ax.plot(x_points, y_points, 'o', color='blue',
             markeredgecolor='white', markeredgewidth=2, markersize=15,
             zorder=10)
-    # add lines
+    if xlim:
+        maxX = max(xlim[1], X[-1])
+        ax.set_xlim(minX, maxX)
+
     
-def get_plot_info(subjid):
+    
+def get_plot_info(subjid, N=None):
     plot_info = {}
     for dim in ['motion', 'orientation']:
         taskinfo, df = load_threshold_data(subjid, dim)
         if df is not None:
+            if N: df = df.iloc[-N:]
             # remove outliers
             subset = df.copy()
             """
@@ -55,7 +67,7 @@ def get_plot_info(subjid):
                     break
                 subset = subset[filter_vec]
             """
-            nbins = min(11, len(subset)//10)
+            nbins = min(7, len(subset)//10)
             # get accuracy as a function of binned decision variable
             # bins decision variables
             bins = subset.decision_var.quantile(np.linspace(0,1,nbins)); bins.iloc[-1]+=100
@@ -86,9 +98,9 @@ def get_plot_info(subjid):
                               'df': df}
     return plot_info
     
-def plot_threshold_run(subjid, responseFun='lapseWeibull'):
+def plot_threshold_run(subjid, responseFun='lapseWeibull', N=200):
     colors = ['m', 'c']
-    plot_info = get_plot_info(subjid)
+    plot_info = get_plot_info(subjid, N=N)
     sns.set_context('poster')
     f, axes = plt.subplots(3,2, figsize=(16,16))
     for i, key in enumerate(plot_info.keys()):
@@ -101,9 +113,8 @@ def plot_threshold_run(subjid, responseFun='lapseWeibull'):
                             markeredgewidth=1.5,
                             linestyle="None",
                             c=colors[i],)
-        xlim = axes[0][i].get_xlim()
         # plot response fun fit
-        init_estimate = .01 if key=='motion' else 8
+        init_estimate = .01 if key=='motion' else 6
         fitResponseCurve, metrics = fit_response_fun(plot_info[key]['df'].FB,
                                             plot_info[key]['df'].decision_var,
                                             init_estimate,
@@ -112,7 +123,6 @@ def plot_threshold_run(subjid, responseFun='lapseWeibull'):
         axes[0][i].set_ylabel('Accuracy', fontsize=24)
         axes[0][i].set_xlabel('Decision Var', fontsize=24)
         axes[0][i].set_title(key.title(), fontsize=30, y=1.05)
-        axes[0][i].set_xlim(*xlim)
         # plot choice proportion
         axes[1][i].errorbar(plot_info[key]['bin_response'].index, 
                             plot_info[key]['bin_response']['mean'], 
@@ -134,7 +144,8 @@ def plot_threshold_run(subjid, responseFun='lapseWeibull'):
         axes[1][i].set_xlabel('%s Change' % key, fontsize=24)
         
         # plot quest estimate
-        plot_info[key]['df'].quest_estimate.plot(ax=axes[2][i], c=colors[i])
+        plot_info[key]['df'].quest_estimate.plot(ax=axes[2][i], c=colors[i], )
+        plot_info[key]['df'].decision_var.plot(ax=axes[2][i], c=colors[i], linestyle='--')
         axes[2][i].set_ylabel('Quest Estimate', fontsize=24)
         axes[2][i].set_xlabel('Trial Number', fontsize=24)
         plt.subplots_adjust(hspace=.4)
