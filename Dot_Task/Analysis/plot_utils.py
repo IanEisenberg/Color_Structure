@@ -98,7 +98,7 @@ def get_plot_info(subjid, N=None):
                               'df': df}
     return plot_info
     
-def plot_threshold_run(subjid, responseFun='lapseWeibull', N=200):
+def plot_threshold_run(subjid, responseFun='lapseWeibull', N=None):
     colors = ['m', 'c']
     plot_info = get_plot_info(subjid, N=N)
     sns.set_context('poster')
@@ -149,6 +149,7 @@ def plot_threshold_run(subjid, responseFun='lapseWeibull', N=200):
         axes[2][i].set_ylabel('Quest Estimate', fontsize=24)
         axes[2][i].set_xlabel('Trial Number', fontsize=24)
         plt.subplots_adjust(hspace=.4)
+    return f
 
 
 
