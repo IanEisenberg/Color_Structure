@@ -33,7 +33,7 @@ def plot_response_fun(responseFun, ax=None, plot_kws=None):
     # plot points of interest
     y_points = [.7, .85]
     x_points = [responseFun.inverse(i) for i in y_points]
-    ax.plot(x_points, y_points, 'o', color='red',
+    ax.plot(x_points, y_points, 'o', color='blue',
             markeredgecolor='white', markeredgewidth=2, markersize=15,
             zorder=10)
     # add lines

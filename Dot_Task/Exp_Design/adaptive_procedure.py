@@ -196,9 +196,8 @@ class adaptiveThreshold(BaseExp):
             difficulties = self.ori_difficulties
         tracker_key = (pedestal,strength)
         tracker = self.trackers[tracker_key]
-        if intensity is None:
-            decision_var = next(tracker)
-        else:
+        decision_var = next(tracker)
+        if intensity is not None:
             decision_var = intensity
         difficulties[(pedestal,strength)] = decision_var
         trial['decision_var'] = decision_var

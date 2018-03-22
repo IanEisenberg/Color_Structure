@@ -34,7 +34,7 @@ except NameError:
 stim_repetitions = 4
 exp_len = None
 # window variables
-win_kwargs = {'fullscr': False,
+win_kwargs = {'fullscr': True,
               'allowGUI': True,
               'screen': 1,
               'size': [1920, 1080]}
