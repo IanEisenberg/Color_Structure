@@ -96,7 +96,7 @@ dependencies:
   - pillow==5.0.0
   - prompt-toolkit==1.0.15
   - psutil==5.4.3
-  - psychopy==1.90.0
+  - git+https://github.com/psychopy/psychopy
   - pycparser==2.18
   - pygame==1.9.3
   - pyglet==1.2.4

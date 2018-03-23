@@ -30,5 +30,4 @@ Organization of Task:
 
 conda env create -f environment.yml
 source activate psychopy
-python setup.py install
-
+pip install -e [Prob_Context_Task directory]
