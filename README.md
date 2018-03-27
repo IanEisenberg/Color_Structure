@@ -31,3 +31,14 @@ Organization of Task:
 conda env create -f environment.yml
 source activate psychopy
 pip install -e [Prob_Context_Task directory]
+
+If the enviornment.yml file doesn't work, create a py3.6 environment.
+Then you need to install (using conda, preferably):
+numpy
+pandas
+seaborn
+scipy
+sklearn
+
+Finally,
+pip install git+https://github.com/psychopy/psychopy
