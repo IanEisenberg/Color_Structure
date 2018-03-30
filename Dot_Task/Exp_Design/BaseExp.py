@@ -168,7 +168,7 @@ class BaseExp(object):
             self.clearWindow(fixation=True)
             core.wait(SRI)
         # indicate response window and wait for response
-        self.clearWindow(fixation=True, fixation_color='#0099ff')
+        self.clearWindow(fixation=True, fixation_color=[-1,.2,1])
         stim_clock.reset()
         key_response = event.waitKeys(response_window,
                                       self.action_keys + [self.quit_key],
