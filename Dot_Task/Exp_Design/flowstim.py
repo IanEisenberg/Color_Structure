@@ -92,6 +92,7 @@ class OpticFlow(object):
         self.fixation_on = fixation_on
         self.fixation = Fixation(self.win, height=fix_height)
         
+        
     def setupDots(self):
         self.dots3d = random.rand(self.nElements,2)
         if self.gap > 0:

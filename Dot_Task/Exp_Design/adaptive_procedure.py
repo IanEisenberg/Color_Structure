@@ -83,7 +83,7 @@ class adaptiveThreshold(BaseExp):
         if stim == None:
             self.stim = OpticFlow(self.win, 
                                  speed=self.base_speed,
-                                 color=[1,1,1], 
+                                 color='white', 
                                  nElements = 2000,
                                  sizes=[height*ratio, height])
         else:
@@ -265,10 +265,10 @@ class adaptiveThreshold(BaseExp):
                     core.wait(trial['FBonset'])  
                 if FB == 1:
                     self.clearWindow(fixation=True,
-                                     fixation_color='#66ff66')
+                                     fixation_color='Lime')
                 else:
                     self.clearWindow(fixation=True,
-                                     fixation_color='#ff3300')
+                                     fixation_color='Red')
                 core.wait(trial['FBDuration'])
         # If subject did not respond within the stimulus window clear the stim
         # and admonish the subject
@@ -279,7 +279,7 @@ class adaptiveThreshold(BaseExp):
                 if trial['FBonset'] > 0: 
                     self.clearWindow(fixation=True)
                     core.wait(trial['FBonset'])  
-                self.clearWindow(fixation=True, fixation_color='#ff3300')
+                self.clearWindow(fixation=True, fixation_color='Lime')
                 core.wait(trial['FBDuration'])
         self.clearWindow(fixation=True)
         
