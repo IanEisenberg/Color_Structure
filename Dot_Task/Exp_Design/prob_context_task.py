@@ -159,10 +159,10 @@ class probContextTask(BaseExp):
                     core.wait(trial['FBonset'])  
                 if FB == 1:
                     self.clearWindow(fixation=True,
-                                     fixation_color='#66ff66')
+                                     fixation_color=[-.2, 1, -.2])
                 else:
                     self.clearWindow(fixation=True,
-                                     fixation_color='#ff3300')
+                                     fixation_color=[1,-.6,-1])
                 core.wait(trial['FBDuration'])
         #If subject did not respond within the stimulus window clear the stim
         #and admonish the subject
@@ -171,7 +171,7 @@ class probContextTask(BaseExp):
                 self.clearWindow(fixation=True)
                 core.wait(trial['FBonset'])  
             self.clearWindow(fixation=True,
-                                     fixation_color='#ff3300')
+                                     fixation_color=[1,-.6,-1])
             core.wait(trial['FBDuration'])
             self.clearWindow()
         

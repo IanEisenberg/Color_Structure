@@ -265,10 +265,10 @@ class adaptiveThreshold(BaseExp):
                     core.wait(trial['FBonset'])  
                 if FB == 1:
                     self.clearWindow(fixation=True,
-                                     fixation_color='Lime')
+                                     fixation_color=[-.2, 1, -.2])
                 else:
                     self.clearWindow(fixation=True,
-                                     fixation_color='Red')
+                                     fixation_color=[1,-.6,-1])
                 core.wait(trial['FBDuration'])
         # If subject did not respond within the stimulus window clear the stim
         # and admonish the subject
@@ -279,7 +279,7 @@ class adaptiveThreshold(BaseExp):
                 if trial['FBonset'] > 0: 
                     self.clearWindow(fixation=True)
                     core.wait(trial['FBonset'])  
-                self.clearWindow(fixation=True, fixation_color='Lime')
+                self.clearWindow(fixation=True, fixation_color=[1,-.6,-1])
                 core.wait(trial['FBDuration'])
         self.clearWindow(fixation=True)
         
@@ -309,6 +309,7 @@ class adaptiveThreshold(BaseExp):
             """)
         trial = deepcopy(self.stimulusInfo[0])
         trial['displayFB'] = False
+        trial['trial_type'] = 'Practice'
         self.presentTrial(trial, practice=True)
 
         if self.ts == "motion":
@@ -322,7 +323,7 @@ class adaptiveThreshold(BaseExp):
             If they are slowing down press "DOWN" on the arrow keys.
             
             You should respond after the stimulus ends. The central cross
-            will change to green to indicate when you should respond.
+            will change to blue to indicate when you should respond.
             
             Wait for the experimenter
             
@@ -336,7 +337,7 @@ class adaptiveThreshold(BaseExp):
             If they are rotatig counter-clockwise press "LEFT" on the arrow keys.
             
             You should respond after the stimulus ends. The central cross
-            will change to green to indicate when you should respond.
+            will change to blue to indicate when you should respond.
             
             Wait for the experimenter
             """)
