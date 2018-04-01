@@ -83,7 +83,7 @@ class adaptiveThreshold(BaseExp):
         if stim == None:
             self.stim = OpticFlow(self.win, 
                                  speed=self.base_speed,
-                                 color='white', 
+                                 color=[1,1,1], 
                                  nElements = 2000,
                                  sizes=[height*ratio, height])
         else:
