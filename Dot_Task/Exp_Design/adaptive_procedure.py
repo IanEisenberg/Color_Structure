@@ -309,6 +309,7 @@ class adaptiveThreshold(BaseExp):
             """)
         trial = deepcopy(self.stimulusInfo[0])
         trial['displayFB'] = False
+        trial['trial_type'] = 'Practice'
         self.presentTrial(trial, practice=True)
 
         if self.ts == "motion":
@@ -322,7 +323,7 @@ class adaptiveThreshold(BaseExp):
             If they are slowing down press "DOWN" on the arrow keys.
             
             You should respond after the stimulus ends. The central cross
-            will change to green to indicate when you should respond.
+            will change to blue to indicate when you should respond.
             
             Wait for the experimenter
             
@@ -336,7 +337,7 @@ class adaptiveThreshold(BaseExp):
             If they are rotatig counter-clockwise press "LEFT" on the arrow keys.
             
             You should respond after the stimulus ends. The central cross
-            will change to green to indicate when you should respond.
+            will change to blue to indicate when you should respond.
             
             Wait for the experimenter
             """)
