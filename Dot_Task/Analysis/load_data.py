@@ -40,6 +40,9 @@ def preproc_threshold_data(df):
                                                             'right': 1, 'left': 0}))
     df.insert(0, 'speed_change', df.speed_end-df.speed_start)
     df.insert(0, 'ori_change', df.ori_end-df.ori_start)
+    # drop missed RT
+    assert np.mean(df.rt.isnull()) < .05, print('Many Missing Responses!')
+    df.drop(df.query('rt!=rt').index, inplace=True)
               
 def load_threshold_data(subjid, dim='motion'):
     file_dir = os.path.dirname(__file__)
