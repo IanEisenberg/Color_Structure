@@ -2,8 +2,8 @@ import pickle
 from glob import glob
 import os
 from psychopy import monitors
-from Dot_Task.Analysis.load_data import load_threshold_data
-from Dot_Task.Analysis.utils import fit_response_fun
+from Analysis.load_data import load_threshold_data
+from Analysis.utils import fit_response_fun
 
 def get_trackers(subjid):
     file_dir = os.path.dirname(__file__)

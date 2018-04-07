@@ -6,9 +6,9 @@ import webbrowser
 from make_config import ProbContextConfig
 import glob
 import numpy as np
-from prob_context_task import probContextTask
 from psychopy import event
-from utils import get_difficulties
+from Exp_Design.prob_context_task import probContextTask
+from Exp_Design.utils import get_difficulties
 
 # ****************************************************************************
 # set-up variables

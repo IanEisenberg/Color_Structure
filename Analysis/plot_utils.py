@@ -1,10 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-from psychopy.data import FitCumNormal, FitWeibull
 import seaborn as sns
-from Dot_Task.Analysis.load_data import load_threshold_data
-from Dot_Task.Analysis.utils import fit_choice_fun, fit_response_fun
+from Analysis.load_data import load_threshold_data
+from Analysis.utils import fit_choice_fun, fit_response_fun
 
 def beautify_legend(legend, colors, fontsize=None):
     for i, text in enumerate(legend.get_texts()):

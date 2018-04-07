@@ -6,8 +6,8 @@ import numpy as np
 from psychopy import visual, core, event
 import subprocess
 import sys
-from Dot_Task.Exp_Design.BaseExp import BaseExp
-from Dot_Task.Exp_Design.flowstim import OpticFlow
+from Exp_Design.BaseExp import BaseExp
+from Exp_Design.flowstim import OpticFlow
 
 class probContextTask(BaseExp):
     """ class defining a probabilistic context task

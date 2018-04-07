@@ -12,9 +12,9 @@ Creats config file for subject and run the task.
 """
 import os
 import random as r
-from Dot_Task.Exp_Design.adaptive_procedure import adaptiveThreshold
-from Dot_Task.Exp_Design.utils import get_tracker_estimates, get_trackers
-from Dot_Task.Exp_Design.make_config import ThresholdConfig
+from Exp_Design.adaptive_procedure import adaptiveThreshold
+from Exp_Design.utils import get_tracker_estimates, get_trackers
+from Exp_Design.make_config import ThresholdConfig
 
         
 # ****************************************************************************

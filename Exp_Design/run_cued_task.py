@@ -5,9 +5,9 @@ runprobContextTask
 import webbrowser
 import numpy as np
 from psychopy import event
-from Dot_Task.Exp_Design.make_config import ProbContextConfig
-from Dot_Task.Exp_Design.prob_context_task import probContextTask
-from Dot_Task.Exp_Design.utils import get_response_curve
+from Exp_Design.make_config import ProbContextConfig
+from Exp_Design.prob_context_task import probContextTask
+from Exp_Design.utils import get_response_curve
 
 # ****************************************************************************
 # set-up variables

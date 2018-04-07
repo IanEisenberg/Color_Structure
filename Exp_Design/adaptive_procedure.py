@@ -13,10 +13,10 @@ from psychopy.data import QuestHandler, StairHandler
 import os
 import subprocess
 import sys
-from Dot_Task.Exp_Design.BaseExp import BaseExp
-from Dot_Task.Exp_Design.flowstim import OpticFlow
-from Dot_Task.Exp_Design.utils import get_total_trials, get_tracker_data
-from Dot_Task.Analysis.utils import fit_response_fun
+from Exp_Design.BaseExp import BaseExp
+from Exp_Design.flowstim import OpticFlow
+from Exp_Design.utils import get_total_trials, get_tracker_data
+from Analysis.utils import fit_response_fun
 np.set_printoptions(precision=4, suppress=True)
 
 class adaptiveThreshold(BaseExp):

@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import lmfit
 import random as r
-from helper_classes import BiasPredModel, SwitchModel, MemoryModel, softmax
+from Analysis.helper_classes import BiasPredModel, SwitchModel, MemoryModel, softmax
 
 def track_runs(iterable):
     """
