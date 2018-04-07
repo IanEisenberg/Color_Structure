@@ -3,8 +3,7 @@ build/
 dist/
 *egg*
 Plots/
-**/Data/Log/*.log
-**/Data/RawData/*.yaml
+Data/Log/*.log
 Presentations_Posters/
 Papers/
 twilio_info.txt

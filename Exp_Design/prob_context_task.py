@@ -75,20 +75,23 @@ class probContextTask(BaseExp):
                                      fillColor = 'white', edges = 120)
         else:
             self.cue = cue
+        # define fixation
+        self.fixation = self.stim.fixation
     
     def presentCue(self, trial, duration):
         print('cue', trial['ts'], self.cue_type)
         if self.cue_type == 'deterministic':
-            self.text_stim.setText(trial['ts'])
-            self.text_stim.setHeight(.15)
-            self.text_stim.setColor(self.text_color)
-            self.text_stim.draw()
+            self.presentTextToWindow(trial['ts'], 
+                                     color=self.text_color,
+                                     position=[0,.3],
+                                     fixation=self.fixation,
+                                     flip=False)
         elif self.cue_type == 'probabilistic':  
             self.cue.setPos((0, trial['context']*.8))
             self.cue.draw()
         self.win.flip()
         core.wait(duration)
-        self.win.flip()
+        self.clearWindow()
     
     def presentPause(self):
         pauseClock = core.Clock()
@@ -170,11 +173,9 @@ class probContextTask(BaseExp):
             if trial['FBonset'] > 0: 
                 self.clearWindow(fixation=True)
                 core.wait(trial['FBonset'])  
-            self.clearWindow(fixation=True,
-                                     fixation_color=[1,-.6,-1])
+            self.clearWindow(fixation=True, fixation_color=[1,-.6,-1])
             core.wait(trial['FBDuration'])
-            self.clearWindow()
-        
+        self.clearWindow(fixation=True)
         # log trial and add to data
         trial['trial_time'] = trialClock.getTime()
         self.writeToLog(json.dumps(trial))

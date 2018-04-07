@@ -44,7 +44,12 @@ class Config(object):
         self.stim_motions = ['in','out']
         self.stim_oris = [-60,30]
     
-    def get_config(self, save=True, filey=None, other_params={}, setup_args={}):
+    def get_config(self, save=True, filey=None, 
+                   other_params=None, setup_args=None):
+        if other_params is None:
+            other_params = {}
+        if setup_args is None:
+            setup_args = {}
         if self.trial_list==None:
             self.setup_trial_list(**setup_args)
         
@@ -154,7 +159,7 @@ class ProbContextConfig(Config):
         # setup
         self.setup_stims()
         
-    def get_config(self, save=True, filey=None):
+    def get_config(self, save=True, filey=None, setup_args=None):
         other_params = {'rp': self.rp,
                         'states': self.states,
                         'stim_ids': self.stim_ids,
@@ -163,7 +168,8 @@ class ProbContextConfig(Config):
                         'speed_difficulties': self.speed_difficulties}
         return super(ProbContextConfig, self).get_config(save, 
                                                          filey, 
-                                                         other_params)
+                                                         other_params,
+                                                         setup_args)
       
     def load_config_settings(self, filename, **kwargs):
         super(ProbContextConfig, self).load_config_settings(filename, **kwargs)
@@ -302,14 +308,15 @@ class ThresholdConfig(Config):
         self.setup_stims()
     
         
-    def get_config(self, save=True, filey=None):
+    def get_config(self, save=True, filey=None, setup_args=None):
         other_params = {'stim_ids': self.stim_ids,
                         'ts': self.ts,
                         'ori_difficulties': self.ori_difficulties,
                         'speed_difficulties': self.speed_difficulties}
         return super(ThresholdConfig, self).get_config(save, 
                                                        filey, 
-                                                       other_params)
+                                                       other_params,
+                                                       setup_args)
         
                     
     def setup_trial_list(self, stimulusDuration=1.5, responseWindow=1.5, 
