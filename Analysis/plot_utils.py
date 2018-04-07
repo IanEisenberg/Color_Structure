@@ -39,7 +39,7 @@ def plot_response_fun(responseFun, ax=None, plot_kws=None):
     y_points = [.7, .85]
     x_points = [responseFun.inverse(i) for i in y_points]
     ax.plot(x_points, y_points, 'o', color='blue',
-            markeredgecolor='white', markeredgewidth=2, markersize=15,
+            markeredgecolor='white', markeredgewidth=1, markersize=9,
             zorder=10)
     if xlim:
         maxX = max(xlim[1], X[-1])
@@ -99,16 +99,17 @@ def get_plot_info(subjid, N=None):
 def plot_threshold_run(subjid, responseFun='lapseWeibull', N=None):
     colors = ['m', 'c']
     plot_info = get_plot_info(subjid, N=N)
-    sns.set_context('poster')
-    f, axes = plt.subplots(3,2, figsize=(16,16))
+    sns.set_context('paper',font_scale=1)
+    f, axes = plt.subplots(3,2, figsize=(3.5,5))
     for i, key in enumerate(plot_info.keys()):
         # plot accuracy
         axes[0][i].errorbar(plot_info[key]['bin_accuracy'].index, 
                             plot_info[key]['bin_accuracy']['mean'], 
                             yerr=plot_info[key]['bin_accuracy']['se'].tolist(), 
                             marker='o',
+                            markersize=7,
                             markeredgecolor='white', 
-                            markeredgewidth=1.5,
+                            markeredgewidth=1,
                             linestyle="None",
                             c=colors[i],)
         # plot response fun fit
@@ -118,16 +119,17 @@ def plot_threshold_run(subjid, responseFun='lapseWeibull', N=None):
                                             init_estimate,
                                             kind=responseFun)
         plot_response_fun(fitResponseCurve, axes[0][i], plot_kws={'c': colors[i]})
-        axes[0][i].set_ylabel('Accuracy', fontsize=24)
-        axes[0][i].set_xlabel('Decision Var', fontsize=24)
-        axes[0][i].set_title(key.title(), fontsize=30, y=1.05)
+        axes[0][i].set_ylabel('Accuracy')
+        axes[0][i].set_xlabel('Decision Var')
+        axes[0][i].set_title(key.title(), y=1.05)
         # plot choice proportion
         axes[1][i].errorbar(plot_info[key]['bin_response'].index, 
                             plot_info[key]['bin_response']['mean'], 
                             yerr=plot_info[key]['bin_response']['se'].tolist(), 
                             marker='o',
+                            markersize=7,
                             markeredgecolor='white', 
-                            markeredgewidth=1.5,
+                            markeredgewidth=1,
                             linestyle="None",
                             c=colors[i])
         # plot fit logistic function
@@ -138,14 +140,14 @@ def plot_threshold_run(subjid, responseFun='lapseWeibull', N=None):
                         maxval=plot_info[key]['df'].loc[:,stim_col].max(),
                         ax=axes[1][i], 
                         plot_kws={'c': colors[i]})
-        axes[1][i].set_ylabel('Positive Choice %', fontsize=24)
-        axes[1][i].set_xlabel('%s Change' % key, fontsize=24)
+        axes[1][i].set_ylabel('Positive Choice %')
+        axes[1][i].set_xlabel('%s Change' % key)
         
         # plot quest estimate
         plot_info[key]['df'].quest_estimate.plot(ax=axes[2][i], c=colors[i], )
         plot_info[key]['df'].decision_var.plot(ax=axes[2][i], c=colors[i], linestyle='--')
-        axes[2][i].set_ylabel('Quest Estimate', fontsize=24)
-        axes[2][i].set_xlabel('Trial Number', fontsize=24)
+        axes[2][i].set_ylabel('Quest Estimate')
+        axes[2][i].set_xlabel('Trial Number')
         plt.subplots_adjust(hspace=.4)
     return f
 
