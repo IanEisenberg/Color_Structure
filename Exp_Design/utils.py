@@ -64,7 +64,13 @@ def get_response_curve(subjid):
     responseCurves = {}
     for dim in ['motion', 'orientation']:
         taskinfo, df = load_threshold_data(subjid, dim)
-        responseCurve = fit_response_fun(df, kind='lapseWeibull')
+        assert df is not None, \
+            print('No threshold data found for %s!' % subjid)
+        init_estimate = .01 if dim=='motion' else 6
+        responseCurve = fit_response_fun(responses=df.FB, 
+                                         intensities=df.decision_var, 
+                                         threshold_estimate=init_estimate,
+                                         kind='lapseWeibull')
         responseCurves[dim] = responseCurve[0]
     return responseCurves
 

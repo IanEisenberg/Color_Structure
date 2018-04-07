@@ -44,7 +44,7 @@ cue_config = ProbContextConfig(taskname=cuename,
                                speed_difficulties=[.7, .85],
                                ori_difficulties=[.7, .85],
                                responseCurves=responseCurves)
-cue_config_file = cue_config.get_config()
+cue_config_file = cue_config.get_config(setup_args={'displayFB': False})
 
     
 
