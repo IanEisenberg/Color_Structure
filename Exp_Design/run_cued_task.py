@@ -7,7 +7,7 @@ import numpy as np
 from psychopy import event
 from Exp_Design.make_config import ProbContextConfig
 from Exp_Design.prob_context_task import probContextTask
-from Exp_Design.utils import get_response_curve
+from Exp_Design.utils import get_response_curves
 
 # ****************************************************************************
 # set-up variables
@@ -35,7 +35,7 @@ np.random.shuffle(ts_order)
 # ****************************************************************************
 # load motion_difficulties and ori_difficulties from adaptive tasks     
 # cued task 
-responseCurves = get_response_curve(subjid)
+responseCurves = get_response_curves(subjid)
 cue_config = ProbContextConfig(taskname=cuename, 
                                subjid=subjid, 
                                stim_repetitions=stim_repetitions, 

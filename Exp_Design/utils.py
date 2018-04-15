@@ -4,6 +4,26 @@ import os
 from psychopy import monitors
 from Analysis.load_data import load_threshold_data
 from Analysis.utils import fit_response_fun
+def get_monitor(distance=30, width=30):  
+    monitor = monitors.Monitor('test')
+    monitor.setDistance(60)
+    monitor.setSizePix([2560,1440])
+    monitor.setWidth(60)
+    return monitor
+
+def get_response_curves(subjid):
+    responseCurves = {}
+    for dim in ['motion', 'orientation']:
+        taskinfo, df = load_threshold_data(subjid, dim)
+        assert df is not None, \
+            print('No threshold data found for %s!' % subjid)
+        init_estimate = .01 if dim=='motion' else 6
+        responseCurve = fit_response_fun(responses=df.FB, 
+                                         intensities=df.decision_var, 
+                                         threshold_estimate=init_estimate,
+                                         kind='lapseWeibull')
+        responseCurves[dim] = responseCurve[0]
+    return responseCurves
 
 def get_trackers(subjid):
     file_dir = os.path.dirname(__file__)
@@ -60,27 +80,6 @@ def get_total_trials(trackers):
         loaded_trackers.append(v)
     return trials
     
-def get_response_curve(subjid):
-    responseCurves = {}
-    for dim in ['motion', 'orientation']:
-        taskinfo, df = load_threshold_data(subjid, dim)
-        assert df is not None, \
-            print('No threshold data found for %s!' % subjid)
-        init_estimate = .01 if dim=='motion' else 6
-        responseCurve = fit_response_fun(responses=df.FB, 
-                                         intensities=df.decision_var, 
-                                         threshold_estimate=init_estimate,
-                                         kind='lapseWeibull')
-        responseCurves[dim] = responseCurve[0]
-    return responseCurves
-
-def get_monitor(distance=30, width=30):  
-    monitor = monitors.Monitor('test')
-    monitor.setDistance(60)
-    monitor.setSizePix([2560,1440])
-    monitor.setWidth(60)
-    return monitor
-
 def fix_trackers(subjid):
     file_dir = os.path.dirname(__file__)
     try:

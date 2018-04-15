@@ -4,12 +4,15 @@ import seaborn as sns
 from Analysis.load_data import load_threshold_data
 from Analysis.utils import fit_choice_fun, fit_response_fun
 
-def beautify_legend(legend, colors, fontsize=None):
+def beautify_legend(legend, colors=None, fontsize=None):
+    if colors is None:
+        colors = [i.get_color() for i in legend.legendHandles]
     for i, text in enumerate(legend.get_texts()):
         text.set_color(colors[i])
     for item in legend.legendHandles:
         item.set_visible(False)
-    legend.get_frame().set_linewidth(0.0)
+    for item in legend.legendHandles:
+        item.set_visible(False)
     if fontsize:
         plt.setp(legend.get_texts(), fontsize=fontsize)
 
@@ -37,7 +40,7 @@ def plot_response_fun(responseFun, ax=None, plot_kws=None):
     ax.plot(X, y, **plot_kws)
     # plot points of interest
     y_points = [.7, .85]
-    x_points = [responseFun.inverse(i) for i in y_points]
+    x_points = responseFun.inverse(y_points)
     ax.plot(x_points, y_points, 'o', color='blue',
             markeredgecolor='white', markeredgewidth=1, markersize=9,
             zorder=10)
@@ -96,11 +99,11 @@ def get_plot_info(subjid, N=None):
                               'df': df}
     return plot_info
     
-def plot_threshold_run(subjid, responseFun='lapseWeibull', N=None):
+def plot_threshold_run(subjid, responseFun='lapseWeibull', N=None, size=8):
     colors = ['m', 'c']
     plot_info = get_plot_info(subjid, N=N)
     sns.set_context('paper',font_scale=1)
-    f, axes = plt.subplots(3,2, figsize=(3.5,5))
+    f, axes = plt.subplots(3,2, figsize=(size*.7,size))
     for i, key in enumerate(plot_info.keys()):
         # plot accuracy
         axes[0][i].errorbar(plot_info[key]['bin_accuracy'].index, 
@@ -119,9 +122,9 @@ def plot_threshold_run(subjid, responseFun='lapseWeibull', N=None):
                                             init_estimate,
                                             kind=responseFun)
         plot_response_fun(fitResponseCurve, axes[0][i], plot_kws={'c': colors[i]})
-        axes[0][i].set_ylabel('Accuracy')
-        axes[0][i].set_xlabel('Decision Var')
-        axes[0][i].set_title(key.title(), y=1.05)
+        axes[0][i].set_ylabel('Accuracy', fontsize=size*1.5)
+        axes[0][i].set_xlabel('Decision Var', fontsize=size*1.5)
+        axes[0][i].set_title(key.title(), y=1.05, fontsize=size*2)
         # plot choice proportion
         axes[1][i].errorbar(plot_info[key]['bin_response'].index, 
                             plot_info[key]['bin_response']['mean'], 
@@ -140,16 +143,59 @@ def plot_threshold_run(subjid, responseFun='lapseWeibull', N=None):
                         maxval=plot_info[key]['df'].loc[:,stim_col].max(),
                         ax=axes[1][i], 
                         plot_kws={'c': colors[i]})
-        axes[1][i].set_ylabel('Positive Choice %')
-        axes[1][i].set_xlabel('%s Change' % key)
+        axes[1][i].set_ylabel('Positive Choice %', fontsize=size*1.5)
+        axes[1][i].set_xlabel('%s Change' % key, fontsize=size*1.5)
         
         # plot quest estimate
         plot_info[key]['df'].quest_estimate.plot(ax=axes[2][i], c=colors[i], )
         plot_info[key]['df'].decision_var.plot(ax=axes[2][i], c=colors[i], linestyle='--')
-        axes[2][i].set_ylabel('Quest Estimate')
-        axes[2][i].set_xlabel('Trial Number')
+        axes[2][i].set_ylabel('Quest Estimate', fontsize=size*1.5)
+        axes[2][i].set_xlabel('Trial Number', fontsize=size*1.5)
         plt.subplots_adjust(hspace=.4)
     return f
 
-
-
+def plot_threshold_estimates(subjid, responseFun='lapseWeibull', 
+                             window=300, step=5, size=8):
+    colors = ['m', 'c']
+    plot_info = get_plot_info(subjid)
+    sns.set_context('paper',font_scale=1)
+    f, axes = plt.subplots(1,2, figsize=(size,size*.7))
+    for i, key in enumerate(plot_info.keys()):
+        init_estimate = .01 if key=='motion' else 6
+        FB = plot_info[key]['df'].FB
+        decision_var = plot_info[key]['df'].decision_var
+        win_difficulties = []
+        # calculate fits in different windows
+        for j in range(0, len(FB)-window, step):
+            FB_win = FB.iloc[j:window+j]
+            decision_var_win = decision_var.iloc[j:window+j]
+            fitResponseCurve, metrics = fit_response_fun(FB_win,
+                                                         decision_var_win,
+                                                         init_estimate,
+                                                         kind=responseFun)
+            win_difficulties.append(fitResponseCurve.inverse([.7,.85]))
+        # plot the fits over windows
+        zipped = list(zip(*win_difficulties))
+        axes[i].plot(range(0, len(FB)-window, step), zipped[0], 'o-',
+                    color=colors[0])
+        axes[i].plot(range(0, len(FB)-window, step), zipped[1], 'o-',
+                    color=colors[1])
+        axes[i].set_xlabel('Starting Trial Number', fontsize=size*1.5)
+        axes[i].set_ylabel('Estimated Value', fontsize=size*1.5)
+        axes[i].set_title(key, fontsize=size*2)
+        # add overal estimate
+        fitResponseCurve, metrics = fit_response_fun(FB,
+                                                     decision_var,
+                                                     init_estimate,
+                                                     kind=responseFun)
+        difficulties = fitResponseCurve.inverse([.7,.85])
+        axes[i].hlines(difficulties[0], 0, axes[i].get_xlim()[1],
+                        linestyle='--', color=colors[0])
+        axes[i].hlines(difficulties[1], 0, axes[i].get_xlim()[1],
+                        linestyle='--', color=colors[1])
+        
+        
+    leg = axes[0].legend(['85% accuracy', '70% accuracy'], fontsize=size*1.5,
+                  markerscale=0)
+    beautify_legend(leg)
+    plt.suptitle('Windowed Estimates Window Size: %s' % window, fontsize=size*1.5)
