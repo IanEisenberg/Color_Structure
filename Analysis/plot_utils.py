@@ -166,7 +166,8 @@ def plot_threshold_estimates(subjid, responseFun='lapseWeibull',
         decision_var = plot_info[key]['df'].decision_var
         win_difficulties = []
         # calculate fits in different windows
-        for j in range(0, len(FB)-window, step):
+        win_range = range(0, max(len(FB)-window,1), step)
+        for j in win_range:
             FB_win = FB.iloc[j:window+j]
             decision_var_win = decision_var.iloc[j:window+j]
             fitResponseCurve, metrics = fit_response_fun(FB_win,
@@ -176,9 +177,9 @@ def plot_threshold_estimates(subjid, responseFun='lapseWeibull',
             win_difficulties.append(fitResponseCurve.inverse([.7,.85]))
         # plot the fits over windows
         zipped = list(zip(*win_difficulties))
-        axes[i].plot(range(0, len(FB)-window, step), zipped[0], 'o-',
+        axes[i].plot(win_range, zipped[0], 'o-',
                     color=colors[0])
-        axes[i].plot(range(0, len(FB)-window, step), zipped[1], 'o-',
+        axes[i].plot(win_range, zipped[1], 'o-',
                     color=colors[1])
         axes[i].set_xlabel('Starting Trial Number', fontsize=size*1.5)
         axes[i].set_ylabel('Estimated Value', fontsize=size*1.5)
