@@ -433,7 +433,7 @@ class adaptiveThreshold(BaseExp):
         self.defineStims()
         # set up eyetracker
         if eyetracker:
-            from Dot_Task.pylinkwrapper.connector import Connect
+            from pylinkwrapper.connector import Connect
             conn = Connect(self.win, 'eyetest')
             conn.calibrate()
         # run practice

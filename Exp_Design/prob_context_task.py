@@ -83,7 +83,7 @@ class probContextTask(BaseExp):
         if self.cue_type == 'deterministic':
             self.presentTextToWindow(trial['ts'], 
                                      color=self.text_color,
-                                     position=[0,.3],
+                                     position=[0,.2],
                                      fixation=self.fixation,
                                      flip=False)
         elif self.cue_type == 'probabilistic':  
