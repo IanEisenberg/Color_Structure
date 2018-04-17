@@ -114,7 +114,7 @@ class ProbContextConfig(Config):
                  ts_order=None, rp=.9):
         
         if not action_keys:
-            action_keys = ['down','up','z', 'x']
+            action_keys = ['down','up','left','right']
         # init Base Exp
         super(ProbContextConfig, self).__init__(subjid,
                                                 taskname,

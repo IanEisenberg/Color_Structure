@@ -27,6 +27,11 @@ win_kwargs = {'fullscr': False,
 # counterbalance ts_order (which ts is associated with top of screen)
 ts_order = ['motion','orientation']
 np.random.shuffle(ts_order)
+action_keys = ['down','up','left','right']
+# set up for fmri
+fmri = True
+if fmri == True:
+    action_keys = ['e', 'b','r','y']
 
 
 
@@ -38,6 +43,7 @@ np.random.shuffle(ts_order)
 responseCurves = get_response_curves(subjid)
 cue_config = ProbContextConfig(taskname=cuename, 
                                subjid=subjid, 
+                               action_keys=action_keys,
                                stim_repetitions=stim_repetitions, 
                                ts_order=ts_order, 
                                rp=recursive_p,
