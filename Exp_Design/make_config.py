@@ -42,7 +42,7 @@ class Config(object):
         self.trial_list = None
         self.base_speed = .12
         self.stim_motions = ['in','out']
-        self.stim_oris = [-60,30]
+        self.stim_oris = [-45,45]
     
     def get_config(self, save=True, filey=None, 
                    other_params=None, setup_args=None):

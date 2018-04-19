@@ -29,7 +29,7 @@ ts_order = ['motion','orientation']
 np.random.shuffle(ts_order)
 action_keys = ['down','up','left','right']
 # set up for fmri
-fmri = True
+fmri = False
 if fmri == True:
     action_keys = ['e', 'b','r','y']
 
