@@ -1,1 +1,1 @@
-from connector import Connect
+from pylinkwrapper.connector import Connect

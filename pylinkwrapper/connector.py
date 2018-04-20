@@ -1,7 +1,7 @@
 # Pylink wrapper for Psychopy
 import os
 import pylink
-import psychocal
+import pylinkwrapper.psychocal as psychocal
 import time
 import re
 from psychopy.tools.monitorunittools import deg2pix, pix2deg
@@ -91,9 +91,9 @@ class Connect(object):
             self.tracker.setAutoCalibrationPacing(paval)
 
             # Execute custom calibration display
-            print '*' * 150
-            print 'Calibration Mode'
-            print '*' * 150
+            print( '*' * 150)
+            print( 'Calibration Mode')
+            print( '*' * 150)
             pylink.openGraphicsEx(genv)
 
             # Calibrate
