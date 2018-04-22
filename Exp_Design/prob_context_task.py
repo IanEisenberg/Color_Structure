@@ -199,7 +199,7 @@ class probContextTask(BaseExp):
         if intro_text:
             self.presentInstruction(intro_text)
         if self.fmri_trigger:
-            for _ in range(ignored_triggers):
+            for _ in range(ignored_triggers+1):
                 self.waitForKeypress(self.fmri_trigger)
         # get ready
         self.presentTextToWindow('Get Ready!', size=.15)
