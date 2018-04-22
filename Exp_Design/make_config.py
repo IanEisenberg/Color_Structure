@@ -16,19 +16,60 @@ import yaml
 file_dir = os.path.dirname(__file__)
 
 # helper function
-def split_config(config, trials_per_run):
+def split_config(config, trials_per_run=None, time_per_run=None, save=True):
+    """
+    Splits config file into subruns of a particular # of trials or time
+    Args:
+        trials_per_run: int
+        time_per_run: int, time in minutes
+    """
+    assert trials_per_run is None or time_per_run is None
     config_files = []
-    total_trials = len(config.trial_list)-1
-    start = 1
     run=1
-    while start < total_trials:
-        new_config = deepcopy(config)
-        # subset config
-        new_config.trial_list = new_config.trial_list[start:start+trials_per_run]
-        start += trials_per_run
-        config_files.append(new_config.get_config(setup_args={'displayFB': False},
-                                                  run=run))
-        run+=1
+    init_onset = config.trial_list[1]['onset']
+    if trials_per_run:
+        total_trials = len(config.trial_list)-1
+        start = 1
+        while start < total_trials:
+            new_config = deepcopy(config)
+            # subset config
+            new_config.trial_list = new_config.trial_list[start:start+trials_per_run]
+            # update onsets and trial count
+            curr_onset = init_onset
+            for i,trial in enumerate(new_config.trial_list):
+                trial['trial_count'] = i+1
+                trial['onset'] = curr_onset
+                curr_onset += trial['duration']
+            # save
+            
+            config_files.append(new_config.get_config(setup_args={'displayFB': False},
+                                                      run=run, save=dsave))
+            # progress for next run
+            start += trials_per_run
+            run+=1
+    elif time_per_run:
+        durations = [i['duration'] for i in config.trial_list[1:]]
+        cum_durations = np.cumsum(durations)
+        start = 1
+        while cum_durations[-1]>0:
+            new_config = deepcopy(config)
+            # subset config
+            last_trial = np.where((cum_durations+init_onset)<time_per_run*60)[0][-1]
+            new_config.trial_list = new_config.trial_list[start:last_trial+2]
+            # update onsets and trial count
+            curr_onset = init_onset
+            for i,trial in enumerate(new_config.trial_list):
+                trial['trial_count'] = i+1
+                trial['onset'] = curr_onset
+                curr_onset += trial['duration']
+            # save
+            config_files.append(new_config.get_config(setup_args={'displayFB': False},
+                                                      run=run, save=save))
+            # progress for next run
+            start=last_trial+2
+            cum_durations -= cum_durations[last_trial]
+            run+=1
+            
     return config_files
 
 # Class
@@ -236,77 +277,63 @@ class ProbContextConfig(Config):
                          counterbalance_task=False):
         if self.seed is not None:
             np.random.seed(self.seed)
+        # set up stims and tasks based on task type
         if counterbalance_task:
+            stims = self.stim_ids*self.stim_repetitions*2
+            tasks = [self.ts_order[0]]*self.exp_len + [self.ts_order[1]]*self.exp_len
             self.exp_len = self.exp_len*2
-        curr_onset = 2 #initial onset time
+        else:
+            stims = r.sample(self.stim_ids*self.stim_repetitions,self.exp_len) 
         trial_list = [] 
         # define ITI and SRI
         ITIs = []; SRIs = []; 
         for _ in range(self.exp_len):
             ITIs.append(min(np.random.exponential(avg_ITI-1)+1, 3*avg_ITI))
             SRIs.append(min(np.random.exponential(avg_SRI-.5)+.5, 3*avg_SRI))
-                
-        if not counterbalance_task:
-            stims = r.sample(self.stim_ids*self.stim_repetitions,self.exp_len)   
-            #define bins. Will set context to center point of each bin
-            bin_boundaries = np.linspace(-1,1,11)
-            for trial in range(self.exp_len):
-                state = self.states[self.trial_states[trial]]
-                dist = self.distribution(**state['dist_args'])
-                binned = -1.1 + np.digitize([dist.rvs()],bin_boundaries)*.2
-                context_sample = round(max(-1, min(1, binned[0])),2)
-                trial_dict = {
-                    'trial_count': trial+1,
-                    'state': self.trial_states[trial],
-                    'ts': state['ts'],
-                    'task_distributions': self.distribution_name,
-                    'distribution_args': state['dist_args'],
-                    'context': context_sample,
+        for trial in range(self.exp_len):
+            duration = cueDuration+CSI+stimulusDuration+responseWindow \
+                            +SRIs[trial]+FBDuration+FBonset+ITIs[trial]
+            trial_dict = {
                     'stim': stims[trial].copy(),
-                    'onset': curr_onset,
+                    'duration': duration,
                     'cueDuration': cueDuration,
                     'stimulusDuration': stimulusDuration,
-                    'responseWindow': responseWindow,
-                    'stimResponseInterval': SRIs[trial],
                     'FBDuration': FBDuration,
                     'FBonset': FBonset,
                     'displayFB': displayFB,
                     'CSI': CSI,
+                    'stimResponseInterval': SRIs[trial],
+                    'responseWindow': responseWindow,
                     'ITI': ITIs[trial],
                     #option to change based on state and stim
                     'reward_amount': 1,
                     'punishment_amount': 0
                 }
-                trial_list += [trial_dict]
-                curr_onset += cueDuration+CSI+stimulusDuration+responseWindow\
-                                +SRIs[trial]+FBDuration+FBonset+ITIs[trial]
-        else:
-            stims = self.stim_ids*self.stim_repetitions*2
-            trial=0
-            for _ in range(self.exp_len//2):
-                for task in self.ts_order:
-                    trial_dict = {
-                        'trial_count': trial+1,
-                        'ts': task,
-                        'stim': stims[trial].copy(),
-                        'onset': curr_onset,
-                        'cueDuration': cueDuration,
-                        'stimulusDuration': stimulusDuration,
-                        'responseWindow': responseWindow,
-                        'stimResponseInterval': SRIs[trial],
-                        'FBDuration': FBDuration,
-                        'FBonset': FBonset,
-                        'displayFB': displayFB,
-                        'CSI': CSI,
-                        'ITI': ITIs[trial],
-                        #option to change based on state and stim
-                        'reward_amount': 1,
-                        'punishment_amount': 0
-                    }
-                    trial_list += [trial_dict]
-                    curr_onset += cueDuration+CSI+stimulusDuration+responseWindow\
-                                    +SRIs[trial]+FBDuration+FBonset+ITIs[trial]
-                    trial += 1
+            if not counterbalance_task:
+                #define bins. Will set context to center point of each bin
+                bin_boundaries = np.linspace(-1,1,11)
+                state = self.states[self.trial_states[trial]]
+                dist = self.distribution(**state['dist_args'])
+                binned = -1.1 + np.digitize([dist.rvs()],bin_boundaries)*.2
+                context_sample = round(max(-1, min(1, binned[0])),2)
+                trial_dict.update({
+                    'state': self.trial_states[trial],
+                    'ts': state['ts'],
+                    'task_distributions': self.distribution_name,
+                    'distribution_args': state['dist_args'],
+                    'context': context_sample,
+                    })
+            else:
+                trial_dict.update({'ts': tasks[trial] })
+            trial_list += [trial_dict]
+        if counterbalance_task:
+            np.random.shuffle(trial_list)
+        # add trial count and onset
+        curr_onset = 2
+        for i,trial in enumerate(trial_list):
+            trial['trial_count'] = i+1
+            trial['onset'] = curr_onset
+            curr_onset += trial['duration']
         self.trial_list = trial_list
        
 

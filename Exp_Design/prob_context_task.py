@@ -119,11 +119,11 @@ class probContextTask(BaseExp):
         trial['response'] = np.nan
         trial['rt'] = np.nan
         trial['FB'] = np.nan
-        
-        
+        # update onset to actual onset
+        trial['onset'] = self.expClock.getTime()
+        # set up stim
         stim = trial['stim']
         trial_attributes = self.getTrialAttributes(stim)
-        
         print('*'*40)        
         print('Taskset: %s\nSpeed: %s, Strength: %s \
               \nOriDirection: %s, OriStrength: %s \
@@ -132,8 +132,6 @@ class probContextTask(BaseExp):
                stim['speedDirection'], stim['speedStrength'], 
                stim['oriDirection'],stim['oriStrength'],
                self.getCorrectChoice(trial_attributes,trial['ts'])))
-
-        
         # present cue
         self.presentCue(trial, trial['cueDuration'])
         core.wait(trial['CSI'])

@@ -49,12 +49,7 @@ cue_config = ProbContextConfig(taskname=cuename,
 complete_config = cue_config.get_config(setup_args={'displayFB': False, 'counterbalance_task': True}, 
                                         save=False)
 # split into subconfigs        
-last_trial = complete_config[-1]
-total_length = last_trial['onset']/60
-num_trials = last_trial['trial_count']
-trials_per_run = math.floor((6.8/total_length*num_trials))
-
-config_files = split_config(cue_config, trials_per_run=trials_per_run)
+config_files = split_config(cue_config, time_per_run=7)
 # repeat config files
 config_files = config_files + config_files
 # ****************************************************************************
@@ -81,6 +76,7 @@ for config_file in config_files:
         cued_task.run_task(intro_text=None, ignored_triggers=12)
     else:
         cued_task.run_task(intro_text=intro_text)   
+    input('Enter when Scan Setup is complete. Triggers: ')
     exp_continue = True if input('Coninue? y/n: ') == 'y' else False
     if not exp_continue:
         break
