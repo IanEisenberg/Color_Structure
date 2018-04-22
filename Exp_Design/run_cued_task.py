@@ -17,7 +17,7 @@ save_dir = '../Data'
 cuename = 'cued_dot_task'
 cue_type = 'deterministic'
 # set up task variables
-stim_repetitions = 1
+stim_repetitions = 3
 recursive_p = .5
 # window variables
 win_kwargs = {'fullscr': False,
@@ -54,7 +54,8 @@ total_length = last_trial['onset']/60
 num_trials = last_trial['trial_count']
 trials_per_run = int(7/total_length*num_trials)
 config_files = split_config(cue_config, trials_per_run=trials_per_run)
-
+# repeat config files
+config_files = config_files + config_files
 # ****************************************************************************
 # Start cueing
 # ****************************************************************************
