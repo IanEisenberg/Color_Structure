@@ -4,8 +4,9 @@ Created on Thu Nov 20 16:13:45 2014
 
 @author: admin
 """
-
+from copy import deepcopy
 import datetime
+from glob import glob
 import numpy as np
 import os
 from os import path
@@ -14,6 +15,23 @@ from scipy.stats import norm
 import yaml
 file_dir = os.path.dirname(__file__)
 
+# helper function
+def split_config(config, trials_per_run):
+    config_files = []
+    total_trials = len(config.trial_list)-1
+    start = 1
+    run=1
+    while start < total_trials:
+        new_config = deepcopy(config)
+        # subset config
+        new_config.trial_list = new_config.trial_list[start:start+trials_per_run]
+        start += trials_per_run
+        config_files.append(new_config.get_config(setup_args={'displayFB': False},
+                                                  run=run))
+        run+=1
+    return config_files
+
+# Class
 class Config(object):
     def __init__(self, subjid, taskname, action_keys,
                  stim_repetitions, distribution=norm, seed=None):
@@ -44,7 +62,7 @@ class Config(object):
         self.stim_motions = ['in','out']
         self.stim_oris = [-45,45]
     
-    def get_config(self, save=True, filey=None, 
+    def get_config(self, save=True, filey=None, run=None,
                    other_params=None, setup_args=None):
         if other_params is None:
             other_params = {}
@@ -70,7 +88,12 @@ class Config(object):
         to_save = self.trial_list
         to_save.insert(0,initial_params)
         if save==True:
-            filename = self.taskname + '_' + self.subjid + '_config_' + self.timestamp + '.yaml'
+            basefilename = self.taskname + '_' + self.subjid + '_config_' + self.timestamp 
+            if run is None:
+                similar_files = glob(path.join(self.loc,basefilename+'*'))
+                filename = basefilename + '_Run%s.yaml' % str(len(similar_files)+1).zfill(2)
+            else:
+                filename = basefilename + '_Run%s.yaml' % str(run).zfill(2)
             if filey == None:
                 filey = path.join(self.loc,filename)
             yaml.dump(to_save, open(filey,'w'))
@@ -159,7 +182,7 @@ class ProbContextConfig(Config):
         # setup
         self.setup_stims()
         
-    def get_config(self, save=True, filey=None, setup_args=None):
+    def get_config(self, save=True, filey=None, setup_args=None, run=None):
         other_params = {'rp': self.rp,
                         'states': self.states,
                         'stim_ids': self.stim_ids,
@@ -168,6 +191,7 @@ class ProbContextConfig(Config):
                         'speed_difficulties': self.speed_difficulties}
         return super(ProbContextConfig, self).get_config(save, 
                                                          filey, 
+                                                         run,
                                                          other_params,
                                                          setup_args)
       
@@ -206,56 +230,83 @@ class ProbContextConfig(Config):
                     state_reps += 1
         self.trial_states = trial_states
             
-    def setup_trial_list(self, cueDuration=.5, CSI=.5, 
-                         stimulusDuration=1.5, responseWindow=1.5, avg_SRI=1,
-                         FBDuration=1, FBonset=0, 
-                         avg_ITI=1, displayFB = True):
+    def setup_trial_list(self, cueDuration=.75, CSI=.25, 
+                         stimulusDuration=1.5, responseWindow=1, avg_SRI=2,
+                         FBDuration=1, FBonset=0, avg_ITI=4, displayFB=True,
+                         counterbalance_task=False):
         if self.seed is not None:
             np.random.seed(self.seed)
-        trial_list = []    
-        trial_count = 1
+        if counterbalance_task:
+            self.exp_len = self.exp_len*2
         curr_onset = 2 #initial onset time
-        stims = r.sample(self.stim_ids*self.stim_repetitions,self.exp_len)   
-            
-        #define bins. Will set context to center point of each bin
-        bin_boundaries = np.linspace(-1,1,11)
-        
-        for trial in range(self.exp_len):
-            # define ITI and SRI
-            ITI = avg_ITI + r.random()-.5
-            SRI = avg_SRI + r.random()-.5
-            state = self.states[self.trial_states[trial]]
-            dist = self.distribution(**state['dist_args'])
-            binned = -1.1 + np.digitize([dist.rvs()],bin_boundaries)*.2
-            context_sample = round(max(-1, min(1, binned[0])),2)
-            trial_dict = {
-                'trial_count': trial_count,
-                'state': self.trial_states[trial],
-                'ts': state['ts'],
-                'task_distributions': self.distribution_name,
-                'distribution_args': state['dist_args'],
-                'context': context_sample,
-                'stim': stims[trial].copy(),
-                'onset': curr_onset,
-                'cueDuration': cueDuration,
-                'stimulusDuration': stimulusDuration,
-                'responseWindow': responseWindow,
-                'stimResponseInterval': SRI,
-                'FBDuration': FBDuration,
-                'FBonset': FBonset,
-                'displayFB': displayFB,
-                'CSI': CSI,
-                'ITI': ITI,
-                #option to change based on state and stim
-                'reward_amount': 1,
-                'punishment_amount': 0
-            }
-
-            trial_list += [trial_dict]
-
-            trial_count += 1
-            curr_onset += cueDuration+CSI+stimulusDuration+responseWindow\
-                            +SRI+FBDuration+FBonset+ITI
+        trial_list = [] 
+        # define ITI and SRI
+        ITIs = []; SRIs = []; 
+        for _ in range(self.exp_len):
+            ITIs.append(min(np.random.exponential(avg_ITI-1)+1, 3*avg_ITI))
+            SRIs.append(min(np.random.exponential(avg_SRI-.5)+.5, 3*avg_SRI))
+                
+        if not counterbalance_task:
+            stims = r.sample(self.stim_ids*self.stim_repetitions,self.exp_len)   
+            #define bins. Will set context to center point of each bin
+            bin_boundaries = np.linspace(-1,1,11)
+            for trial in range(self.exp_len):
+                state = self.states[self.trial_states[trial]]
+                dist = self.distribution(**state['dist_args'])
+                binned = -1.1 + np.digitize([dist.rvs()],bin_boundaries)*.2
+                context_sample = round(max(-1, min(1, binned[0])),2)
+                trial_dict = {
+                    'trial_count': trial+1,
+                    'state': self.trial_states[trial],
+                    'ts': state['ts'],
+                    'task_distributions': self.distribution_name,
+                    'distribution_args': state['dist_args'],
+                    'context': context_sample,
+                    'stim': stims[trial].copy(),
+                    'onset': curr_onset,
+                    'cueDuration': cueDuration,
+                    'stimulusDuration': stimulusDuration,
+                    'responseWindow': responseWindow,
+                    'stimResponseInterval': SRIs[trial],
+                    'FBDuration': FBDuration,
+                    'FBonset': FBonset,
+                    'displayFB': displayFB,
+                    'CSI': CSI,
+                    'ITI': ITIs[trial],
+                    #option to change based on state and stim
+                    'reward_amount': 1,
+                    'punishment_amount': 0
+                }
+                trial_list += [trial_dict]
+                curr_onset += cueDuration+CSI+stimulusDuration+responseWindow\
+                                +SRIs[trial]+FBDuration+FBonset+ITIs[trial]
+        else:
+            stims = self.stim_ids*self.stim_repetitions*2
+            trial=0
+            for _ in range(self.exp_len//2):
+                for task in self.ts_order:
+                    trial_dict = {
+                        'trial_count': trial+1,
+                        'ts': task,
+                        'stim': stims[trial].copy(),
+                        'onset': curr_onset,
+                        'cueDuration': cueDuration,
+                        'stimulusDuration': stimulusDuration,
+                        'responseWindow': responseWindow,
+                        'stimResponseInterval': SRIs[trial],
+                        'FBDuration': FBDuration,
+                        'FBonset': FBonset,
+                        'displayFB': displayFB,
+                        'CSI': CSI,
+                        'ITI': ITIs[trial],
+                        #option to change based on state and stim
+                        'reward_amount': 1,
+                        'punishment_amount': 0
+                    }
+                    trial_list += [trial_dict]
+                    curr_onset += cueDuration+CSI+stimulusDuration+responseWindow\
+                                    +SRIs[trial]+FBDuration+FBonset+ITIs[trial]
+                    trial += 1
         self.trial_list = trial_list
        
 
@@ -308,13 +359,14 @@ class ThresholdConfig(Config):
         self.setup_stims()
     
         
-    def get_config(self, save=True, filey=None, setup_args=None):
+    def get_config(self, save=True, filey=None, run=None, setup_args=None):
         other_params = {'stim_ids': self.stim_ids,
                         'ts': self.ts,
                         'ori_difficulties': self.ori_difficulties,
                         'speed_difficulties': self.speed_difficulties}
         return super(ThresholdConfig, self).get_config(save, 
                                                        filey, 
+                                                       run,
                                                        other_params,
                                                        setup_args)
         

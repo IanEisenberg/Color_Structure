@@ -13,17 +13,17 @@ class probContextTask(BaseExp):
     """ class defining a probabilistic context task
     """
     
-    def __init__(self,config_file,subjid,save_dir,verbose=True, 
-                 cue_type='probabilistic', win_kwargs={}):
+    def __init__(self,config_file,subjid,save_dir,fmri_trigger=None,
+                 verbose=True, cue_type='probabilistic', win_kwargs={}):
         # set up some variables
         self.stimulusInfo=[]
         self.loadedStimulusFile=[]
         self.expClock = core.Clock()
         self.alldata=[]
+        self.fmri_trigger=fmri_trigger
         #looks up the hash of the most recent git push. Stored in log file
         self.gitHash = subprocess.check_output(['git','rev-parse','--short','HEAD'])[:-1]
-        # load config file
-        self.config_file=config_file
+
         try:
             self.loadConfigFile(config_file)
         except:
@@ -81,10 +81,12 @@ class probContextTask(BaseExp):
     def presentCue(self, trial, duration):
         print('cue', trial['ts'], self.cue_type)
         if self.cue_type == 'deterministic':
-            self.presentTextToWindow(trial['ts'], 
+            cue = 'S' if trial['ts'] == 'motion' else 'O'
+            self.presentTextToWindow(cue, 
+                                     size=.13,
                                      color=self.text_color,
-                                     position=[0,.2],
-                                     fixation=self.fixation,
+                                     position=[0,0],
+                                     fixation=None,
                                      flip=False)
         elif self.cue_type == 'probabilistic':  
             self.cue.setPos((0, trial['context']*.8))
@@ -180,9 +182,11 @@ class probContextTask(BaseExp):
         trial['trial_time'] = trialClock.getTime()
         self.writeToLog(json.dumps(trial))
         self.alldata.append(trial)
+        if self.fmri_trigger:
+            core.wait(trial['ITI'])
         return trial
             
-    def run_task(self, intro_text=None):
+    def run_task(self, intro_text=None, ignored_triggers=16):
         self.setupWindow()
         self.defineStims()
          # set up pause trials
@@ -194,6 +198,9 @@ class probContextTask(BaseExp):
         # present intro screen
         if intro_text:
             self.presentInstruction(intro_text)
+        if self.fmri_trigger:
+            for _ in range(ignored_triggers):
+                self.waitForKeypress(self.fmri_trigger)
         # get ready
         self.presentTextToWindow('Get Ready!', size=.15)
         core.wait(1.5)
@@ -205,10 +212,13 @@ class probContextTask(BaseExp):
                 pause_time += self.presentPause()
             
             # wait for onset time
-            while self.expClock.getTime() < trial['onset']+pause_time:
-                    key_response=event.getKeys([self.quit_key])
-                    if len(key_response)==1:
-                        self.shutDownEarly()
+            if self.fmri_trigger is None:
+                while self.expClock.getTime() < trial['onset']+pause_time:
+                        key_response=event.getKeys([self.quit_key])
+                        if len(key_response)==1:
+                            self.shutDownEarly()
+            else:
+                self.waitForKeypress(self.fmri_trigger)
             self.presentTrial(trial)
         
         # clean up and save
@@ -218,7 +228,7 @@ class probContextTask(BaseExp):
                        other_data=other_data)
         self.presentInstruction(
             """
-            Thank you. Please wait for the experimenter.
+            End of Run
             """)
         self.closeWindow()
 

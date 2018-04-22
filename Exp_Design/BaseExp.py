@@ -48,8 +48,10 @@ class BaseExp(object):
             else:
                 self.stimulusInfo.append(trial)
         if len(self.stimulusInfo)>0:
-            self.loadedStimulusFile=filename
-
+            self.config_file=filename
+            
+    def deleteConfigFile(self):
+        os.remove(self.config_file)
     #**************************************************************************
     # ******* Function to Save Data **************
     #**************************************************************************
@@ -91,7 +93,7 @@ class BaseExp(object):
         pickle.dump(data,f)
     
     def checkRespForQuitKey(self,resp):
-            if self.quit_key in resp:
+            if self.quit_key == resp:
                 self.shutDownEarly()
     
     def clearWindow(self, fixation=True, fixation_color=None):
@@ -299,6 +301,8 @@ class BaseExp(object):
         self.win.flip()
         
     def shutDownEarly(self):
+        if len(self.alldata) < 5:
+            self.deleteConfigFile()
         self.closeWindow()
         sys.exit()
             
@@ -307,11 +311,14 @@ class BaseExp(object):
         - this is primarily for waiting to start a task
         - use getResponse to get responses on a task
         """
-        if type(keyList) == str:
-            keyList = [keyList]
-        if len(keyList) == 0:
-            keyList = [self.trigger_key]
-        keyList.append(self.quit_key)
+        if keyList is None:
+            pass
+        else:
+            if type(keyList) == str:
+                keyList = [keyList]
+            if len(keyList) == 0:
+                keyList = [self.trigger_key]
+            keyList.append(self.quit_key)
         start=False
         event.clearEvents()
         while start==False:

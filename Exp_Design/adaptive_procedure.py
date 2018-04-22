@@ -42,8 +42,6 @@ class adaptiveThreshold(BaseExp):
         
         #looks up the hash of the most recent git push. Stored in log file
         self.gitHash = subprocess.check_output(['git','rev-parse','--short','HEAD'])[:-1]
-        # load config file
-        self.config_file = config_file
         try:
             self.loadConfigFile(config_file)
         except Exception as e:
