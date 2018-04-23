@@ -81,7 +81,7 @@ class probContextTask(BaseExp):
     def presentCue(self, trial, duration):
         print('cue', trial['ts'], self.cue_type)
         if self.cue_type == 'deterministic':
-            cue = 'S' if trial['ts'] == 'motion' else 'O'
+            cue = 'S' if trial['ts'] == 'motion' else 'R'
             self.presentTextToWindow(cue, 
                                      size=.13,
                                      color=self.text_color,
@@ -147,20 +147,14 @@ class probContextTask(BaseExp):
             print('Choice: %s' % trial['response'])
             # get feedback and update tracker
             correct_choice = self.getCorrectChoice(trial_attributes,trial['ts'])
-            #update tracker if in trial mode
-            if correct_choice == trial['response']:
-                FB = trial['reward_amount']
-            else:
-                FB = trial['punishment_amount']
-             #record points for bonus
-            self.pointtracker += FB
+            trial['correct_response'] = correct_choice
+            trial['correct'] = (correct_choice == trial['response'])
             #If training, present FB to window
             if trial['displayFB'] == True:
-                trial['FB'] = FB
                 if trial['FBonset'] > 0: 
                     self.clearWindow(fixation=True)
                     core.wait(trial['FBonset'])  
-                if FB == 1:
+                if trial['correct']:
                     self.clearWindow(fixation=True,
                                      fixation_color=[-.2, 1, -.2])
                 else:

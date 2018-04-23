@@ -33,22 +33,29 @@ def load_data(datafile):
     stim_df = pd.DataFrame(df.stim.tolist())
     df = pd.concat([df,stim_df], axis=1)
     return (taskinfo, df)
-
-
-def preproc_threshold_data(df):
-    df.insert(0, 'binarized_response', df.response.replace({'up':1, 'down':0, 
-                                                            'right': 1, 'left': 0}))
-    df.insert(0, 'speed_change', df.speed_end-df.speed_start)
-    df.insert(0, 'ori_change', df.ori_end-df.ori_start)
-    # drop missed RT
-    assert np.mean(df.rt.isnull()) < .05, print('Many Missing Responses!')
-    df.drop(df.query('rt!=rt').index, inplace=True)
-              
+ 
+def load_cued_data(subjid):
+    file_dir = os.path.dirname(__file__)
+    files = sorted(glob(os.path.join(file_dir,'..','Data','RawData',subjid,
+                                     '%s_cued*' % subjid)))
+    if len(files) > 0:
+        datafile = pd.DataFrame()
+        for i, filey in enumerate(files):
+            taskinfo,df = load_data(filey)
+            df.insert(0, 'Session', i)
+            datafile = pd.concat([datafile, df])
+        # reorganize
+        datafile.reset_index(drop=True, inplace=True)
+        return taskinfo, datafile
+    else:
+        print('No files found for subject %s!' % subjid)
+        return None, None
+             
 def load_threshold_data(subjid, dim='motion'):
     file_dir = os.path.dirname(__file__)
     assert dim in ['motion','orientation']
     files = sorted(glob(os.path.join(file_dir,'..','Data','RawData',subjid,
-                                     '%s_*%s*' % (subjid, dim))))
+                                     '%s_adaptive_%s*' % (subjid, dim))))
     if len(files) > 0:
         datafile = pd.DataFrame()
         for i, filey in enumerate(files):
@@ -88,3 +95,12 @@ def preproc_data(traindata, testdata, taskinfo, dist = norm):
             train_recursive_p = 1 - traindata.switch.mean()
             action_eps = 1-np.mean([testdata['response'][i] in testdata['stim'][i] for i in testdata.index])
             return train_ts_dis, train_recursive_p, action_eps
+        
+def preproc_threshold_data(df):
+    df.insert(0, 'binarized_response', df.response.replace({'up':1, 'down':0, 
+                                                            'right': 1, 'left': 0}))
+    df.insert(0, 'speed_change', df.speed_end-df.speed_start)
+    df.insert(0, 'ori_change', df.ori_end-df.ori_start)
+    # drop missed RT
+    assert np.mean(df.rt.isnull()) < .05, print('Many Missing Responses!')
+    df.drop(df.query('rt!=rt').index, inplace=True)

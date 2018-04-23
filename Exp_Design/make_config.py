@@ -305,9 +305,6 @@ class ProbContextConfig(Config):
                     'stimResponseInterval': SRIs[trial],
                     'responseWindow': responseWindow,
                     'ITI': ITIs[trial],
-                    #option to change based on state and stim
-                    'reward_amount': 1,
-                    'punishment_amount': 0
                 }
             if not counterbalance_task:
                 #define bins. Will set context to center point of each bin
@@ -423,9 +420,6 @@ class ThresholdConfig(Config):
                 'FBonset': FBonset,
                 'displayFB': displayFB,
                 'ITI': ITI,
-                #option to change based on state and stim
-                'reward_amount': 1,
-                'punishment_amount': 0
             }
 
             trial_list += [trial_dict]

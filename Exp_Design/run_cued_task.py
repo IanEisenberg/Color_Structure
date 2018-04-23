@@ -1,7 +1,7 @@
 """
 runprobContextTask
 """
-import math
+import os
 from Exp_Design.make_config import ProbContextConfig, split_config
 from Exp_Design.prob_context_task import probContextTask
 from Exp_Design.utils import get_response_curves
@@ -25,10 +25,14 @@ win_kwargs = {'fullscr': True,
               'size': [1920, 1200]}
 action_keys = ['down','up','left','right']
 fmri_trigger=None
+avg_ITI = 1
+avg_SRI = 2
 # set up for fmri
 if fmri == True:
     action_keys = ['e', 'b','r','y']
     fmri_trigger = 't'
+    avg_ITI = 4
+    avg_SRI = 2
 
 
 
@@ -46,12 +50,19 @@ cue_config = ProbContextConfig(taskname=cuename,
                                speed_difficulties=[.75],
                                ori_difficulties=[.75],
                                responseCurves=responseCurves)
-complete_config = cue_config.get_config(setup_args={'displayFB': False, 'counterbalance_task': True}, 
+complete_config = cue_config.get_config(setup_args={'displayFB': False, 
+                                                    'counterbalance_task': True,
+                                                    'avg_ITI': avg_ITI,
+                                                    'avg_SRI': avg_SRI}, 
                                         save=False)
 # split into subconfigs        
 config_files = split_config(cue_config, time_per_run=7)
 # repeat config files
 config_files = config_files + config_files
+
+## remove config files
+#for filey in config_files:
+#    os.remove(filey)
 # ****************************************************************************
 # Start cueing
 # ****************************************************************************
@@ -59,8 +70,11 @@ config_files = config_files + config_files
 intro_text = \
     """
     In this phase of the experiment you will be cued
-    whether to pay attention to motion or orientation
+    whether to pay attention to SPEED or ROTATION
     before each trial.
+    
+    An "S" or "R" will be displayed before each trial
+    telling you which feature to attend to.
     
     Please wait for the experimenter.
     """

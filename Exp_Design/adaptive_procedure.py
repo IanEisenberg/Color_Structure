@@ -240,28 +240,20 @@ class adaptiveThreshold(BaseExp):
             trial['response'], trial['rt'] = key_response
             # get feedback and update tracker
             correct_choice = self.getCorrectChoice(trial_attributes,trial['ts'])
+            trial['correct_response'] = correct_choice
+            trial['correct'] = (correct_choice == trial['response'])
             #update tracker if in trial mode
-            if correct_choice == trial['response']:
-                FB = trial['reward_amount']
-                if not practice:
-                    tracker.addResponse(1, intensity=decision_var)
-            else:
-                FB = trial['punishment_amount']
-                if not practice:
-                    tracker.addResponse(0, intensity=decision_var)
+            if not practice:
+                tracker.addResponse(int(trial['correct']), intensity=decision_var)
             # add current tracker estimate
             if not practice:
                 trial['quest_estimate'] = tracker.mean()
-            # record points for bonus
-            if not practice:
-                self.pointtracker += FB
             # Present FB to window
             if trial['displayFB'] == True:
-                trial['FB'] = FB
                 if trial['FBonset'] > 0: 
                     self.clearWindow(fixation=True)
                     core.wait(trial['FBonset'])  
-                if FB == 1:
+                if trial['correct']:
                     self.clearWindow(fixation=True,
                                      fixation_color=[-.2, 1, -.2])
                 else:
@@ -438,7 +430,8 @@ class adaptiveThreshold(BaseExp):
         if practice:
             self.run_practice()
         else:
-            self.presentInstruction(self.ts.title(), size=.15)
+            title = 'Speed' if self.ts == 'motion' else 'Rotation'
+            self.presentInstruction(title, size=.15)
         # run the estimation procedure
         self.run_estimation(intro=True, prop_estimate=prop_estimate)
         # clean up and save
