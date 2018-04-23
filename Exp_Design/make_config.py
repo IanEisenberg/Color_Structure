@@ -43,7 +43,7 @@ def split_config(config, trials_per_run=None, time_per_run=None, save=True):
             # save
             
             config_files.append(new_config.get_config(setup_args={'displayFB': False},
-                                                      run=run, save=dsave))
+                                                      run=run, save=save))
             # progress for next run
             start += trials_per_run
             run+=1

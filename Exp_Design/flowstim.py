@@ -65,8 +65,8 @@ class OpticFlow(object):
             mask[:,80:]=0
             x = np.linspace(-np.pi, np.pi, 201)
             mask = np.vstack([np.cos(x)]*201)
-        self.dots = visual.ElementArrayStim(win, elementTex=None,units = 'deg',
-                                       elementMask=mask, **kwargs)
+        self.dots = visual.ElementArrayStim(win, elementTex=None, units='height',
+                                            elementMask=mask, **kwargs)
         self.base_dot_size = self.dots.sizes
         self.__dict__.update(kwargs)
         # OpticFlow specific arguments
@@ -82,8 +82,8 @@ class OpticFlow(object):
         # set up transformation matrices
         self.T = np.array([0,0,speed])
         # set up viewer's focal length and limits of scenece
-        self.f = .5
-        self.fieldlimits = [[-10,10], [-10,10], [self.f,4]] # x,y,z, min/max
+        self.f = .2
+        self.fieldlimits = [[-1,1], [-1,1], [self.f,4]] # x,y,z, min/max
         # set up dots in 3d space
         self.setupDots()
         self.project2screen()
@@ -185,35 +185,37 @@ class OpticFlow(object):
         self.win.flip()
 
 
-def get_win(screen=0,fullscr=True):
-    return  visual.Window([800,600], color=[-1,-1,-1], allowGUI=False, fullscr=fullscr, 
+def get_win(screen=0,size=[800,600], fullscr=True):
+    return  visual.Window(size, color=[-1,-1,-1], allowGUI=False, fullscr=fullscr, 
                                      monitor='testMonitor', units='norm',  screen=screen,
                                      allowStencil=True) 
 
-
 """
 # For testing
-win = get_win(fullscr=True)
-colors = np.array([[0,0,1],[1,0,0]])
-stim = OpticFlow(win,.05, color = colors[0], sizes = [.015,.02], nElements = 6000)
-color_proportion = 0
+from psychopy import event
+from psychopy import core
+win = get_win(size=[2200,1200], fullscr=False)
+# set up aperture
+aperture_size = 1.5
+aperture_vertices = visual.Aperture(win, size=aperture_size, units='norm').vertices
+ratio = float(win.size[1])/win.size[0]
+aperture_vertices[:,0]*=ratio
+aperture = visual.Aperture(win, size=aperture_size, units='norm', shape = aperture_vertices)
+aperture.enable()
+height = .04
+ratio = .3
+stim = OpticFlow(win, 
+                 speed=.02,
+                 color=[1,1,1], 
+                 nElements = 2000,
+                 sizes=[height*ratio, height])
+
+clock = core.Clock()
 while True:
+    stim.updateTrialAttributes(ori=(clock.getTime()*10)%360)
     keys=event.getKeys()
+    stim.draw()
     if 'q' in keys:
         break
-    if keys != []:
-        keys=event.waitKeys()
-        
-    color_proportion+=.02
-    bounded_proportion = np.sin(color_proportion)*.5+.5
-    color = colors[0]*bounded_proportion \
-                + colors[1]*(1-bounded_proportion)
-    stim.updateTrialAttributes(color = color)
-    
-    if color_proportion%6 > 3:
-        stim.updateTrialAttributes(dir = 'in')
-    else:
-        stim.updateTrialAttributes(dir = 'out')
-    stim.draw()
 win.close()      
 """

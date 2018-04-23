@@ -76,13 +76,13 @@ class adaptiveThreshold(BaseExp):
     # ******* Display Functions **************
     #**************************************************************************
     def defineStims(self, stim = None):
-        height = 1
+        height = .035
         ratio = .3
         if stim == None:
             self.stim = OpticFlow(self.win, 
                                  speed=self.base_speed,
                                  color=[1,1,1], 
-                                 nElements = 2000,
+                                 nElements = 2500,
                                  sizes=[height*ratio, height])
         else:
             self.stim = stim 

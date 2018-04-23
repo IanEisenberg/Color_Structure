@@ -57,14 +57,14 @@ class probContextTask(BaseExp):
     #**************************************************************************
     def defineStims(self, stim = None, cue = None):
         ratio = self.win.size[1]/float(self.win.size[0])
-        stim_height = 1
+        stim_height = .035
         ratio = .3
         cue_height = .05
         if stim == None:
             self.stim=OpticFlow(self.win, 
                                 speed=self.base_speed,
                                 color=[1,1,1], 
-                                nElements = 2000,
+                                nElements = 2500,
                                 sizes=[stim_height*ratio, stim_height])
         else:
             self.stim = stim
