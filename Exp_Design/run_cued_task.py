@@ -62,7 +62,10 @@ config_files = config_files + config_files
 
 ## remove config files
 #for filey in config_files:
-#    os.remove(filey)
+#    try:
+#        os.remove(filey)
+#    except FileNotFoundError:
+#        continue
 # ****************************************************************************
 # Start cueing
 # ****************************************************************************
