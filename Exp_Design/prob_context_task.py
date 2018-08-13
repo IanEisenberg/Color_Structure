@@ -99,7 +99,6 @@ class probContextTask(BaseExp):
         pauseClock = core.Clock()
         timer_text = "Take a break!\n\nContinue in: \n\n       "
         self.presentTimer(duration=20, text=timer_text)
-        self.presentTextToWindow('Get Ready!', size=.15)
         core.wait(1.5)
         self.aperture.enable()
         pause_time = pauseClock.getTime()
@@ -118,7 +117,6 @@ class probContextTask(BaseExp):
         trial['stimulusCleared']=0
         trial['response'] = np.nan
         trial['rt'] = np.nan
-        trial['FB'] = np.nan
         # update onset to actual onset
         trial['onset'] = self.expClock.getTime()
         # set up stim
@@ -220,7 +218,7 @@ class probContextTask(BaseExp):
                        other_data=other_data)
         self.presentInstruction(
             """
-            End of Run
+            End of Run (press 5 to continue)
             """)
         self.closeWindow()
 

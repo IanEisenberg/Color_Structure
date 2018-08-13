@@ -34,10 +34,14 @@ def load_data(datafile):
     df = pd.concat([df,stim_df], axis=1)
     return (taskinfo, df)
  
-def load_cued_data(subjid):
+def load_cued_data(subjid, fmri=True):
     file_dir = os.path.dirname(__file__)
+    if fmri: 
+        task = "fmri_cued_dot_task" 
+    else: 
+        task="cued_dot_task"
     files = sorted(glob(os.path.join(file_dir,'..','Data','RawData',subjid,
-                                     '%s_cued*' % subjid)))
+                                     '%s_%s*' % (subjid, task))))
     if len(files) > 0:
         datafile = pd.DataFrame()
         for i, filey in enumerate(files):
