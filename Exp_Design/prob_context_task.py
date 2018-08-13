@@ -119,6 +119,7 @@ class probContextTask(BaseExp):
         trial['rt'] = np.nan
         # update onset to actual onset
         trial['onset'] = self.expClock.getTime()
+        print(f'Actual Onset: {trial["onset"]}')
         # set up stim
         stim = trial['stim']
         trial_attributes = self.getTrialAttributes(stim)
@@ -180,11 +181,6 @@ class probContextTask(BaseExp):
         self.setupWindow()
         self.defineStims()
          # set up pause trials
-        length_min = self.stimulusInfo[-1]['onset']/60
-        # have break every 6 minutes
-        num_pauses = np.round(length_min/6)
-        pause_trials = np.round(np.linspace(0,self.exp_len,num_pauses+1))[1:-1]
-        pause_time = 0
         # present intro screen
         if intro_text:
             self.presentInstruction(intro_text)
@@ -192,23 +188,20 @@ class probContextTask(BaseExp):
             for _ in range(ignored_triggers+1):
                 self.waitForKeypress(self.fmri_trigger)
         # get ready
-        self.presentTextToWindow('Get Ready!', size=.15)
-        core.wait(1.5)
         # start the task
         self.expClock.reset()
+        #self.presentTextToWindow('Get Ready!', size=.15)
+        core.wait(1.5)
         self.clearWindow(fixation=self.fixation)
         for trial in self.stimulusInfo:
-            if trial['trial_count'] in pause_trials:
-                pause_time += self.presentPause()
-            
             # wait for onset time
-            if self.fmri_trigger is None:
-                while self.expClock.getTime() < trial['onset']+pause_time:
-                        key_response=event.getKeys([self.quit_key])
-                        if len(key_response)==1:
-                            self.shutDownEarly()
-            else:
+            while self.expClock.getTime() < trial['onset']:
+                    key_response=event.getKeys([self.quit_key])
+                    if len(key_response)==1:
+                        self.shutDownEarly()
+            if self.trigger_key:
                 self.waitForKeypress(self.fmri_trigger)
+            print(f'Intended Onset: {trial["onset"]}')
             self.presentTrial(trial)
         
         # clean up and save
