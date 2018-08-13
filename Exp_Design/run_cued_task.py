@@ -1,7 +1,6 @@
 """
 runprobContextTask
 """
-import os
 from Exp_Design.make_config import ProbContextConfig, split_config
 from Exp_Design.prob_context_task import probContextTask
 from Exp_Design.utils import get_response_curves
@@ -17,7 +16,7 @@ save_dir = '../Data'
 taskname = 'cued_dot_task'
 cue_type = 'deterministic'
 # set up task variables
-stim_repetitions = 24 # per task
+stim_repetitions = 26 # per task
 recursive_p = .5
 # window variables
 win_kwargs = {'fullscr': True,
@@ -43,7 +42,7 @@ if fmri == True:
 # load motion_difficulties and ori_difficulties from adaptive tasks     
 # cued task 
 
-responseCurves = get_response_curves(subjid)
+responseCurves = get_response_curves('IE')
 cue_config = ProbContextConfig(taskname=taskname, 
                                subjid=subjid, 
                                action_keys=action_keys,
@@ -59,13 +58,19 @@ complete_config = cue_config.get_config(setup_args={'displayFB': False,
                                         save=False)
 
 # split into subconfigs        
-#config_files = split_config(cue_config, time_per_run=7.5)
+config_files = split_config(cue_config, time_per_run=7)
 # repeat config files
-#config_files = config_files + config_files
+config_files = config_files + config_files
 
-
+## print config_files time
+# import yaml
+#for c in config_files:
+#    f = yaml.load(open(c,'r'))
+#    last_onset = f[-1]['onset']/60
+#    print(last_onset)
 
 ## remove config files
+# import os
 #for filey in config_files:
 #    try:
 #        os.remove(filey)

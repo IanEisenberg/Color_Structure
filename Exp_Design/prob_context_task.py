@@ -119,7 +119,6 @@ class probContextTask(BaseExp):
         trial['rt'] = np.nan
         # update onset to actual onset
         trial['onset'] = self.expClock.getTime()
-        print(f'Actual Onset: {trial["onset"]}')
         # set up stim
         stim = trial['stim']
         trial_attributes = self.getTrialAttributes(stim)
@@ -201,7 +200,6 @@ class probContextTask(BaseExp):
                         self.shutDownEarly()
             if self.trigger_key:
                 self.waitForKeypress(self.fmri_trigger)
-            print(f'Intended Onset: {trial["onset"]}')
             self.presentTrial(trial)
         
         # clean up and save

@@ -62,9 +62,10 @@ def split_config(config, trials_per_run=None, time_per_run=None, save=True):
                 trial['trial_count'] = i+1
                 trial['onset'] = curr_onset
                 curr_onset += trial['duration']
-            # save
-            config_files.append(new_config.get_config(setup_args={'displayFB': False},
-                                                      run=run, save=save))
+            if (time_per_run*60-curr_onset) < 30:
+                # save
+                config_files.append(new_config.get_config(setup_args={'displayFB': False},
+                                                          run=run, save=save))
             # progress for next run
             start=last_trial+2
             cum_durations -= cum_durations[last_trial]
