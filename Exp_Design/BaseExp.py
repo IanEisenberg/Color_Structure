@@ -140,7 +140,7 @@ class BaseExp(object):
         
     
     def presentStim(self, trial_attributes, duration=.5, response_window=3,
-                    SRI=0):
+                    SRI=0, response_ends=False):
         """ Used during instructions to present possible stims
         """
         # unpack trial attributes
@@ -179,6 +179,9 @@ class BaseExp(object):
             assert len(key_response) == 1
             key_response = key_response[0]
             self.checkRespForQuitKey([key_response[0]])
+            if not response_ends:
+                self.clearWindow(fixation=True)
+                core.wait(response_window, key_response[1])
         else:
             key_response = []
         if self.aperture: self.aperture.disable()
