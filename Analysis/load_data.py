@@ -70,7 +70,8 @@ def load_cued_data(subjid, fmri=True):
         task = "*fmri_cued_dot_task*" 
     else: 
         task = "*cued_dot_task*"
-    taskinfo, data = load_datafiles(subjid, task)
+    taskinfo, data = load_datafiles(subjid, task,
+                                    preproc_fun=preproc_cued_data)
     return taskinfo, data
 
 def load_threshold_data(subjid, dim="motion"):
@@ -78,8 +79,26 @@ def load_threshold_data(subjid, dim="motion"):
     taskinfo, data = load_datafiles(subjid, f'*{dim}*', 
                                     preproc_fun=preproc_threshold_data)
     return taskinfo, data
-             
-def preproc_data(traindata, testdata, taskinfo, dist = norm):
+        
+def preproc_cued_data(df):
+    df.response.replace({'e': 'down', 'b': 'up', 'r': 'left', 'y': 'right'},
+                        inplace=True)
+    response_ts = np.where(df.response.isin(['up','down']), 
+                           'motion', 'orientation')
+    df.insert(df.columns.get_loc('ts'), 'response_ts',  response_ts)
+    
+def preproc_threshold_data(df):
+    df.insert(df.columns.get_loc('response'), 'binarized_response', 
+              df.response.replace({'up':1, 'down':0, 'right': 1, 'left': 0}))
+    df.insert(df.columns.get_loc('speed_end'), 'speed_change', 
+              df.speed_end-df.speed_start)
+    df.insert(df.columns.get_loc('ori_end'), 'ori_change', 
+              df.ori_end-df.ori_start)
+    # drop missed RT
+    assert np.mean(df.rt.isnull()) < .05, print('Many Missing Responses!')
+    df.drop(df.query('rt!=rt').index, inplace=True)
+
+def preproc_context_data(traindata, testdata, taskinfo, dist = norm):
             """ Sets TS2 to always be associated with the 'top' of the screen (positive context values),
             creates a log_rt column and outputs task statistics during training
             :return: train_ts_dis, train_recursive_p, action_eps
@@ -104,12 +123,3 @@ def preproc_data(traindata, testdata, taskinfo, dist = norm):
             train_recursive_p = 1 - traindata.switch.mean()
             action_eps = 1-np.mean([testdata['response'][i] in testdata['stim'][i] for i in testdata.index])
             return train_ts_dis, train_recursive_p, action_eps
-        
-def preproc_threshold_data(df):
-    df.insert(0, 'binarized_response', df.response.replace({'up':1, 'down':0, 
-                                                            'right': 1, 'left': 0}))
-    df.insert(0, 'speed_change', df.speed_end-df.speed_start)
-    df.insert(0, 'ori_change', df.ori_end-df.ori_start)
-    # drop missed RT
-    assert np.mean(df.rt.isnull()) < .05, print('Many Missing Responses!')
-    df.drop(df.query('rt!=rt').index, inplace=True)
