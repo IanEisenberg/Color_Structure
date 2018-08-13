@@ -12,7 +12,7 @@ import os
 import pandas as pd
 from scipy.stats import norm
     
-def load_data(datafile):
+def load_datafile(datafile):
     """
     Load a temporal structure task data file. Cleans up the raw data (returns
     the first action/rt, removes trials without a response). Returns the global
@@ -32,48 +32,53 @@ def load_data(datafile):
     # separate stim attributes
     stim_df = pd.DataFrame(df.stim.tolist())
     df = pd.concat([df,stim_df], axis=1)
-    return (taskinfo, df)
+    return (taskinfo, loaded_pickle['configfile'], df)
  
-def load_cued_data(subjid, fmri=True):
+def load_datafiles(subjid, lookup_string, preproc_fun=None):
     file_dir = os.path.dirname(__file__)
-    if fmri: 
-        task = "fmri_cued_dot_task" 
-    else: 
-        task="cued_dot_task"
     files = sorted(glob(os.path.join(file_dir,'..','Data','RawData',subjid,
-                                     '%s_%s*' % (subjid, task))))
+                                     lookup_string)))
+    session_i = 1
+    run_i = 1
+    last_date = None
     if len(files) > 0:
-        datafile = pd.DataFrame()
+        data = pd.DataFrame()
         for i, filey in enumerate(files):
-            taskinfo,df = load_data(filey)
-            df.insert(0, 'Session', i)
-            datafile = pd.concat([datafile, df])
+            date = os.path.basename(filey).split('_')[-2]
+            if last_date and date != last_date:
+                session_i += 1
+                last_date = date
+                run_i = 1
+            taskinfo, configfile, df = load_datafile(filey)
+            df.insert(0, 'session', session_i)
+            df.insert(0, 'run', run_i)
+            df.insert(0, 'configfile', configfile)
+            if preproc_fun:
+                preproc_fun(df)
+            data = pd.concat([data, df])
+            run_i += 1
         # reorganize
-        datafile.reset_index(drop=True, inplace=True)
-        return taskinfo, datafile
+        data.reset_index(drop=True, inplace=True)
+        data.configfile = data.configfile.astype('category')
+        return taskinfo, data
     else:
-        print('No files found for subject %s!' % subjid)
-        return None, None
-             
-def load_threshold_data(subjid, dim='motion'):
-    file_dir = os.path.dirname(__file__)
-    assert dim in ['motion','orientation']
-    files = sorted(glob(os.path.join(file_dir,'..','Data','RawData',subjid,
-                                     '%s_adaptive_%s*' % (subjid, dim))))
-    if len(files) > 0:
-        datafile = pd.DataFrame()
-        for i, filey in enumerate(files):
-            taskinfo,df = load_data(filey)
-            df.insert(0, 'Session', i)
-            preproc_threshold_data(df)
-            datafile = pd.concat([datafile, df])
-        # reorganize
-        datafile.reset_index(drop=True, inplace=True)
-        return taskinfo, datafile
-    else:
-        print('No %s files found for subject %s!' % (dim, subjid))
+        print('No %s files found for subject %s!' % (lookup_string, subjid))
         return None, None
 
+def load_cued_data(subjid, fmri=True):
+    if fmri: 
+        task = "*fmri_cued_dot_task*" 
+    else: 
+        task = "*cued_dot_task*"
+    taskinfo, data = load_datafiles(subjid, task)
+    return taskinfo, data
+
+def load_threshold_data(subjid, dim="motion"):
+    assert dim in ['motion','orientation']
+    taskinfo, data = load_datafiles(subjid, f'*{dim}*', 
+                                    preproc_fun=preproc_threshold_data)
+    return taskinfo, data
+             
 def preproc_data(traindata, testdata, taskinfo, dist = norm):
             """ Sets TS2 to always be associated with the 'top' of the screen (positive context values),
             creates a log_rt column and outputs task statistics during training
