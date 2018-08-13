@@ -50,9 +50,10 @@ def load_datafiles(subjid, lookup_string, preproc_fun=None):
                 last_date = date
                 run_i = 1
             taskinfo, configfile, df = load_datafile(filey)
-            df.insert(0, 'session', session_i)
             df.insert(0, 'run', run_i)
             df.insert(0, 'configfile', configfile)
+            df.insert(0, 'session', session_i)
+            df.insert(0, 'subjid', subjid)
             if preproc_fun:
                 preproc_fun(df)
             data = pd.concat([data, df])
@@ -79,7 +80,24 @@ def load_threshold_data(subjid, dim="motion"):
     taskinfo, data = load_datafiles(subjid, f'*{dim}*', 
                                     preproc_fun=preproc_threshold_data)
     return taskinfo, data
+
+def get_event_files(subjid):
+    taskinfo, data = load_cued_data(subjid, fmri=True)
+    run_starts = np.where(data.run!=data.run.shift(-1))[0]+1
+    event_files = []
+    start = 0
+    median_rt = data.rt.median()
+    for end in run_starts:
+        run = data.iloc[start:end]
+        event_run = preproc_fmri_data(run, median_rt)
+        event_files.append(event_run)
+        start=end
+    return event_files
+    
         
+# ****************************************************************************
+# preproc functions
+# ****************************************************************************
 def preproc_cued_data(df):
     df.response.replace({'e': 'down', 'b': 'up', 'r': 'left', 'y': 'right'},
                         inplace=True)
@@ -98,6 +116,44 @@ def preproc_threshold_data(df):
     assert np.mean(df.rt.isnull()) < .05, print('Many Missing Responses!')
     df.drop(df.query('rt!=rt').index, inplace=True)
 
+def preproc_fmri_data(df, median_rt=None):
+    if median_rt is None:
+        median_rt = df.rt.median()
+    event_file = []
+    for i, row in df.iterrows():
+        # determine if trial is junk
+        junk = False
+        if row.response_ts != row.ts or np.isnan(row.rt):
+            junk = True
+            
+        generic = {'session': row.session,
+                   'run': row.run,
+                   'subjid': row.subjid,
+                   'junk': junk}
+        cue = {'onset': row.onset,
+               'duration': row.cueDuration,
+               'ts': row.ts,
+               'type': 'cue'}
+        stim = {'onset': row.onset+row.CSI,
+                'duration': row.stimulusDuration,
+                'motionDirection': row.motionDirection,
+                'oriBase': row.oriBase,
+                'oriDirection': row.oriDirection,
+                'speedDirection': row.speedDirection,
+                'ts': row.ts,
+                'type': 'stimulus'}
+        response_onset = row.onset+row.CSI+row.stimulusDuration+row.stimResponseInterval
+        response = {'onset': response_onset,
+                    'duration': 0, #impulse
+                    'correct': row.correct,
+                    'rt': row.rt - median_rt, 
+                    'type': 'response'}
+        for part in [cue, stim, response]:
+            part.update(generic)
+            event_file.append(part)
+    return pd.DataFrame(event_file)
+    
+    
 def preproc_context_data(traindata, testdata, taskinfo, dist = norm):
             """ Sets TS2 to always be associated with the 'top' of the screen (positive context values),
             creates a log_rt column and outputs task statistics during training
