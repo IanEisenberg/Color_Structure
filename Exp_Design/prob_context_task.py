@@ -123,10 +123,10 @@ class probContextTask(BaseExp):
         stim = trial['stim']
         trial_attributes = self.getTrialAttributes(stim)
         print('*'*40)        
-        print('Taskset: %s\nSpeed: %s, Strength: %s \
+        print('Onset: %s\n,Taskset: %s\nSpeed: %s, Strength: %s \
               \nOriDirection: %s, OriStrength: %s \
               \nCorrectChoice: %s' % 
-              (trial['ts'], 
+              (trial['onset'], trial['ts'], 
                stim['speedDirection'], stim['speedStrength'], 
                stim['oriDirection'],stim['oriStrength'],
                self.getCorrectChoice(trial_attributes,trial['ts'])))
@@ -173,7 +173,11 @@ class probContextTask(BaseExp):
         self.writeToLog(json.dumps(trial))
         self.alldata.append(trial)
         if self.fmri_trigger:
-            core.wait(trial['ITI'])
+            wait_time = trial['ITI']
+            while (trialClock.getTime()-trial['trial_time']) < wait_time:
+                key_response=event.getKeys([self.quit_key])
+                if len(key_response)==1:
+                    self.shutDownEarly()
         return trial
             
     def run_task(self, intro_text=None, ignored_triggers=16):
@@ -189,16 +193,18 @@ class probContextTask(BaseExp):
         # get ready
         # start the task
         self.expClock.reset()
-        #self.presentTextToWindow('Get Ready!', size=.15)
-        core.wait(1.5)
-        self.clearWindow(fixation=self.fixation)
+        if self.fmri_trigger is None:
+            self.presentTextToWindow('Get Ready!', size=.15)
+            core.wait(1.5)
+            self.clearWindow(fixation=self.fixation)
         for trial in self.stimulusInfo:
             # wait for onset time
-            while self.expClock.getTime() < trial['onset']:
+            if self.fmri_trigger is None:
+                while self.expClock.getTime() < trial['onset']:
                     key_response=event.getKeys([self.quit_key])
                     if len(key_response)==1:
                         self.shutDownEarly()
-            if self.trigger_key:
+            else:
                 self.waitForKeypress(self.fmri_trigger)
             self.presentTrial(trial)
         
