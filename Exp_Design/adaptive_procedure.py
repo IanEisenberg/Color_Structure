@@ -228,7 +228,6 @@ class adaptiveThreshold(BaseExp):
         """
         trial['response'] = np.nan
         trial['rt'] = np.nan
-        trial['FB'] = np.nan
         # present stimulus and get response
         event.clearEvents()
         key_response = self.presentStim(trial_attributes, 

@@ -213,8 +213,7 @@ class ProbContextConfig(Config):
                 val = responseCurves['motion'].inverse(difficulty)
                 self.speed_difficulties[(pedestal, difficulty)] = val
         # calculate exp len
-        num_stims = len(self.ori_difficulties)*len(self.speed_difficulties)\
-                    *len(self.stim_oris)*len(self.stim_motions)
+        num_stims = len(self.ori_difficulties)*len(self.speed_difficulties)
         if exp_len is None:
             self.exp_len = int(stim_repetitions*num_stims)
         else:

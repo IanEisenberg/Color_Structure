@@ -17,7 +17,7 @@ save_dir = '../Data'
 cuename = 'cued_dot_task'
 cue_type = 'deterministic'
 # set up task variables
-stim_repetitions = 6
+stim_repetitions = 24 # per task
 recursive_p = .5
 # window variables
 win_kwargs = {'fullscr': True,

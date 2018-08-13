@@ -13,7 +13,7 @@ Creats config file for subject and run the task.
 import os
 import random as r
 from Exp_Design.adaptive_procedure import adaptiveThreshold
-from Exp_Design.utils import get_tracker_estimates, get_trackers
+from Exp_Design.utils import get_data_files, get_tracker_estimates, get_trackers
 from Exp_Design.make_config import ThresholdConfig
 
         
@@ -41,7 +41,13 @@ win_kwargs = {'fullscr': True,
               'size': [1920, 1080]}
 
 # randomize ts order (which ts is associated with top of screen)
-first_task = 'motion' if r.random() > .5 else 'orientation'
+motion_files, ori_files = get_data_files(subjid)
+if len(motion_files) > len(ori_files):
+    first_task = 'orientation'
+elif len(ori_files) > len(motion_files):
+    first_task = 'motion'
+else:
+    first_task = 'motion' if r.random() > .5 else 'orientation'
 
 def setup_task(trackers, dim='motion', 
                speed_difficulties=None, ori_difficulties=None):

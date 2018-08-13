@@ -39,7 +39,7 @@ def plot_response_fun(responseFun, ax=None, plot_kws=None):
     y = [responseFun.eval(x) for x in X]
     ax.plot(X, y, **plot_kws)
     # plot points of interest
-    y_points = [.7, .85]
+    y_points = [.7, .775, .85]
     x_points = responseFun.inverse(y_points)
     ax.plot(x_points, y_points, 'o', color='blue',
             markeredgecolor='white', markeredgewidth=1, markersize=9,
@@ -75,7 +75,7 @@ def get_plot_info(subjid, N=None):
             subset.insert(0, 'decision_bins', np.digitize(subset.decision_var, bins))
             binned_decision_var = subset.groupby('decision_bins').decision_var.mean()
             subset.insert(0, 'binned_decision_var', subset.decision_bins.replace(binned_decision_var))
-            bin_accuracy = subset.groupby('binned_decision_var').FB.agg(['mean', 'std', 'count'])
+            bin_accuracy = subset.groupby('binned_decision_var').correct.agg(['mean', 'std', 'count'])
             # calculate standard error
             bin_accuracy.insert(0, 'se', bin_accuracy['std']/bin_accuracy['count']**.5)
             
@@ -117,7 +117,7 @@ def plot_threshold_run(subjid, responseFun='lapseWeibull', N=None, size=8):
                             c=colors[i],)
         # plot response fun fit
         init_estimate = .01 if key=='motion' else 6
-        fitResponseCurve, metrics = fit_response_fun(plot_info[key]['df'].FB,
+        fitResponseCurve, metrics = fit_response_fun(plot_info[key]['df'].correct,
                                             plot_info[key]['df'].decision_var,
                                             init_estimate,
                                             kind=responseFun)
@@ -156,13 +156,13 @@ def plot_threshold_run(subjid, responseFun='lapseWeibull', N=None, size=8):
 
 def plot_threshold_estimates(subjid, responseFun='lapseWeibull', 
                              window=300, step=5, size=8):
-    colors = ['m', 'c']
+    colors = ['m', 'r', 'c']
     plot_info = get_plot_info(subjid)
     sns.set_context('paper',font_scale=1)
     f, axes = plt.subplots(1,2, figsize=(size,size*.7))
     for i, key in enumerate(plot_info.keys()):
         init_estimate = .01 if key=='motion' else 6
-        FB = plot_info[key]['df'].FB
+        FB = plot_info[key]['df'].correct
         decision_var = plot_info[key]['df'].decision_var
         win_difficulties = []
         # calculate fits in different windows
@@ -174,13 +174,15 @@ def plot_threshold_estimates(subjid, responseFun='lapseWeibull',
                                                          decision_var_win,
                                                          init_estimate,
                                                          kind=responseFun)
-            win_difficulties.append(fitResponseCurve.inverse([.7,.85]))
+            win_difficulties.append(fitResponseCurve.inverse([.7,.775, .85]))
         # plot the fits over windows
         zipped = list(zip(*win_difficulties))
         axes[i].plot(win_range, zipped[0], 'o-',
                     color=colors[0])
         axes[i].plot(win_range, zipped[1], 'o-',
                     color=colors[1])
+        axes[i].plot(win_range, zipped[2], 'o-',
+                    color=colors[2])
         axes[i].set_xlabel('Starting Trial Number', fontsize=size*1.5)
         axes[i].set_ylabel('Estimated Value', fontsize=size*1.5)
         axes[i].set_title(key, fontsize=size*2)
@@ -189,14 +191,16 @@ def plot_threshold_estimates(subjid, responseFun='lapseWeibull',
                                                      decision_var,
                                                      init_estimate,
                                                      kind=responseFun)
-        difficulties = fitResponseCurve.inverse([.7,.85])
+        difficulties = fitResponseCurve.inverse([.7,.775,.85])
         axes[i].hlines(difficulties[0], 0, axes[i].get_xlim()[1],
                         linestyle='--', color=colors[0])
         axes[i].hlines(difficulties[1], 0, axes[i].get_xlim()[1],
                         linestyle='--', color=colors[1])
+        axes[i].hlines(difficulties[2], 0, axes[i].get_xlim()[1],
+                        linestyle='--', color=colors[2])
         
         
-    leg = axes[0].legend(['85% accuracy', '70% accuracy'], fontsize=size*1.5,
-                  markerscale=0)
+    leg = axes[0].legend(['85% accuracy', '77.5% accuracy', '70% accuracy'], 
+              fontsize=size*1.5, markerscale=0)
     beautify_legend(leg)
     plt.suptitle('Windowed Estimates Window Size: %s' % window, fontsize=size*1.5)

@@ -4,6 +4,15 @@ import os
 from psychopy import monitors
 from Analysis.load_data import load_threshold_data
 from Analysis.utils import fit_response_fun
+
+def get_data_files(subjid):
+    file_dir = os.path.dirname(__file__)
+    motion_files = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
+                                        subjid, '*%s*motion*' % subjid)))
+    orientation_files = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
+                                       subjid, '*%s*orientation*' % subjid)))
+    return motion_files, orientation_files
+
 def get_monitor(distance=30, width=30):  
     monitor = monitors.Monitor('test')
     monitor.setDistance(60)
@@ -18,7 +27,7 @@ def get_response_curves(subjid):
         assert df is not None, \
             print('No threshold data found for %s!' % subjid)
         init_estimate = .01 if dim=='motion' else 6
-        responseCurve = fit_response_fun(responses=df.FB, 
+        responseCurve = fit_response_fun(responses=df.correct, 
                                          intensities=df.decision_var, 
                                          threshold_estimate=init_estimate,
                                          kind='lapseWeibull')
@@ -26,22 +35,20 @@ def get_response_curves(subjid):
     return responseCurves
 
 def get_trackers(subjid):
-    file_dir = os.path.dirname(__file__)
-    try:
-        motion_file = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
-                                        subjid, '*%s*motion*' % subjid)))[-1]
+    motion_files, orientation_files = get_data_files(subjid)
+    if len(motion_files) > 0:
+        motion_file = motion_files[-1]
         motion_data = pickle.load(open(motion_file,'rb'))
         motion_trackers = motion_data['trackers']
         print('Found Motion Trackers. Loading from file: %s\n' % motion_file)
-    except IndexError:
+    else:
         motion_trackers = {}
-    try:
-        orientation_file = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
-                                       subjid, '*%s*orientation*' % subjid)))[-1]
+    if len(orientation_files) > 0:
+        orientation_file = orientation_files[-1]
         orientation_data = pickle.load(open(orientation_file,'rb'))
         orientation_trackers = orientation_data['trackers']
         print('Found Orientation Trackers. Loading from file: %s\n' % orientation_file)
-    except IndexError:
+    else:
         orientation_trackers = {}
     return {'motion': motion_trackers, 
             'orientation': orientation_trackers}
@@ -81,10 +88,9 @@ def get_total_trials(trackers):
     return trials
     
 def fix_trackers(subjid):
-    file_dir = os.path.dirname(__file__)
-    try:
-        motion_file = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
-                                        subjid, '*%s*motion*' % subjid)))[-1]
+    motion_files, orientation_files = get_data_files(subjid)
+    if len(motion_files) > 0:
+        motion_file = motion_files[-1]
         motion_data = pickle.load(open(motion_file,'rb'))
         motion_trackers = motion_data['trackers']
         print('Found Motion Trackers. Loading from file: %s\n' % motion_file)
@@ -93,11 +99,10 @@ def fix_trackers(subjid):
         tracker.data = tracker.data[:128] + [i['FB'] for i in taskdata]       
         tracker.intensities = tracker.intensities[:128] + [i['decision_var'] for i in taskdata]
         pickle.dump(motion_data, open(motion_file, 'wb'))
-    except IndexError:
+    else:
         print('No motion file found')
-    try:
-        ori_file = sorted(glob(os.path.join(file_dir,'..','Data','RawData',
-                                        subjid, '*%s*ori*' % subjid)))[-1]
+    if len(orientation_files) > 0:
+        ori_file = orientation_files[-1]
         ori_data = pickle.load(open(ori_file,'rb'))
         ori_trackers = ori_data['trackers']
         print('Found ori Trackers. Loading from file: %s\n' % ori_file)
@@ -106,5 +111,5 @@ def fix_trackers(subjid):
         tracker.data = tracker.data[:128] + [i['FB'] for i in taskdata]       
         tracker.intensities = tracker.intensities[:128] + [i['decision_var'] for i in taskdata]
         pickle.dump(ori_data, open(ori_file, 'wb'))
-    except IndexError:
+    else:
         print('No ori file found')
