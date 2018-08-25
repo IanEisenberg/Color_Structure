@@ -1,0 +1,15 @@
+#!/bin/bash
+#SBATCH --job-name=group-QC
+#SBATCH --output=.out/group-QC.job.out
+#SBATCH --error=.err/group-QC.job.err
+#SBATCH --time=01:00:00
+#SBATCH --qos=russpold
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=ieisenbe@stanford.edu
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=4
+#SBATCH -p russpold
+module load singularity
+export PYTHONPATH=""
+singularity run /share/PI/russpold/singularity_images/poldracklab_mriqc_0.9.9-rc1.m2-2017-10-02-dcff40059d2c.img /oak/stanford/groups/russpold/data/uh2 /scratch/PI/russpold/work/ieisenbe/uh2/mriqc group  -w $LOCAL_SCRATCH  --verbose-reports
+
