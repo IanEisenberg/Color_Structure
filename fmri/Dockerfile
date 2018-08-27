@@ -116,7 +116,7 @@ ENV MKL_NUM_THREADS=1 \
 
 # Installing dev requirements (packages that are not in pypi)
 WORKDIR /home
-ADD requirements.txt requirements.txt
+ADD docker_files/requirements.txt requirements.txt
 RUN pip install -r requirements.txt && \
     rm -rf ~/.cache/pip
                      

@@ -1,4 +1,4 @@
-scripts_loc=~/Experiments/Prob_Context_Task/fmri/analysis
+scripts_loc=~/Experiments/Prob_Context_Task/fmri/analysis/scripts
 data_loc=/mnt/OAK/prob_context/BIDS_data    
 
 # as script
