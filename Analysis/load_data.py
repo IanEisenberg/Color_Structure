@@ -61,7 +61,7 @@ def load_datafiles(subjid, lookup_string, preproc_fun=None):
         # reorganize
         data.reset_index(drop=True, inplace=True)
         data.configfile = data.configfile.astype('category')
-        return taskinfo, data
+        return taskinfo, data, files
     else:
         print('No %s files found for subject %s!' % (lookup_string, subjid))
         return None, None
@@ -71,29 +71,43 @@ def load_cued_data(subjid, fmri=True):
         task = "*fmri_cued_dot_task*" 
     else: 
         task = "*cued_dot_task*"
-    taskinfo, data = load_datafiles(subjid, task,
-                                    preproc_fun=preproc_cued_data)
-    return taskinfo, data
+    taskinfo, data, files = load_datafiles(subjid, task,
+                                           preproc_fun=preproc_cued_data)
+    return taskinfo, data, files
 
 def load_threshold_data(subjid, dim="motion"):
     assert dim in ['motion','orientation']
-    taskinfo, data = load_datafiles(subjid, f'*{dim}*', 
-                                    preproc_fun=preproc_threshold_data)
-    return taskinfo, data
+    taskinfo, data, files = load_datafiles(subjid, f'*{dim}*', 
+                                           preproc_fun=preproc_threshold_data)
+    return taskinfo, data, files
 
-def get_event_files(subjid):
-    taskinfo, data = load_cued_data(subjid, fmri=True)
+def get_event_files(subjid, save=False):
+    taskinfo, data, files = load_cued_data(subjid, fmri=True)
     run_starts = np.where(data.run!=data.run.shift(-1))[0]+1
     event_files = []
     start = 0
     median_rt = data.rt.median()
-    for end in run_starts:
+    event_file_locs = []
+    for filey, end in zip(files, run_starts):
         run = data.iloc[start:end]
         event_run = preproc_fmri_data(run, median_rt)
         event_files.append(event_run)
         start=end
-    return event_files
-    
+        if save:
+            event_loc = filey.replace('RawData','EventsData')
+            os.makedirs(os.path.dirname(event_loc), exist_ok=True)
+            pickle.dump(event_run, open(event_loc, 'wb'))
+            event_file_locs.append(event_loc)
+    return event_files, sorted(event_file_locs)
+
+def events_to_BIDS_dir(subjid, BIDS_dir):
+    events, file_locs = get_event_files(subjid, True)
+    BIDS_files = sorted(glob(os.path.join(BIDS_dir, '*%s*' % subjid,
+                                          '*', 'func', '*bold*')))
+    for events_file, fmri_file in zip(file_locs, BIDS_files):
+        new_file = fmri_file.replace('bold.nii.gz', 'events.tsv')
+        events_df = pickle.load(open(events_file,'rb'))
+        events_df.to_csv(new_file, sep='\t')
         
 # ****************************************************************************
 # preproc functions
