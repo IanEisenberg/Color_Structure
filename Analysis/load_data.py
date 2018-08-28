@@ -64,7 +64,7 @@ def load_datafiles(subjid, lookup_string, preproc_fun=None):
         return taskinfo, data, files
     else:
         print('No %s files found for subject %s!' % (lookup_string, subjid))
-        return None, None
+        return None, None, None
 
 def load_cued_data(subjid, fmri=True):
     if fmri: 
