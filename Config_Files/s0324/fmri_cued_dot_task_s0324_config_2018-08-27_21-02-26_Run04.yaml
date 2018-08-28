@@ -1,0 +1,662 @@
+- action_keys: [e, b, r, y]
+  base_speed: 0.12
+  clearAfterResponse: 1
+  exp_len: 208
+  ori_difficulties:
+    ? !!python/tuple [-45, 0.75]
+    : !!python/object/apply:numpy.core.multiarray.scalar
+    - &id001 !!python/object/apply:numpy.dtype
+      args: [f8, 0, 1]
+      state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
+    - !!binary |
+      kvnYjG3uFUA=
+    ? !!python/tuple [45, 0.75]
+    : !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      kvnYjG3uFUA=
+  quit_key: q
+  responseWindow: 1.0
+  rp: 0.5
+  speed_difficulties:
+    ? !!python/tuple [in, 0.75]
+    : !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      kzNU4UA0ez8=
+    ? !!python/tuple [out, 0.75]
+    : !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      kzNU4UA0ez8=
+  states:
+    0:
+      dist_args: {loc: -0.3, scale: 0.37}
+      ts: motion
+    1:
+      dist_args: {loc: 0.3, scale: 0.37}
+      ts: orientation
+  stim_ids:
+  - {motionDirection: in, oriBase: -45, oriDirection: -1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  - {motionDirection: in, oriBase: -45, oriDirection: -1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  - {motionDirection: in, oriBase: -45, oriDirection: 1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  - {motionDirection: in, oriBase: -45, oriDirection: 1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  - {motionDirection: in, oriBase: 45, oriDirection: -1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  - {motionDirection: in, oriBase: 45, oriDirection: -1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  - {motionDirection: in, oriBase: 45, oriDirection: 1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  - {motionDirection: in, oriBase: 45, oriDirection: 1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  - {motionDirection: out, oriBase: -45, oriDirection: -1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  - {motionDirection: out, oriBase: -45, oriDirection: -1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  - {motionDirection: out, oriBase: -45, oriDirection: 1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  - {motionDirection: out, oriBase: -45, oriDirection: 1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  - {motionDirection: out, oriBase: 45, oriDirection: -1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  - {motionDirection: out, oriBase: 45, oriDirection: -1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  - {motionDirection: out, oriBase: 45, oriDirection: 1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  - {motionDirection: out, oriBase: 45, oriDirection: 1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stim_motions: [in, out]
+  stim_oris: [-45, 45]
+  subjid: s0324
+  taskname: fmri_cued_dot_task
+  trigger_key: '5'
+  ts_order: [motion, orientation]
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 3.604605099740693
+  cueDuration: 0.75
+  displayFB: false
+  duration: 12.703864371527583
+  onset: 2
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: 45, oriDirection: -1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 4.59925927178689
+  stimulusDuration: 1.5
+  trial_count: 1
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 2.329274978294288
+  cueDuration: 0.75
+  displayFB: false
+  duration: 7.83657402019305
+  onset: 14.703864371527583
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: -45, oriDirection: -1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 1.0072990418987615
+  stimulusDuration: 1.5
+  trial_count: 2
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 4.187829262501912
+  cueDuration: 0.75
+  displayFB: false
+  duration: 9.966163396830527
+  onset: 22.540438391720635
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: -45, oriDirection: -1, oriStrength: 0.75,
+    speedDirection: -1, speedStrength: 0.75}
+  stimResponseInterval: 1.2783341343286163
+  stimulusDuration: 1.5
+  trial_count: 3
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 4.716772122661855
+  cueDuration: 0.75
+  displayFB: false
+  duration: 10.820944262183897
+  onset: 32.506601788551166
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: -45, oriDirection: 1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 1.604172139522043
+  stimulusDuration: 1.5
+  trial_count: 4
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 5.570437071852741
+  cueDuration: 0.75
+  displayFB: false
+  duration: 10.942880316525969
+  onset: 43.327546050735066
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: 45, oriDirection: -1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 0.8724432446732284
+  stimulusDuration: 1.5
+  trial_count: 5
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 3.965251863268334
+  cueDuration: 0.75
+  displayFB: false
+  duration: 11.182322777250567
+  onset: 54.27042636726104
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: 45, oriDirection: -1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 2.717070913982233
+  stimulusDuration: 1.5
+  trial_count: 6
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 3.3299294246578652
+  cueDuration: 0.75
+  displayFB: false
+  duration: 12.249753710385843
+  onset: 65.4527491445116
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: -45, oriDirection: 1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 4.419824285727978
+  stimulusDuration: 1.5
+  trial_count: 7
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 1.295895785420954
+  cueDuration: 0.75
+  displayFB: false
+  duration: 8.120783062205872
+  onset: 77.70250285489745
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: 45, oriDirection: 1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 2.324887276784917
+  stimulusDuration: 1.5
+  trial_count: 8
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 5.1013156751191735
+  cueDuration: 0.75
+  displayFB: false
+  duration: 11.065192586961693
+  onset: 85.82328591710332
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: -45, oriDirection: -1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 1.4638769118425194
+  stimulusDuration: 1.5
+  trial_count: 9
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 2.560252296705743
+  cueDuration: 0.75
+  displayFB: false
+  duration: 11.550937849903868
+  onset: 96.888478504065
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: -45, oriDirection: 1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 4.490685553198125
+  stimulusDuration: 1.5
+  trial_count: 10
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 1.9231513040536292
+  cueDuration: 0.75
+  displayFB: false
+  duration: 7.273258719754981
+  onset: 108.43941635396888
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: -45, oriDirection: 1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 0.850107415701352
+  stimulusDuration: 1.5
+  trial_count: 11
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 1.3014978360265606
+  cueDuration: 0.75
+  displayFB: false
+  duration: 7.157264334577365
+  onset: 115.71267507372386
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: -45, oriDirection: -1, oriStrength: 0.75,
+    speedDirection: 1, speedStrength: 0.75}
+  stimResponseInterval: 1.355766498550805
+  stimulusDuration: 1.5
+  trial_count: 12
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 1.38073570465707
+  cueDuration: 0.75
+  displayFB: false
+  duration: 6.749494301672099
+  onset: 122.86993940830122
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: -45, oriDirection: 1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 0.8687585970150293
+  stimulusDuration: 1.5
+  trial_count: 13
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 3.9431518796767566
+  cueDuration: 0.75
+  displayFB: false
+  duration: 10.682645392488407
+  onset: 129.61943370997332
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: 45, oriDirection: 1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 2.239493512811651
+  stimulusDuration: 1.5
+  trial_count: 14
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 9.21141267685498
+  cueDuration: 0.75
+  displayFB: false
+  duration: 16.087641555717074
+  onset: 140.30207910246173
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: 45, oriDirection: -1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 2.3762288788620944
+  stimulusDuration: 1.5
+  trial_count: 15
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 4.907984829373413
+  cueDuration: 0.75
+  displayFB: false
+  duration: 11.896184073905678
+  onset: 156.38972065817882
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: 45, oriDirection: 1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 2.4881992445322645
+  stimulusDuration: 1.5
+  trial_count: 16
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 2.9412549315948153
+  cueDuration: 0.75
+  displayFB: false
+  duration: 8.787298922400396
+  onset: 168.2859047320845
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: 45, oriDirection: -1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 1.3460439908055792
+  stimulusDuration: 1.5
+  trial_count: 17
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 1.647234431795118
+  cueDuration: 0.75
+  displayFB: false
+  duration: 7.137098822115085
+  onset: 177.0732036544849
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: 45, oriDirection: -1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 0.9898643903199672
+  stimulusDuration: 1.5
+  trial_count: 18
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 1.0832736185465157
+  cueDuration: 0.75
+  displayFB: false
+  duration: 8.67188567994117
+  onset: 184.2103024766
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: 45, oriDirection: -1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 3.0886120613946533
+  stimulusDuration: 1.5
+  trial_count: 19
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 4.144401987773699
+  cueDuration: 0.75
+  displayFB: false
+  duration: 9.996918004062437
+  onset: 192.88218815654116
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: 45, oriDirection: 1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 1.3525160162887389
+  stimulusDuration: 1.5
+  trial_count: 20
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 3.112138564761965
+  cueDuration: 0.75
+  displayFB: false
+  duration: 8.942627596057207
+  onset: 202.8791061606036
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: 45, oriDirection: 1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 1.330489031295241
+  stimulusDuration: 1.5
+  trial_count: 21
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 4.365254404136245
+  cueDuration: 0.75
+  displayFB: false
+  duration: 14.865254404136245
+  onset: 211.82173375666082
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: 45, oriDirection: 1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 6
+  stimulusDuration: 1.5
+  trial_count: 22
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 2.2928889265493577
+  cueDuration: 0.75
+  displayFB: false
+  duration: 7.9377282874148385
+  onset: 226.68698816079706
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: 45, oriDirection: 1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 1.1448393608654803
+  stimulusDuration: 1.5
+  trial_count: 23
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 1.9746014657537567
+  cueDuration: 0.75
+  displayFB: false
+  duration: 7.771618973383502
+  onset: 234.6247164482119
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: -45, oriDirection: -1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 1.2970175076297448
+  stimulusDuration: 1.5
+  trial_count: 24
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 6.614142017649255
+  cueDuration: 0.75
+  displayFB: false
+  duration: 14.441881653594077
+  onset: 242.3963354215954
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: -45, oriDirection: 1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 3.327739635944823
+  stimulusDuration: 1.5
+  trial_count: 25
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 2.1475247711134977
+  cueDuration: 0.75
+  displayFB: false
+  duration: 8.058040111190456
+  onset: 256.8382170751895
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: -45, oriDirection: -1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 1.4105153400769588
+  stimulusDuration: 1.5
+  trial_count: 26
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 12
+  cueDuration: 0.75
+  displayFB: false
+  duration: 17.08676170244951
+  onset: 264.89625718637996
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: 45, oriDirection: -1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 0.5867617024495101
+  stimulusDuration: 1.5
+  trial_count: 27
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 2.7739672817306325
+  cueDuration: 0.75
+  displayFB: false
+  duration: 9.959473035551916
+  onset: 281.98301888882946
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: -45, oriDirection: 1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 2.685505753821283
+  stimulusDuration: 1.5
+  trial_count: 28
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 11.652883340619574
+  cueDuration: 0.75
+  displayFB: false
+  duration: 16.799769057146293
+  onset: 291.9424919243814
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: -45, oriDirection: 1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 0.6468857165267198
+  stimulusDuration: 1.5
+  trial_count: 29
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 5.847882860316865
+  cueDuration: 0.75
+  displayFB: false
+  duration: 11.339455342346806
+  onset: 308.7422609815277
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: -45, oriDirection: -1, oriStrength: 0.75,
+    speedDirection: 1, speedStrength: 0.75}
+  stimResponseInterval: 0.9915724820299407
+  stimulusDuration: 1.5
+  trial_count: 30
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 12
+  cueDuration: 0.75
+  displayFB: false
+  duration: 18.983198516633365
+  onset: 320.0817163238745
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: -45, oriDirection: -1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 2.4831985166333643
+  stimulusDuration: 1.5
+  trial_count: 31
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 5.41908214139559
+  cueDuration: 0.75
+  displayFB: false
+  duration: 13.603468314709064
+  onset: 339.06491484050787
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: -45, oriDirection: -1, oriStrength: 0.75,
+    speedDirection: 1, speedStrength: 0.75}
+  stimResponseInterval: 3.684386173313473
+  stimulusDuration: 1.5
+  trial_count: 32
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 2.1458072936092885
+  cueDuration: 0.75
+  displayFB: false
+  duration: 8.610837591077829
+  onset: 352.66838315521693
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: -45, oriDirection: -1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 1.9650302974685392
+  stimulusDuration: 1.5
+  trial_count: 33
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 4.924208583434948
+  cueDuration: 0.75
+  displayFB: false
+  duration: 12.429525025444555
+  onset: 361.27922074629475
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: 45, oriDirection: 1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 3.005316442009608
+  stimulusDuration: 1.5
+  trial_count: 34
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 1.1964407883122514
+  cueDuration: 0.75
+  displayFB: false
+  duration: 7.176481720324761
+  onset: 373.7087457717393
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: -45, oriDirection: -1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 1.4800409320125085
+  stimulusDuration: 1.5
+  trial_count: 35
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 1.7955533930961693
+  cueDuration: 0.75
+  displayFB: false
+  duration: 7.256240476943605
+  onset: 380.8852274920641
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: 45, oriDirection: 1, oriStrength: 0.75, speedDirection: -1,
+    speedStrength: 0.75}
+  stimResponseInterval: 0.9606870838474355
+  stimulusDuration: 1.5
+  trial_count: 36
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 2.6126974296525476
+  cueDuration: 0.75
+  displayFB: false
+  duration: 8.040466379827222
+  onset: 388.1414679690077
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: -45, oriDirection: 1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 0.9277689501746749
+  stimulusDuration: 1.5
+  trial_count: 37
+  ts: orientation
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 2.5754889073745257
+  cueDuration: 0.75
+  displayFB: false
+  duration: 10.857749725500183
+  onset: 396.18193434883494
+  responseWindow: 1
+  stim: {motionDirection: out, oriBase: -45, oriDirection: 1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 3.7822608181256565
+  stimulusDuration: 1.5
+  trial_count: 38
+  ts: motion
+- CSI: 0.25
+  FBDuration: 1
+  FBonset: 0
+  ITI: 1.4903792898440598
+  cueDuration: 0.75
+  displayFB: false
+  duration: 6.98516918853113
+  onset: 407.0396840743351
+  responseWindow: 1
+  stim: {motionDirection: in, oriBase: -45, oriDirection: -1, oriStrength: 0.75, speedDirection: 1,
+    speedStrength: 0.75}
+  stimResponseInterval: 0.99478989868707
+  stimulusDuration: 1.5
+  trial_count: 39
+  ts: motion
