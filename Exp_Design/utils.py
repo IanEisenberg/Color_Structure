@@ -23,7 +23,7 @@ def get_monitor(distance=30, width=30):
 def get_response_curves(subjid):
     responseCurves = {}
     for dim in ['motion', 'orientation']:
-        taskinfo, df = load_threshold_data(subjid, dim)
+        taskinfo, df, files = load_threshold_data(subjid, dim)
         assert df is not None, \
             print('No threshold data found for %s!' % subjid)
         init_estimate = .01 if dim=='motion' else 6

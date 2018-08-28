@@ -233,7 +233,8 @@ class adaptiveThreshold(BaseExp):
         key_response = self.presentStim(trial_attributes, 
                                         duration=trial['stimulusDuration'], 
                                         response_window=trial['responseWindow'], 
-                                        SRI=trial['stimResponseInterval'])
+                                        SRI=trial['stimResponseInterval'],
+                                        response_ends=True)
         if key_response:
             # record response
             trial['response'], trial['rt'] = key_response

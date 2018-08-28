@@ -178,7 +178,7 @@ class BaseExp(object):
         if key_response is not None:
             assert len(key_response) == 1
             key_response = key_response[0]
-            self.checkRespForQuitKey([key_response[0]])
+            self.checkRespForQuitKey(key_response[0])
             if not response_ends:
                 self.clearWindow(fixation=True)
                 core.wait(response_window, key_response[1])

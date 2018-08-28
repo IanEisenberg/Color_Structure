@@ -42,7 +42,10 @@ if fmri == True:
 # load motion_difficulties and ori_difficulties from adaptive tasks     
 # cued task 
 
-responseCurves = get_response_curves('IE')
+try: 
+    responseCurves = get_response_curves(subjid)
+except AssertionError:
+    responseCurves = get_response_curves('example')
 cue_config = ProbContextConfig(taskname=taskname, 
                                subjid=subjid, 
                                action_keys=action_keys,
@@ -63,7 +66,7 @@ config_files = split_config(cue_config, time_per_run=7)
 config_files = config_files + config_files
 
 ## print config_files time
-# import yaml
+#import yaml
 #for c in config_files:
 #    f = yaml.load(open(c,'r'))
 #    last_onset = f[-1]['onset']/60
